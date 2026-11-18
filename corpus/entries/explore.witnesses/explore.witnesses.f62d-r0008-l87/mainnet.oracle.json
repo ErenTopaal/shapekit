@@ -1,0 +1,103 @@
+{
+  "ledgers": [
+    {
+      "close_time": "1774742400",
+      "evicted": [],
+      "ledger_hash": "2a88efeb9dadf763a1df9e2b1d1cbb9b1ec4a2e8331202d7bfa2e4ee49642aea",
+      "ledger_seq": 87,
+      "protocol": 17,
+      "transactions": [
+        {
+          "apply_index": 0,
+          "changes": [
+            {
+              "after": "209999200",
+              "asset": "native",
+              "before": "209999400",
+              "delta": "-200",
+              "held_in": "account",
+              "holder": "GDLX32CN3P6YLIFQIUFPIIYXMNOZQCYEVZWSR7LC56FICT7HPN5UEEDP",
+              "kind": "balance-change",
+              "scope": "fee-processing"
+            },
+            {
+              "amount": "200",
+              "asset": "native",
+              "contract": "CAS3J7GYLGXMF6TDJBBYYSE3HQ6BBSMLNUQ34T6TZMYMW2EVH34XOWMA",
+              "event": "fee",
+              "from": "GDLX32CN3P6YLIFQIUFPIIYXMNOZQCYEVZWSR7LC56FICT7HPN5UEEDP",
+              "kind": "token-event",
+              "scope": "fee-processing",
+              "stage": "before-all-txs"
+            },
+            {
+              "account": "GBDEBVRJ4YZSVSGXYOKSE5NFHDRFOMD5QNT66N5ODAFFIMCGGQDP2VSF",
+              "after": "274877906963",
+              "before": "274877906962",
+              "kind": "sequence",
+              "scope": "tx-before"
+            }
+          ],
+          "declared": {
+            "fee_source": "GDLX32CN3P6YLIFQIUFPIIYXMNOZQCYEVZWSR7LC56FICT7HPN5UEEDP",
+            "participants": [
+              {
+                "address": "GBDEBVRJ4YZSVSGXYOKSE5NFHDRFOMD5QNT66N5ODAFFIMCGGQDP2VSF",
+                "kind": "account",
+                "roles": [
+                  "tx-source"
+                ]
+              },
+              {
+                "address": "GDLX32CN3P6YLIFQIUFPIIYXMNOZQCYEVZWSR7LC56FICT7HPN5UEEDP",
+                "kind": "account",
+                "roles": [
+                  "fee-source"
+                ]
+              }
+            ],
+            "source": "GBDEBVRJ4YZSVSGXYOKSE5NFHDRFOMD5QNT66N5ODAFFIMCGGQDP2VSF"
+          },
+          "events": "unified",
+          "fee": {
+            "balance_delta": "-200",
+            "charged": "200",
+            "source": "GDLX32CN3P6YLIFQIUFPIIYXMNOZQCYEVZWSR7LC56FICT7HPN5UEEDP"
+          },
+          "hash": "5eb75ff4d892585434d6b82e81e848d8ece99cf67efc934b411329cf6ebd8c7b",
+          "inner_hash": "f4f83cfe6f0160839e35b4b7f874e1af449bc40f1397ff485cb0c6d99f089111",
+          "participants": [
+            {
+              "address": "CAS3J7GYLGXMF6TDJBBYYSE3HQ6BBSMLNUQ34T6TZMYMW2EVH34XOWMA",
+              "kind": "contract",
+              "roles": [
+                "event-contract"
+              ]
+            },
+            {
+              "address": "GBDEBVRJ4YZSVSGXYOKSE5NFHDRFOMD5QNT66N5ODAFFIMCGGQDP2VSF",
+              "kind": "account",
+              "roles": [
+                "entry-changed"
+              ]
+            },
+            {
+              "address": "GDLX32CN3P6YLIFQIUFPIIYXMNOZQCYEVZWSR7LC56FICT7HPN5UEEDP",
+              "kind": "account",
+              "roles": [
+                "entry-changed",
+                "event-address",
+                "fee-source"
+              ]
+            }
+          ],
+          "result": "tx_fee_bump_inner_failed",
+          "successful": false
+        }
+      ],
+      "upgrades": []
+    }
+  ],
+  "network_passphrase": "Public Global Stellar Network ; September 2015",
+  "oracle_vocab_version": 2
+}

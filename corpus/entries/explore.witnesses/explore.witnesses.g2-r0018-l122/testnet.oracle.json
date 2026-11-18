@@ -1,0 +1,120 @@
+{
+  "ledgers": [
+    {
+      "close_time": "1777766400",
+      "evicted": [],
+      "ledger_hash": "cc56b6a2a7e80b36c4ba0bd06d960d658c3c92de5474d7508688ec4c3e38faff",
+      "ledger_seq": 122,
+      "protocol": 19,
+      "transactions": [
+        {
+          "apply_index": 0,
+          "changes": [
+            {
+              "after": "119999988700",
+              "asset": "native",
+              "before": "119999989000",
+              "delta": "-300",
+              "held_in": "account",
+              "holder": "GAWINJXGWLV7HGWDRAUJXFWSZPVNA667VSGXL64A4TKYYWP6GSEI347S",
+              "kind": "balance-change",
+              "scope": "fee-processing"
+            },
+            {
+              "amount": "300",
+              "asset": "native",
+              "contract": "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC",
+              "event": "fee",
+              "from": "GAWINJXGWLV7HGWDRAUJXFWSZPVNA667VSGXL64A4TKYYWP6GSEI347S",
+              "kind": "token-event",
+              "scope": "fee-processing",
+              "stage": "before-all-txs"
+            },
+            {
+              "account": "GDOMAYH3VSVX5CHYE6MIB6GU5N4RYHRIO3OKV27ZQH6RXYR3NGZ23JTV",
+              "after": "360777252868",
+              "before": "360777252867",
+              "kind": "sequence",
+              "scope": "tx-before"
+            }
+          ],
+          "declared": {
+            "fee_source": "GAWINJXGWLV7HGWDRAUJXFWSZPVNA667VSGXL64A4TKYYWP6GSEI347S",
+            "participants": [
+              {
+                "address": "GA2B3T27Y22BZFWRP5Q6AZQAV6OWSDIY7IIUEHDR5PULG5MB6NQQELGL",
+                "kind": "account",
+                "roles": [
+                  "destination"
+                ]
+              },
+              {
+                "address": "GAWINJXGWLV7HGWDRAUJXFWSZPVNA667VSGXL64A4TKYYWP6GSEI347S",
+                "kind": "account",
+                "roles": [
+                  "fee-source"
+                ]
+              },
+              {
+                "address": "GD4UHIMYBKJEZC7T53VUESSSOMFTCXKRAFTYU4SXBFTZRBIR3MXK3TNB",
+                "kind": "account",
+                "roles": [
+                  "destination"
+                ]
+              },
+              {
+                "address": "GDOMAYH3VSVX5CHYE6MIB6GU5N4RYHRIO3OKV27ZQH6RXYR3NGZ23JTV",
+                "kind": "account",
+                "mux_ids": [
+                  "0"
+                ],
+                "roles": [
+                  "tx-source"
+                ]
+              }
+            ],
+            "source": "MDOMAYH3VSVX5CHYE6MIB6GU5N4RYHRIO3OKV27ZQH6RXYR3NGZ22AAAAAAAAAAAABPV4"
+          },
+          "events": "unified",
+          "fee": {
+            "balance_delta": "-300",
+            "charged": "300",
+            "source": "GAWINJXGWLV7HGWDRAUJXFWSZPVNA667VSGXL64A4TKYYWP6GSEI347S"
+          },
+          "hash": "12e6eeda03c7f82710441b445d416d25e8d59aaa44f329385b0e048842825360",
+          "inner_hash": "21c6c0140ed1ebcf68f4e722ff688a69e0f31188322681e795f889533e460adc",
+          "participants": [
+            {
+              "address": "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC",
+              "kind": "contract",
+              "roles": [
+                "event-contract"
+              ]
+            },
+            {
+              "address": "GAWINJXGWLV7HGWDRAUJXFWSZPVNA667VSGXL64A4TKYYWP6GSEI347S",
+              "kind": "account",
+              "roles": [
+                "entry-changed",
+                "event-address",
+                "fee-source"
+              ]
+            },
+            {
+              "address": "GDOMAYH3VSVX5CHYE6MIB6GU5N4RYHRIO3OKV27ZQH6RXYR3NGZ23JTV",
+              "kind": "account",
+              "roles": [
+                "entry-changed"
+              ]
+            }
+          ],
+          "result": "tx_fee_bump_inner_failed",
+          "successful": false
+        }
+      ],
+      "upgrades": []
+    }
+  ],
+  "network_passphrase": "Test SDF Network ; September 2015",
+  "oracle_vocab_version": 2
+}

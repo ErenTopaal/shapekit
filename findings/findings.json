@@ -4,20 +4,20 @@
     {
       "kind": "manifest",
       "path": "corpus/manifest.json",
-      "sha256": "9aea15cac71b67baf75c4fca783f7d7a58ccba3d38504e66ba06269d1885139e",
+      "sha256": "8ac5e84ddcf7aec435b37b637d40a445251f12114403de451bd381fa98cf5139",
       "detail": "corpus 0.2.0"
     },
     {
       "kind": "harness",
       "path": "findings/inputs/harness-wallet-backend-3e22515a.json",
-      "sha256": "52eac13f1b21f8429683919f6696113fa14caeb316ee82e8374cd762edcfa406",
-      "detail": "wallet-backend 3e22515a44979fdc3a558fda3991ca2b48e38cef, 906 entries, manifest 9aea15cac71b67baf75c4fca783f7d7a58ccba3d38504e66ba06269d1885139e"
+      "sha256": "48596ee09b2e0e8cbe6881cc43e27677793c70d25b5966b631911592dc87bbfa",
+      "detail": "wallet-backend 3e22515a44979fdc3a558fda3991ca2b48e38cef, 1652 entries, manifest 8ac5e84ddcf7aec435b37b637d40a445251f12114403de451bd381fa98cf5139"
     },
     {
       "kind": "harness",
       "path": "findings/inputs/harness-stellar-etl-2b24ec89.json",
-      "sha256": "ec360a556fdf380929762149cde264c93c7c63fde6127bdf67b95e241845c84d",
-      "detail": "stellar-etl 2b24ec89ddce7fc0beb7795de982c93e6895eaf3, 906 entries, manifest 9aea15cac71b67baf75c4fca783f7d7a58ccba3d38504e66ba06269d1885139e"
+      "sha256": "c5c32c836f1fd0264ec7811f26cae1ae35283a2b0939fd17b3d2a9f8f49c0388",
+      "detail": "stellar-etl 2b24ec89ddce7fc0beb7795de982c93e6895eaf3, 1652 entries, manifest 8ac5e84ddcf7aec435b37b637d40a445251f12114403de451bd381fa98cf5139"
     },
     {
       "kind": "conformance",
@@ -51,10 +51,10 @@
     }
   ],
   "summary": {
-    "findings": 24,
-    "failures": 611,
+    "findings": 25,
+    "failures": 891,
     "unmapped": 0,
-    "held": 99,
+    "held": 215,
     "by_component": {
       "go-stellar-sdk": {
         "divergence": 4,
@@ -73,18 +73,19 @@
       "wallet-backend": {
         "data-loss": 7,
         "robustness": 1,
-        "wrong-data": 2
+        "wrong-data": 3
       }
     },
     "by_severity": {
       "data-loss": 7,
       "divergence": 11,
       "robustness": 4,
-      "wrong-data": 2
+      "wrong-data": 3
     },
     "by_status": {
       "duplicate-of": 7,
-      "filed": 17
+      "filed": 17,
+      "wont-fix": 1
     }
   },
   "findings": [
@@ -115,7 +116,9 @@
         "cap67.unified-events.p22-backfill-clawback",
         "cap67.unified-events.p22-backfill-clawback-claimable-balance",
         "cap67.unified-events.p30-clawback",
-        "cap67.unified-events.p30-clawback-claimable-balance"
+        "cap67.unified-events.p30-clawback-claimable-balance",
+        "explore.witnesses.g2-r0000-l74",
+        "explore.witnesses.g2-r0000-l77"
       ],
       "recipe": "chain:cap35.clawback.p30",
       "affected": [
@@ -381,6 +384,62 @@
           "entry": "cap67.unified-events.p30-clawback-claimable-balance",
           "at": "testnet",
           "what": "extra token-event: token-event is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.g2-r0000-l74",
+          "at": "mainnet",
+          "what": "dropped token-event: token-event is missing"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.g2-r0000-l74",
+          "at": "mainnet",
+          "what": "extra token-event: token-event is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.g2-r0000-l74",
+          "at": "testnet",
+          "what": "dropped token-event: token-event is missing"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.g2-r0000-l74",
+          "at": "testnet",
+          "what": "extra token-event: token-event is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.g2-r0000-l77",
+          "at": "mainnet",
+          "what": "dropped token-event: token-event is missing"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.g2-r0000-l77",
+          "at": "mainnet",
+          "what": "extra token-event: token-event is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.g2-r0000-l77",
+          "at": "testnet",
+          "what": "dropped token-event: token-event is missing"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.g2-r0000-l77",
+          "at": "testnet",
+          "what": "extra token-event: token-event is stored but the meta does not show it"
         }
       ]
     },
@@ -426,7 +485,16 @@
         "cap67.unified-events.p30-claim-claimable-balance",
         "cap67.unified-events.p30-clawback-claimable-balance",
         "cap67.unified-events.p30-create-claimable-balance",
-        "cap67.unified-events.p30-payment-burn"
+        "cap67.unified-events.p30-payment-burn",
+        "explore.witnesses.f62d-r0000-l73",
+        "explore.witnesses.f63-p23-r0002-l79",
+        "explore.witnesses.g2-r0000-l76",
+        "explore.witnesses.g2-r0000-l77",
+        "explore.witnesses.g2-r0001-l72",
+        "explore.witnesses.g2-r0003-l105",
+        "explore.witnesses.g2-r0006-l126",
+        "explore.witnesses.g2-r0007-l81",
+        "explore.witnesses.g2-r0009-l78"
       ],
       "recipe": "chain:cap23.claimable-balances.p30",
       "affected": [
@@ -1000,6 +1068,132 @@
           "entry": "cap67.unified-events.p30-payment-burn",
           "at": "testnet",
           "what": "extra participant: participant GC75L4OJYE25NGFKBO7L35X76K3OJCVTONXBC2L4XGBQNF7IGQV6GOZW is stored but the meta does not show it, the envelope names it as destination"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.f62d-r0000-l73",
+          "at": "mainnet",
+          "what": "extra participant: participant GCM5L5H5P4B4PKNUV6EKA7BXKRGXWUDDOGV2LABGCJ6OFQLUN37DW24G is stored but the meta does not show it, the envelope names it as claimant"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.f62d-r0000-l73",
+          "at": "testnet",
+          "what": "extra participant: participant GCM5L5H5P4B4PKNUV6EKA7BXKRGXWUDDOGV2LABGCJ6OFQLUN37DW24G is stored but the meta does not show it, the envelope names it as claimant"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.f63-p23-r0002-l79",
+          "at": "mainnet",
+          "what": "extra participant: participant GDD2IS67LGM4AZNVSQZNZYZNGEIGZJE6QTQBSMKXKZ5TZM4VMLQLE3G2 is stored but the meta does not show it, the envelope names it as claimant"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.f63-p23-r0002-l79",
+          "at": "testnet",
+          "what": "extra participant: participant GDD2IS67LGM4AZNVSQZNZYZNGEIGZJE6QTQBSMKXKZ5TZM4VMLQLE3G2 is stored but the meta does not show it, the envelope names it as claimant"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.g2-r0000-l76",
+          "at": "mainnet",
+          "what": "extra participant: participant GBO7S7AEMDG2RP35UCQQJBYVYPOGPQ5EC7R7RYNEET2MGOVZPHBCJ3Z4 is stored but the meta does not show it, the envelope names it as claimant"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.g2-r0000-l76",
+          "at": "testnet",
+          "what": "extra participant: participant GBO7S7AEMDG2RP35UCQQJBYVYPOGPQ5EC7R7RYNEET2MGOVZPHBCJ3Z4 is stored but the meta does not show it, the envelope names it as claimant"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.g2-r0000-l77",
+          "at": "mainnet",
+          "what": "dropped participant: participant GCBMPXXFV5CCVEZD54PBTUCEJ7MGKB5FRIU72HZB2JWXVP4DMDX3PUJ7 is missing"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.g2-r0000-l77",
+          "at": "testnet",
+          "what": "dropped participant: participant GCBMPXXFV5CCVEZD54PBTUCEJ7MGKB5FRIU72HZB2JWXVP4DMDX3PUJ7 is missing"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.g2-r0001-l72",
+          "at": "mainnet",
+          "what": "extra participant: participant GCEQKZTNVPEOSTZGNH772PYFESTHFHD6ZLCOZLRQKTJ5GJ4MQ3IYXIJ3 is stored but the meta does not show it, the envelope names it as claimant"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.g2-r0001-l72",
+          "at": "testnet",
+          "what": "extra participant: participant GCEQKZTNVPEOSTZGNH772PYFESTHFHD6ZLCOZLRQKTJ5GJ4MQ3IYXIJ3 is stored but the meta does not show it, the envelope names it as claimant"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.g2-r0003-l105",
+          "at": "mainnet",
+          "what": "extra participant: participant GBZKJRYKPBYBRWHVY3KI76STJN7HOOFF257PUMB4WHFGK7BAA4XTJIBI is stored but the meta does not show it, the envelope names it as claimant"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.g2-r0003-l105",
+          "at": "testnet",
+          "what": "extra participant: participant GBZKJRYKPBYBRWHVY3KI76STJN7HOOFF257PUMB4WHFGK7BAA4XTJIBI is stored but the meta does not show it, the envelope names it as claimant"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.g2-r0006-l126",
+          "at": "mainnet",
+          "what": "dropped participant: participant GB7LH3XLHKSR7LP4QTK7VDB7E4AJBUIGLLFU4SMDEOWRYEXB2QAALWJO is missing"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.g2-r0006-l126",
+          "at": "testnet",
+          "what": "dropped participant: participant GB7LH3XLHKSR7LP4QTK7VDB7E4AJBUIGLLFU4SMDEOWRYEXB2QAALWJO is missing"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.g2-r0007-l81",
+          "at": "mainnet",
+          "what": "extra participant: participant GBRSJ6ANMXOARFBUI5EPO7RUXGRZ7RCJKIVPD2CJ6QAA7ZWJPTUWSBDA is stored but the meta does not show it, the envelope names it as tx-source"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.g2-r0007-l81",
+          "at": "testnet",
+          "what": "extra participant: participant GBRSJ6ANMXOARFBUI5EPO7RUXGRZ7RCJKIVPD2CJ6QAA7ZWJPTUWSBDA is stored but the meta does not show it, the envelope names it as tx-source"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.g2-r0009-l78",
+          "at": "mainnet",
+          "what": "extra participant: participant GAZ5W6G2WRXBVRQZFOPH4WCHSBVFFHKNJ357LPQ5QZ5R7ULM2ZEVQ2ZS is stored but the meta does not show it, the envelope names it as tx-source"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.g2-r0009-l78",
+          "at": "testnet",
+          "what": "extra participant: participant GAZ5W6G2WRXBVRQZFOPH4WCHSBVFFHKNJ357LPQ5QZ5R7ULM2ZEVQ2ZS is stored but the meta does not show it, the envelope names it as tx-source"
         }
       ]
     },
@@ -1047,7 +1241,16 @@
         "cap67.unified-events.p22-backfill-liquidity-pool-deposit",
         "cap67.unified-events.p30-claim-claimable-balance",
         "cap67.unified-events.p30-create-claimable-balance",
-        "cap67.unified-events.p30-liquidity-pool-deposit"
+        "cap67.unified-events.p30-liquidity-pool-deposit",
+        "explore.witnesses.f62d-r0000-l73",
+        "explore.witnesses.f63-p23-r0002-l79",
+        "explore.witnesses.f63-pool-deposit-events-l68",
+        "explore.witnesses.g2-r0000-l76",
+        "explore.witnesses.g2-r0002-l95",
+        "explore.witnesses.g2-r0003-l105",
+        "explore.witnesses.g2-r0003-l94",
+        "explore.witnesses.g2-r0003-l95",
+        "explore.witnesses.g2-r0006-l126"
       ],
       "recipe": "chain:cap23.claimable-balances.p30",
       "affected": [
@@ -1845,6 +2048,370 @@
           "entry": "cap67.unified-events.p30-liquidity-pool-deposit",
           "at": "testnet",
           "what": "extra token-event: token-event is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.f62d-r0000-l73",
+          "at": "mainnet",
+          "what": "dropped token-event: token-event is missing"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.f62d-r0000-l73",
+          "at": "mainnet",
+          "what": "extra token-event: token-event is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.f62d-r0000-l73",
+          "at": "testnet",
+          "what": "dropped token-event: token-event is missing"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.f62d-r0000-l73",
+          "at": "testnet",
+          "what": "extra token-event: token-event is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.f63-p23-r0002-l79",
+          "at": "mainnet",
+          "what": "dropped token-event: token-event is missing"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.f63-p23-r0002-l79",
+          "at": "mainnet",
+          "what": "extra token-event: token-event is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.f63-p23-r0002-l79",
+          "at": "testnet",
+          "what": "dropped token-event: token-event is missing"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.f63-p23-r0002-l79",
+          "at": "testnet",
+          "what": "extra token-event: token-event is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.f63-pool-deposit-events-l68",
+          "at": "mainnet",
+          "what": "dropped token-event: token-event is missing"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.f63-pool-deposit-events-l68",
+          "at": "mainnet",
+          "what": "dropped token-event: token-event is missing"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.f63-pool-deposit-events-l68",
+          "at": "mainnet",
+          "what": "extra token-event: token-event is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.f63-pool-deposit-events-l68",
+          "at": "mainnet",
+          "what": "extra token-event: token-event is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.f63-pool-deposit-events-l68",
+          "at": "testnet",
+          "what": "dropped token-event: token-event is missing"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.f63-pool-deposit-events-l68",
+          "at": "testnet",
+          "what": "dropped token-event: token-event is missing"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.f63-pool-deposit-events-l68",
+          "at": "testnet",
+          "what": "extra token-event: token-event is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.f63-pool-deposit-events-l68",
+          "at": "testnet",
+          "what": "extra token-event: token-event is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.g2-r0000-l76",
+          "at": "mainnet",
+          "what": "dropped token-event: token-event is missing"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.g2-r0000-l76",
+          "at": "mainnet",
+          "what": "extra token-event: token-event is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.g2-r0000-l76",
+          "at": "testnet",
+          "what": "dropped token-event: token-event is missing"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.g2-r0000-l76",
+          "at": "testnet",
+          "what": "extra token-event: token-event is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.g2-r0002-l95",
+          "at": "mainnet",
+          "what": "dropped token-event: token-event is missing"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.g2-r0002-l95",
+          "at": "mainnet",
+          "what": "dropped token-event: token-event is missing"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.g2-r0002-l95",
+          "at": "mainnet",
+          "what": "extra token-event: token-event is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.g2-r0002-l95",
+          "at": "mainnet",
+          "what": "extra token-event: token-event is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.g2-r0002-l95",
+          "at": "testnet",
+          "what": "dropped token-event: token-event is missing"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.g2-r0002-l95",
+          "at": "testnet",
+          "what": "dropped token-event: token-event is missing"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.g2-r0002-l95",
+          "at": "testnet",
+          "what": "extra token-event: token-event is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.g2-r0002-l95",
+          "at": "testnet",
+          "what": "extra token-event: token-event is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.g2-r0003-l105",
+          "at": "mainnet",
+          "what": "dropped token-event: token-event is missing"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.g2-r0003-l105",
+          "at": "mainnet",
+          "what": "extra token-event: token-event is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.g2-r0003-l105",
+          "at": "testnet",
+          "what": "dropped token-event: token-event is missing"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.g2-r0003-l105",
+          "at": "testnet",
+          "what": "extra token-event: token-event is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.g2-r0003-l94",
+          "at": "mainnet",
+          "what": "dropped token-event: token-event is missing"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.g2-r0003-l94",
+          "at": "mainnet",
+          "what": "dropped token-event: token-event is missing"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.g2-r0003-l94",
+          "at": "mainnet",
+          "what": "extra token-event: token-event is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.g2-r0003-l94",
+          "at": "mainnet",
+          "what": "extra token-event: token-event is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.g2-r0003-l94",
+          "at": "testnet",
+          "what": "dropped token-event: token-event is missing"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.g2-r0003-l94",
+          "at": "testnet",
+          "what": "dropped token-event: token-event is missing"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.g2-r0003-l94",
+          "at": "testnet",
+          "what": "extra token-event: token-event is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.g2-r0003-l94",
+          "at": "testnet",
+          "what": "extra token-event: token-event is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.g2-r0003-l95",
+          "at": "mainnet",
+          "what": "dropped token-event: token-event is missing"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.g2-r0003-l95",
+          "at": "mainnet",
+          "what": "dropped token-event: token-event is missing"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.g2-r0003-l95",
+          "at": "mainnet",
+          "what": "extra token-event: token-event is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.g2-r0003-l95",
+          "at": "mainnet",
+          "what": "extra token-event: token-event is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.g2-r0003-l95",
+          "at": "testnet",
+          "what": "dropped token-event: token-event is missing"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.g2-r0003-l95",
+          "at": "testnet",
+          "what": "dropped token-event: token-event is missing"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.g2-r0003-l95",
+          "at": "testnet",
+          "what": "extra token-event: token-event is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.g2-r0003-l95",
+          "at": "testnet",
+          "what": "extra token-event: token-event is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.g2-r0006-l126",
+          "at": "mainnet",
+          "what": "dropped token-event: token-event is missing"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.g2-r0006-l126",
+          "at": "mainnet",
+          "what": "extra token-event: token-event is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.g2-r0006-l126",
+          "at": "testnet",
+          "what": "dropped token-event: token-event is missing"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.g2-r0006-l126",
+          "at": "testnet",
+          "what": "extra token-event: token-event is stored but the meta does not show it"
         }
       ]
     },
@@ -1883,7 +2450,9 @@
         "classic.memo-bytes.p30-memo-lone-continuation",
         "classic.memo-bytes.p30-memo-overlong-nul",
         "classic.memo-bytes.p30-memo-surrogate",
-        "classic.memo-bytes.p30-memo-truncated-sequence-28"
+        "classic.memo-bytes.p30-memo-truncated-sequence-28",
+        "explore.witnesses.f62d-r0003-l86",
+        "explore.witnesses.g2-r0018-l115"
       ],
       "recipe": "chain:classic.memo-bytes.p30",
       "affected": [
@@ -2135,6 +2704,34 @@
           "entry": "classic.memo-bytes.p30-memo-truncated-sequence-28",
           "at": "testnet",
           "what": "wrong-value token-event: token-event differs in to_muxed_id"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.f62d-r0003-l86",
+          "at": "mainnet",
+          "what": "wrong-value token-event: token-event differs in to_muxed_id"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.f62d-r0003-l86",
+          "at": "testnet",
+          "what": "wrong-value token-event: token-event differs in to_muxed_id"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.g2-r0018-l115",
+          "at": "mainnet",
+          "what": "wrong-value token-event: token-event differs in to_muxed_id"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.g2-r0018-l115",
+          "at": "testnet",
+          "what": "wrong-value token-event: token-event differs in to_muxed_id"
         }
       ]
     },
@@ -2175,6 +2772,12 @@
         "cap73.sac-trust.p30-deploy-xlm-sac-meta",
         "cap85.executable-tag.p30-contract-deploys-external-ref-envelope",
         "cap85.executable-tag.p30-contract-deploys-external-ref-meta",
+        "explore.pairs.sac-trust-p28-a-l65",
+        "explore.pairs.sac-trust-p28-b-l65",
+        "explore.pairs.sac-trust-p30-a-l69",
+        "explore.pairs.sac-trust-p30-b-l69",
+        "explore.witnesses.f63-p21-r0001-l69",
+        "explore.witnesses.f63-p28-r0000-l81",
         "soroban.invoke-basics.p30-contract-deploys-with-constructor-envelope",
         "soroban.invoke-basics.p30-contract-deploys-with-constructor-meta"
       ],
@@ -2328,6 +2931,90 @@
           "source": "harness",
           "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
           "entry": "cap85.executable-tag.p30-contract-deploys-external-ref-meta",
+          "at": "testnet",
+          "what": "dropped contract-deployed: contract-deployed is missing"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.pairs.sac-trust-p28-a-l65",
+          "at": "mainnet",
+          "what": "dropped contract-deployed: contract-deployed is missing"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.pairs.sac-trust-p28-a-l65",
+          "at": "testnet",
+          "what": "dropped contract-deployed: contract-deployed is missing"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.pairs.sac-trust-p28-b-l65",
+          "at": "mainnet",
+          "what": "dropped contract-deployed: contract-deployed is missing"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.pairs.sac-trust-p28-b-l65",
+          "at": "testnet",
+          "what": "dropped contract-deployed: contract-deployed is missing"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.pairs.sac-trust-p30-a-l69",
+          "at": "mainnet",
+          "what": "dropped contract-deployed: contract-deployed is missing"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.pairs.sac-trust-p30-a-l69",
+          "at": "testnet",
+          "what": "dropped contract-deployed: contract-deployed is missing"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.pairs.sac-trust-p30-b-l69",
+          "at": "mainnet",
+          "what": "dropped contract-deployed: contract-deployed is missing"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.pairs.sac-trust-p30-b-l69",
+          "at": "testnet",
+          "what": "dropped contract-deployed: contract-deployed is missing"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.f63-p21-r0001-l69",
+          "at": "mainnet",
+          "what": "dropped contract-deployed: contract-deployed is missing"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.f63-p21-r0001-l69",
+          "at": "testnet",
+          "what": "dropped contract-deployed: contract-deployed is missing"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.f63-p28-r0000-l81",
+          "at": "mainnet",
+          "what": "dropped contract-deployed: contract-deployed is missing"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.f63-p28-r0000-l81",
           "at": "testnet",
           "what": "dropped contract-deployed: contract-deployed is missing"
         },
@@ -2601,7 +3288,19 @@
       "related": [],
       "entries": [
         "cap33.sponsorship.p30-sponsored-account-envelope",
-        "cap33.sponsorship.p30-sponsored-account-meta"
+        "cap33.sponsorship.p30-sponsored-account-meta",
+        "explore.pairs.muxed-payment-a-l64",
+        "explore.pairs.muxed-payment-b-l64",
+        "explore.pairs.sac-trust-p28-a-l64",
+        "explore.pairs.sac-trust-p28-b-l64",
+        "explore.pairs.sac-trust-p30-a-l68",
+        "explore.pairs.sac-trust-p30-b-l68",
+        "explore.witnesses.f62c-r0000-l64",
+        "explore.witnesses.f62d-r0000-l64",
+        "explore.witnesses.f63-p24-r0001-l64",
+        "explore.witnesses.f63-p28-r0000-l64",
+        "explore.witnesses.f63-restore-archived-code-l64",
+        "explore.witnesses.g2-r0000-l64"
       ],
       "recipe": "chain:cap33.sponsorship.p30",
       "affected": [
@@ -2641,6 +3340,468 @@
           "source": "harness",
           "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
           "entry": "cap33.sponsorship.p30-sponsored-account-meta",
+          "at": "testnet",
+          "what": "extra signer-added: signer-added is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.pairs.muxed-payment-a-l64",
+          "at": "mainnet",
+          "what": "extra signer-added: signer-added is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.pairs.muxed-payment-a-l64",
+          "at": "mainnet",
+          "what": "extra signer-added: signer-added is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.pairs.muxed-payment-a-l64",
+          "at": "testnet",
+          "what": "extra signer-added: signer-added is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.pairs.muxed-payment-a-l64",
+          "at": "testnet",
+          "what": "extra signer-added: signer-added is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.pairs.muxed-payment-b-l64",
+          "at": "mainnet",
+          "what": "extra signer-added: signer-added is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.pairs.muxed-payment-b-l64",
+          "at": "mainnet",
+          "what": "extra signer-added: signer-added is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.pairs.muxed-payment-b-l64",
+          "at": "testnet",
+          "what": "extra signer-added: signer-added is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.pairs.muxed-payment-b-l64",
+          "at": "testnet",
+          "what": "extra signer-added: signer-added is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.pairs.sac-trust-p28-a-l64",
+          "at": "mainnet",
+          "what": "extra signer-added: signer-added is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.pairs.sac-trust-p28-a-l64",
+          "at": "mainnet",
+          "what": "extra signer-added: signer-added is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.pairs.sac-trust-p28-a-l64",
+          "at": "testnet",
+          "what": "extra signer-added: signer-added is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.pairs.sac-trust-p28-a-l64",
+          "at": "testnet",
+          "what": "extra signer-added: signer-added is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.pairs.sac-trust-p28-b-l64",
+          "at": "mainnet",
+          "what": "extra signer-added: signer-added is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.pairs.sac-trust-p28-b-l64",
+          "at": "mainnet",
+          "what": "extra signer-added: signer-added is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.pairs.sac-trust-p28-b-l64",
+          "at": "testnet",
+          "what": "extra signer-added: signer-added is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.pairs.sac-trust-p28-b-l64",
+          "at": "testnet",
+          "what": "extra signer-added: signer-added is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.pairs.sac-trust-p30-a-l68",
+          "at": "mainnet",
+          "what": "extra signer-added: signer-added is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.pairs.sac-trust-p30-a-l68",
+          "at": "mainnet",
+          "what": "extra signer-added: signer-added is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.pairs.sac-trust-p30-a-l68",
+          "at": "testnet",
+          "what": "extra signer-added: signer-added is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.pairs.sac-trust-p30-a-l68",
+          "at": "testnet",
+          "what": "extra signer-added: signer-added is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.pairs.sac-trust-p30-b-l68",
+          "at": "mainnet",
+          "what": "extra signer-added: signer-added is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.pairs.sac-trust-p30-b-l68",
+          "at": "mainnet",
+          "what": "extra signer-added: signer-added is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.pairs.sac-trust-p30-b-l68",
+          "at": "testnet",
+          "what": "extra signer-added: signer-added is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.pairs.sac-trust-p30-b-l68",
+          "at": "testnet",
+          "what": "extra signer-added: signer-added is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.f62c-r0000-l64",
+          "at": "mainnet",
+          "what": "extra signer-added: signer-added is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.f62c-r0000-l64",
+          "at": "mainnet",
+          "what": "extra signer-added: signer-added is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.f62c-r0000-l64",
+          "at": "mainnet",
+          "what": "extra signer-added: signer-added is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.f62c-r0000-l64",
+          "at": "mainnet",
+          "what": "extra signer-added: signer-added is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.f62c-r0000-l64",
+          "at": "testnet",
+          "what": "extra signer-added: signer-added is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.f62c-r0000-l64",
+          "at": "testnet",
+          "what": "extra signer-added: signer-added is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.f62c-r0000-l64",
+          "at": "testnet",
+          "what": "extra signer-added: signer-added is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.f62c-r0000-l64",
+          "at": "testnet",
+          "what": "extra signer-added: signer-added is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.f62d-r0000-l64",
+          "at": "mainnet",
+          "what": "extra signer-added: signer-added is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.f62d-r0000-l64",
+          "at": "mainnet",
+          "what": "extra signer-added: signer-added is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.f62d-r0000-l64",
+          "at": "mainnet",
+          "what": "extra signer-added: signer-added is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.f62d-r0000-l64",
+          "at": "mainnet",
+          "what": "extra signer-added: signer-added is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.f62d-r0000-l64",
+          "at": "testnet",
+          "what": "extra signer-added: signer-added is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.f62d-r0000-l64",
+          "at": "testnet",
+          "what": "extra signer-added: signer-added is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.f62d-r0000-l64",
+          "at": "testnet",
+          "what": "extra signer-added: signer-added is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.f62d-r0000-l64",
+          "at": "testnet",
+          "what": "extra signer-added: signer-added is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.f63-p24-r0001-l64",
+          "at": "mainnet",
+          "what": "extra signer-added: signer-added is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.f63-p24-r0001-l64",
+          "at": "mainnet",
+          "what": "extra signer-added: signer-added is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.f63-p24-r0001-l64",
+          "at": "mainnet",
+          "what": "extra signer-added: signer-added is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.f63-p24-r0001-l64",
+          "at": "mainnet",
+          "what": "extra signer-added: signer-added is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.f63-p24-r0001-l64",
+          "at": "testnet",
+          "what": "extra signer-added: signer-added is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.f63-p24-r0001-l64",
+          "at": "testnet",
+          "what": "extra signer-added: signer-added is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.f63-p24-r0001-l64",
+          "at": "testnet",
+          "what": "extra signer-added: signer-added is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.f63-p24-r0001-l64",
+          "at": "testnet",
+          "what": "extra signer-added: signer-added is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.f63-p28-r0000-l64",
+          "at": "mainnet",
+          "what": "extra signer-added: signer-added is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.f63-p28-r0000-l64",
+          "at": "mainnet",
+          "what": "extra signer-added: signer-added is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.f63-p28-r0000-l64",
+          "at": "mainnet",
+          "what": "extra signer-added: signer-added is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.f63-p28-r0000-l64",
+          "at": "mainnet",
+          "what": "extra signer-added: signer-added is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.f63-p28-r0000-l64",
+          "at": "testnet",
+          "what": "extra signer-added: signer-added is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.f63-p28-r0000-l64",
+          "at": "testnet",
+          "what": "extra signer-added: signer-added is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.f63-p28-r0000-l64",
+          "at": "testnet",
+          "what": "extra signer-added: signer-added is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.f63-p28-r0000-l64",
+          "at": "testnet",
+          "what": "extra signer-added: signer-added is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.f63-restore-archived-code-l64",
+          "at": "mainnet",
+          "what": "extra signer-added: signer-added is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.f63-restore-archived-code-l64",
+          "at": "testnet",
+          "what": "extra signer-added: signer-added is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.g2-r0000-l64",
+          "at": "mainnet",
+          "what": "extra signer-added: signer-added is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.g2-r0000-l64",
+          "at": "mainnet",
+          "what": "extra signer-added: signer-added is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.g2-r0000-l64",
+          "at": "mainnet",
+          "what": "extra signer-added: signer-added is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.g2-r0000-l64",
+          "at": "mainnet",
+          "what": "extra signer-added: signer-added is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.g2-r0000-l64",
+          "at": "testnet",
+          "what": "extra signer-added: signer-added is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.g2-r0000-l64",
+          "at": "testnet",
+          "what": "extra signer-added: signer-added is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.g2-r0000-l64",
+          "at": "testnet",
+          "what": "extra signer-added: signer-added is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.g2-r0000-l64",
           "at": "testnet",
           "what": "extra signer-added: signer-added is stored but the meta does not show it"
         }
@@ -4933,6 +6094,66 @@
           "what": "implementation-defined, 3 different answers from 24 sdk versions: rejected from go@v0.7.1, go@v0.7.2, go@v0.7.3, go@v0.8.0, go@v0.9.0, java@5.0.0, java@6.0.0, js@16.3.0, js@16.3.1, js@16.4.1, js@17.2.0, js@17.2.1, js@17.3.0, js@17.4.0, php@1.18.0; {\"json\":{\"tx\":{\"signatures\":[{\"hint\":\"07070707\",... (sha256 fdc93c8b32da) from rust@28.0.0, rust@28.0.1, rust@30.0.0, stellar-cli@28.1.0, stellar-cli@30.0.1; {\"json\":{\"tx\":{\"signatures\":[{\"hint\":\"07070707\",... (sha256 1426c702ce6b) from dart@3.12.0, kmp@1.18.0, python@16.1.1, python@17.0.1"
         }
       ]
+    },
+    {
+      "id": "WB-FLAGS-OP",
+      "title": "account and trustline flags rows follow the operation's parameters, also when the ledger's flags do not change",
+      "component": "wallet-backend",
+      "severity": "wrong-data",
+      "caps": [],
+      "minimal_entry": "explore.witnesses.f62c-r0005-l124",
+      "reproduce": "shapekit harness run --chain explore.f62c.r0005 --network testnet --adapter \"adapters/bin/wb-adapter --commit 3e22515a44979fdc3a558fda3991ca2b48e38cef\"",
+      "status": "wont-fix",
+      "reason": "intended, recorded and not filed: the effects code is a port of Horizon's (internal/indexer/processors/effects_horizon.go L3-L4 at 3e22515a), whose account_flags_updated and trustline_flags_updated effects describe what the operation asked for, not what changed",
+      "cause": "addSetOptionsEffects writes account flags from op.SetFlags and op.ClearFlags whenever either is present (effects_horizon.go L165-L175 at 3e22515a), and addAllowTrustEffects writes trustline flags from op.Authorize on every AllowTrust (L307-L340), without reading the ledger change. A set options that clears flags already clear, or an allow trust that authorizes a trustline already authorized, leaves the entry's flags as they were, so the meta shows no flag change while a flags row is stored.",
+      "siblings": [],
+      "related": [],
+      "entries": [
+        "explore.witnesses.f62c-r0005-l124",
+        "explore.witnesses.f62d-r0007-l72"
+      ],
+      "recipe": "recipe:corpus/recipes/explore.witnesses/f62c/r0005.json",
+      "affected": [
+        {
+          "on": "wallet-backend",
+          "tested": [
+            "3e22515a44979fdc3a558fda3991ca2b48e38cef"
+          ],
+          "failing": [
+            "3e22515a44979fdc3a558fda3991ca2b48e38cef"
+          ]
+        }
+      ],
+      "occurrences": [
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.f62c-r0005-l124",
+          "at": "mainnet",
+          "what": "extra trustline-flags: trustline-flags is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.f62c-r0005-l124",
+          "at": "testnet",
+          "what": "extra trustline-flags: trustline-flags is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.f62d-r0007-l72",
+          "at": "mainnet",
+          "what": "extra account-flags: account-flags is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "explore.witnesses.f62d-r0007-l72",
+          "at": "testnet",
+          "what": "extra account-flags: account-flags is stored but the meta does not show it"
+        }
+      ]
     }
   ],
   "unmapped": [],
@@ -4991,6 +6212,34 @@
         "source": "harness",
         "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
         "entry": "cap73.sac-trust.p30-trust-meta",
+        "at": "testnet",
+        "what": "dropped trustline-created: trustline-created is missing"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.pairs.sac-trust-p28-a-l66",
+        "at": "mainnet",
+        "what": "dropped trustline-created: trustline-created is missing"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.pairs.sac-trust-p28-a-l66",
+        "at": "testnet",
+        "what": "dropped trustline-created: trustline-created is missing"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.pairs.sac-trust-p30-a-l70",
+        "at": "mainnet",
+        "what": "dropped trustline-created: trustline-created is missing"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.pairs.sac-trust-p30-a-l70",
         "at": "testnet",
         "what": "dropped trustline-created: trustline-created is missing"
       }
@@ -5603,6 +6852,790 @@
         "entry": "classic.failed-tx.p9-change-trust-native-internal-error-meta",
         "at": "testnet",
         "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 65"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.f62c-r0016-l93",
+        "at": "mainnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 93"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.f62c-r0016-l93",
+        "at": "testnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 93"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.f62c-r0016-l94",
+        "at": "mainnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 94"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.f62c-r0016-l94",
+        "at": "testnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 94"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.f62c-r0017-l77",
+        "at": "mainnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 77"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.f62c-r0017-l77",
+        "at": "testnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 77"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.f62c-r0017-l78",
+        "at": "mainnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 78"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.f62c-r0017-l78",
+        "at": "testnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 78"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.f62d-r0001-l66",
+        "at": "mainnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 66"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.f62d-r0001-l66",
+        "at": "testnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 66"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.f62d-r0001-l67",
+        "at": "mainnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 67"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.f62d-r0001-l67",
+        "at": "testnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 67"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.f62d-r0001-l69",
+        "at": "mainnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 69"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.f62d-r0001-l69",
+        "at": "testnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 69"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.f62d-r0001-l72",
+        "at": "mainnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 72"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.f62d-r0001-l72",
+        "at": "testnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 72"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.f62d-r0001-l73",
+        "at": "mainnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 73"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.f62d-r0001-l73",
+        "at": "testnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 73"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.f62d-r0002-l66",
+        "at": "mainnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 66"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.f62d-r0002-l66",
+        "at": "testnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 66"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.f62d-r0002-l68",
+        "at": "mainnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 68"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.f62d-r0002-l68",
+        "at": "testnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 68"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.f62d-r0002-l75",
+        "at": "mainnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 75"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.f62d-r0002-l75",
+        "at": "testnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 75"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.f62d-r0002-l77",
+        "at": "mainnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 77"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.f62d-r0002-l77",
+        "at": "testnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 77"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.f62d-r0002-l79",
+        "at": "mainnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 79"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.f62d-r0002-l79",
+        "at": "testnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 79"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.f62d-r0002-l84",
+        "at": "mainnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 84"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.f62d-r0002-l84",
+        "at": "testnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 84"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.f63-p21-r0001-l66",
+        "at": "mainnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 66"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.f63-p21-r0001-l66",
+        "at": "testnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 66"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.f63-p21-r0001-l67",
+        "at": "mainnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 67"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.f63-p21-r0001-l67",
+        "at": "testnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 67"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.f63-p21-r0001-l68",
+        "at": "mainnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 68"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.f63-p21-r0001-l68",
+        "at": "testnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 68"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.f63-p21-r0001-l69",
+        "at": "mainnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 69"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.f63-p21-r0001-l69",
+        "at": "testnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 69"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.f63-p21-r0001-l72",
+        "at": "mainnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 72"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.f63-p21-r0001-l72",
+        "at": "testnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 72"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.f63-p21-r0001-l73",
+        "at": "mainnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 73"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.f63-p21-r0001-l73",
+        "at": "testnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 73"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.f63-p21-r0001-l86",
+        "at": "mainnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 86"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.f63-p21-r0001-l86",
+        "at": "testnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 86"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.g1-r0016-l66",
+        "at": "mainnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 66"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.g1-r0016-l66",
+        "at": "testnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 66"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.g1-r0016-l74",
+        "at": "mainnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 74"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.g1-r0016-l74",
+        "at": "testnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 74"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.g2-r0001-l102",
+        "at": "mainnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 102"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.g2-r0001-l102",
+        "at": "testnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 102"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.g2-r0001-l112",
+        "at": "mainnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 112"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.g2-r0001-l112",
+        "at": "testnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 112"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.g2-r0001-l113",
+        "at": "mainnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 113"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.g2-r0001-l113",
+        "at": "testnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 113"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.g2-r0001-l114",
+        "at": "mainnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 114"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.g2-r0001-l114",
+        "at": "testnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 114"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.g2-r0001-l115",
+        "at": "mainnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 115"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.g2-r0001-l115",
+        "at": "testnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 115"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.g2-r0001-l72",
+        "at": "mainnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 72"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.g2-r0001-l72",
+        "at": "testnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 72"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.g2-r0001-l81",
+        "at": "mainnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 81"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.g2-r0001-l81",
+        "at": "testnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 81"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.g2-r0001-l82",
+        "at": "mainnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 82"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.g2-r0001-l82",
+        "at": "testnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 82"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.g2-r0001-l83",
+        "at": "mainnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 83"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.g2-r0001-l83",
+        "at": "testnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 83"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.g2-r0001-l84",
+        "at": "mainnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 84"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.g2-r0001-l84",
+        "at": "testnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 84"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.g2-r0001-l85",
+        "at": "mainnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 85"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.g2-r0001-l85",
+        "at": "testnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 85"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.g2-r0001-l86",
+        "at": "mainnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 86"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.g2-r0001-l86",
+        "at": "testnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 86"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.g2-r0015-l67",
+        "at": "mainnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 67"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.g2-r0015-l67",
+        "at": "testnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 67"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.g2-r0015-l69",
+        "at": "mainnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 69"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.g2-r0015-l69",
+        "at": "testnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 69"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.g2-r0015-l71",
+        "at": "mainnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 71"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.g2-r0015-l71",
+        "at": "testnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 71"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.g2-r0015-l72",
+        "at": "mainnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 72"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.g2-r0015-l72",
+        "at": "testnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 72"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.g2-r0017-l129",
+        "at": "mainnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 129"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.g2-r0017-l129",
+        "at": "testnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 129"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.g2-r0017-l130",
+        "at": "mainnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 130"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.g2-r0017-l130",
+        "at": "testnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 130"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.g2-r0019-l69",
+        "at": "mainnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 69"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.g2-r0019-l69",
+        "at": "testnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 69"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.g2-r0020-l69",
+        "at": "mainnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 69"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.g2-r0020-l69",
+        "at": "testnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 69"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.g2-r0023-l119",
+        "at": "mainnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 119"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.g2-r0023-l119",
+        "at": "testnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 119"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.g2-r0027-l67",
+        "at": "mainnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 67"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.g2-r0027-l67",
+        "at": "testnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 67"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.g2-r0027-l69",
+        "at": "mainnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 69"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.g2-r0027-l69",
+        "at": "testnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 69"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.g2-r0030-l95",
+        "at": "mainnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 95"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.g2-r0030-l95",
+        "at": "testnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 95"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.g2-r0030-l99",
+        "at": "mainnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 99"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.g2-r0030-l99",
+        "at": "testnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 99"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.g2-r0031-l66",
+        "at": "mainnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 66"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.g2-r0031-l66",
+        "at": "testnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 66"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.g2-r0031-l67",
+        "at": "mainnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 67"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.g2-r0031-l67",
+        "at": "testnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 67"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.g2-r0033-l66",
+        "at": "mainnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 66"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.g2-r0033-l66",
+        "at": "testnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 66"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.g2-r0036-l71",
+        "at": "mainnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 71"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.g2-r0036-l71",
+        "at": "testnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 71"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.g2-r0040-l74",
+        "at": "mainnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 74"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.g2-r0040-l74",
+        "at": "testnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 74"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.g2-r0041-l89",
+        "at": "mainnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 89"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.g2-r0041-l89",
+        "at": "testnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 89"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.g2-r0042-l67",
+        "at": "mainnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 67"
+      },
+      {
+        "source": "harness",
+        "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "entry": "explore.witnesses.g2-r0042-l67",
+        "at": "testnet",
+        "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 67"
       }
     ],
     "GO-TEXTID": [

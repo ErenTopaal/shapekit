@@ -1,0 +1,118 @@
+{
+  "ledgers": [
+    {
+      "close_time": "1775779200",
+      "evicted": [],
+      "ledger_hash": "5ed1960f250bb309ce92af309514cf9cf4116e7d1ab0bb0d244a69dc022848da",
+      "ledger_seq": 99,
+      "protocol": 17,
+      "transactions": [
+        {
+          "apply_index": 0,
+          "changes": [
+            {
+              "after": "99999999700",
+              "asset": "native",
+              "before": "100000000000",
+              "delta": "-300",
+              "held_in": "account",
+              "holder": "GATRGVJO4DRK2OUHIPJ4KJM3TXCUHTMFLGR55MCTICMQGK32N2TIX54W",
+              "kind": "balance-change",
+              "scope": "fee-processing"
+            },
+            {
+              "amount": "300",
+              "asset": "native",
+              "contract": "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC",
+              "event": "fee",
+              "from": "GATRGVJO4DRK2OUHIPJ4KJM3TXCUHTMFLGR55MCTICMQGK32N2TIX54W",
+              "kind": "token-event",
+              "scope": "fee-processing",
+              "stage": "before-all-txs"
+            },
+            {
+              "account": "GATRGVJO4DRK2OUHIPJ4KJM3TXCUHTMFLGR55MCTICMQGK32N2TIX54W",
+              "after": "274877906945",
+              "before": "274877906944",
+              "kind": "sequence",
+              "scope": "tx-before"
+            },
+            {
+              "kind": "sponsorship",
+              "op_index": 1,
+              "scope": "operation",
+              "sponsor_after": "GATRGVJO4DRK2OUHIPJ4KJM3TXCUHTMFLGR55MCTICMQGK32N2TIX54W",
+              "target": "trustline GAWAAQJUH2DI56A3RRDJBBD6A26EQXGWHCKLTT4MCWNSKQ6NXJF6XQSQ LONGASSET12:GBESTJZ3VBOL4MU43T5SFJAAP4NJYHGW6A5R2RXH5LWUKKDZZG2KDELF"
+            },
+            {
+              "account": "GAWAAQJUH2DI56A3RRDJBBD6A26EQXGWHCKLTT4MCWNSKQ6NXJF6XQSQ",
+              "asset": "LONGASSET12:GBESTJZ3VBOL4MU43T5SFJAAP4NJYHGW6A5R2RXH5LWUKKDZZG2KDELF",
+              "flags": 1,
+              "kind": "trustline-created",
+              "limit": "9223372036854775807",
+              "op_index": 1,
+              "scope": "operation"
+            }
+          ],
+          "declared": {
+            "participants": [
+              {
+                "address": "GATRGVJO4DRK2OUHIPJ4KJM3TXCUHTMFLGR55MCTICMQGK32N2TIX54W",
+                "kind": "account",
+                "roles": [
+                  "tx-source"
+                ]
+              },
+              {
+                "address": "GAWAAQJUH2DI56A3RRDJBBD6A26EQXGWHCKLTT4MCWNSKQ6NXJF6XQSQ",
+                "kind": "account",
+                "roles": [
+                  "op-source",
+                  "sponsored"
+                ]
+              }
+            ],
+            "source": "GATRGVJO4DRK2OUHIPJ4KJM3TXCUHTMFLGR55MCTICMQGK32N2TIX54W"
+          },
+          "events": "unified",
+          "fee": {
+            "balance_delta": "-300",
+            "charged": "300",
+            "source": "GATRGVJO4DRK2OUHIPJ4KJM3TXCUHTMFLGR55MCTICMQGK32N2TIX54W"
+          },
+          "hash": "0e38551706f52c1cec7631d0c6e4674e3e42802bf6a60db88a7880890e30596b",
+          "participants": [
+            {
+              "address": "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC",
+              "kind": "contract",
+              "roles": [
+                "event-contract"
+              ]
+            },
+            {
+              "address": "GATRGVJO4DRK2OUHIPJ4KJM3TXCUHTMFLGR55MCTICMQGK32N2TIX54W",
+              "kind": "account",
+              "roles": [
+                "entry-changed",
+                "event-address",
+                "fee-source"
+              ]
+            },
+            {
+              "address": "GAWAAQJUH2DI56A3RRDJBBD6A26EQXGWHCKLTT4MCWNSKQ6NXJF6XQSQ",
+              "kind": "account",
+              "roles": [
+                "entry-changed"
+              ]
+            }
+          ],
+          "result": "tx_success",
+          "successful": true
+        }
+      ],
+      "upgrades": []
+    }
+  ],
+  "network_passphrase": "Test SDF Network ; September 2015",
+  "oracle_vocab_version": 2
+}

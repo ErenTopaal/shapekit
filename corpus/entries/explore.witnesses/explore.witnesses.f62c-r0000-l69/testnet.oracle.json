@@ -1,0 +1,147 @@
+{
+  "ledgers": [
+    {
+      "close_time": "1773187200",
+      "evicted": [],
+      "ledger_hash": "20bf325e8acbf0348229169ba62bb4d759760d10f5c17eddd9c6e763b443e8c0",
+      "ledger_seq": 69,
+      "protocol": 22,
+      "transactions": [
+        {
+          "apply_index": 0,
+          "changes": [
+            {
+              "after": "99999999900",
+              "asset": "native",
+              "before": "100000000000",
+              "delta": "-100",
+              "held_in": "account",
+              "holder": "GAIRMBBRLIDIHIBHY57653J4VGZGPFEJ3CPE6AULDU4WWR32OFMPU3PI",
+              "kind": "balance-change",
+              "scope": "fee-processing"
+            },
+            {
+              "amount": "100",
+              "asset": "native",
+              "contract": "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC",
+              "event": "fee",
+              "from": "GAIRMBBRLIDIHIBHY57653J4VGZGPFEJ3CPE6AULDU4WWR32OFMPU3PI",
+              "kind": "token-event",
+              "scope": "fee-processing",
+              "stage": "before-all-txs"
+            },
+            {
+              "account": "GAIRMBBRLIDIHIBHY57653J4VGZGPFEJ3CPE6AULDU4WWR32OFMPU3PI",
+              "after": "274877906945",
+              "before": "274877906944",
+              "kind": "sequence",
+              "scope": "tx-before"
+            },
+            {
+              "account": "GAIRMBBRLIDIHIBHY57653J4VGZGPFEJ3CPE6AULDU4WWR32OFMPU3PI",
+              "final_balance": "99999999900",
+              "kind": "account-removed",
+              "op_index": 0,
+              "scope": "operation"
+            },
+            {
+              "after": "0",
+              "asset": "native",
+              "before": "99999999900",
+              "delta": "-99999999900",
+              "held_in": "account",
+              "holder": "GAIRMBBRLIDIHIBHY57653J4VGZGPFEJ3CPE6AULDU4WWR32OFMPU3PI",
+              "kind": "balance-change",
+              "op_index": 0,
+              "scope": "operation"
+            },
+            {
+              "after": "199999999500",
+              "asset": "native",
+              "before": "99999999600",
+              "delta": "99999999900",
+              "held_in": "account",
+              "holder": "GDWCHWYFMEMZEZEIO6B23SZRIQY2EKFBIBMZ4JJ3PJWRTZXDQVMKTMAL",
+              "kind": "balance-change",
+              "op_index": 0,
+              "scope": "operation"
+            },
+            {
+              "amount": "99999999900",
+              "asset": "native",
+              "asset_topic": "native",
+              "contract": "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC",
+              "event": "transfer",
+              "from": "GAIRMBBRLIDIHIBHY57653J4VGZGPFEJ3CPE6AULDU4WWR32OFMPU3PI",
+              "kind": "token-event",
+              "op_index": 0,
+              "scope": "operation",
+              "stage": "operation",
+              "to": "GDWCHWYFMEMZEZEIO6B23SZRIQY2EKFBIBMZ4JJ3PJWRTZXDQVMKTMAL"
+            }
+          ],
+          "declared": {
+            "participants": [
+              {
+                "address": "GAIRMBBRLIDIHIBHY57653J4VGZGPFEJ3CPE6AULDU4WWR32OFMPU3PI",
+                "kind": "account",
+                "mux_ids": [
+                  "0"
+                ],
+                "roles": [
+                  "tx-source"
+                ]
+              },
+              {
+                "address": "GDWCHWYFMEMZEZEIO6B23SZRIQY2EKFBIBMZ4JJ3PJWRTZXDQVMKTMAL",
+                "kind": "account",
+                "roles": [
+                  "destination"
+                ]
+              }
+            ],
+            "source": "MAIRMBBRLIDIHIBHY57653J4VGZGPFEJ3CPE6AULDU4WWR32OFMPUAAAAAAAAAAAAA2PK"
+          },
+          "events": "unified",
+          "fee": {
+            "balance_delta": "-100",
+            "charged": "100",
+            "source": "GAIRMBBRLIDIHIBHY57653J4VGZGPFEJ3CPE6AULDU4WWR32OFMPU3PI"
+          },
+          "hash": "1ce71c993c06a43cc5c44ca1c6774d36b8a8fd097b2d57cdf16582ad2709cc79",
+          "participants": [
+            {
+              "address": "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC",
+              "kind": "contract",
+              "roles": [
+                "event-contract"
+              ]
+            },
+            {
+              "address": "GAIRMBBRLIDIHIBHY57653J4VGZGPFEJ3CPE6AULDU4WWR32OFMPU3PI",
+              "kind": "account",
+              "roles": [
+                "entry-changed",
+                "event-address",
+                "fee-source"
+              ]
+            },
+            {
+              "address": "GDWCHWYFMEMZEZEIO6B23SZRIQY2EKFBIBMZ4JJ3PJWRTZXDQVMKTMAL",
+              "kind": "account",
+              "roles": [
+                "entry-changed",
+                "event-address"
+              ]
+            }
+          ],
+          "result": "tx_success",
+          "successful": true
+        }
+      ],
+      "upgrades": []
+    }
+  ],
+  "network_passphrase": "Test SDF Network ; September 2015",
+  "oracle_vocab_version": 2
+}

@@ -1,0 +1,119 @@
+{
+  "ledgers": [
+    {
+      "close_time": "1773014400",
+      "evicted": [],
+      "ledger_hash": "baf7f5cc1ec814f1f722075bfed95375813cb6cbd550aac77d9eae6bb8b6fea1",
+      "ledger_seq": 67,
+      "protocol": 21,
+      "transactions": [
+        {
+          "apply_index": 0,
+          "changes": [
+            {
+              "after": "99999856247",
+              "asset": "native",
+              "before": "99999926689",
+              "delta": "-70442",
+              "held_in": "account",
+              "holder": "GBWBS3NF766EEGMW7L3ZAK3JZSCO6HZGAI7ZTLBLINGUN54WTGRIGCEM",
+              "kind": "balance-change",
+              "scope": "fee-processing"
+            },
+            {
+              "account": "GBWBS3NF766EEGMW7L3ZAK3JZSCO6HZGAI7ZTLBLINGUN54WTGRIGCEM",
+              "after": "274877906946",
+              "before": "274877906945",
+              "kind": "sequence",
+              "scope": "tx-before"
+            },
+            {
+              "action": "created",
+              "contract": "CBO5GNSTHS6KF7EUSRVNSMHJKQPXQEVXBBRJ25MRCNBV7AED7XIM3RJK",
+              "durability": "persistent",
+              "key_xdr": "AAAAFA==",
+              "kind": "contract-data",
+              "op_index": 0,
+              "scope": "operation"
+            },
+            {
+              "contract": "CBO5GNSTHS6KF7EUSRVNSMHJKQPXQEVXBBRJ25MRCNBV7AED7XIM3RJK",
+              "executable": "wasm:3bb9d0722370b368eb6c8f038d11c61001749083383add26f89fcb3e8bb78e94",
+              "kind": "contract-deployed",
+              "op_index": 0,
+              "scope": "operation"
+            },
+            {
+              "action": "created",
+              "after": 4162,
+              "key_hash": "34f64492380153325324bbeecc9e021819fa0e760276fa1911f52beb1130e4f5",
+              "kind": "ttl",
+              "op_index": 0,
+              "scope": "operation",
+              "target": "contract data of CBO5GNSTHS6KF7EUSRVNSMHJKQPXQEVXBBRJ25MRCNBV7AED7XIM3RJK key 00000014"
+            },
+            {
+              "after": "99999868800",
+              "asset": "native",
+              "before": "99999856247",
+              "delta": "12553",
+              "held_in": "account",
+              "holder": "GBWBS3NF766EEGMW7L3ZAK3JZSCO6HZGAI7ZTLBLINGUN54WTGRIGCEM",
+              "kind": "balance-change",
+              "scope": "tx-after"
+            }
+          ],
+          "declared": {
+            "participants": [
+              {
+                "address": "CBO5GNSTHS6KF7EUSRVNSMHJKQPXQEVXBBRJ25MRCNBV7AED7XIM3RJK",
+                "kind": "contract",
+                "roles": [
+                  "footprint"
+                ]
+              },
+              {
+                "address": "GBWBS3NF766EEGMW7L3ZAK3JZSCO6HZGAI7ZTLBLINGUN54WTGRIGCEM",
+                "kind": "account",
+                "roles": [
+                  "deployer",
+                  "tx-source"
+                ]
+              }
+            ],
+            "source": "GBWBS3NF766EEGMW7L3ZAK3JZSCO6HZGAI7ZTLBLINGUN54WTGRIGCEM"
+          },
+          "events": "soroban-operation",
+          "fee": {
+            "balance_delta": "-70442",
+            "charged": "57889",
+            "source": "GBWBS3NF766EEGMW7L3ZAK3JZSCO6HZGAI7ZTLBLINGUN54WTGRIGCEM"
+          },
+          "hash": "00ae9bd30178d565c9f8b95b23193e28916a18a63c31832d23761c6770c25fa0",
+          "participants": [
+            {
+              "address": "CBO5GNSTHS6KF7EUSRVNSMHJKQPXQEVXBBRJ25MRCNBV7AED7XIM3RJK",
+              "kind": "contract",
+              "roles": [
+                "entry-changed"
+              ]
+            },
+            {
+              "address": "GBWBS3NF766EEGMW7L3ZAK3JZSCO6HZGAI7ZTLBLINGUN54WTGRIGCEM",
+              "kind": "account",
+              "roles": [
+                "entry-changed",
+                "fee-source"
+              ]
+            }
+          ],
+          "result": "tx_success",
+          "successful": true
+        }
+      ],
+      "upgrades": []
+    }
+  ],
+  "network_passphrase": "Test SDF Network ; September 2015",
+  "oracle_vocab_version": 2
+}

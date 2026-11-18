@@ -146,7 +146,7 @@ pub fn check(dump: &Dump, core: &CoreState, known: &Known, mapping: &Mapping) ->
     r
 }
 
-/// One entry of a recipe pair (`candidate/recipes/explore.pairs/<pair>/pair.json`): two
+/// One entry of a recipe pair (`corpus/recipes/explore.pairs/<pair>/pair.json`): two
 /// chains from the same start that reach it in two ways.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct PairEntry {

@@ -10,6 +10,35 @@
   ],
   "entries": [
     {
+      "id": "cap03.offer-liabilities.mainnet-37466023",
+      "cells": {
+        "dart@3.12.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/finding-candidates.toml",
+          "checks": [
+            {
+              "check": "mainnet/tx_hash 12",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk's hash differs from the one the network wrote"
+            },
+            {
+              "check": "mainnet/tx_hash 236",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk's hash differs from the one the network wrote"
+            },
+            {
+              "check": "mainnet/tx_hash 236 inner",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk's hash differs from the one the network wrote"
+            }
+          ]
+        }
+      }
+    },
+    {
       "id": "cap03.offer-liabilities.synth-negative-offer-id",
       "cells": {
         "dart@3.12.0": {
@@ -110,6 +139,65 @@
               "op": "id_parse",
               "result": "unsupported",
               "detail": "ManageSellOfferOperationBuilder.setOfferId takes text only"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cap15.fee-bump.mainnet-57369500",
+      "cells": {
+        "dart@3.12.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/finding-candidates.toml",
+          "checks": [
+            {
+              "check": "mainnet/tx_hash 26",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk's hash differs from the one the network wrote"
+            },
+            {
+              "check": "mainnet/tx_hash 29",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk's hash differs from the one the network wrote"
+            },
+            {
+              "check": "mainnet/tx_hash 38",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk's hash differs from the one the network wrote"
+            },
+            {
+              "check": "mainnet/tx_hash 52",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk's hash differs from the one the network wrote"
+            },
+            {
+              "check": "mainnet/tx_hash 60",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk's hash differs from the one the network wrote"
+            },
+            {
+              "check": "mainnet/tx_hash 75",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk's hash differs from the one the network wrote"
+            },
+            {
+              "check": "mainnet/tx_hash 83",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk's hash differs from the one the network wrote"
+            },
+            {
+              "check": "mainnet/tx_hash 104",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk's hash differs from the one the network wrote"
             }
           ]
         }
@@ -807,6 +895,202 @@
               "op": "tx_hash",
               "result": "diverges-from-network",
               "detail": "the sdk refused a value the network accepts: FormatException: FormatException: Unfinished UTF-8 octet sequence (at offset 28)"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "explore.witnesses.f62d-r0000-l96",
+      "cells": {
+        "dart@3.12.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/finding-candidates.toml",
+          "checks": [
+            {
+              "check": "testnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk's hash differs from the one the network wrote"
+            },
+            {
+              "check": "mainnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk's hash differs from the one the network wrote"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "explore.witnesses.f62d-r0004-l69",
+      "cells": {
+        "dart@3.12.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/finding-candidates.toml",
+          "checks": [
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk's XDR-JSON differs from the expected value"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: XDR-JSON XdrUint64 holds -1, outside the range of a uint64"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk's XDR-JSON differs from the expected value"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: XDR-JSON XdrUint64 holds -1, outside the range of a uint64"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "explore.witnesses.f62d-r0004-l74",
+      "cells": {
+        "dart@3.12.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/finding-candidates.toml",
+          "checks": [
+            {
+              "check": "testnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: _Exception: Exception: Unknown operation body OperationType.9"
+            },
+            {
+              "check": "mainnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: _Exception: Exception: Unknown operation body OperationType.9"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "explore.witnesses.g1-r0047-l69",
+      "cells": {
+        "dart@3.12.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/finding-candidates.toml",
+          "checks": [
+            {
+              "check": "testnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk's hash differs from the one the network wrote"
+            },
+            {
+              "check": "mainnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk's hash differs from the one the network wrote"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "explore.witnesses.g2-r0007-l69",
+      "cells": {
+        "dart@3.12.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/finding-candidates.toml",
+          "checks": [
+            {
+              "check": "testnet/tx_hash 1",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk's hash differs from the one the network wrote"
+            },
+            {
+              "check": "mainnet/tx_hash 1",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk's hash differs from the one the network wrote"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "explore.witnesses.g2-r0010-l74",
+      "cells": {
+        "dart@3.12.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/finding-candidates.toml",
+          "checks": [
+            {
+              "check": "testnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: _Exception: Exception: Unknown operation body OperationType.9"
+            },
+            {
+              "check": "mainnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: _Exception: Exception: Unknown operation body OperationType.9"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "explore.witnesses.g2-r0010-l92",
+      "cells": {
+        "dart@3.12.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/finding-candidates.toml",
+          "checks": [
+            {
+              "check": "testnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk's hash differs from the one the network wrote"
+            },
+            {
+              "check": "mainnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk's hash differs from the one the network wrote"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "explore.witnesses.g2-r0038-l67",
+      "cells": {
+        "dart@3.12.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/finding-candidates.toml",
+          "checks": [
+            {
+              "check": "testnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk's hash differs from the one the network wrote"
+            },
+            {
+              "check": "mainnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk's hash differs from the one the network wrote"
             }
           ]
         }

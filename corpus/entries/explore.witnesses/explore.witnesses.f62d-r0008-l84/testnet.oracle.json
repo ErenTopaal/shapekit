@@ -1,0 +1,118 @@
+{
+  "ledgers": [
+    {
+      "close_time": "1774483200",
+      "evicted": [],
+      "ledger_hash": "f7c198739809101a56ce115b985c3d367b360f3a60f6105865d0e193dd9992a9",
+      "ledger_seq": 84,
+      "protocol": 17,
+      "transactions": [
+        {
+          "apply_index": 0,
+          "changes": [
+            {
+              "after": "209999500",
+              "asset": "native",
+              "before": "209999800",
+              "delta": "-300",
+              "held_in": "account",
+              "holder": "GDLX32CN3P6YLIFQIUFPIIYXMNOZQCYEVZWSR7LC56FICT7HPN5UEEDP",
+              "kind": "balance-change",
+              "scope": "fee-processing"
+            },
+            {
+              "amount": "300",
+              "asset": "native",
+              "contract": "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC",
+              "event": "fee",
+              "from": "GDLX32CN3P6YLIFQIUFPIIYXMNOZQCYEVZWSR7LC56FICT7HPN5UEEDP",
+              "kind": "token-event",
+              "scope": "fee-processing",
+              "stage": "before-all-txs"
+            },
+            {
+              "account": "GBDEBVRJ4YZSVSGXYOKSE5NFHDRFOMD5QNT66N5ODAFFIMCGGQDP2VSF",
+              "after": "274877906961",
+              "before": "274877906960",
+              "kind": "sequence",
+              "scope": "tx-before"
+            }
+          ],
+          "declared": {
+            "fee_source": "GDLX32CN3P6YLIFQIUFPIIYXMNOZQCYEVZWSR7LC56FICT7HPN5UEEDP",
+            "participants": [
+              {
+                "address": "BAAPLJ3SUGMBX6RK467CTJFJ5BOAE7K4UIQ3CIGG42C2WVAJW2SFPTWJRA",
+                "kind": "claimable-balance",
+                "roles": [
+                  "claimable-balance"
+                ]
+              },
+              {
+                "address": "GBDEBVRJ4YZSVSGXYOKSE5NFHDRFOMD5QNT66N5ODAFFIMCGGQDP2VSF",
+                "kind": "account",
+                "roles": [
+                  "op-source",
+                  "tx-source"
+                ]
+              },
+              {
+                "address": "GDLX32CN3P6YLIFQIUFPIIYXMNOZQCYEVZWSR7LC56FICT7HPN5UEEDP",
+                "kind": "account",
+                "roles": [
+                  "fee-source"
+                ]
+              },
+              {
+                "address": "GDNSNO7P67EBSR4F6HHJNWWOWZVUZSGN43XEGT4535HC4TCBSYKLKH6B",
+                "kind": "account",
+                "roles": [
+                  "sponsored"
+                ]
+              }
+            ],
+            "source": "GBDEBVRJ4YZSVSGXYOKSE5NFHDRFOMD5QNT66N5ODAFFIMCGGQDP2VSF"
+          },
+          "events": "unified",
+          "fee": {
+            "balance_delta": "-300",
+            "charged": "300",
+            "source": "GDLX32CN3P6YLIFQIUFPIIYXMNOZQCYEVZWSR7LC56FICT7HPN5UEEDP"
+          },
+          "hash": "58e541db40b9019f39add80e199ae611f3e35eb8891087207a713c3021815ff6",
+          "inner_hash": "d41d118fa3d31812caa046ad91bda8d2d69f0edca91708d37f8a31f1d64a5058",
+          "participants": [
+            {
+              "address": "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC",
+              "kind": "contract",
+              "roles": [
+                "event-contract"
+              ]
+            },
+            {
+              "address": "GBDEBVRJ4YZSVSGXYOKSE5NFHDRFOMD5QNT66N5ODAFFIMCGGQDP2VSF",
+              "kind": "account",
+              "roles": [
+                "entry-changed"
+              ]
+            },
+            {
+              "address": "GDLX32CN3P6YLIFQIUFPIIYXMNOZQCYEVZWSR7LC56FICT7HPN5UEEDP",
+              "kind": "account",
+              "roles": [
+                "entry-changed",
+                "event-address",
+                "fee-source"
+              ]
+            }
+          ],
+          "result": "tx_fee_bump_inner_failed",
+          "successful": false
+        }
+      ],
+      "upgrades": []
+    }
+  ],
+  "network_passphrase": "Test SDF Network ; September 2015",
+  "oracle_vocab_version": 2
+}

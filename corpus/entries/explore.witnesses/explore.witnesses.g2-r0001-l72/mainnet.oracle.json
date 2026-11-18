@@ -1,0 +1,112 @@
+{
+  "ledgers": [
+    {
+      "close_time": "1773446400",
+      "evicted": [],
+      "ledger_hash": "eb23a15efad7fc39c566de820e1e69a63ed2e5c5d7f3dc06b7e2a30866126287",
+      "ledger_seq": 72,
+      "protocol": 14,
+      "transactions": [
+        {
+          "apply_index": 0,
+          "changes": [
+            {
+              "after": "99999999500",
+              "asset": "native",
+              "before": "99999999600",
+              "delta": "-100",
+              "held_in": "account",
+              "holder": "GC6WEIKDOHHZIXPCPOMVCFDBXEO53L4AW2NX7DP6IHQWQ66FOBATQE6D",
+              "kind": "balance-change",
+              "scope": "fee-processing"
+            },
+            {
+              "account": "GC6WEIKDOHHZIXPCPOMVCFDBXEO53L4AW2NX7DP6IHQWQ66FOBATQE6D",
+              "after": "274877906949",
+              "before": "274877906948",
+              "kind": "sequence",
+              "scope": "tx-before"
+            },
+            {
+              "after": "100",
+              "asset": "USD:GC6WEIKDOHHZIXPCPOMVCFDBXEO53L4AW2NX7DP6IHQWQ66FOBATQE6D",
+              "before": "0",
+              "delta": "100",
+              "held_in": "claimable-balance",
+              "holder": "BAAOMUI5R7O6Z2NSWCA4ZUHJNCN4JDGVBM7KSIVAM7EOQ4JF4GCTDE2E2Y",
+              "kind": "balance-change",
+              "op_index": 0,
+              "scope": "operation"
+            },
+            {
+              "amount": "100",
+              "asset": "USD:GC6WEIKDOHHZIXPCPOMVCFDBXEO53L4AW2NX7DP6IHQWQ66FOBATQE6D",
+              "balance_id": "BAAOMUI5R7O6Z2NSWCA4ZUHJNCN4JDGVBM7KSIVAM7EOQ4JF4GCTDE2E2Y",
+              "claimants": [
+                "GCEQKZTNVPEOSTZGNH772PYFESTHFHD6ZLCOZLRQKTJ5GJ4MQ3IYXIJ3"
+              ],
+              "kind": "claimable-balance-created",
+              "op_index": 0,
+              "scope": "operation"
+            },
+            {
+              "kind": "sponsorship",
+              "op_index": 0,
+              "scope": "operation",
+              "sponsor_after": "GC6WEIKDOHHZIXPCPOMVCFDBXEO53L4AW2NX7DP6IHQWQ66FOBATQE6D",
+              "target": "claimable balance BAAOMUI5R7O6Z2NSWCA4ZUHJNCN4JDGVBM7KSIVAM7EOQ4JF4GCTDE2E2Y"
+            }
+          ],
+          "declared": {
+            "participants": [
+              {
+                "address": "GC6WEIKDOHHZIXPCPOMVCFDBXEO53L4AW2NX7DP6IHQWQ66FOBATQE6D",
+                "kind": "account",
+                "roles": [
+                  "tx-source"
+                ]
+              },
+              {
+                "address": "GCEQKZTNVPEOSTZGNH772PYFESTHFHD6ZLCOZLRQKTJ5GJ4MQ3IYXIJ3",
+                "kind": "account",
+                "roles": [
+                  "claimant"
+                ]
+              }
+            ],
+            "source": "GC6WEIKDOHHZIXPCPOMVCFDBXEO53L4AW2NX7DP6IHQWQ66FOBATQE6D"
+          },
+          "events": "none",
+          "fee": {
+            "balance_delta": "-100",
+            "charged": "100",
+            "source": "GC6WEIKDOHHZIXPCPOMVCFDBXEO53L4AW2NX7DP6IHQWQ66FOBATQE6D"
+          },
+          "hash": "ba9efb32d4d7dd2818b63548921f0bddb9d34da4c8fb649d9707914681d1b086",
+          "participants": [
+            {
+              "address": "BAAOMUI5R7O6Z2NSWCA4ZUHJNCN4JDGVBM7KSIVAM7EOQ4JF4GCTDE2E2Y",
+              "kind": "claimable-balance",
+              "roles": [
+                "entry-changed"
+              ]
+            },
+            {
+              "address": "GC6WEIKDOHHZIXPCPOMVCFDBXEO53L4AW2NX7DP6IHQWQ66FOBATQE6D",
+              "kind": "account",
+              "roles": [
+                "entry-changed",
+                "fee-source"
+              ]
+            }
+          ],
+          "result": "tx_success",
+          "successful": true
+        }
+      ],
+      "upgrades": []
+    }
+  ],
+  "network_passphrase": "Public Global Stellar Network ; September 2015",
+  "oracle_vocab_version": 2
+}

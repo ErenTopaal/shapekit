@@ -4,9 +4,9 @@
     {
       "kind": "conformance",
       "path": "candidate/findings/inputs/conformance-dart.json",
-      "sha256": "88dfe28f392c739fbe75fd3fe4747bb03f687c1159a55789513c2314dbf9a512",
+      "sha256": "8700ffae4ba8e4e44f8e765a8d1153b8960a70c0d0393b72d8daeec8424d62f1",
       "from": "target/conformance/dart/divergence-matrix.json",
-      "from_sha256": "96b86c0444ef1f1b6bc9ec9848776f172e79caf1f46c032d5580c52bd901b8c3",
+      "from_sha256": "98e52d6ae38ae81ee907ec5c67c1c4936196366ddcda3b54a507a0b34eae48bd",
       "command": "shapekit conformance run --sdk dart --all-versions --out target/conformance/dart",
       "reduction": "failing cells only, with their failing checks; check details cut to 400 characters; implementation-defined answers kept whole",
       "describes": "corpus 0.2.0, dart@3.12.0"
@@ -14,9 +14,9 @@
     {
       "kind": "conformance",
       "path": "candidate/findings/inputs/conformance-dotnet.json",
-      "sha256": "2e6e809b372a7abf1247c46d055e34213abf087923c006b0ef3ee49125e191c6",
+      "sha256": "afe142a50d448cdcdceac7ac38d92e199e887a22e4913f759fa97ca6d1a6bd94",
       "from": "target/conformance/dotnet/divergence-matrix.json",
-      "from_sha256": "3e798317f0437c38a2460d6775d7080a86bccec961ec63f97de95f4e725b2225",
+      "from_sha256": "bbc9622fad2008a8f0efd6fc88ff0137cb799dccf6c8362e1754443900b72499",
       "command": "shapekit conformance run --sdk dotnet --all-versions --out target/conformance/dotnet",
       "reduction": "failing cells only, with their failing checks; check details cut to 400 characters; implementation-defined answers kept whole",
       "describes": "corpus 0.2.0, dotnet@16.0.0 dotnet@17.0.0"
@@ -34,9 +34,9 @@
     {
       "kind": "conformance",
       "path": "candidate/findings/inputs/conformance-kmp.json",
-      "sha256": "b55b5e4b1030ea98c4ae7e5230c10161615cbde65adf2f52df5ec41611d9629d",
+      "sha256": "fd3e2da635cd957d010e8342bf1ea0e5934eae55a1160ec294e881a13b0d4549",
       "from": "target/conformance/kmp/divergence-matrix.json",
-      "from_sha256": "95584f37b5cb7670f09a15e58fed42d4b7a62f5e67a5833123bc722152cdab6c",
+      "from_sha256": "43f74db77f38e212bfa99dc7e34c0796c871bb0dc630f0aff7a5856c7b71437f",
       "command": "shapekit conformance run --sdk kmp --all-versions --out target/conformance/kmp",
       "reduction": "failing cells only, with their failing checks; check details cut to 400 characters; implementation-defined answers kept whole",
       "describes": "corpus 0.2.0, kmp@1.18.0"
@@ -44,9 +44,9 @@
     {
       "kind": "conformance",
       "path": "candidate/findings/inputs/conformance-php.json",
-      "sha256": "3526df3d06c65a54ef96d7305159b1b96a816c359cdc297477e706c96c91a72e",
+      "sha256": "37a1d2012a8a49fa5083e1ab17a4d67cfebf7d056428b7724ebc0c65c5f50552",
       "from": "target/conformance/php/divergence-matrix.json",
-      "from_sha256": "5d843380c4f5612c58f1cbafb6b0c73d2d1ed725c4afd1d705e49422f3955efe",
+      "from_sha256": "f703cec23f10274752959d15154f2b1e39bdfed4ce3e136312282945be7299a1",
       "command": "shapekit conformance run --sdk php --all-versions --out target/conformance/php",
       "reduction": "failing cells only, with their failing checks; check details cut to 400 characters; implementation-defined answers kept whole",
       "describes": "corpus 0.2.0, php@1.18.0"
@@ -54,9 +54,9 @@
     {
       "kind": "conformance",
       "path": "candidate/findings/inputs/conformance-stellar-cli.json",
-      "sha256": "ba72ba195701ab715907ecb8c938f76541a36e7d61aca06ba5ca398b59924a67",
+      "sha256": "c8c9edd63c657eb0d277ebd2d5184d528bf691805710a93850fd03767652cfd7",
       "from": "target/conformance/stellar-cli/divergence-matrix.json",
-      "from_sha256": "a134770933aaf0cb5ba116d5c1526b5dca620203b1d0dd56eba71724f135f333",
+      "from_sha256": "0999e19430a9600bdb3b5980725e1f05834707187507413d3a713e0a1c891d94",
       "command": "shapekit conformance run --sdk stellar-cli --all-versions --out target/conformance/stellar-cli",
       "reduction": "failing cells only, with their failing checks; check details cut to 400 characters; implementation-defined answers kept whole",
       "describes": "corpus 0.2.0, stellar-cli@28.1.0 stellar-cli@30.0.1"
@@ -64,12 +64,12 @@
     {
       "kind": "harness",
       "path": "candidate/findings/inputs/harness-stellar-etl-2b24ec89.json",
-      "sha256": "ec360a556fdf380929762149cde264c93c7c63fde6127bdf67b95e241845c84d",
+      "sha256": "c5c32c836f1fd0264ec7811f26cae1ae35283a2b0939fd17b3d2a9f8f49c0388",
       "from": "target/findings/stellar-etl-2b24ec89/harness-report.json",
-      "from_sha256": "ec360a556fdf380929762149cde264c93c7c63fde6127bdf67b95e241845c84d",
+      "from_sha256": "c5c32c836f1fd0264ec7811f26cae1ae35283a2b0939fd17b3d2a9f8f49c0388",
       "command": "shapekit harness run --network both --adapter \"adapters/bin/etl-adapter --commit 2b24ec89ddce7fc0beb7795de982c93e6895eaf3 --cpus 2\" --out target/findings/stellar-etl-2b24ec89",
       "reduction": "none",
-      "describes": "stellar-etl 2b24ec89ddce7fc0beb7795de982c93e6895eaf3, 906 entries, manifest 9aea15cac71b67baf75c4fca783f7d7a58ccba3d38504e66ba06269d1885139e"
+      "describes": "stellar-etl 2b24ec89ddce7fc0beb7795de982c93e6895eaf3, 1652 entries, manifest 8ac5e84ddcf7aec435b37b637d40a445251f12114403de451bd381fa98cf5139"
     }
   ]
 }

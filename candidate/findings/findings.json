@@ -4,14 +4,14 @@
     {
       "kind": "manifest",
       "path": "corpus/manifest.json",
-      "sha256": "9aea15cac71b67baf75c4fca783f7d7a58ccba3d38504e66ba06269d1885139e",
+      "sha256": "8ac5e84ddcf7aec435b37b637d40a445251f12114403de451bd381fa98cf5139",
       "detail": "corpus 0.2.0"
     },
     {
       "kind": "harness",
       "path": "candidate/findings/inputs/harness-stellar-etl-2b24ec89.json",
-      "sha256": "ec360a556fdf380929762149cde264c93c7c63fde6127bdf67b95e241845c84d",
-      "detail": "stellar-etl 2b24ec89ddce7fc0beb7795de982c93e6895eaf3, 906 entries, manifest 9aea15cac71b67baf75c4fca783f7d7a58ccba3d38504e66ba06269d1885139e"
+      "sha256": "c5c32c836f1fd0264ec7811f26cae1ae35283a2b0939fd17b3d2a9f8f49c0388",
+      "detail": "stellar-etl 2b24ec89ddce7fc0beb7795de982c93e6895eaf3, 1652 entries, manifest 8ac5e84ddcf7aec435b37b637d40a445251f12114403de451bd381fa98cf5139"
     },
     {
       "kind": "conformance",
@@ -22,37 +22,37 @@
     {
       "kind": "conformance",
       "path": "candidate/findings/inputs/conformance-dart.json",
-      "sha256": "88dfe28f392c739fbe75fd3fe4747bb03f687c1159a55789513c2314dbf9a512",
+      "sha256": "8700ffae4ba8e4e44f8e765a8d1153b8960a70c0d0393b72d8daeec8424d62f1",
       "detail": "corpus 0.2.0, dart@3.12.0"
     },
     {
       "kind": "conformance",
       "path": "candidate/findings/inputs/conformance-php.json",
-      "sha256": "3526df3d06c65a54ef96d7305159b1b96a816c359cdc297477e706c96c91a72e",
+      "sha256": "37a1d2012a8a49fa5083e1ab17a4d67cfebf7d056428b7724ebc0c65c5f50552",
       "detail": "corpus 0.2.0, php@1.18.0"
     },
     {
       "kind": "conformance",
       "path": "candidate/findings/inputs/conformance-dotnet.json",
-      "sha256": "2e6e809b372a7abf1247c46d055e34213abf087923c006b0ef3ee49125e191c6",
+      "sha256": "afe142a50d448cdcdceac7ac38d92e199e887a22e4913f759fa97ca6d1a6bd94",
       "detail": "corpus 0.2.0, dotnet@16.0.0 dotnet@17.0.0"
     },
     {
       "kind": "conformance",
       "path": "candidate/findings/inputs/conformance-kmp.json",
-      "sha256": "b55b5e4b1030ea98c4ae7e5230c10161615cbde65adf2f52df5ec41611d9629d",
+      "sha256": "fd3e2da635cd957d010e8342bf1ea0e5934eae55a1160ec294e881a13b0d4549",
       "detail": "corpus 0.2.0, kmp@1.18.0"
     },
     {
       "kind": "conformance",
       "path": "candidate/findings/inputs/conformance-stellar-cli.json",
-      "sha256": "ba72ba195701ab715907ecb8c938f76541a36e7d61aca06ba5ca398b59924a67",
+      "sha256": "c8c9edd63c657eb0d277ebd2d5184d528bf691805710a93850fd03767652cfd7",
       "detail": "corpus 0.2.0, stellar-cli@28.1.0 stellar-cli@30.0.1"
     }
   ],
   "summary": {
-    "findings": 40,
-    "failures": 466,
+    "findings": 46,
+    "failures": 847,
     "unmapped": 0,
     "by_component": {
       "go-stellar-sdk": {
@@ -60,11 +60,11 @@
       },
       "kmp-stellar-sdk": {
         "data-loss": 2,
-        "divergence": 1,
+        "divergence": 2,
         "robustness": 2
       },
       "soneso/stellar-php-sdk": {
-        "divergence": 5,
+        "divergence": 7,
         "robustness": 3
       },
       "stellar-cli": {
@@ -73,7 +73,7 @@
       },
       "stellar-dotnet-sdk": {
         "data-loss": 1,
-        "divergence": 2,
+        "divergence": 3,
         "robustness": 5
       },
       "stellar-etl": {
@@ -82,17 +82,17 @@
       },
       "stellar_flutter_sdk": {
         "data-loss": 1,
-        "divergence": 3,
+        "divergence": 5,
         "robustness": 3
       }
     },
     "by_severity": {
       "data-loss": 8,
-      "divergence": 16,
+      "divergence": 22,
       "robustness": 16
     },
     "by_status": {
-      "draft": 39,
+      "draft": 45,
       "wont-fix": 1
     }
   },
@@ -114,13 +114,18 @@
       "reproduce": "shapekit harness run --chain classic.failed-tx.change-trust-native.p9 --network testnet --adapter \"adapters/bin/etl-adapter --commit 2b24ec89ddce7fc0beb7795de982c93e6895eaf3\"",
       "status": "wont-fix",
       "reason": "intended for the data stellar-etl reads: the public ledger lake holds history re-emitted by a current core, so every ledger there carries TransactionMeta v4, which unified events need. Only locally recorded chains below protocol 23 hold v2 or v3 meta",
-      "cause": "export_token_transfer builds the processor with NewEventsProcessorForUnifiedEvents (internal/transform/token_transfer.go L15 at 2b24ec89), which reads the CAP-67 unified events stream and returns \"expected version 4 got N\" for any other meta version (go-stellar-sdk processors/token_transfer/token_transfer_processor.go L474-L478 at e31e3b146d00, the pseudo-version stellar-etl pins). The command exits 1, the adapter retries it, and the harness stops the chain at its first ledger with a transaction: every entry of the five corpus chains recorded at protocols 9 to 22 (meta v2 or v3) is not evaluated, on both networks.",
+      "cause": "export_token_transfer builds the processor with NewEventsProcessorForUnifiedEvents (internal/transform/token_transfer.go L15 at 2b24ec89), which reads the CAP-67 unified events stream and returns \"expected version 4 got N\" for any other meta version (go-stellar-sdk processors/token_transfer/token_transfer_processor.go L474-L478 at e31e3b146d00, the pseudo-version stellar-etl pins). The command exits 1, the adapter retries it, and the harness stops the chain at its first ledger with a transaction: every entry of the five corpus chains recorded at protocols 9 to 22 (meta v2 or v3), and of the 20 explorer chains below protocol 23 recorded with classic events and their backfill off, is not evaluated, on both networks.",
       "siblings": [
         "CLI-TXHASH-V1",
         "DART-INFLATION",
+        "KMP-MUXED-SOURCE",
+        "NET-CREATECONTRACT",
         "NET-DEPRECATED-OPS",
+        "NET-PRICE",
         "PHP-CBKEY-JSON",
+        "PHP-HEXHASH",
         "PHP-INFLATION",
+        "PHP-SETOPTIONS",
         "PHP-UINT64"
       ],
       "related": [],
@@ -159,7 +164,63 @@
         "classic.failed-tx.p12-path-payment-strict-send-no-issuer",
         "classic.failed-tx.p12-payment-no-issuer",
         "classic.failed-tx.p9-change-trust-native-internal-error-envelope",
-        "classic.failed-tx.p9-change-trust-native-internal-error-meta"
+        "classic.failed-tx.p9-change-trust-native-internal-error-meta",
+        "explore.witnesses.f62c-r0016-l93",
+        "explore.witnesses.f62c-r0016-l94",
+        "explore.witnesses.f62c-r0017-l77",
+        "explore.witnesses.f62c-r0017-l78",
+        "explore.witnesses.f62d-r0001-l66",
+        "explore.witnesses.f62d-r0001-l67",
+        "explore.witnesses.f62d-r0001-l69",
+        "explore.witnesses.f62d-r0001-l72",
+        "explore.witnesses.f62d-r0001-l73",
+        "explore.witnesses.f62d-r0002-l66",
+        "explore.witnesses.f62d-r0002-l68",
+        "explore.witnesses.f62d-r0002-l75",
+        "explore.witnesses.f62d-r0002-l77",
+        "explore.witnesses.f62d-r0002-l79",
+        "explore.witnesses.f62d-r0002-l84",
+        "explore.witnesses.f63-p21-r0001-l66",
+        "explore.witnesses.f63-p21-r0001-l67",
+        "explore.witnesses.f63-p21-r0001-l68",
+        "explore.witnesses.f63-p21-r0001-l69",
+        "explore.witnesses.f63-p21-r0001-l72",
+        "explore.witnesses.f63-p21-r0001-l73",
+        "explore.witnesses.f63-p21-r0001-l86",
+        "explore.witnesses.g1-r0016-l66",
+        "explore.witnesses.g1-r0016-l74",
+        "explore.witnesses.g2-r0001-l102",
+        "explore.witnesses.g2-r0001-l112",
+        "explore.witnesses.g2-r0001-l113",
+        "explore.witnesses.g2-r0001-l114",
+        "explore.witnesses.g2-r0001-l115",
+        "explore.witnesses.g2-r0001-l72",
+        "explore.witnesses.g2-r0001-l81",
+        "explore.witnesses.g2-r0001-l82",
+        "explore.witnesses.g2-r0001-l83",
+        "explore.witnesses.g2-r0001-l84",
+        "explore.witnesses.g2-r0001-l85",
+        "explore.witnesses.g2-r0001-l86",
+        "explore.witnesses.g2-r0015-l67",
+        "explore.witnesses.g2-r0015-l69",
+        "explore.witnesses.g2-r0015-l71",
+        "explore.witnesses.g2-r0015-l72",
+        "explore.witnesses.g2-r0017-l129",
+        "explore.witnesses.g2-r0017-l130",
+        "explore.witnesses.g2-r0019-l69",
+        "explore.witnesses.g2-r0020-l69",
+        "explore.witnesses.g2-r0023-l119",
+        "explore.witnesses.g2-r0027-l67",
+        "explore.witnesses.g2-r0027-l69",
+        "explore.witnesses.g2-r0030-l95",
+        "explore.witnesses.g2-r0030-l99",
+        "explore.witnesses.g2-r0031-l66",
+        "explore.witnesses.g2-r0031-l67",
+        "explore.witnesses.g2-r0033-l66",
+        "explore.witnesses.g2-r0036-l71",
+        "explore.witnesses.g2-r0040-l74",
+        "explore.witnesses.g2-r0041-l89",
+        "explore.witnesses.g2-r0042-l67"
       ],
       "recipe": "chain:classic.failed-tx.change-trust-native.p9",
       "affected": [
@@ -177,6 +238,7 @@
         "dart@3.12.0",
         "dotnet@16.0.0",
         "dotnet@17.0.0",
+        "kmp@1.18.0",
         "php@1.18.0",
         "stellar-cli@28.1.0",
         "stellar-cli@30.0.1"
@@ -671,6 +733,790 @@
           "entry": "classic.failed-tx.p9-change-trust-native-internal-error-meta",
           "at": "testnet",
           "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 65"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.f62c-r0016-l93",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 93"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.f62c-r0016-l93",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 93"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.f62c-r0016-l94",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 94"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.f62c-r0016-l94",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 94"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.f62c-r0017-l77",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 77"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.f62c-r0017-l77",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 77"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.f62c-r0017-l78",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 78"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.f62c-r0017-l78",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 78"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.f62d-r0001-l66",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 66"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.f62d-r0001-l66",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 66"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.f62d-r0001-l67",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 67"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.f62d-r0001-l67",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 67"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.f62d-r0001-l69",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 69"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.f62d-r0001-l69",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 69"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.f62d-r0001-l72",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 72"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.f62d-r0001-l72",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 72"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.f62d-r0001-l73",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 73"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.f62d-r0001-l73",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 73"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.f62d-r0002-l66",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 66"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.f62d-r0002-l66",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 66"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.f62d-r0002-l68",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 68"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.f62d-r0002-l68",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 68"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.f62d-r0002-l75",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 75"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.f62d-r0002-l75",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 75"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.f62d-r0002-l77",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 77"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.f62d-r0002-l77",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 77"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.f62d-r0002-l79",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 79"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.f62d-r0002-l79",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 79"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.f62d-r0002-l84",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 84"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.f62d-r0002-l84",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 84"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.f63-p21-r0001-l66",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 66"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.f63-p21-r0001-l66",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 66"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.f63-p21-r0001-l67",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 67"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.f63-p21-r0001-l67",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 67"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.f63-p21-r0001-l68",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 68"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.f63-p21-r0001-l68",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 68"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.f63-p21-r0001-l69",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 69"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.f63-p21-r0001-l69",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 69"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.f63-p21-r0001-l72",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 72"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.f63-p21-r0001-l72",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 72"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.f63-p21-r0001-l73",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 73"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.f63-p21-r0001-l73",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 73"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.f63-p21-r0001-l86",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 86"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.f63-p21-r0001-l86",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 86"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.g1-r0016-l66",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 66"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.g1-r0016-l66",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 66"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.g1-r0016-l74",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 74"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.g1-r0016-l74",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 74"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.g2-r0001-l102",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 102"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.g2-r0001-l102",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 102"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.g2-r0001-l112",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 112"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.g2-r0001-l112",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 112"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.g2-r0001-l113",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 113"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.g2-r0001-l113",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 113"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.g2-r0001-l114",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 114"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.g2-r0001-l114",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 114"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.g2-r0001-l115",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 115"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.g2-r0001-l115",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 115"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.g2-r0001-l72",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 72"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.g2-r0001-l72",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 72"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.g2-r0001-l81",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 81"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.g2-r0001-l81",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 81"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.g2-r0001-l82",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 82"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.g2-r0001-l82",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 82"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.g2-r0001-l83",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 83"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.g2-r0001-l83",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 83"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.g2-r0001-l84",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 84"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.g2-r0001-l84",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 84"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.g2-r0001-l85",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 85"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.g2-r0001-l85",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 85"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.g2-r0001-l86",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 86"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.g2-r0001-l86",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 86"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.g2-r0015-l67",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 67"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.g2-r0015-l67",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 67"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.g2-r0015-l69",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 69"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.g2-r0015-l69",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 69"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.g2-r0015-l71",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 71"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.g2-r0015-l71",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 71"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.g2-r0015-l72",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 72"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.g2-r0015-l72",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 72"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.g2-r0017-l129",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 129"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.g2-r0017-l129",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 129"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.g2-r0017-l130",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 130"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.g2-r0017-l130",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 130"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.g2-r0019-l69",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 69"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.g2-r0019-l69",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 69"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.g2-r0020-l69",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 69"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.g2-r0020-l69",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 69"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.g2-r0023-l119",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 119"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.g2-r0023-l119",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 119"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.g2-r0027-l67",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 67"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.g2-r0027-l67",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 67"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.g2-r0027-l69",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 69"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.g2-r0027-l69",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 69"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.g2-r0030-l95",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 95"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.g2-r0030-l95",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 95"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.g2-r0030-l99",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 99"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.g2-r0030-l99",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 99"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.g2-r0031-l66",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 66"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.g2-r0031-l66",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 66"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.g2-r0031-l67",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 67"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.g2-r0031-l67",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 67"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.g2-r0033-l66",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 66"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.g2-r0033-l66",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 66"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.g2-r0036-l71",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 71"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.g2-r0036-l71",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 71"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.g2-r0040-l74",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 74"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.g2-r0040-l74",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 74"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.g2-r0041-l89",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 89"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.g2-r0041-l89",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 89"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.g2-r0042-l67",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 67"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.witnesses.g2-r0042-l67",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 67"
         }
       ]
     },
@@ -694,7 +1540,9 @@
         "cap73.sac-trust.p28-trust-envelope",
         "cap73.sac-trust.p28-trust-meta",
         "cap73.sac-trust.p30-trust-envelope",
-        "cap73.sac-trust.p30-trust-meta"
+        "cap73.sac-trust.p30-trust-meta",
+        "explore.pairs.sac-trust-p28-a-l66",
+        "explore.pairs.sac-trust-p30-a-l70"
       ],
       "recipe": "chain:cap73.sac-trust.p28",
       "affected": [
@@ -762,6 +1610,34 @@
           "source": "harness",
           "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
           "entry": "cap73.sac-trust.p30-trust-meta",
+          "at": "testnet",
+          "what": "dropped trustline-created: trustline-created is missing"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.pairs.sac-trust-p28-a-l66",
+          "at": "mainnet",
+          "what": "dropped trustline-created: trustline-created is missing"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.pairs.sac-trust-p28-a-l66",
+          "at": "testnet",
+          "what": "dropped trustline-created: trustline-created is missing"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.pairs.sac-trust-p30-a-l70",
+          "at": "mainnet",
+          "what": "dropped trustline-created: trustline-created is missing"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "explore.pairs.sac-trust-p30-a-l70",
           "at": "testnet",
           "what": "dropped trustline-created: trustline-created is missing"
         }
@@ -1513,10 +2389,15 @@
       "status": "draft",
       "draft": "candidate/findings/issues/dart-cap03.offer-liabilities.synth-negative-offer-id.md",
       "cause": "XdrManageSellOfferOp.offerID is an XdrUint64 (lib/src/xdr/xdr_manage_sell_offer_op.dart L34), where the schema says int64. The bytes round trip, but XDR-JSON renders offer id -16 as \"18446744073709551600\" and refuses the canonical \"-16\" (\"XdrUint64 holds -16, outside the range of a uint64\").",
-      "siblings": [],
+      "siblings": [
+        "CLI-TXHASH-V1",
+        "KMP-TXOBJECT",
+        "PHP-OFFERID"
+      ],
       "related": [],
       "entries": [
-        "cap03.offer-liabilities.synth-negative-offer-id"
+        "cap03.offer-liabilities.synth-negative-offer-id",
+        "explore.witnesses.f62d-r0004-l69"
       ],
       "affected": [
         {
@@ -1529,6 +2410,12 @@
           ]
         }
       ],
+      "other_sdks": [
+        "kmp@1.18.0",
+        "php@1.18.0",
+        "stellar-cli@28.1.0",
+        "stellar-cli@30.0.1"
+      ],
       "occurrences": [
         {
           "source": "conformance",
@@ -1536,6 +2423,13 @@
           "entry": "cap03.offer-liabilities.synth-negative-offer-id",
           "at": "dart@3.12.0",
           "what": "diverges-from-network (2 check(s): any/decode_json, any/encode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "dart@3.12.0",
+          "entry": "explore.witnesses.f62d-r0004-l69",
+          "at": "dart@3.12.0",
+          "what": "diverges-from-network (4 check(s): testnet/decode_json, testnet/encode_json, mainnet/decode_json, mainnet/encode_json)"
         }
       ]
     },
@@ -1643,7 +2537,9 @@
       "related": [],
       "entries": [
         "cap26.inflation.p11-inflation-not-time",
-        "cap26.inflation.p11-inflation-payout"
+        "cap26.inflation.p11-inflation-payout",
+        "explore.witnesses.f62d-r0004-l74",
+        "explore.witnesses.g2-r0010-l74"
       ],
       "recipe": "chain:cap26.inflation.p11",
       "affected": [
@@ -1676,6 +2572,20 @@
           "source": "conformance",
           "on": "dart@3.12.0",
           "entry": "cap26.inflation.p11-inflation-payout",
+          "at": "dart@3.12.0",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "dart@3.12.0",
+          "entry": "explore.witnesses.f62d-r0004-l74",
+          "at": "dart@3.12.0",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "dart@3.12.0",
+          "entry": "explore.witnesses.g2-r0010-l74",
           "at": "dart@3.12.0",
           "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
         }
@@ -1920,9 +2830,11 @@
       "draft": "candidate/findings/issues/php-cap27.muxed-accounts.p30-tx-source-and-payment-destination-id-2p64-1.md",
       "cause": "uint64 fields are php ints, which hold 2^64-1 as -1, and XdrJsonHelper::uint64ToString refuses negative ints (Soneso/StellarSDK/Xdr/XdrJsonHelper.php L290-L300), so a muxed id or memo id at or above 2^63 has no XDR-JSON. In the other direction XdrSequenceNumber is read as an unsigned BigInteger (Xdr/XdrBuffer.php readBigInteger64), so a bump_to of -1 renders as \"18446744073709551615\" where the schema's int64 says -1.",
       "siblings": [
+        "DART-MAXTIME",
         "DART-UTF8",
         "ETL-META-V4",
         "KMP-MUXED-SOURCE",
+        "KMP-TXOBJECT",
         "KMP-UTF8"
       ],
       "related": [],
@@ -1941,6 +2853,11 @@
         "classic.memo-arms.p30-memo-id-2-63",
         "classic.memo-arms.p30-memo-id-max",
         "classic.memo-arms.p30-memo-id-muxed-destination",
+        "explore.witnesses.f62d-r0000-l80",
+        "explore.witnesses.f62d-r0000-l96",
+        "explore.witnesses.f63-p26-r0002-l89",
+        "explore.witnesses.f63-p27-r0002-l90",
+        "explore.witnesses.g2-r0004-l125",
         "sep41.muxed-addresses.p28-credit-transfer-to-muxed",
         "sep41.muxed-addresses.p30-credit-transfer-to-muxed",
         "soroban.invoke-basics.p30-invoke-temporary-entry-envelope",
@@ -2067,6 +2984,41 @@
         {
           "source": "conformance",
           "on": "php@1.18.0",
+          "entry": "explore.witnesses.f62d-r0000-l80",
+          "at": "php@1.18.0",
+          "what": "diverges-from-network (2 check(s): testnet/decode_json, mainnet/decode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "php@1.18.0",
+          "entry": "explore.witnesses.f62d-r0000-l96",
+          "at": "php@1.18.0",
+          "what": "diverges-from-network (2 check(s): testnet/decode_json, mainnet/decode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "php@1.18.0",
+          "entry": "explore.witnesses.f63-p26-r0002-l89",
+          "at": "php@1.18.0",
+          "what": "diverges-from-network (2 check(s): testnet/decode_json, mainnet/decode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "php@1.18.0",
+          "entry": "explore.witnesses.f63-p27-r0002-l90",
+          "at": "php@1.18.0",
+          "what": "diverges-from-network (2 check(s): testnet/decode_json, mainnet/decode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "php@1.18.0",
+          "entry": "explore.witnesses.g2-r0004-l125",
+          "at": "php@1.18.0",
+          "what": "diverges-from-network (2 check(s): testnet/decode_json, mainnet/decode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "php@1.18.0",
           "entry": "sep41.muxed-addresses.p28-credit-transfer-to-muxed",
           "at": "php@1.18.0",
           "what": "diverges-from-network (2 check(s): testnet/decode_json, mainnet/decode_json)"
@@ -2138,12 +3090,17 @@
       "cause": "XdrInnerTransactionResultPair and XdrConfigUpgradeSetKey keep their hash as hex text (bin2hex in decode, Soneso/StellarSDK/Xdr/XdrInnerTransactionResultPair.php L21 and Xdr/XdrConfigUpgradeSetKey.php L18), while the base classes' toJsonValue hex-encodes the field again (Xdr/XdrInnerTransactionResultPairBase.php L52), so XDR-JSON carries a 128-character string. Reading that JSON back fails (\"Unexpected length for value. Has length 16, expected 32\") or crashes with a TypeError in XdrEncoder::opaqueFixed. The bytes round trip; only XDR-JSON is wrong. Encoding the pair from a decoded value also raises php warnings (pack(): illegal hex digit) on stderr.",
       "siblings": [
         "CLI-TXHASH-V1",
-        "ETL-3"
+        "DART-PRICE",
+        "ETL-3",
+        "ETL-META-V4",
+        "KMP-MUXED-SOURCE",
+        "NET-PRICE"
       ],
       "related": [],
       "entries": [
         "cap15.fee-bump.golden-f5fa0a4b15bfd9d9-12",
         "cap15.fee-bump.mainnet-51000294-a25b8226-meta",
+        "cap15.fee-bump.mainnet-57369500",
         "cap15.fee-bump.p30-fee-source-is-inner-source-meta",
         "cap15.fee-bump.p30-fee-source-is-inner-source-pre-auth-signer-meta",
         "cap15.fee-bump.p30-inner-bad-auth",
@@ -2164,6 +3121,42 @@
         "cap77.frozen-keys.p30-bypass-upgrade",
         "cap77.frozen-keys.p30-freeze-upgrade",
         "classic.failed-tx.mainnet-63092990-6f36ffa2-meta",
+        "explore.pairs.sac-trust-p30-a-l67",
+        "explore.pairs.sac-trust-p30-b-l67",
+        "explore.witnesses.f62c-r0000-l89",
+        "explore.witnesses.f62c-r0000-l90",
+        "explore.witnesses.f62c-r0000-l92",
+        "explore.witnesses.f62c-r0005-l112",
+        "explore.witnesses.f62c-r0005-l97",
+        "explore.witnesses.f62c-r0016-l94",
+        "explore.witnesses.f62d-r0000-l100",
+        "explore.witnesses.f62d-r0003-l73",
+        "explore.witnesses.f62d-r0007-l72",
+        "explore.witnesses.f62d-r0007-l74",
+        "explore.witnesses.f62d-r0007-l77",
+        "explore.witnesses.f62d-r0008-l84",
+        "explore.witnesses.f62d-r0008-l87",
+        "explore.witnesses.f62d-r0022-l76",
+        "explore.witnesses.f62d-r0022-l82",
+        "explore.witnesses.f62d-r0024-l97",
+        "explore.witnesses.f63-p28-r0000-l79",
+        "explore.witnesses.f63-p29-r0003-l105",
+        "explore.witnesses.g2-r0001-l113",
+        "explore.witnesses.g2-r0001-l114",
+        "explore.witnesses.g2-r0003-l77",
+        "explore.witnesses.g2-r0005-l102",
+        "explore.witnesses.g2-r0005-l68",
+        "explore.witnesses.g2-r0005-l95",
+        "explore.witnesses.g2-r0006-l121",
+        "explore.witnesses.g2-r0007-l71",
+        "explore.witnesses.g2-r0007-l74",
+        "explore.witnesses.g2-r0007-l81",
+        "explore.witnesses.g2-r0009-l78",
+        "explore.witnesses.g2-r0009-l83",
+        "explore.witnesses.g2-r0017-l129",
+        "explore.witnesses.g2-r0018-l122",
+        "explore.witnesses.g2-r0021-l101",
+        "explore.witnesses.g2-r0022-l171",
         "soroban.scval-shapes.mainnet-63092996-71f6c6ff-meta"
       ],
       "recipe": "chain:cap70.scp-timing.p30",
@@ -2179,6 +3172,11 @@
         }
       ],
       "other_sdks": [
+        "dart@3.12.0",
+        "dotnet@16.0.0",
+        "dotnet@17.0.0",
+        "kmp@1.18.0",
+        "stellar-cli@28.1.0",
         "stellar-cli@30.0.1"
       ],
       "occurrences": [
@@ -2193,6 +3191,13 @@
           "source": "conformance",
           "on": "php@1.18.0",
           "entry": "cap15.fee-bump.mainnet-51000294-a25b8226-meta",
+          "at": "php@1.18.0",
+          "what": "diverges-from-network (2 check(s): mainnet/decode_json, mainnet/encode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "php@1.18.0",
+          "entry": "cap15.fee-bump.mainnet-57369500",
           "at": "php@1.18.0",
           "what": "diverges-from-network (2 check(s): mainnet/decode_json, mainnet/encode_json)"
         },
@@ -2339,6 +3344,258 @@
         {
           "source": "conformance",
           "on": "php@1.18.0",
+          "entry": "explore.pairs.sac-trust-p30-a-l67",
+          "at": "php@1.18.0",
+          "what": "diverges-from-network (4 check(s): testnet/decode_json, testnet/encode_json, mainnet/decode_json, mainnet/encode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "php@1.18.0",
+          "entry": "explore.pairs.sac-trust-p30-b-l67",
+          "at": "php@1.18.0",
+          "what": "diverges-from-network (4 check(s): testnet/decode_json, testnet/encode_json, mainnet/decode_json, mainnet/encode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "php@1.18.0",
+          "entry": "explore.witnesses.f62c-r0000-l89",
+          "at": "php@1.18.0",
+          "what": "diverges-from-network (4 check(s): testnet/decode_json, testnet/encode_json, mainnet/decode_json, mainnet/encode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "php@1.18.0",
+          "entry": "explore.witnesses.f62c-r0000-l90",
+          "at": "php@1.18.0",
+          "what": "diverges-from-network (4 check(s): testnet/decode_json, testnet/encode_json, mainnet/decode_json, mainnet/encode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "php@1.18.0",
+          "entry": "explore.witnesses.f62c-r0000-l92",
+          "at": "php@1.18.0",
+          "what": "diverges-from-network (4 check(s): testnet/decode_json, testnet/encode_json, mainnet/decode_json, mainnet/encode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "php@1.18.0",
+          "entry": "explore.witnesses.f62c-r0005-l112",
+          "at": "php@1.18.0",
+          "what": "diverges-from-network (4 check(s): testnet/decode_json, testnet/encode_json, mainnet/decode_json, mainnet/encode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "php@1.18.0",
+          "entry": "explore.witnesses.f62c-r0005-l97",
+          "at": "php@1.18.0",
+          "what": "diverges-from-network (4 check(s): testnet/decode_json, testnet/encode_json, mainnet/decode_json, mainnet/encode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "php@1.18.0",
+          "entry": "explore.witnesses.f62c-r0016-l94",
+          "at": "php@1.18.0",
+          "what": "diverges-from-network (4 check(s): testnet/decode_json, testnet/encode_json, mainnet/decode_json, mainnet/encode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "php@1.18.0",
+          "entry": "explore.witnesses.f62d-r0000-l100",
+          "at": "php@1.18.0",
+          "what": "diverges-from-network (4 check(s): testnet/decode_json, testnet/encode_json, mainnet/decode_json, mainnet/encode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "php@1.18.0",
+          "entry": "explore.witnesses.f62d-r0003-l73",
+          "at": "php@1.18.0",
+          "what": "diverges-from-network (4 check(s): testnet/decode_json, testnet/encode_json, mainnet/decode_json, mainnet/encode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "php@1.18.0",
+          "entry": "explore.witnesses.f62d-r0007-l72",
+          "at": "php@1.18.0",
+          "what": "diverges-from-network (4 check(s): testnet/decode_json, testnet/encode_json, mainnet/decode_json, mainnet/encode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "php@1.18.0",
+          "entry": "explore.witnesses.f62d-r0007-l74",
+          "at": "php@1.18.0",
+          "what": "diverges-from-network (4 check(s): testnet/decode_json, testnet/encode_json, mainnet/decode_json, mainnet/encode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "php@1.18.0",
+          "entry": "explore.witnesses.f62d-r0007-l77",
+          "at": "php@1.18.0",
+          "what": "diverges-from-network (8 check(s): testnet/decode_json, testnet/encode_json, testnet/tx_hash 0, testnet/tx_hash 0 inner)"
+        },
+        {
+          "source": "conformance",
+          "on": "php@1.18.0",
+          "entry": "explore.witnesses.f62d-r0008-l84",
+          "at": "php@1.18.0",
+          "what": "diverges-from-network (4 check(s): testnet/decode_json, testnet/encode_json, mainnet/decode_json, mainnet/encode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "php@1.18.0",
+          "entry": "explore.witnesses.f62d-r0008-l87",
+          "at": "php@1.18.0",
+          "what": "diverges-from-network (4 check(s): testnet/decode_json, testnet/encode_json, mainnet/decode_json, mainnet/encode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "php@1.18.0",
+          "entry": "explore.witnesses.f62d-r0022-l76",
+          "at": "php@1.18.0",
+          "what": "diverges-from-network (4 check(s): testnet/decode_json, testnet/encode_json, mainnet/decode_json, mainnet/encode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "php@1.18.0",
+          "entry": "explore.witnesses.f62d-r0022-l82",
+          "at": "php@1.18.0",
+          "what": "diverges-from-network (4 check(s): testnet/decode_json, testnet/encode_json, mainnet/decode_json, mainnet/encode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "php@1.18.0",
+          "entry": "explore.witnesses.f62d-r0024-l97",
+          "at": "php@1.18.0",
+          "what": "diverges-from-network (4 check(s): testnet/decode_json, testnet/encode_json, mainnet/decode_json, mainnet/encode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "php@1.18.0",
+          "entry": "explore.witnesses.f63-p28-r0000-l79",
+          "at": "php@1.18.0",
+          "what": "diverges-from-network (4 check(s): testnet/decode_json, testnet/encode_json, mainnet/decode_json, mainnet/encode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "php@1.18.0",
+          "entry": "explore.witnesses.f63-p29-r0003-l105",
+          "at": "php@1.18.0",
+          "what": "diverges-from-network (4 check(s): testnet/decode_json, testnet/encode_json, mainnet/decode_json, mainnet/encode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "php@1.18.0",
+          "entry": "explore.witnesses.g2-r0001-l113",
+          "at": "php@1.18.0",
+          "what": "diverges-from-network (4 check(s): testnet/decode_json, testnet/encode_json, mainnet/decode_json, mainnet/encode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "php@1.18.0",
+          "entry": "explore.witnesses.g2-r0001-l114",
+          "at": "php@1.18.0",
+          "what": "diverges-from-network (4 check(s): testnet/decode_json, testnet/encode_json, mainnet/decode_json, mainnet/encode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "php@1.18.0",
+          "entry": "explore.witnesses.g2-r0003-l77",
+          "at": "php@1.18.0",
+          "what": "diverges-from-network (4 check(s): testnet/decode_json, testnet/encode_json, mainnet/decode_json, mainnet/encode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "php@1.18.0",
+          "entry": "explore.witnesses.g2-r0005-l102",
+          "at": "php@1.18.0",
+          "what": "diverges-from-network (4 check(s): testnet/decode_json, testnet/encode_json, mainnet/decode_json, mainnet/encode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "php@1.18.0",
+          "entry": "explore.witnesses.g2-r0005-l68",
+          "at": "php@1.18.0",
+          "what": "diverges-from-network (4 check(s): testnet/decode_json, testnet/encode_json, mainnet/decode_json, mainnet/encode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "php@1.18.0",
+          "entry": "explore.witnesses.g2-r0005-l95",
+          "at": "php@1.18.0",
+          "what": "diverges-from-network (4 check(s): testnet/decode_json, testnet/encode_json, mainnet/decode_json, mainnet/encode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "php@1.18.0",
+          "entry": "explore.witnesses.g2-r0006-l121",
+          "at": "php@1.18.0",
+          "what": "diverges-from-network (4 check(s): testnet/decode_json, testnet/encode_json, mainnet/decode_json, mainnet/encode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "php@1.18.0",
+          "entry": "explore.witnesses.g2-r0007-l71",
+          "at": "php@1.18.0",
+          "what": "diverges-from-network (4 check(s): testnet/decode_json, testnet/encode_json, mainnet/decode_json, mainnet/encode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "php@1.18.0",
+          "entry": "explore.witnesses.g2-r0007-l74",
+          "at": "php@1.18.0",
+          "what": "diverges-from-network (4 check(s): testnet/decode_json, testnet/encode_json, mainnet/decode_json, mainnet/encode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "php@1.18.0",
+          "entry": "explore.witnesses.g2-r0007-l81",
+          "at": "php@1.18.0",
+          "what": "diverges-from-network (4 check(s): testnet/decode_json, testnet/encode_json, mainnet/decode_json, mainnet/encode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "php@1.18.0",
+          "entry": "explore.witnesses.g2-r0009-l78",
+          "at": "php@1.18.0",
+          "what": "diverges-from-network (4 check(s): testnet/decode_json, testnet/encode_json, mainnet/decode_json, mainnet/encode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "php@1.18.0",
+          "entry": "explore.witnesses.g2-r0009-l83",
+          "at": "php@1.18.0",
+          "what": "diverges-from-network (4 check(s): testnet/decode_json, testnet/encode_json, mainnet/decode_json, mainnet/encode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "php@1.18.0",
+          "entry": "explore.witnesses.g2-r0017-l129",
+          "at": "php@1.18.0",
+          "what": "diverges-from-network (4 check(s): testnet/decode_json, testnet/encode_json, mainnet/decode_json, mainnet/encode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "php@1.18.0",
+          "entry": "explore.witnesses.g2-r0018-l122",
+          "at": "php@1.18.0",
+          "what": "diverges-from-network (4 check(s): testnet/decode_json, testnet/encode_json, mainnet/decode_json, mainnet/encode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "php@1.18.0",
+          "entry": "explore.witnesses.g2-r0021-l101",
+          "at": "php@1.18.0",
+          "what": "diverges-from-network (4 check(s): testnet/decode_json, testnet/encode_json, mainnet/decode_json, mainnet/encode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "php@1.18.0",
+          "entry": "explore.witnesses.g2-r0022-l171",
+          "at": "php@1.18.0",
+          "what": "diverges-from-network (4 check(s): testnet/decode_json, testnet/encode_json, mainnet/decode_json, mainnet/encode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "php@1.18.0",
           "entry": "soroban.scval-shapes.mainnet-63092996-71f6c6ff-meta",
           "at": "php@1.18.0",
           "what": "diverges-from-network (2 check(s): mainnet/decode_json, mainnet/encode_json)"
@@ -2352,21 +3609,29 @@
       "severity": "divergence",
       "caps": [
         "CAP-0002",
+        "CAP-0003",
+        "CAP-0006",
         "CAP-0023",
         "CAP-0028",
         "CAP-0035",
         "CAP-0067"
       ],
-      "minimal_entry": "classic.failed-tx.p30-revoke-only-transferable",
-      "reproduce": "shapekit conformance run --sdk php --version 1.18.0 --entry classic.failed-tx.p30-revoke-only-transferable",
+      "minimal_entry": "explore.witnesses.g2-r0014-l143",
+      "reproduce": "shapekit conformance run --sdk php --version 1.18.0 --entry explore.witnesses.g2-r0014-l143",
       "status": "draft",
       "draft": "candidate/findings/issues/php-cap23.claimable-balances.p30-claim-through-depth-4-meta.md",
       "cause": "XdrLedgerKeyBase::toJsonValue writes the claimable_balance arm as the bare ClaimableBalanceID, and fromJsonValue reads it that way (Soneso/StellarSDK/Xdr/XdrLedgerKeyBase.php L148 and L183), where the schema's arm is the struct LedgerKeyClaimableBalance { balance_id }, so the canonical XDR-JSON of every removed or restored claimable balance is refused (\"Expected string for XdrClaimableBalanceID JSON value, got array\").",
       "siblings": [
-        "ETL-META-V4"
+        "CLI-TXHASH-V1",
+        "DART-PRICE",
+        "ETL-META-V4",
+        "KMP-MUXED-SOURCE",
+        "NET-PRICE"
       ],
       "related": [],
       "entries": [
+        "cap03.offer-liabilities.mainnet-37466023",
+        "cap03.offer-liabilities.mainnet-44679511",
         "cap23.claimable-balances.p30-claim-through-depth-4-meta",
         "cap35.clawback.p30-clawback-claimable-balance-meta",
         "cap67.unified-events.p22-backfill-claim-claimable-balance",
@@ -2375,9 +3640,13 @@
         "cap67.unified-events.p22-clawback-claimable-balance",
         "cap67.unified-events.p30-claim-claimable-balance",
         "cap67.unified-events.p30-clawback-claimable-balance",
-        "classic.failed-tx.p30-revoke-only-transferable"
+        "classic.failed-tx.p30-revoke-only-transferable",
+        "explore.witnesses.f62c-r0000-l86",
+        "explore.witnesses.g2-r0000-l77",
+        "explore.witnesses.g2-r0006-l126",
+        "explore.witnesses.g2-r0014-l143"
       ],
-      "recipe": "chain:classic.failed-tx.p30",
+      "recipe": "recipe:corpus/recipes/explore.witnesses/g2/r0014.json",
       "affected": [
         {
           "on": "php",
@@ -2389,7 +3658,29 @@
           ]
         }
       ],
+      "other_sdks": [
+        "dart@3.12.0",
+        "dotnet@16.0.0",
+        "dotnet@17.0.0",
+        "kmp@1.18.0",
+        "stellar-cli@28.1.0",
+        "stellar-cli@30.0.1"
+      ],
       "occurrences": [
+        {
+          "source": "conformance",
+          "on": "php@1.18.0",
+          "entry": "cap03.offer-liabilities.mainnet-37466023",
+          "at": "php@1.18.0",
+          "what": "diverges-from-network (2 check(s): mainnet/decode_json, mainnet/encode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "php@1.18.0",
+          "entry": "cap03.offer-liabilities.mainnet-44679511",
+          "at": "php@1.18.0",
+          "what": "diverges-from-network (2 check(s): mainnet/decode_json, mainnet/encode_json)"
+        },
         {
           "source": "conformance",
           "on": "php@1.18.0",
@@ -2450,6 +3741,34 @@
           "source": "conformance",
           "on": "php@1.18.0",
           "entry": "classic.failed-tx.p30-revoke-only-transferable",
+          "at": "php@1.18.0",
+          "what": "diverges-from-network (4 check(s): testnet/decode_json, testnet/encode_json, mainnet/decode_json, mainnet/encode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "php@1.18.0",
+          "entry": "explore.witnesses.f62c-r0000-l86",
+          "at": "php@1.18.0",
+          "what": "diverges-from-network (4 check(s): testnet/decode_json, testnet/encode_json, mainnet/decode_json, mainnet/encode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "php@1.18.0",
+          "entry": "explore.witnesses.g2-r0000-l77",
+          "at": "php@1.18.0",
+          "what": "diverges-from-network (4 check(s): testnet/decode_json, testnet/encode_json, mainnet/decode_json, mainnet/encode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "php@1.18.0",
+          "entry": "explore.witnesses.g2-r0006-l126",
+          "at": "php@1.18.0",
+          "what": "diverges-from-network (4 check(s): testnet/decode_json, testnet/encode_json, mainnet/decode_json, mainnet/encode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "php@1.18.0",
+          "entry": "explore.witnesses.g2-r0014-l143",
           "at": "php@1.18.0",
           "what": "diverges-from-network (4 check(s): testnet/decode_json, testnet/encode_json, mainnet/decode_json, mainnet/encode_json)"
         }
@@ -2643,7 +3962,9 @@
       "related": [],
       "entries": [
         "cap26.inflation.p11-inflation-not-time",
-        "cap26.inflation.p11-inflation-payout"
+        "cap26.inflation.p11-inflation-payout",
+        "explore.witnesses.f62d-r0004-l74",
+        "explore.witnesses.g2-r0010-l74"
       ],
       "recipe": "chain:cap26.inflation.p11",
       "affected": [
@@ -2676,6 +3997,20 @@
           "source": "conformance",
           "on": "php@1.18.0",
           "entry": "cap26.inflation.p11-inflation-payout",
+          "at": "php@1.18.0",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "php@1.18.0",
+          "entry": "explore.witnesses.f62d-r0004-l74",
+          "at": "php@1.18.0",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "php@1.18.0",
+          "entry": "explore.witnesses.g2-r0010-l74",
           "at": "php@1.18.0",
           "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
         }
@@ -2745,7 +4080,9 @@
       "status": "draft",
       "draft": "candidate/findings/issues/dotnet-cap73.sac-trust.golden-504393015a71bc7a-8.md",
       "cause": "CreateContractOperation.FromXdr reads only HostFunction.CreateContractV2 (StellarDotnetSdk/Operations/InvokeHostFunctionOperation.cs L362-L375), which is null for HOST_FUNCTION_TYPE_CREATE_CONTRACT, and ContractIdAddressPreimage.FromContractIdPreimageXdr dereferences the address arm of a preimage that has none, so building the transaction object of envelopes core applied throws a NullReferenceException; no transaction hash can be taken.",
-      "siblings": [],
+      "siblings": [
+        "ETL-META-V4"
+      ],
       "related": [],
       "entries": [
         "cap73.sac-trust.golden-504393015a71bc7a-8",
@@ -2754,6 +4091,14 @@
         "cap73.sac-trust.p28-deploy-xlm-sac-envelope",
         "cap73.sac-trust.p30-deploy-credit-sac-envelope",
         "cap73.sac-trust.p30-deploy-xlm-sac-envelope",
+        "explore.pairs.sac-trust-p28-a-l65",
+        "explore.pairs.sac-trust-p28-b-l65",
+        "explore.pairs.sac-trust-p30-a-l69",
+        "explore.pairs.sac-trust-p30-b-l69",
+        "explore.witnesses.f63-p21-r0001-l67",
+        "explore.witnesses.f63-p21-r0001-l69",
+        "explore.witnesses.f63-p24-r0001-l71",
+        "explore.witnesses.f63-p28-r0000-l81",
         "soroban.auth-trees.golden-27003f6cc5cdecc2-3",
         "soroban.auth-trees.golden-a8df5d4dbdc85ac8-2",
         "soroban.auth-trees.p30-unmatched-create-claimable-balance-deployer",
@@ -2816,6 +4161,62 @@
           "entry": "cap73.sac-trust.p30-deploy-xlm-sac-envelope",
           "at": "dotnet@16.0.0",
           "what": "diverges-from-network (6 check(s): testnet/decode_json, testnet/encode_json, testnet/tx_hash, mainnet/decode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "dotnet@16.0.0",
+          "entry": "explore.pairs.sac-trust-p28-a-l65",
+          "at": "dotnet@16.0.0",
+          "what": "diverges-from-network (6 check(s): testnet/decode_json, testnet/encode_json, testnet/tx_hash 0, mainnet/decode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "dotnet@16.0.0",
+          "entry": "explore.pairs.sac-trust-p28-b-l65",
+          "at": "dotnet@16.0.0",
+          "what": "diverges-from-network (6 check(s): testnet/decode_json, testnet/encode_json, testnet/tx_hash 0, mainnet/decode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "dotnet@16.0.0",
+          "entry": "explore.pairs.sac-trust-p30-a-l69",
+          "at": "dotnet@16.0.0",
+          "what": "diverges-from-network (8 check(s): testnet/decode_encode, testnet/decode_json, testnet/encode_json, testnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "dotnet@16.0.0",
+          "entry": "explore.pairs.sac-trust-p30-b-l69",
+          "at": "dotnet@16.0.0",
+          "what": "diverges-from-network (8 check(s): testnet/decode_encode, testnet/decode_json, testnet/encode_json, testnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "dotnet@16.0.0",
+          "entry": "explore.witnesses.f63-p21-r0001-l67",
+          "at": "dotnet@16.0.0",
+          "what": "diverges-from-network (6 check(s): testnet/decode_json, testnet/encode_json, testnet/tx_hash 0, mainnet/decode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "dotnet@16.0.0",
+          "entry": "explore.witnesses.f63-p21-r0001-l69",
+          "at": "dotnet@16.0.0",
+          "what": "diverges-from-network (6 check(s): testnet/decode_json, testnet/encode_json, testnet/tx_hash 0, mainnet/decode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "dotnet@16.0.0",
+          "entry": "explore.witnesses.f63-p24-r0001-l71",
+          "at": "dotnet@16.0.0",
+          "what": "diverges-from-network (6 check(s): testnet/decode_json, testnet/encode_json, testnet/tx_hash 0, mainnet/decode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "dotnet@16.0.0",
+          "entry": "explore.witnesses.f63-p28-r0000-l81",
+          "at": "dotnet@16.0.0",
+          "what": "diverges-from-network (6 check(s): testnet/decode_json, testnet/encode_json, testnet/tx_hash 0, mainnet/decode_json)"
         },
         {
           "source": "conformance",
@@ -2897,6 +4298,62 @@
         {
           "source": "conformance",
           "on": "dotnet@17.0.0",
+          "entry": "explore.pairs.sac-trust-p28-a-l65",
+          "at": "dotnet@17.0.0",
+          "what": "diverges-from-network (6 check(s): testnet/decode_json, testnet/encode_json, testnet/tx_hash 0, mainnet/decode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "dotnet@17.0.0",
+          "entry": "explore.pairs.sac-trust-p28-b-l65",
+          "at": "dotnet@17.0.0",
+          "what": "diverges-from-network (6 check(s): testnet/decode_json, testnet/encode_json, testnet/tx_hash 0, mainnet/decode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "dotnet@17.0.0",
+          "entry": "explore.pairs.sac-trust-p30-a-l69",
+          "at": "dotnet@17.0.0",
+          "what": "diverges-from-network (6 check(s): testnet/decode_json, testnet/encode_json, testnet/tx_hash 0, mainnet/decode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "dotnet@17.0.0",
+          "entry": "explore.pairs.sac-trust-p30-b-l69",
+          "at": "dotnet@17.0.0",
+          "what": "diverges-from-network (6 check(s): testnet/decode_json, testnet/encode_json, testnet/tx_hash 0, mainnet/decode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "dotnet@17.0.0",
+          "entry": "explore.witnesses.f63-p21-r0001-l67",
+          "at": "dotnet@17.0.0",
+          "what": "diverges-from-network (6 check(s): testnet/decode_json, testnet/encode_json, testnet/tx_hash 0, mainnet/decode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "dotnet@17.0.0",
+          "entry": "explore.witnesses.f63-p21-r0001-l69",
+          "at": "dotnet@17.0.0",
+          "what": "diverges-from-network (6 check(s): testnet/decode_json, testnet/encode_json, testnet/tx_hash 0, mainnet/decode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "dotnet@17.0.0",
+          "entry": "explore.witnesses.f63-p24-r0001-l71",
+          "at": "dotnet@17.0.0",
+          "what": "diverges-from-network (6 check(s): testnet/decode_json, testnet/encode_json, testnet/tx_hash 0, mainnet/decode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "dotnet@17.0.0",
+          "entry": "explore.witnesses.f63-p28-r0000-l81",
+          "at": "dotnet@17.0.0",
+          "what": "diverges-from-network (6 check(s): testnet/decode_json, testnet/encode_json, testnet/tx_hash 0, mainnet/decode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "dotnet@17.0.0",
           "entry": "soroban.auth-trees.golden-27003f6cc5cdecc2-3",
           "at": "dotnet@17.0.0",
           "what": "diverges-from-network (3 check(s): any/decode_json, any/encode_json, any/tx_hash 0)"
@@ -2952,7 +4409,8 @@
         "CLI-TXHASH-V1",
         "DART-INFLATION",
         "ETL-META-V4",
-        "PHP-INFLATION"
+        "PHP-INFLATION",
+        "PHP-SETOPTIONS"
       ],
       "related": [],
       "entries": [
@@ -2969,7 +4427,24 @@
         "classic.failed-tx.p12-allow-trust-trust-not-required",
         "classic.failed-tx.p30-allow-trust-cant-revoke",
         "classic.failed-tx.p30-allow-trust-low-reserve",
-        "classic.failed-tx.p30-allow-trust-no-trust-line"
+        "classic.failed-tx.p30-allow-trust-no-trust-line",
+        "explore.witnesses.f62c-r0000-l68",
+        "explore.witnesses.f62c-r0000-l71",
+        "explore.witnesses.f62c-r0005-l124",
+        "explore.witnesses.f62d-r0000-l72",
+        "explore.witnesses.f62d-r0000-l81",
+        "explore.witnesses.f62d-r0002-l66",
+        "explore.witnesses.f62d-r0004-l74",
+        "explore.witnesses.f63-p24-r0001-l84",
+        "explore.witnesses.g1-r0004-l141",
+        "explore.witnesses.g2-r0000-l69",
+        "explore.witnesses.g2-r0001-l102",
+        "explore.witnesses.g2-r0003-l101",
+        "explore.witnesses.g2-r0003-l75",
+        "explore.witnesses.g2-r0010-l74",
+        "explore.witnesses.g2-r0013-l92",
+        "explore.witnesses.g2-r0015-l71",
+        "explore.witnesses.g2-r0026-l107"
       ],
       "recipe": "chain:cap26.inflation.p11",
       "affected": [
@@ -3024,6 +4499,97 @@
           "source": "conformance",
           "on": "dotnet@16.0.0",
           "entry": "classic.failed-tx.p12-allow-trust-trust-not-required",
+          "at": "dotnet@16.0.0",
+          "what": "diverges-from-network (6 check(s): testnet/decode_json, testnet/encode_json, testnet/tx_hash 0, mainnet/decode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "dotnet@16.0.0",
+          "entry": "explore.witnesses.f62c-r0000-l68",
+          "at": "dotnet@16.0.0",
+          "what": "diverges-from-network (6 check(s): testnet/decode_json, testnet/encode_json, testnet/tx_hash 0, mainnet/decode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "dotnet@16.0.0",
+          "entry": "explore.witnesses.f62c-r0000-l71",
+          "at": "dotnet@16.0.0",
+          "what": "diverges-from-network (6 check(s): testnet/decode_json, testnet/encode_json, testnet/tx_hash 0, mainnet/decode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "dotnet@16.0.0",
+          "entry": "explore.witnesses.f62c-r0005-l124",
+          "at": "dotnet@16.0.0",
+          "what": "diverges-from-network (6 check(s): testnet/decode_json, testnet/encode_json, testnet/tx_hash 0, mainnet/decode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "dotnet@16.0.0",
+          "entry": "explore.witnesses.f62d-r0002-l66",
+          "at": "dotnet@16.0.0",
+          "what": "diverges-from-network (6 check(s): testnet/decode_json, testnet/encode_json, testnet/tx_hash 0, mainnet/decode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "dotnet@16.0.0",
+          "entry": "explore.witnesses.f62d-r0004-l74",
+          "at": "dotnet@16.0.0",
+          "what": "diverges-from-network (6 check(s): testnet/decode_json, testnet/encode_json, testnet/tx_hash 0, mainnet/decode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "dotnet@16.0.0",
+          "entry": "explore.witnesses.f63-p24-r0001-l84",
+          "at": "dotnet@16.0.0",
+          "what": "diverges-from-network (6 check(s): testnet/decode_json, testnet/encode_json, testnet/tx_hash 0, mainnet/decode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "dotnet@16.0.0",
+          "entry": "explore.witnesses.g1-r0004-l141",
+          "at": "dotnet@16.0.0",
+          "what": "diverges-from-network (6 check(s): testnet/decode_json, testnet/encode_json, testnet/tx_hash 0, mainnet/decode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "dotnet@16.0.0",
+          "entry": "explore.witnesses.g2-r0000-l69",
+          "at": "dotnet@16.0.0",
+          "what": "diverges-from-network (6 check(s): testnet/decode_json, testnet/encode_json, testnet/tx_hash 0, mainnet/decode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "dotnet@16.0.0",
+          "entry": "explore.witnesses.g2-r0001-l102",
+          "at": "dotnet@16.0.0",
+          "what": "diverges-from-network (6 check(s): testnet/decode_json, testnet/encode_json, testnet/tx_hash 0, mainnet/decode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "dotnet@16.0.0",
+          "entry": "explore.witnesses.g2-r0003-l101",
+          "at": "dotnet@16.0.0",
+          "what": "diverges-from-network (6 check(s): testnet/decode_json, testnet/encode_json, testnet/tx_hash 0, mainnet/decode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "dotnet@16.0.0",
+          "entry": "explore.witnesses.g2-r0003-l75",
+          "at": "dotnet@16.0.0",
+          "what": "diverges-from-network (6 check(s): testnet/decode_json, testnet/encode_json, testnet/tx_hash 0, mainnet/decode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "dotnet@16.0.0",
+          "entry": "explore.witnesses.g2-r0010-l74",
+          "at": "dotnet@16.0.0",
+          "what": "diverges-from-network (6 check(s): testnet/decode_json, testnet/encode_json, testnet/tx_hash 0, mainnet/decode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "dotnet@16.0.0",
+          "entry": "explore.witnesses.g2-r0015-l71",
           "at": "dotnet@16.0.0",
           "what": "diverges-from-network (6 check(s): testnet/decode_json, testnet/encode_json, testnet/tx_hash 0, mainnet/decode_json)"
         },
@@ -3122,6 +4688,125 @@
           "source": "conformance",
           "on": "dotnet@17.0.0",
           "entry": "classic.failed-tx.p30-allow-trust-no-trust-line",
+          "at": "dotnet@17.0.0",
+          "what": "diverges-from-network (6 check(s): testnet/decode_json, testnet/encode_json, testnet/tx_hash 0, mainnet/decode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "dotnet@17.0.0",
+          "entry": "explore.witnesses.f62c-r0000-l68",
+          "at": "dotnet@17.0.0",
+          "what": "diverges-from-network (6 check(s): testnet/decode_json, testnet/encode_json, testnet/tx_hash 0, mainnet/decode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "dotnet@17.0.0",
+          "entry": "explore.witnesses.f62c-r0000-l71",
+          "at": "dotnet@17.0.0",
+          "what": "diverges-from-network (6 check(s): testnet/decode_json, testnet/encode_json, testnet/tx_hash 0, mainnet/decode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "dotnet@17.0.0",
+          "entry": "explore.witnesses.f62c-r0005-l124",
+          "at": "dotnet@17.0.0",
+          "what": "diverges-from-network (6 check(s): testnet/decode_json, testnet/encode_json, testnet/tx_hash 0, mainnet/decode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "dotnet@17.0.0",
+          "entry": "explore.witnesses.f62d-r0000-l72",
+          "at": "dotnet@17.0.0",
+          "what": "diverges-from-network (6 check(s): testnet/decode_json, testnet/encode_json, testnet/tx_hash 1, mainnet/decode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "dotnet@17.0.0",
+          "entry": "explore.witnesses.f62d-r0000-l81",
+          "at": "dotnet@17.0.0",
+          "what": "diverges-from-network (6 check(s): testnet/decode_json, testnet/encode_json, testnet/tx_hash 0, mainnet/decode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "dotnet@17.0.0",
+          "entry": "explore.witnesses.f62d-r0002-l66",
+          "at": "dotnet@17.0.0",
+          "what": "diverges-from-network (6 check(s): testnet/decode_json, testnet/encode_json, testnet/tx_hash 0, mainnet/decode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "dotnet@17.0.0",
+          "entry": "explore.witnesses.f62d-r0004-l74",
+          "at": "dotnet@17.0.0",
+          "what": "diverges-from-network (6 check(s): testnet/decode_json, testnet/encode_json, testnet/tx_hash 0, mainnet/decode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "dotnet@17.0.0",
+          "entry": "explore.witnesses.f63-p24-r0001-l84",
+          "at": "dotnet@17.0.0",
+          "what": "diverges-from-network (6 check(s): testnet/decode_json, testnet/encode_json, testnet/tx_hash 0, mainnet/decode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "dotnet@17.0.0",
+          "entry": "explore.witnesses.g1-r0004-l141",
+          "at": "dotnet@17.0.0",
+          "what": "diverges-from-network (6 check(s): testnet/decode_json, testnet/encode_json, testnet/tx_hash 0, mainnet/decode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "dotnet@17.0.0",
+          "entry": "explore.witnesses.g2-r0000-l69",
+          "at": "dotnet@17.0.0",
+          "what": "diverges-from-network (6 check(s): testnet/decode_json, testnet/encode_json, testnet/tx_hash 0, mainnet/decode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "dotnet@17.0.0",
+          "entry": "explore.witnesses.g2-r0001-l102",
+          "at": "dotnet@17.0.0",
+          "what": "diverges-from-network (6 check(s): testnet/decode_json, testnet/encode_json, testnet/tx_hash 0, mainnet/decode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "dotnet@17.0.0",
+          "entry": "explore.witnesses.g2-r0003-l101",
+          "at": "dotnet@17.0.0",
+          "what": "diverges-from-network (6 check(s): testnet/decode_json, testnet/encode_json, testnet/tx_hash 0, mainnet/decode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "dotnet@17.0.0",
+          "entry": "explore.witnesses.g2-r0003-l75",
+          "at": "dotnet@17.0.0",
+          "what": "diverges-from-network (6 check(s): testnet/decode_json, testnet/encode_json, testnet/tx_hash 0, mainnet/decode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "dotnet@17.0.0",
+          "entry": "explore.witnesses.g2-r0010-l74",
+          "at": "dotnet@17.0.0",
+          "what": "diverges-from-network (6 check(s): testnet/decode_json, testnet/encode_json, testnet/tx_hash 0, mainnet/decode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "dotnet@17.0.0",
+          "entry": "explore.witnesses.g2-r0013-l92",
+          "at": "dotnet@17.0.0",
+          "what": "diverges-from-network (6 check(s): testnet/decode_json, testnet/encode_json, testnet/tx_hash 0, mainnet/decode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "dotnet@17.0.0",
+          "entry": "explore.witnesses.g2-r0015-l71",
+          "at": "dotnet@17.0.0",
+          "what": "diverges-from-network (6 check(s): testnet/decode_json, testnet/encode_json, testnet/tx_hash 0, mainnet/decode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "dotnet@17.0.0",
+          "entry": "explore.witnesses.g2-r0026-l107",
           "at": "dotnet@17.0.0",
           "what": "diverges-from-network (6 check(s): testnet/decode_json, testnet/encode_json, testnet/tx_hash 0, mainnet/decode_json)"
         }
@@ -3738,8 +5423,12 @@
       "draft": "candidate/findings/issues/kmp-cap27.muxed-accounts.p28-claimable-balance-tx-source-id-1.md",
       "cause": "Transaction.fromV1EnvelopeXdr keeps only MuxedAccount.fromXdr(tx.sourceAccount).accountId, the G account (commonMain/com/soneso/stellar/sdk/Transaction.kt L332), and toV1Xdr writes MuxedAccount(sourceAccount) back (L191), so a muxed source becomes a plain account: the rebuilt envelope is another transaction and AbstractTransaction.hash() is not the hash the network wrote.",
       "siblings": [
+        "CLI-TXHASH-V1",
         "DART-UTF8",
+        "ETL-META-V4",
         "NET-UTF8",
+        "PHP-CBKEY-JSON",
+        "PHP-HEXHASH",
         "PHP-UINT64"
       ],
       "related": [],
@@ -3760,6 +5449,17 @@
         "classic.memo-bytes.p30-memo-lone-continuation",
         "classic.memo-bytes.p30-memo-overlong-nul",
         "classic.memo-bytes.p30-memo-surrogate",
+        "explore.witnesses.f62c-r0000-l69",
+        "explore.witnesses.f62c-r0000-l77",
+        "explore.witnesses.f62c-r0000-l86",
+        "explore.witnesses.f62c-r0017-l77",
+        "explore.witnesses.f62d-r0000-l85",
+        "explore.witnesses.f62d-r0003-l79",
+        "explore.witnesses.f62d-r0008-l75",
+        "explore.witnesses.g2-r0007-l77",
+        "explore.witnesses.g2-r0012-l78",
+        "explore.witnesses.g2-r0013-l93",
+        "explore.witnesses.g2-r0018-l122",
         "soroban.auth-trees.golden-57a486abce28859d-17",
         "soroban.auth-trees.golden-e0d0e3f38b2d55e0-17",
         "soroban.muxed-source.p28-muxed-and-base-source-one-ledger",
@@ -3786,7 +5486,9 @@
       "other_sdks": [
         "dart@3.12.0",
         "dotnet@17.0.0",
-        "php@1.18.0"
+        "php@1.18.0",
+        "stellar-cli@28.1.0",
+        "stellar-cli@30.0.1"
       ],
       "occurrences": [
         {
@@ -3900,6 +5602,83 @@
           "entry": "classic.memo-bytes.p30-memo-surrogate",
           "at": "kmp@1.18.0",
           "what": "diverges-from-network (8 check(s): testnet/decode_encode, testnet/decode_json, testnet/encode_json, testnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "kmp@1.18.0",
+          "entry": "explore.witnesses.f62c-r0000-l69",
+          "at": "kmp@1.18.0",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "kmp@1.18.0",
+          "entry": "explore.witnesses.f62c-r0000-l77",
+          "at": "kmp@1.18.0",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "kmp@1.18.0",
+          "entry": "explore.witnesses.f62c-r0000-l86",
+          "at": "kmp@1.18.0",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "kmp@1.18.0",
+          "entry": "explore.witnesses.f62c-r0017-l77",
+          "at": "kmp@1.18.0",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "kmp@1.18.0",
+          "entry": "explore.witnesses.f62d-r0000-l85",
+          "at": "kmp@1.18.0",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "kmp@1.18.0",
+          "entry": "explore.witnesses.f62d-r0003-l79",
+          "at": "kmp@1.18.0",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "kmp@1.18.0",
+          "entry": "explore.witnesses.f62d-r0008-l75",
+          "at": "kmp@1.18.0",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "kmp@1.18.0",
+          "entry": "explore.witnesses.g2-r0007-l77",
+          "at": "kmp@1.18.0",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "kmp@1.18.0",
+          "entry": "explore.witnesses.g2-r0012-l78",
+          "at": "kmp@1.18.0",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "kmp@1.18.0",
+          "entry": "explore.witnesses.g2-r0013-l93",
+          "at": "kmp@1.18.0",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "kmp@1.18.0",
+          "entry": "explore.witnesses.g2-r0018-l122",
+          "at": "kmp@1.18.0",
+          "what": "diverges-from-network (4 check(s): testnet/tx_hash 0, testnet/tx_hash 0 inner, mainnet/tx_hash 0, mainnet/tx_hash 0 inner)"
         },
         {
           "source": "conformance",
@@ -4557,16 +6336,27 @@
       "cause": "tx hash runs unwrap_envelope_v1 on the envelope (soroban-cli 30.0.1 src/commands/tx/hash.rs L31, src/commands/tx/xdr.rs L79-L84), which returns OnlyTransactionV1Supported (xdr.rs L18-L19) for a TransactionV0 or fee bump envelope, so the hash of those transactions, which stellar-core computes, cannot be had from the command.",
       "siblings": [
         "DART-INFLATION",
+        "DART-OFFERU64",
+        "DART-PRICE",
         "ETL-3",
         "ETL-META-V4",
+        "KMP-MUXED-SOURCE",
+        "KMP-TXOBJECT",
         "NET-DEPRECATED-OPS",
+        "NET-PRICE",
+        "PHP-CBKEY-JSON",
         "PHP-HEXHASH",
-        "PHP-INFLATION"
+        "PHP-INFLATION",
+        "PHP-OFFERID",
+        "PHP-SETOPTIONS"
       ],
       "related": [],
       "entries": [
         "cap03.offer-liabilities.mainnet-25000000",
+        "cap03.offer-liabilities.mainnet-37466023",
+        "cap03.offer-liabilities.mainnet-44679511",
         "cap15.fee-bump.golden-f5fa0a4b15bfd9d9-12",
+        "cap15.fee-bump.mainnet-57369500",
         "cap15.fee-bump.p30-fee-source-is-inner-source-envelope",
         "cap15.fee-bump.p30-fee-source-is-inner-source-pre-auth-signer-envelope",
         "cap15.fee-bump.p30-inner-bad-auth",
@@ -4590,7 +6380,77 @@
         "classic.failed-tx.p12-path-payment-strict-receive-no-issuer",
         "classic.failed-tx.p12-path-payment-strict-send-no-issuer",
         "classic.failed-tx.p12-payment-no-issuer",
-        "classic.failed-tx.p9-change-trust-native-internal-error-envelope"
+        "classic.failed-tx.p9-change-trust-native-internal-error-envelope",
+        "explore.witnesses.f62c-r0000-l89",
+        "explore.witnesses.f62c-r0000-l90",
+        "explore.witnesses.f62c-r0000-l92",
+        "explore.witnesses.f62c-r0005-l112",
+        "explore.witnesses.f62c-r0005-l97",
+        "explore.witnesses.f62c-r0016-l94",
+        "explore.witnesses.f62d-r0000-l100",
+        "explore.witnesses.f62d-r0001-l67",
+        "explore.witnesses.f62d-r0001-l69",
+        "explore.witnesses.f62d-r0001-l72",
+        "explore.witnesses.f62d-r0001-l73",
+        "explore.witnesses.f62d-r0002-l66",
+        "explore.witnesses.f62d-r0002-l68",
+        "explore.witnesses.f62d-r0002-l77",
+        "explore.witnesses.f62d-r0002-l79",
+        "explore.witnesses.f62d-r0002-l84",
+        "explore.witnesses.f62d-r0003-l73",
+        "explore.witnesses.f62d-r0004-l66",
+        "explore.witnesses.f62d-r0004-l69",
+        "explore.witnesses.f62d-r0004-l74",
+        "explore.witnesses.f62d-r0004-l75",
+        "explore.witnesses.f62d-r0007-l72",
+        "explore.witnesses.f62d-r0007-l74",
+        "explore.witnesses.f62d-r0007-l77",
+        "explore.witnesses.f62d-r0008-l84",
+        "explore.witnesses.f62d-r0008-l87",
+        "explore.witnesses.f62d-r0022-l76",
+        "explore.witnesses.f62d-r0024-l97",
+        "explore.witnesses.f63-p28-r0000-l79",
+        "explore.witnesses.g1-r0004-l102",
+        "explore.witnesses.g1-r0004-l103",
+        "explore.witnesses.g1-r0004-l104",
+        "explore.witnesses.g1-r0004-l122",
+        "explore.witnesses.g1-r0004-l123",
+        "explore.witnesses.g1-r0004-l126",
+        "explore.witnesses.g1-r0004-l141",
+        "explore.witnesses.g1-r0004-l142",
+        "explore.witnesses.g2-r0001-l113",
+        "explore.witnesses.g2-r0001-l114",
+        "explore.witnesses.g2-r0003-l77",
+        "explore.witnesses.g2-r0005-l102",
+        "explore.witnesses.g2-r0005-l68",
+        "explore.witnesses.g2-r0006-l121",
+        "explore.witnesses.g2-r0007-l71",
+        "explore.witnesses.g2-r0007-l74",
+        "explore.witnesses.g2-r0007-l81",
+        "explore.witnesses.g2-r0008-l71",
+        "explore.witnesses.g2-r0008-l73",
+        "explore.witnesses.g2-r0008-l76",
+        "explore.witnesses.g2-r0008-l77",
+        "explore.witnesses.g2-r0008-l78",
+        "explore.witnesses.g2-r0008-l80",
+        "explore.witnesses.g2-r0009-l78",
+        "explore.witnesses.g2-r0009-l83",
+        "explore.witnesses.g2-r0010-l74",
+        "explore.witnesses.g2-r0010-l92",
+        "explore.witnesses.g2-r0010-l93",
+        "explore.witnesses.g2-r0015-l67",
+        "explore.witnesses.g2-r0015-l71",
+        "explore.witnesses.g2-r0015-l72",
+        "explore.witnesses.g2-r0017-l129",
+        "explore.witnesses.g2-r0018-l122",
+        "explore.witnesses.g2-r0021-l101",
+        "explore.witnesses.g2-r0022-l171",
+        "explore.witnesses.g2-r0028-l66",
+        "explore.witnesses.g2-r0029-l98",
+        "explore.witnesses.g2-r0033-l66",
+        "explore.witnesses.g2-r0038-l67",
+        "explore.witnesses.g2-r0038-l68",
+        "explore.witnesses.g2-r0041-l89"
       ],
       "recipe": "chain:classic.failed-tx.change-trust-native.p9",
       "affected": [
@@ -4610,6 +6470,7 @@
         "dart@3.12.0",
         "dotnet@16.0.0",
         "dotnet@17.0.0",
+        "kmp@1.18.0",
         "php@1.18.0"
       ],
       "occurrences": [
@@ -4619,6 +6480,27 @@
           "entry": "cap03.offer-liabilities.mainnet-25000000",
           "at": "stellar-cli@28.1.0",
           "what": "diverges-from-network (14 check(s): mainnet/tx_hash 0, mainnet/tx_hash 1, mainnet/tx_hash 2, mainnet/tx_hash 3)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "cap03.offer-liabilities.mainnet-37466023",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (4 check(s): mainnet/tx_hash 236, mainnet/tx_hash 236 inner, mainnet/balance_id 104.0, mainnet/balance_id 135.0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "cap03.offer-liabilities.mainnet-44679511",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (2 check(s): mainnet/tx_hash 364, mainnet/tx_hash 364 inner)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "cap15.fee-bump.mainnet-57369500",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (110 check(s): mainnet/tx_hash 45, mainnet/tx_hash 45 inner, mainnet/tx_hash 46, mainnet/tx_hash 46 inner)"
         },
         {
           "source": "conformance",
@@ -4713,6 +6595,391 @@
         },
         {
           "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "explore.witnesses.f62c-r0000-l89",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (4 check(s): testnet/tx_hash 0, testnet/tx_hash 0 inner, mainnet/tx_hash 0, mainnet/tx_hash 0 inner)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "explore.witnesses.f62c-r0000-l90",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (4 check(s): testnet/tx_hash 0, testnet/tx_hash 0 inner, mainnet/tx_hash 0, mainnet/tx_hash 0 inner)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "explore.witnesses.f62c-r0000-l92",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (4 check(s): testnet/tx_hash 0, testnet/tx_hash 0 inner, mainnet/tx_hash 0, mainnet/tx_hash 0 inner)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "explore.witnesses.f62c-r0005-l112",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (4 check(s): testnet/tx_hash 0, testnet/tx_hash 0 inner, mainnet/tx_hash 0, mainnet/tx_hash 0 inner)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "explore.witnesses.f62c-r0005-l97",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (4 check(s): testnet/tx_hash 0, testnet/tx_hash 0 inner, mainnet/tx_hash 0, mainnet/tx_hash 0 inner)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "explore.witnesses.f62c-r0016-l94",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (4 check(s): testnet/tx_hash 0, testnet/tx_hash 0 inner, mainnet/tx_hash 0, mainnet/tx_hash 0 inner)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "explore.witnesses.f62d-r0001-l67",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "explore.witnesses.f62d-r0001-l69",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "explore.witnesses.f62d-r0001-l72",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "explore.witnesses.f62d-r0001-l73",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "explore.witnesses.f62d-r0002-l66",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "explore.witnesses.f62d-r0002-l68",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "explore.witnesses.f62d-r0002-l77",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "explore.witnesses.f62d-r0002-l79",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "explore.witnesses.f62d-r0002-l84",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "explore.witnesses.f62d-r0004-l66",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "explore.witnesses.f62d-r0004-l69",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "explore.witnesses.f62d-r0004-l74",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "explore.witnesses.f62d-r0004-l75",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "explore.witnesses.f62d-r0008-l84",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (4 check(s): testnet/tx_hash 0, testnet/tx_hash 0 inner, mainnet/tx_hash 0, mainnet/tx_hash 0 inner)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "explore.witnesses.f62d-r0008-l87",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (4 check(s): testnet/tx_hash 0, testnet/tx_hash 0 inner, mainnet/tx_hash 0, mainnet/tx_hash 0 inner)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "explore.witnesses.f63-p28-r0000-l79",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (4 check(s): testnet/tx_hash 0, testnet/tx_hash 0 inner, mainnet/tx_hash 0, mainnet/tx_hash 0 inner)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "explore.witnesses.g1-r0004-l102",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "explore.witnesses.g1-r0004-l103",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "explore.witnesses.g1-r0004-l104",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "explore.witnesses.g1-r0004-l122",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "explore.witnesses.g1-r0004-l123",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "explore.witnesses.g1-r0004-l126",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "explore.witnesses.g1-r0004-l141",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "explore.witnesses.g1-r0004-l142",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "explore.witnesses.g2-r0001-l113",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (4 check(s): testnet/tx_hash 0, testnet/tx_hash 0 inner, mainnet/tx_hash 0, mainnet/tx_hash 0 inner)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "explore.witnesses.g2-r0001-l114",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (4 check(s): testnet/tx_hash 0, testnet/tx_hash 0 inner, mainnet/tx_hash 0, mainnet/tx_hash 0 inner)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "explore.witnesses.g2-r0003-l77",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (4 check(s): testnet/tx_hash 0, testnet/tx_hash 0 inner, mainnet/tx_hash 0, mainnet/tx_hash 0 inner)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "explore.witnesses.g2-r0006-l121",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (4 check(s): testnet/tx_hash 0, testnet/tx_hash 0 inner, mainnet/tx_hash 0, mainnet/tx_hash 0 inner)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "explore.witnesses.g2-r0008-l71",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "explore.witnesses.g2-r0008-l73",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "explore.witnesses.g2-r0008-l76",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "explore.witnesses.g2-r0008-l77",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "explore.witnesses.g2-r0008-l78",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "explore.witnesses.g2-r0008-l80",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "explore.witnesses.g2-r0010-l74",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "explore.witnesses.g2-r0010-l92",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "explore.witnesses.g2-r0010-l93",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "explore.witnesses.g2-r0015-l67",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "explore.witnesses.g2-r0015-l71",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "explore.witnesses.g2-r0015-l72",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "explore.witnesses.g2-r0017-l129",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (4 check(s): testnet/tx_hash 0, testnet/tx_hash 0 inner, mainnet/tx_hash 0, mainnet/tx_hash 0 inner)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "explore.witnesses.g2-r0018-l122",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (4 check(s): testnet/tx_hash 0, testnet/tx_hash 0 inner, mainnet/tx_hash 0, mainnet/tx_hash 0 inner)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "explore.witnesses.g2-r0022-l171",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (4 check(s): testnet/tx_hash 0, testnet/tx_hash 0 inner, mainnet/tx_hash 0, mainnet/tx_hash 0 inner)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "explore.witnesses.g2-r0028-l66",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "explore.witnesses.g2-r0029-l98",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "explore.witnesses.g2-r0033-l66",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "explore.witnesses.g2-r0038-l67",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "explore.witnesses.g2-r0038-l68",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "explore.witnesses.g2-r0041-l89",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
           "on": "stellar-cli@30.0.1",
           "entry": "cap03.offer-liabilities.mainnet-25000000",
           "at": "stellar-cli@30.0.1",
@@ -4721,9 +6988,30 @@
         {
           "source": "conformance",
           "on": "stellar-cli@30.0.1",
+          "entry": "cap03.offer-liabilities.mainnet-37466023",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (4 check(s): mainnet/tx_hash 236, mainnet/tx_hash 236 inner, mainnet/balance_id 104.0, mainnet/balance_id 135.0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "cap03.offer-liabilities.mainnet-44679511",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (2 check(s): mainnet/tx_hash 364, mainnet/tx_hash 364 inner)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
           "entry": "cap15.fee-bump.golden-f5fa0a4b15bfd9d9-12",
           "at": "stellar-cli@30.0.1",
           "what": "diverges-from-network (4 check(s): any/tx_hash 0, any/tx_hash 0 inner, any/tx_hash 1, any/tx_hash 1 inner)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "cap15.fee-bump.mainnet-57369500",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (110 check(s): mainnet/tx_hash 45, mainnet/tx_hash 45 inner, mainnet/tx_hash 46, mainnet/tx_hash 46 inner)"
         },
         {
           "source": "conformance",
@@ -4892,6 +7180,496 @@
           "entry": "classic.failed-tx.p9-change-trust-native-internal-error-envelope",
           "at": "stellar-cli@30.0.1",
           "what": "diverges-from-network (2 check(s): testnet/tx_hash, mainnet/tx_hash)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "explore.witnesses.f62c-r0000-l89",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (4 check(s): testnet/tx_hash 0, testnet/tx_hash 0 inner, mainnet/tx_hash 0, mainnet/tx_hash 0 inner)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "explore.witnesses.f62c-r0000-l90",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (4 check(s): testnet/tx_hash 0, testnet/tx_hash 0 inner, mainnet/tx_hash 0, mainnet/tx_hash 0 inner)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "explore.witnesses.f62c-r0000-l92",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (4 check(s): testnet/tx_hash 0, testnet/tx_hash 0 inner, mainnet/tx_hash 0, mainnet/tx_hash 0 inner)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "explore.witnesses.f62c-r0005-l112",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (4 check(s): testnet/tx_hash 0, testnet/tx_hash 0 inner, mainnet/tx_hash 0, mainnet/tx_hash 0 inner)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "explore.witnesses.f62c-r0005-l97",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (4 check(s): testnet/tx_hash 0, testnet/tx_hash 0 inner, mainnet/tx_hash 0, mainnet/tx_hash 0 inner)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "explore.witnesses.f62c-r0016-l94",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (4 check(s): testnet/tx_hash 0, testnet/tx_hash 0 inner, mainnet/tx_hash 0, mainnet/tx_hash 0 inner)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "explore.witnesses.f62d-r0000-l100",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (4 check(s): testnet/tx_hash 0, testnet/tx_hash 0 inner, mainnet/tx_hash 0, mainnet/tx_hash 0 inner)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "explore.witnesses.f62d-r0001-l67",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "explore.witnesses.f62d-r0001-l69",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "explore.witnesses.f62d-r0001-l72",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "explore.witnesses.f62d-r0001-l73",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "explore.witnesses.f62d-r0002-l66",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "explore.witnesses.f62d-r0002-l68",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "explore.witnesses.f62d-r0002-l77",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "explore.witnesses.f62d-r0002-l79",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "explore.witnesses.f62d-r0002-l84",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "explore.witnesses.f62d-r0003-l73",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (4 check(s): testnet/tx_hash 0, testnet/tx_hash 0 inner, mainnet/tx_hash 0, mainnet/tx_hash 0 inner)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "explore.witnesses.f62d-r0004-l66",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "explore.witnesses.f62d-r0004-l69",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "explore.witnesses.f62d-r0004-l74",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "explore.witnesses.f62d-r0004-l75",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "explore.witnesses.f62d-r0007-l72",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (4 check(s): testnet/tx_hash 0, testnet/tx_hash 0 inner, mainnet/tx_hash 0, mainnet/tx_hash 0 inner)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "explore.witnesses.f62d-r0007-l74",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (4 check(s): testnet/tx_hash 0, testnet/tx_hash 0 inner, mainnet/tx_hash 0, mainnet/tx_hash 0 inner)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "explore.witnesses.f62d-r0007-l77",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (4 check(s): testnet/tx_hash 0, testnet/tx_hash 0 inner, mainnet/tx_hash 0, mainnet/tx_hash 0 inner)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "explore.witnesses.f62d-r0008-l84",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (4 check(s): testnet/tx_hash 0, testnet/tx_hash 0 inner, mainnet/tx_hash 0, mainnet/tx_hash 0 inner)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "explore.witnesses.f62d-r0008-l87",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (4 check(s): testnet/tx_hash 0, testnet/tx_hash 0 inner, mainnet/tx_hash 0, mainnet/tx_hash 0 inner)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "explore.witnesses.f62d-r0022-l76",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (4 check(s): testnet/tx_hash 0, testnet/tx_hash 0 inner, mainnet/tx_hash 0, mainnet/tx_hash 0 inner)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "explore.witnesses.f62d-r0024-l97",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (4 check(s): testnet/tx_hash 0, testnet/tx_hash 0 inner, mainnet/tx_hash 0, mainnet/tx_hash 0 inner)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "explore.witnesses.f63-p28-r0000-l79",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (4 check(s): testnet/tx_hash 0, testnet/tx_hash 0 inner, mainnet/tx_hash 0, mainnet/tx_hash 0 inner)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "explore.witnesses.g1-r0004-l102",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "explore.witnesses.g1-r0004-l103",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "explore.witnesses.g1-r0004-l104",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "explore.witnesses.g1-r0004-l122",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "explore.witnesses.g1-r0004-l123",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "explore.witnesses.g1-r0004-l126",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "explore.witnesses.g1-r0004-l141",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "explore.witnesses.g1-r0004-l142",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "explore.witnesses.g2-r0001-l113",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (4 check(s): testnet/tx_hash 0, testnet/tx_hash 0 inner, mainnet/tx_hash 0, mainnet/tx_hash 0 inner)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "explore.witnesses.g2-r0001-l114",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (4 check(s): testnet/tx_hash 0, testnet/tx_hash 0 inner, mainnet/tx_hash 0, mainnet/tx_hash 0 inner)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "explore.witnesses.g2-r0003-l77",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (4 check(s): testnet/tx_hash 0, testnet/tx_hash 0 inner, mainnet/tx_hash 0, mainnet/tx_hash 0 inner)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "explore.witnesses.g2-r0005-l102",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (4 check(s): testnet/tx_hash 1, testnet/tx_hash 1 inner, mainnet/tx_hash 0, mainnet/tx_hash 0 inner)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "explore.witnesses.g2-r0005-l68",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (4 check(s): testnet/tx_hash 0, testnet/tx_hash 0 inner, mainnet/tx_hash 0, mainnet/tx_hash 0 inner)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "explore.witnesses.g2-r0006-l121",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (4 check(s): testnet/tx_hash 0, testnet/tx_hash 0 inner, mainnet/tx_hash 0, mainnet/tx_hash 0 inner)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "explore.witnesses.g2-r0007-l71",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (4 check(s): testnet/tx_hash 0, testnet/tx_hash 0 inner, mainnet/tx_hash 0, mainnet/tx_hash 0 inner)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "explore.witnesses.g2-r0007-l74",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (4 check(s): testnet/tx_hash 1, testnet/tx_hash 1 inner, mainnet/tx_hash 0, mainnet/tx_hash 0 inner)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "explore.witnesses.g2-r0007-l81",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (4 check(s): testnet/tx_hash 0, testnet/tx_hash 0 inner, mainnet/tx_hash 0, mainnet/tx_hash 0 inner)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "explore.witnesses.g2-r0008-l71",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "explore.witnesses.g2-r0008-l73",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "explore.witnesses.g2-r0008-l76",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "explore.witnesses.g2-r0008-l77",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "explore.witnesses.g2-r0008-l78",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "explore.witnesses.g2-r0008-l80",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "explore.witnesses.g2-r0009-l78",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (4 check(s): testnet/tx_hash 1, testnet/tx_hash 1 inner, mainnet/tx_hash 0, mainnet/tx_hash 0 inner)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "explore.witnesses.g2-r0009-l83",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (4 check(s): testnet/tx_hash 0, testnet/tx_hash 0 inner, mainnet/tx_hash 0, mainnet/tx_hash 0 inner)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "explore.witnesses.g2-r0010-l74",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "explore.witnesses.g2-r0010-l92",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "explore.witnesses.g2-r0010-l93",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "explore.witnesses.g2-r0015-l67",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "explore.witnesses.g2-r0015-l71",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "explore.witnesses.g2-r0015-l72",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "explore.witnesses.g2-r0017-l129",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (4 check(s): testnet/tx_hash 0, testnet/tx_hash 0 inner, mainnet/tx_hash 0, mainnet/tx_hash 0 inner)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "explore.witnesses.g2-r0018-l122",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (4 check(s): testnet/tx_hash 0, testnet/tx_hash 0 inner, mainnet/tx_hash 0, mainnet/tx_hash 0 inner)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "explore.witnesses.g2-r0021-l101",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (4 check(s): testnet/tx_hash 0, testnet/tx_hash 0 inner, mainnet/tx_hash 0, mainnet/tx_hash 0 inner)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "explore.witnesses.g2-r0022-l171",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (4 check(s): testnet/tx_hash 0, testnet/tx_hash 0 inner, mainnet/tx_hash 0, mainnet/tx_hash 0 inner)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "explore.witnesses.g2-r0028-l66",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "explore.witnesses.g2-r0029-l98",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "explore.witnesses.g2-r0033-l66",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "explore.witnesses.g2-r0038-l67",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "explore.witnesses.g2-r0038-l68",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "explore.witnesses.g2-r0041-l89",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
         }
       ]
     },
@@ -5464,6 +8242,445 @@
           "entry": "soroban.invoke-basics.synth-strkey-c-invalid",
           "at": "stellar-cli@30.0.1",
           "what": "diverges-from-network (1 check(s): case 7/strkey_decode)"
+        }
+      ]
+    },
+    {
+      "id": "DART-PRICE",
+      "title": "a transaction whose offer price is not in lowest terms hashes to another value once the sdk rebuilds it",
+      "component": "stellar_flutter_sdk",
+      "severity": "divergence",
+      "caps": [
+        "CAP-0003",
+        "CAP-0006",
+        "CAP-0015"
+      ],
+      "minimal_entry": "explore.witnesses.g2-r0010-l92",
+      "reproduce": "shapekit conformance run --sdk dart --version 3.12.0 --entry explore.witnesses.g2-r0010-l92",
+      "status": "draft",
+      "draft": "candidate/findings/issues/dart-cap03.offer-liabilities.mainnet-37466023.md",
+      "cause": "AbstractTransaction.fromEnvelopeXdr(..).hash(network) rebuilds every operation before hashing. ManageSellOfferOperation builder() turns the XDR price into Price(n, d).toDecimalString() and toOperationBody reads it back with Price.fromString (lib/src/manage_sell_offer_operation.dart L109 and L135-L143 at 3.12.0), which writes the reduced or approximated fraction, so an offer or liquidity pool deposit bound such as 6836306/1144362402, 7/7 or 2147483647/2147483647 is hashed as another fraction (lib/src/transaction.dart L109).",
+      "siblings": [
+        "CLI-TXHASH-V1",
+        "NET-PRICE",
+        "PHP-CBKEY-JSON",
+        "PHP-HEXHASH"
+      ],
+      "related": [],
+      "entries": [
+        "cap03.offer-liabilities.mainnet-37466023",
+        "cap15.fee-bump.mainnet-57369500",
+        "explore.witnesses.g1-r0047-l69",
+        "explore.witnesses.g2-r0007-l69",
+        "explore.witnesses.g2-r0010-l92",
+        "explore.witnesses.g2-r0038-l67"
+      ],
+      "recipe": "recipe:corpus/recipes/explore.witnesses/g2/r0010.json",
+      "affected": [
+        {
+          "on": "dart",
+          "tested": [
+            "3.12.0"
+          ],
+          "failing": [
+            "3.12.0"
+          ]
+        }
+      ],
+      "other_sdks": [
+        "dotnet@16.0.0",
+        "dotnet@17.0.0",
+        "php@1.18.0",
+        "stellar-cli@28.1.0",
+        "stellar-cli@30.0.1"
+      ],
+      "occurrences": [
+        {
+          "source": "conformance",
+          "on": "dart@3.12.0",
+          "entry": "cap03.offer-liabilities.mainnet-37466023",
+          "at": "dart@3.12.0",
+          "what": "diverges-from-network (3 check(s): mainnet/tx_hash 12, mainnet/tx_hash 236, mainnet/tx_hash 236 inner)"
+        },
+        {
+          "source": "conformance",
+          "on": "dart@3.12.0",
+          "entry": "cap15.fee-bump.mainnet-57369500",
+          "at": "dart@3.12.0",
+          "what": "diverges-from-network (8 check(s): mainnet/tx_hash 26, mainnet/tx_hash 29, mainnet/tx_hash 38, mainnet/tx_hash 52)"
+        },
+        {
+          "source": "conformance",
+          "on": "dart@3.12.0",
+          "entry": "explore.witnesses.g1-r0047-l69",
+          "at": "dart@3.12.0",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "dart@3.12.0",
+          "entry": "explore.witnesses.g2-r0007-l69",
+          "at": "dart@3.12.0",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 1, mainnet/tx_hash 1)"
+        },
+        {
+          "source": "conformance",
+          "on": "dart@3.12.0",
+          "entry": "explore.witnesses.g2-r0010-l92",
+          "at": "dart@3.12.0",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "dart@3.12.0",
+          "entry": "explore.witnesses.g2-r0038-l67",
+          "at": "dart@3.12.0",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        }
+      ]
+    },
+    {
+      "id": "DART-MAXTIME",
+      "title": "a transaction with max time 2^64-1 hashes to another value once the sdk rebuilds it",
+      "component": "stellar_flutter_sdk",
+      "severity": "divergence",
+      "caps": [],
+      "minimal_entry": "explore.witnesses.f62d-r0000-l96",
+      "reproduce": "shapekit conformance run --sdk dart --version 3.12.0 --entry explore.witnesses.f62d-r0000-l96",
+      "status": "draft",
+      "draft": "candidate/findings/issues/dart-explore.witnesses.f62d-r0000-l96.md",
+      "cause": "TimeBounds.fromXdr reads the max time with BigInt.toInt (lib/src/transaction.dart L1087-L1092 at 3.12.0), which clamps 18446744073709551615 to 9223372036854775807, and toXdr writes the clamped value back (L1095-L1100), so a transaction core applied with max_time 2^64-1 hashes to another value.",
+      "siblings": [
+        "KMP-TXOBJECT",
+        "PHP-UINT64"
+      ],
+      "related": [],
+      "entries": [
+        "explore.witnesses.f62d-r0000-l96"
+      ],
+      "recipe": "recipe:corpus/recipes/explore.witnesses/f62d/r0000.json",
+      "affected": [
+        {
+          "on": "dart",
+          "tested": [
+            "3.12.0"
+          ],
+          "failing": [
+            "3.12.0"
+          ]
+        }
+      ],
+      "other_sdks": [
+        "kmp@1.18.0",
+        "php@1.18.0"
+      ],
+      "occurrences": [
+        {
+          "source": "conformance",
+          "on": "dart@3.12.0",
+          "entry": "explore.witnesses.f62d-r0000-l96",
+          "at": "dart@3.12.0",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        }
+      ]
+    },
+    {
+      "id": "NET-PRICE",
+      "title": "a transaction whose offer price the sdk does not get back from a decimal hashes to another value",
+      "component": "stellar-dotnet-sdk",
+      "severity": "divergence",
+      "caps": [
+        "CAP-0003",
+        "CAP-0006",
+        "CAP-0015"
+      ],
+      "minimal_entry": "explore.witnesses.g2-r0010-l92",
+      "reproduce": "shapekit conformance run --sdk dotnet --version 17.0.0 --entry explore.witnesses.g2-r0010-l92",
+      "status": "draft",
+      "draft": "candidate/findings/issues/dotnet-cap03.offer-liabilities.mainnet-37466023.md",
+      "cause": "ManageSellOfferOperation.FromXdr turns the price into decimal.Divide(N, D) written as a string, and ToOperationBody reads it back with Price.FromString (StellarDotnetSdk/Operations/ManageSellOfferOperation.cs L83 and L95-L106, Price.cs L55-L96, a continued fraction bounded by int.MaxValue), which writes another fraction for prices not in lowest terms and turns 1/2147483647 into 0/1, so Transaction.FromEnvelopeXdr(..).Hash(network) is not the network hash.",
+      "siblings": [
+        "CLI-TXHASH-V1",
+        "DART-PRICE",
+        "ETL-META-V4",
+        "PHP-CBKEY-JSON",
+        "PHP-HEXHASH"
+      ],
+      "related": [],
+      "entries": [
+        "cap03.offer-liabilities.mainnet-37466023",
+        "cap15.fee-bump.mainnet-57369500",
+        "explore.witnesses.g2-r0007-l69",
+        "explore.witnesses.g2-r0010-l92",
+        "explore.witnesses.g2-r0027-l67",
+        "explore.witnesses.g2-r0031-l67",
+        "explore.witnesses.g2-r0038-l67"
+      ],
+      "recipe": "recipe:corpus/recipes/explore.witnesses/g2/r0010.json",
+      "affected": [
+        {
+          "on": "dotnet",
+          "tested": [
+            "16.0.0",
+            "17.0.0"
+          ],
+          "failing": [
+            "16.0.0",
+            "17.0.0"
+          ]
+        }
+      ],
+      "other_sdks": [
+        "dart@3.12.0",
+        "php@1.18.0",
+        "stellar-cli@28.1.0",
+        "stellar-cli@30.0.1"
+      ],
+      "occurrences": [
+        {
+          "source": "conformance",
+          "on": "dotnet@16.0.0",
+          "entry": "cap03.offer-liabilities.mainnet-37466023",
+          "at": "dotnet@16.0.0",
+          "what": "diverges-from-network (6 check(s): mainnet/decode_json, mainnet/encode_json, mainnet/tx_hash 12, mainnet/tx_hash 108)"
+        },
+        {
+          "source": "conformance",
+          "on": "dotnet@16.0.0",
+          "entry": "cap15.fee-bump.mainnet-57369500",
+          "at": "dotnet@16.0.0",
+          "what": "diverges-from-network (10 check(s): mainnet/decode_json, mainnet/encode_json, mainnet/tx_hash 26, mainnet/tx_hash 29)"
+        },
+        {
+          "source": "conformance",
+          "on": "dotnet@16.0.0",
+          "entry": "explore.witnesses.g2-r0010-l92",
+          "at": "dotnet@16.0.0",
+          "what": "diverges-from-network (6 check(s): testnet/decode_json, testnet/encode_json, testnet/tx_hash 0, mainnet/decode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "dotnet@16.0.0",
+          "entry": "explore.witnesses.g2-r0027-l67",
+          "at": "dotnet@16.0.0",
+          "what": "diverges-from-network (6 check(s): testnet/decode_json, testnet/encode_json, testnet/tx_hash 0, mainnet/decode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "dotnet@16.0.0",
+          "entry": "explore.witnesses.g2-r0031-l67",
+          "at": "dotnet@16.0.0",
+          "what": "diverges-from-network (6 check(s): testnet/decode_json, testnet/encode_json, testnet/tx_hash 0, mainnet/decode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "dotnet@16.0.0",
+          "entry": "explore.witnesses.g2-r0038-l67",
+          "at": "dotnet@16.0.0",
+          "what": "diverges-from-network (6 check(s): testnet/decode_json, testnet/encode_json, testnet/tx_hash 0, mainnet/decode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "dotnet@17.0.0",
+          "entry": "cap03.offer-liabilities.mainnet-37466023",
+          "at": "dotnet@17.0.0",
+          "what": "diverges-from-network (6 check(s): mainnet/decode_json, mainnet/encode_json, mainnet/tx_hash 12, mainnet/tx_hash 108)"
+        },
+        {
+          "source": "conformance",
+          "on": "dotnet@17.0.0",
+          "entry": "cap15.fee-bump.mainnet-57369500",
+          "at": "dotnet@17.0.0",
+          "what": "diverges-from-network (10 check(s): mainnet/decode_json, mainnet/encode_json, mainnet/tx_hash 26, mainnet/tx_hash 29)"
+        },
+        {
+          "source": "conformance",
+          "on": "dotnet@17.0.0",
+          "entry": "explore.witnesses.g2-r0007-l69",
+          "at": "dotnet@17.0.0",
+          "what": "diverges-from-network (6 check(s): testnet/decode_json, testnet/encode_json, testnet/tx_hash 1, mainnet/decode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "dotnet@17.0.0",
+          "entry": "explore.witnesses.g2-r0010-l92",
+          "at": "dotnet@17.0.0",
+          "what": "diverges-from-network (6 check(s): testnet/decode_json, testnet/encode_json, testnet/tx_hash 0, mainnet/decode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "dotnet@17.0.0",
+          "entry": "explore.witnesses.g2-r0027-l67",
+          "at": "dotnet@17.0.0",
+          "what": "diverges-from-network (6 check(s): testnet/decode_json, testnet/encode_json, testnet/tx_hash 0, mainnet/decode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "dotnet@17.0.0",
+          "entry": "explore.witnesses.g2-r0031-l67",
+          "at": "dotnet@17.0.0",
+          "what": "diverges-from-network (6 check(s): testnet/decode_json, testnet/encode_json, testnet/tx_hash 0, mainnet/decode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "dotnet@17.0.0",
+          "entry": "explore.witnesses.g2-r0038-l67",
+          "at": "dotnet@17.0.0",
+          "what": "diverges-from-network (6 check(s): testnet/decode_json, testnet/encode_json, testnet/tx_hash 0, mainnet/decode_json)"
+        }
+      ]
+    },
+    {
+      "id": "KMP-TXOBJECT",
+      "title": "the transaction object refuses values the network applied: max time 2^64-1 and offer id -1",
+      "component": "kmp-stellar-sdk",
+      "severity": "divergence",
+      "caps": [],
+      "minimal_entry": "explore.witnesses.f62d-r0004-l69",
+      "reproduce": "shapekit conformance run --sdk kmp --version 1.18.0 --entry explore.witnesses.f62d-r0004-l69",
+      "status": "draft",
+      "draft": "candidate/findings/issues/kmp-explore.witnesses.f62d-r0000-l96.md",
+      "cause": "AbstractTransaction.fromEnvelopeXdr refuses transactions core applied: TimeBounds reads the uint64 max time into a signed Long and requires it to be >= 0 (commonMain/com/soneso/stellar/sdk/TimeBounds.kt L26 at 1.18.0, \"maxTime must be >= 0\" for 2^64-1), and the manage offer operations refuse offer id -1 (\"Offer ID must be non-negative\"), so the transaction hash cannot be had; the class of the candidate lane's other transaction-object refusals.",
+      "siblings": [
+        "CLI-TXHASH-V1",
+        "DART-MAXTIME",
+        "DART-OFFERU64",
+        "PHP-OFFERID",
+        "PHP-UINT64"
+      ],
+      "related": [],
+      "entries": [
+        "explore.witnesses.f62d-r0000-l96",
+        "explore.witnesses.f62d-r0004-l69"
+      ],
+      "recipe": "recipe:corpus/recipes/explore.witnesses/f62d/r0004.json",
+      "affected": [
+        {
+          "on": "kmp",
+          "tested": [
+            "1.18.0"
+          ],
+          "failing": [
+            "1.18.0"
+          ]
+        }
+      ],
+      "other_sdks": [
+        "dart@3.12.0",
+        "php@1.18.0",
+        "stellar-cli@28.1.0",
+        "stellar-cli@30.0.1"
+      ],
+      "occurrences": [
+        {
+          "source": "conformance",
+          "on": "kmp@1.18.0",
+          "entry": "explore.witnesses.f62d-r0000-l96",
+          "at": "kmp@1.18.0",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "kmp@1.18.0",
+          "entry": "explore.witnesses.f62d-r0004-l69",
+          "at": "kmp@1.18.0",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        }
+      ]
+    },
+    {
+      "id": "PHP-OFFERID",
+      "title": "rebuilding a transaction with a manage sell offer of offer id -1 throws",
+      "component": "soneso/stellar-php-sdk",
+      "severity": "divergence",
+      "caps": [],
+      "minimal_entry": "explore.witnesses.f62d-r0004-l69",
+      "reproduce": "shapekit conformance run --sdk php --version 1.18.0 --entry explore.witnesses.f62d-r0004-l69",
+      "status": "draft",
+      "draft": "candidate/findings/issues/php-explore.witnesses.f62d-r0004-l69.md",
+      "cause": "The offer id check of ManageSellOfferOperationBuilder::setOfferId (Soneso/StellarSDK/ManageSellOfferOperationBuilder.php L69-L72 at 1.18.0) throws \"Invalid offer id: -1\" for a value the int64 field holds and core applied in a failed transaction, so the transaction cannot be rebuilt and hashed.",
+      "siblings": [
+        "CLI-TXHASH-V1",
+        "DART-OFFERU64",
+        "KMP-TXOBJECT"
+      ],
+      "related": [],
+      "entries": [
+        "explore.witnesses.f62d-r0004-l69"
+      ],
+      "recipe": "recipe:corpus/recipes/explore.witnesses/f62d/r0004.json",
+      "affected": [
+        {
+          "on": "php",
+          "tested": [
+            "1.18.0"
+          ],
+          "failing": [
+            "1.18.0"
+          ]
+        }
+      ],
+      "other_sdks": [
+        "dart@3.12.0",
+        "kmp@1.18.0",
+        "stellar-cli@28.1.0",
+        "stellar-cli@30.0.1"
+      ],
+      "occurrences": [
+        {
+          "source": "conformance",
+          "on": "php@1.18.0",
+          "entry": "explore.witnesses.f62d-r0004-l69",
+          "at": "php@1.18.0",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        }
+      ]
+    },
+    {
+      "id": "PHP-SETOPTIONS",
+      "title": "a set options operation with clear_flags 0 or an empty home domain hashes to another value once the sdk rebuilds it",
+      "component": "soneso/stellar-php-sdk",
+      "severity": "divergence",
+      "caps": [],
+      "minimal_entry": "explore.witnesses.g2-r0015-l71",
+      "reproduce": "shapekit conformance run --sdk php --version 1.18.0 --entry explore.witnesses.g2-r0015-l71",
+      "status": "draft",
+      "draft": "candidate/findings/issues/php-explore.witnesses.g2-r0015-l71.md",
+      "cause": "AbstractTransaction::fromEnvelopeXdr(..)->hash(network) rebuilds the operation, and SetOptionsOperation::toOperationBody writes inflationDestination, clearFlags, setFlags and homeDomain only when they are truthy (Soneso/StellarSDK/SetOptionsOperation.php L200-L224 at 1.18.0, `if ($this->clearFlags)`), so a present 0 or empty home domain becomes absent and the sdk hashes other bytes than the network.",
+      "siblings": [
+        "CLI-TXHASH-V1",
+        "ETL-META-V4",
+        "NET-DEPRECATED-OPS"
+      ],
+      "related": [],
+      "entries": [
+        "explore.witnesses.g2-r0015-l71"
+      ],
+      "recipe": "recipe:corpus/recipes/explore.witnesses/g2/r0015.json",
+      "affected": [
+        {
+          "on": "php",
+          "tested": [
+            "1.18.0"
+          ],
+          "failing": [
+            "1.18.0"
+          ]
+        }
+      ],
+      "other_sdks": [
+        "dotnet@16.0.0",
+        "dotnet@17.0.0",
+        "stellar-cli@28.1.0",
+        "stellar-cli@30.0.1"
+      ],
+      "occurrences": [
+        {
+          "source": "conformance",
+          "on": "php@1.18.0",
+          "entry": "explore.witnesses.g2-r0015-l71",
+          "at": "php@1.18.0",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
         }
       ]
     }

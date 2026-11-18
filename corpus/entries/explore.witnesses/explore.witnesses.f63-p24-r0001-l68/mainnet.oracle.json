@@ -1,0 +1,147 @@
+{
+  "ledgers": [
+    {
+      "close_time": "1773100800",
+      "evicted": [],
+      "ledger_hash": "dc67291de0ddb4960d6ad65a9edfeecf70f11df5e4089c55130dffe8aac7633a",
+      "ledger_seq": 68,
+      "protocol": 24,
+      "transactions": [
+        {
+          "apply_index": 0,
+          "changes": [
+            {
+              "after": "99999702688",
+              "asset": "native",
+              "before": "99999761776",
+              "delta": "-59088",
+              "held_in": "account",
+              "holder": "GDL7YO7LVZ6VDSMOB52BO6R4YHOO7H7QI46RDDYMBQAAPCGNYM6F4XJM",
+              "kind": "balance-change",
+              "scope": "fee-processing"
+            },
+            {
+              "amount": "59088",
+              "asset": "native",
+              "contract": "CAS3J7GYLGXMF6TDJBBYYSE3HQ6BBSMLNUQ34T6TZMYMW2EVH34XOWMA",
+              "event": "fee",
+              "from": "GDL7YO7LVZ6VDSMOB52BO6R4YHOO7H7QI46RDDYMBQAAPCGNYM6F4XJM",
+              "kind": "token-event",
+              "scope": "fee-processing",
+              "stage": "before-all-txs"
+            },
+            {
+              "account": "GDL7YO7LVZ6VDSMOB52BO6R4YHOO7H7QI46RDDYMBQAAPCGNYM6F4XJM",
+              "after": "274877906947",
+              "before": "274877906946",
+              "kind": "sequence",
+              "scope": "tx-before"
+            },
+            {
+              "action": "created",
+              "contract": "CD3WRLDVYQKNA5U5625TVWNXLEACDYKWCIS5VF75FPSRTRNXOWZIROAX",
+              "durability": "persistent",
+              "key_xdr": "AAAAFA==",
+              "kind": "contract-data",
+              "op_index": 0,
+              "scope": "operation"
+            },
+            {
+              "contract": "CD3WRLDVYQKNA5U5625TVWNXLEACDYKWCIS5VF75FPSRTRNXOWZIROAX",
+              "executable": "wasm:ac4984203d55fb4f04f9fe8aecd135a57a6e863d4047154f0f402e1308bc7eeb",
+              "kind": "contract-deployed",
+              "op_index": 0,
+              "scope": "operation"
+            },
+            {
+              "action": "created",
+              "after": 4163,
+              "key_hash": "8c7cac75f9fb02efc2f0d7ea81e9d30a7ad8ea3438c7396ccabd4f934bd0fb57",
+              "kind": "ttl",
+              "op_index": 0,
+              "scope": "operation",
+              "target": "contract data of CD3WRLDVYQKNA5U5625TVWNXLEACDYKWCIS5VF75FPSRTRNXOWZIROAX key 00000014"
+            },
+            {
+              "after": "99999710317",
+              "asset": "native",
+              "before": "99999702688",
+              "delta": "7629",
+              "held_in": "account",
+              "holder": "GDL7YO7LVZ6VDSMOB52BO6R4YHOO7H7QI46RDDYMBQAAPCGNYM6F4XJM",
+              "kind": "balance-change",
+              "scope": "post-apply-fee"
+            },
+            {
+              "amount": "-7629",
+              "asset": "native",
+              "contract": "CAS3J7GYLGXMF6TDJBBYYSE3HQ6BBSMLNUQ34T6TZMYMW2EVH34XOWMA",
+              "event": "fee",
+              "from": "GDL7YO7LVZ6VDSMOB52BO6R4YHOO7H7QI46RDDYMBQAAPCGNYM6F4XJM",
+              "kind": "token-event",
+              "scope": "post-apply-fee",
+              "stage": "after-all-txs"
+            }
+          ],
+          "declared": {
+            "participants": [
+              {
+                "address": "CD3WRLDVYQKNA5U5625TVWNXLEACDYKWCIS5VF75FPSRTRNXOWZIROAX",
+                "kind": "contract",
+                "roles": [
+                  "footprint"
+                ]
+              },
+              {
+                "address": "GDL7YO7LVZ6VDSMOB52BO6R4YHOO7H7QI46RDDYMBQAAPCGNYM6F4XJM",
+                "kind": "account",
+                "roles": [
+                  "deployer",
+                  "tx-source"
+                ]
+              }
+            ],
+            "source": "GDL7YO7LVZ6VDSMOB52BO6R4YHOO7H7QI46RDDYMBQAAPCGNYM6F4XJM"
+          },
+          "events": "unified",
+          "fee": {
+            "balance_delta": "-51459",
+            "charged": "51459",
+            "source": "GDL7YO7LVZ6VDSMOB52BO6R4YHOO7H7QI46RDDYMBQAAPCGNYM6F4XJM"
+          },
+          "hash": "edcdae45ee75a31598afcc3cb974fd29a7c2d20aebb8156476d5e41355fb4309",
+          "participants": [
+            {
+              "address": "CAS3J7GYLGXMF6TDJBBYYSE3HQ6BBSMLNUQ34T6TZMYMW2EVH34XOWMA",
+              "kind": "contract",
+              "roles": [
+                "event-contract"
+              ]
+            },
+            {
+              "address": "CD3WRLDVYQKNA5U5625TVWNXLEACDYKWCIS5VF75FPSRTRNXOWZIROAX",
+              "kind": "contract",
+              "roles": [
+                "entry-changed"
+              ]
+            },
+            {
+              "address": "GDL7YO7LVZ6VDSMOB52BO6R4YHOO7H7QI46RDDYMBQAAPCGNYM6F4XJM",
+              "kind": "account",
+              "roles": [
+                "entry-changed",
+                "event-address",
+                "fee-source"
+              ]
+            }
+          ],
+          "result": "tx_success",
+          "successful": true
+        }
+      ],
+      "upgrades": []
+    }
+  ],
+  "network_passphrase": "Public Global Stellar Network ; September 2015",
+  "oracle_vocab_version": 2
+}

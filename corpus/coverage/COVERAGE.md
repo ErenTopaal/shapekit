@@ -8,9 +8,9 @@ Only core-emitted entries count as coverage: `core-golden`, `local-core`, `testn
 
 | Measure | Value |
 |---|---|
-| Entries | 716 |
-| Core-emitted entries | 594 |
-| Entries by source class | core-golden 107, local-core 471, local-core-refused 18, mainnet-history 13, synthetic 104, testnet-history 3 |
+| Entries | 1092 |
+| Core-emitted entries | 970 |
+| Entries by source class | core-golden 107, local-core 844, local-core-refused 18, mainnet-history 16, synthetic 104, testnet-history 3 |
 | CAPs (indexer-visible) | 102 (45) |
 | Indexer-visible CAPs with a core-emitted entry | 44 |
 | Indexer-visible CAPs uncovered, with a reason | 1 |
@@ -39,10 +39,10 @@ Only core-emitted entries count as coverage: `core-golden`, `local-core`, `testn
 |---|---|---|---|---|---|---|---|---|---|
 | CAP-0001 Bump Sequence | 10 | yes | `cap01.bump-sequence` | 9 | 8 | core-golden 1, local-core 7, local-core-refused 1 | any 1, mainnet 8, testnet 8 | 30 |  |
 | CAP-0002 Transaction level signature verification | 10 | yes | `classic.failed-tx` | 124 | 123 | core-golden 5, local-core 116, local-core-refused 1, mainnet-history 2 | any 5, mainnet 119, testnet 117 | 9, 12, 23, 26, 30 |  |
-| CAP-0003 Asset-backed offers | 10 | yes | `cap03.offer-liabilities` | 28 | 23 | core-golden 6, local-core 16, mainnet-history 1, synthetic 5 | any 7, mainnet 17, testnet 16, vector 4 | 11, 17, 30 |  |
+| CAP-0003 Asset-backed offers | 10 | yes | `cap03.offer-liabilities` | 30 | 25 | core-golden 6, local-core 16, mainnet-history 3, synthetic 5 | any 7, mainnet 19, testnet 16, vector 4 | 11, 17, 19, 30 |  |
 | CAP-0004 Improved Rounding for Cross Offer | 10 | no |  | 0 | 0 |  |  |  | offer-crossing rounding arithmetic only; results and meta keep existing shapes |
 | CAP-0005 Throttling and transaction pricing improvements | 11 | no |  | 0 | 0 |  |  |  | fee and transaction set selection only; the CAP states no changes in XDR |
-| CAP-0006 Add ManageBuyOffer Operation | 11 | yes | `cap03.offer-liabilities` | 28 | 23 | core-golden 6, local-core 16, mainnet-history 1, synthetic 5 | any 7, mainnet 17, testnet 16, vector 4 | 11, 17, 30 |  |
+| CAP-0006 Add ManageBuyOffer Operation | 11 | yes | `cap03.offer-liabilities` | 30 | 25 | core-golden 6, local-core 16, mainnet-history 3, synthetic 5 | any 7, mainnet 19, testnet 16, vector 4 | 11, 17, 19, 30 |  |
 | CAP-0007 Deterministic Account Creation |  | no |  | 0 | 0 |  |  |  | Draft; not implemented in any protocol; proposed CreateDeterministicAccountOp is absent at v30.0 |
 | CAP-0008 Self Identified Pre-Auth Transaction |  | no |  | 0 | 0 |  |  |  | Draft; not implemented in any protocol; proposed SIGNER_KEY_TYPE_PRE_AUTH_SELF_TX is absent at v30.0 |
 | CAP-0009 Linear/Exterior Immutable Accounts |  | no |  | 0 | 0 |  |  |  | Draft; not implemented in any protocol |
@@ -51,7 +51,7 @@ Only core-emitted entries count as coverage: `core-golden`, `local-core`, `testn
 | CAP-0012 Deterministic accounts and creatorTxID |  | no |  | 0 | 0 |  |  |  | Draft; not implemented in any protocol; proposed CreateDetAccountOp is absent at v30.0 |
 | CAP-0013 Change Trustlines to Balances |  | no |  | 0 | 0 |  |  |  | Rejected; not implemented in any protocol; proposed AddBalanceOp is absent at v30.0 |
 | CAP-0014 Adversarial Transaction Set Ordering |  | no |  | 0 | 0 |  |  |  | Draft; not implemented in any protocol |
-| CAP-0015 Fee-Bump Transactions | 13 | yes | `cap15.fee-bump` | 22 | 20 | core-golden 1, local-core 17, mainnet-history 2, synthetic 2 | any 3, mainnet 19, testnet 17 | 20, 30 |  |
+| CAP-0015 Fee-Bump Transactions | 13 | yes | `cap15.fee-bump` | 23 | 21 | core-golden 1, local-core 17, mainnet-history 3, synthetic 2 | any 3, mainnet 20, testnet 17 | 20, 22, 30 |  |
 | CAP-0016 Cosigned assets: NopOp and COAUTHORIZED_FLAG |  | no |  | 0 | 0 |  |  |  | Rejected; not implemented in any protocol (in favour of CAP-0018); proposed COAUTHORIZED_FLAG and NopOp are absent at v30.0 |
 | CAP-0017 Update LastModifiedLedgerSeq If and Only If LedgerEntry is Modified |  | no |  | 0 | 0 |  |  |  | Accepted but protocol TBD, not implemented; would only change lastModifiedLedgerSeq update rules, no XDR |
 | CAP-0018 Fine-Grained Control of Authorization | 13 | yes | `cap18.maintain-liabilities` | 7 | 6 | core-golden 1, local-core 5, local-core-refused 1 | any 1, mainnet 6, testnet 6 | 30 |  |
@@ -230,14 +230,14 @@ Ed25519 signed-payload signers on accounts, in extra signers and in sponsorship 
 
 | Fragment | Core-emitted entries | Gap |
 |---|---|---|
-| `SignerKey:ed25519_signed_payload` | 33: `cap40.signed-payload-signer.p28-account-four-payload-signers`, `cap40.signed-payload-signer.p28-authorised-by-payload-32`, `cap40.signed-payload-signer.p28-extra-signer-payload-64-envelope` and 30 more |  |
+| `SignerKey:ed25519_signed_payload` | 37: `cap40.signed-payload-signer.p28-account-four-payload-signers`, `cap40.signed-payload-signer.p28-authorised-by-payload-32`, `cap40.signed-payload-signer.p28-extra-signer-payload-64-envelope` and 34 more |  |
 | `:ed25519_signed_payload.payload#one` | 22: `cap40.signed-payload-signer.p28-account-four-payload-signers`, `cap40.signed-payload-signer.p28-authorised-by-payload-32`, `cap40.signed-payload-signer.p28-extra-signer-payload-64-meta` and 19 more |  |
-| `:ed25519_signed_payload.payload#many` | 21: `cap40.signed-payload-signer.p28-account-four-payload-signers`, `cap40.signed-payload-signer.p28-authorised-by-payload-32`, `cap40.signed-payload-signer.p28-extra-signer-payload-64-meta` and 18 more |  |
-| `:ed25519_signed_payload.payload#max` | 18: `cap40.signed-payload-signer.p28-account-four-payload-signers`, `cap40.signed-payload-signer.p28-authorised-by-payload-32`, `cap40.signed-payload-signer.p28-extra-signer-payload-64-envelope` and 15 more |  |
-| `.body:set_options.signer.key:ed25519_signed_payload` | 11: `cap40.signed-payload-signer.p28-remove-signer-payload-1-envelope`, `cap40.signed-payload-signer.p28-set-options-payload-1-envelope`, `cap40.signed-payload-signer.p28-set-options-payload-32-envelope` and 8 more |  |
+| `:ed25519_signed_payload.payload#many` | 22: `cap40.signed-payload-signer.p28-account-four-payload-signers`, `cap40.signed-payload-signer.p28-authorised-by-payload-32`, `cap40.signed-payload-signer.p28-extra-signer-payload-64-meta` and 19 more |  |
+| `:ed25519_signed_payload.payload#max` | 21: `cap40.signed-payload-signer.p28-account-four-payload-signers`, `cap40.signed-payload-signer.p28-authorised-by-payload-32`, `cap40.signed-payload-signer.p28-extra-signer-payload-64-envelope` and 18 more |  |
+| `.body:set_options.signer.key:ed25519_signed_payload` | 12: `cap40.signed-payload-signer.p28-remove-signer-payload-1-envelope`, `cap40.signed-payload-signer.p28-set-options-payload-1-envelope`, `cap40.signed-payload-signer.p28-set-options-payload-32-envelope` and 9 more |  |
 | `.extra_signers[]:ed25519_signed_payload` | 2: `cap40.signed-payload-signer.p28-extra-signer-payload-64-envelope`, `cap40.signed-payload-signer.p30-extra-signer-payload-64-envelope` |  |
-| `.body:revoke_sponsorship:signer.signer_key:ed25519_signed_payload` | 2: `cap40.signed-payload-signer.p28-revoke-sponsorship-payload-64-envelope`, `cap40.signed-payload-signer.p30-revoke-sponsorship-payload-64-envelope` |  |
-| `.signers[].key:ed25519_signed_payload` | 19: `cap40.signed-payload-signer.p28-account-four-payload-signers`, `cap40.signed-payload-signer.p28-authorised-by-payload-32`, `cap40.signed-payload-signer.p28-extra-signer-payload-64-meta` and 16 more |  |
+| `.body:revoke_sponsorship:signer.signer_key:ed25519_signed_payload` | 5: `cap40.signed-payload-signer.p28-revoke-sponsorship-payload-64-envelope`, `cap40.signed-payload-signer.p30-revoke-sponsorship-payload-64-envelope`, `explore.witnesses.f62c-r0000-l91` and 2 more |  |
+| `.signers[].key:ed25519_signed_payload` | 20: `cap40.signed-payload-signer.p28-account-four-payload-signers`, `cap40.signed-payload-signer.p28-authorised-by-payload-32`, `cap40.signed-payload-signer.p28-extra-signer-payload-64-meta` and 17 more |  |
 
 ### `cap27.muxed-accounts`
 
@@ -245,12 +245,12 @@ Muxed accounts as transaction source, operation source and every muxed destinati
 
 | Fragment | Core-emitted entries | Gap |
 |---|---|---|
-| `MuxedAccount:muxed_ed25519` | 42: `cap15.fee-bump.mainnet-51000294-a25b8226-envelope`, `cap15.fee-bump.p30-muxed-fee-source-inner-failed-envelope`, `cap15.fee-bump.p30-muxed-fee-source-inner-success-envelope` and 39 more |  |
-| `.source_account:muxed_ed25519` | 20: `cap15.fee-bump.mainnet-51000294-a25b8226-envelope`, `cap27.muxed-accounts.mainnet-36196205-17fee99b-envelope`, `cap27.muxed-accounts.p28-claimable-balance-tx-source-id-1` and 17 more |  |
-| `.body:payment.destination:muxed_ed25519` | 14: `cap27.muxed-accounts.p28-issued-payment-destination-id-2p53`, `cap27.muxed-accounts.p28-tx-source-and-payment-destination-id-0`, `cap27.muxed-accounts.p28-tx-source-and-payment-destination-id-1` and 11 more |  |
-| `.body:path_payment_strict_receive.destination:muxed_ed25519` | 5: `cap27.muxed-accounts.p28-path-payment-strict-receive-destination-id-2p64-1`, `cap27.muxed-accounts.p30-path-payment-strict-receive-destination-id-2p64-1`, `cap67.unified-events.p22-backfill-path-payment-muxed-destination` and 2 more |  |
-| `.body:path_payment_strict_send.destination:muxed_ed25519` | 2: `cap27.muxed-accounts.p28-path-payment-strict-send-destination-id-1`, `cap27.muxed-accounts.p30-path-payment-strict-send-destination-id-1` |  |
-| `.body:account_merge:muxed_ed25519` | 5: `cap27.muxed-accounts.p28-account-merge-destination-id-2p53`, `cap27.muxed-accounts.p30-account-merge-destination-id-2p53`, `cap67.unified-events.p22-account-merge-muxed-destination` and 2 more |  |
+| `MuxedAccount:muxed_ed25519` | 74: `cap15.fee-bump.mainnet-51000294-a25b8226-envelope`, `cap15.fee-bump.mainnet-57369500`, `cap15.fee-bump.p30-muxed-fee-source-inner-failed-envelope` and 71 more |  |
+| `.source_account:muxed_ed25519` | 40: `cap15.fee-bump.mainnet-51000294-a25b8226-envelope`, `cap27.muxed-accounts.mainnet-36196205-17fee99b-envelope`, `cap27.muxed-accounts.p28-claimable-balance-tx-source-id-1` and 37 more |  |
+| `.body:payment.destination:muxed_ed25519` | 17: `cap27.muxed-accounts.p28-issued-payment-destination-id-2p53`, `cap27.muxed-accounts.p28-tx-source-and-payment-destination-id-0`, `cap27.muxed-accounts.p28-tx-source-and-payment-destination-id-1` and 14 more |  |
+| `.body:path_payment_strict_receive.destination:muxed_ed25519` | 8: `cap27.muxed-accounts.p28-path-payment-strict-receive-destination-id-2p64-1`, `cap27.muxed-accounts.p30-path-payment-strict-receive-destination-id-2p64-1`, `cap67.unified-events.p22-backfill-path-payment-muxed-destination` and 5 more |  |
+| `.body:path_payment_strict_send.destination:muxed_ed25519` | 3: `cap27.muxed-accounts.p28-path-payment-strict-send-destination-id-1`, `cap27.muxed-accounts.p30-path-payment-strict-send-destination-id-1`, `explore.witnesses.g2-r0025-l134` |  |
+| `.body:account_merge:muxed_ed25519` | 10: `cap27.muxed-accounts.p28-account-merge-destination-id-2p53`, `cap27.muxed-accounts.p30-account-merge-destination-id-2p53`, `cap67.unified-events.p22-account-merge-muxed-destination` and 7 more |  |
 | `.body:clawback.from:muxed_ed25519` | 2: `cap27.muxed-accounts.p28-clawback-from-id-2p64-1`, `cap27.muxed-accounts.p30-clawback-from-id-2p64-1` |  |
 
 ### `soroban.muxed-source`
@@ -260,9 +260,9 @@ Soroban operations and transactions with a muxed source account. CAPs: CAP-0027,
 | Fragment | Core-emitted entries | Gap |
 |---|---|---|
 | `TransactionResultResult:tx_soroban_invalid` | none | `refused-before-ledger` the arm itself: set in TransactionFrame::commonValidPreSeqNum (memo and muxed source rule from protocol 25) or TransactionQueue::canAdd (before 25) from the envelope and network settings (stellar-core v30.0.0); the corpus holds the submit-time refusals Shape seen in: refused by core 2: `soroban.muxed-source.p28-invoke-muxed-source`, `soroban.muxed-source.p30-invoke-muxed-source` |
-| `OperationBody:extend_footprint_ttl` | 10: `cap63.parallel-txset.golden-04667ce620bffee7-24`, `soroban.invoke-basics.golden-04667ce620bffee7-24`, `soroban.invoke-basics.golden-568d51258ccf9080-9` and 7 more |  |
-| `OperationBody:restore_footprint` | 14: `cap66.archival.golden-04667ce620bffee7-26`, `cap66.archival.p30-restore-footprint`, `cap76.archival-remediation.golden-04667ce620bffee7-26` and 11 more |  |
-| `.source_account:muxed_ed25519` | 20: `cap15.fee-bump.mainnet-51000294-a25b8226-envelope`, `cap27.muxed-accounts.mainnet-36196205-17fee99b-envelope`, `cap27.muxed-accounts.p28-claimable-balance-tx-source-id-1` and 17 more |  |
+| `OperationBody:extend_footprint_ttl` | 15: `cap63.parallel-txset.golden-04667ce620bffee7-24`, `explore.witnesses.f63-footprint-limits-p22-l66`, `explore.witnesses.f63-p21-r0001-l86` and 12 more |  |
+| `OperationBody:restore_footprint` | 20: `cap66.archival.golden-04667ce620bffee7-26`, `cap66.archival.p30-restore-footprint`, `cap76.archival-remediation.golden-04667ce620bffee7-26` and 17 more |  |
+| `.source_account:muxed_ed25519` | 40: `cap15.fee-bump.mainnet-51000294-a25b8226-envelope`, `cap27.muxed-accounts.mainnet-36196205-17fee99b-envelope`, `cap27.muxed-accounts.p28-claimable-balance-tx-source-id-1` and 37 more |  |
 
 Planned shapes no fragment can express, not in the corpus:
 
@@ -274,8 +274,8 @@ SEP-41 token transfers whose address arguments are muxed account addresses. CAPs
 
 | Fragment | Core-emitted entries | Gap |
 |---|---|---|
-| `ScAddress:muxed_account` | 8: `cap67.unified-events.golden-938fb779c48ac3af-16`, `sep41.muxed-addresses.golden-938fb779c48ac3af-16`, `sep41.muxed-addresses.p28-credit-mint-to-muxed` and 5 more |  |
-| `.args[]:address:muxed_account` | 8: `cap67.unified-events.golden-938fb779c48ac3af-16`, `sep41.muxed-addresses.golden-938fb779c48ac3af-16`, `sep41.muxed-addresses.p28-credit-mint-to-muxed` and 5 more |  |
+| `ScAddress:muxed_account` | 9: `cap67.unified-events.golden-938fb779c48ac3af-16`, `explore.witnesses.f63-p27-r0002-l90`, `sep41.muxed-addresses.golden-938fb779c48ac3af-16` and 6 more |  |
+| `.args[]:address:muxed_account` | 9: `cap67.unified-events.golden-938fb779c48ac3af-16`, `explore.witnesses.f63-p27-r0002-l90`, `sep41.muxed-addresses.golden-938fb779c48ac3af-16` and 6 more |  |
 
 ### `cap84.muxed-contract`
 
@@ -283,8 +283,8 @@ Muxed contract addresses (strkey W) as SAC transfer destinations. CAPs: CAP-0084
 
 | Fragment | Core-emitted entries | Gap |
 |---|---|---|
-| `ScAddress:muxed_contract` | 6: `cap67.unified-events.golden-426337b02a4e2a17-11`, `cap67.unified-events.p30-sac-issuer-transfer-to-muxed-contract`, `cap84.muxed-contract.golden-7f92354d03578deb-11` and 3 more |  |
-| `.args[]:address:muxed_contract` | 6: `cap67.unified-events.golden-426337b02a4e2a17-11`, `cap67.unified-events.p30-sac-issuer-transfer-to-muxed-contract`, `cap84.muxed-contract.golden-7f92354d03578deb-11` and 3 more |  |
+| `ScAddress:muxed_contract` | 7: `cap67.unified-events.golden-426337b02a4e2a17-11`, `cap67.unified-events.p30-sac-issuer-transfer-to-muxed-contract`, `cap84.muxed-contract.golden-7f92354d03578deb-11` and 4 more |  |
+| `.args[]:address:muxed_contract` | 7: `cap67.unified-events.golden-426337b02a4e2a17-11`, `cap67.unified-events.p30-sac-issuer-transfer-to-muxed-contract`, `cap84.muxed-contract.golden-7f92354d03578deb-11` and 4 more |  |
 
 ### `cap73.sac-trust`
 
@@ -292,11 +292,11 @@ SAC trust(address) creating an unlimited trustline with no event, XLM SAC transf
 
 | Fragment | Core-emitted entries | Gap |
 |---|---|---|
-| `ContractIdPreimage:asset` | 5: `cap73.sac-trust.golden-504393015a71bc7a-8`, `cap73.sac-trust.p28-deploy-credit-sac-envelope`, `cap73.sac-trust.p28-deploy-xlm-sac-envelope` and 2 more |  |
-| `ContractExecutable:stellar_asset` | 9: `cap73.sac-trust.golden-504393015a71bc7a-8`, `cap73.sac-trust.p28-deploy-credit-sac-envelope`, `cap73.sac-trust.p28-deploy-credit-sac-meta` and 6 more |  |
-| `OperationBody:invoke_host_function` | 111: `cap15.fee-bump.golden-f5fa0a4b15bfd9d9-12`, `cap38.liquidity-pools.testnet-5521432`, `cap40.signed-payload-signer.testnet-4437357` and 108 more |  |
-| `.changes[]:created.data:trustline` | 9: `cap27.muxed-accounts.mainnet-36196205-17fee99b-meta`, `cap33.sponsorship.p30-sponsored-trustline-meta`, `cap38.liquidity-pools.golden-0d70bfa2dc91b602-10` and 6 more |  |
-| `.changes[]:created.data:account` | 7: `cap33.sponsorship.p30-sponsored-account-meta`, `cap38.liquidity-pools.testnet-5521432`, `cap67.unified-events.golden-09beaf24eb0cdcb0-0` and 4 more |  |
+| `ContractIdPreimage:asset` | 11: `cap73.sac-trust.golden-504393015a71bc7a-8`, `cap73.sac-trust.p28-deploy-credit-sac-envelope`, `cap73.sac-trust.p28-deploy-xlm-sac-envelope` and 8 more |  |
+| `ContractExecutable:stellar_asset` | 15: `cap73.sac-trust.golden-504393015a71bc7a-8`, `cap73.sac-trust.p28-deploy-credit-sac-envelope`, `cap73.sac-trust.p28-deploy-credit-sac-meta` and 12 more |  |
+| `OperationBody:invoke_host_function` | 162: `cap15.fee-bump.golden-f5fa0a4b15bfd9d9-12`, `cap15.fee-bump.mainnet-57369500`, `cap38.liquidity-pools.testnet-5521432` and 159 more |  |
+| `.changes[]:created.data:trustline` | 21: `cap03.offer-liabilities.mainnet-37466023`, `cap03.offer-liabilities.mainnet-44679511`, `cap27.muxed-accounts.mainnet-36196205-17fee99b-meta` and 18 more |  |
+| `.changes[]:created.data:account` | 19: `cap33.sponsorship.p30-sponsored-account-meta`, `cap38.liquidity-pools.testnet-5521432`, `cap67.unified-events.golden-09beaf24eb0cdcb0-0` and 16 more |  |
 
 ### `soroban.auth-trees`
 
@@ -304,11 +304,11 @@ Soroban authorization trees: deep, wide, source-account and address credentials,
 
 | Fragment | Core-emitted entries | Gap |
 |---|---|---|
-| `SorobanCredentials:source_account` | 37: `cap38.liquidity-pools.testnet-5521432`, `cap40.signed-payload-signer.testnet-4437357`, `cap67.unified-events.golden-426337b02a4e2a17-11` and 34 more |  |
-| `SorobanCredentials:address` | 11: `soroban.auth-trees.golden-5f615b0f98ae09f3-11`, `soroban.auth-trees.p30-address-credentials`, `soroban.auth-trees.p30-declared-depth-245` and 8 more |  |
+| `SorobanCredentials:source_account` | 50: `cap15.fee-bump.mainnet-57369500`, `cap38.liquidity-pools.testnet-5521432`, `cap40.signed-payload-signer.testnet-4437357` and 47 more |  |
+| `SorobanCredentials:address` | 12: `explore.witnesses.f63-p23-r0000-l76`, `soroban.auth-trees.golden-5f615b0f98ae09f3-11`, `soroban.auth-trees.p30-address-credentials` and 9 more |  |
 | `.sub_invocations#many` | 6: `cap88.ms-close-time.testnet-5695387`, `soroban.auth-trees.golden-57a486abce28859d-17`, `soroban.auth-trees.golden-e0d0e3f38b2d55e0-17` and 3 more |  |
 | `.root_invocation.sub_invocations[].sub_invocations[].sub_invocations[]` | 6: `soroban.auth-trees.golden-57a486abce28859d-17`, `soroban.auth-trees.p30-declared-depth-245`, `soroban.auth-trees.p30-declared-depth-246` and 3 more |  |
-| `SorobanAuthorizedFunction:create_contract_host_fn` | 4: `soroban.auth-trees.golden-27003f6cc5cdecc2-3`, `soroban.auth-trees.p30-unmatched-create-claimable-balance-deployer`, `soroban.auth-trees.p30-unmatched-create-success` and 1 more |  |
+| `SorobanAuthorizedFunction:create_contract_host_fn` | 5: `explore.witnesses.f63-p21-r0001-l67`, `soroban.auth-trees.golden-27003f6cc5cdecc2-3`, `soroban.auth-trees.p30-unmatched-create-claimable-balance-deployer` and 2 more |  |
 
 ### `cap38.liquidity-pools`
 
@@ -316,13 +316,13 @@ Pool-share trustlines with issuers ordered by key bytes, deposits, withdrawals a
 
 | Fragment | Core-emitted entries | Gap |
 |---|---|---|
-| `ChangeTrustAsset:pool_share` | 5: `cap38.liquidity-pools.golden-0d70bfa2dc91b602-10`, `cap38.liquidity-pools.p30-change-trust-pool-byte-order-envelope`, `cap38.liquidity-pools.testnet-5521432` and 2 more |  |
-| `TrustLineAsset:pool_share` | 9: `cap38.liquidity-pools.golden-0d70bfa2dc91b602-10`, `cap38.liquidity-pools.p30-change-trust-pool-byte-order-meta`, `cap38.liquidity-pools.p30-deposit-meta` and 6 more |  |
-| `LedgerEntryData:liquidity_pool` | 11: `cap38.liquidity-pools.golden-0d70bfa2dc91b602-10`, `cap38.liquidity-pools.p30-change-trust-pool-byte-order-meta`, `cap38.liquidity-pools.p30-deposit-meta` and 8 more |  |
-| `OperationBody:liquidity_pool_deposit` | 13: `cap38.liquidity-pools.golden-d637d6474c6d185d-16`, `cap38.liquidity-pools.p30-deposit-envelope`, `cap67.unified-events.p22-backfill-liquidity-pool-deposit` and 10 more |  |
-| `OperationBody:liquidity_pool_withdraw` | 8: `cap38.liquidity-pools.golden-0d70bfa2dc91b602-16`, `cap38.liquidity-pools.p30-withdraw-envelope`, `cap77.frozen-keys.golden-0d70bfa2dc91b602-16` and 5 more |  |
-| `ClaimAtom:liquidity_pool` | 1: `cap38.liquidity-pools.p30-path-payment-through-pool` |  |
-| `TrustLineEntryV1Ext:v2` | 10: `cap38.liquidity-pools.golden-0d70bfa2dc91b602-10`, `cap38.liquidity-pools.p30-asset-trustline-pool-use-count`, `cap38.liquidity-pools.p30-change-trust-pool-byte-order-meta` and 7 more |  |
+| `ChangeTrustAsset:pool_share` | 11: `cap38.liquidity-pools.golden-0d70bfa2dc91b602-10`, `cap38.liquidity-pools.p30-change-trust-pool-byte-order-envelope`, `cap38.liquidity-pools.testnet-5521432` and 8 more |  |
+| `TrustLineAsset:pool_share` | 15: `cap38.liquidity-pools.golden-0d70bfa2dc91b602-10`, `cap38.liquidity-pools.p30-change-trust-pool-byte-order-meta`, `cap38.liquidity-pools.p30-deposit-meta` and 12 more |  |
+| `LedgerEntryData:liquidity_pool` | 20: `cap03.offer-liabilities.mainnet-44679511`, `cap15.fee-bump.mainnet-57369500`, `cap38.liquidity-pools.golden-0d70bfa2dc91b602-10` and 17 more |  |
+| `OperationBody:liquidity_pool_deposit` | 25: `cap38.liquidity-pools.golden-d637d6474c6d185d-16`, `cap38.liquidity-pools.p30-deposit-envelope`, `cap67.unified-events.p22-backfill-liquidity-pool-deposit` and 22 more |  |
+| `OperationBody:liquidity_pool_withdraw` | 19: `cap38.liquidity-pools.golden-0d70bfa2dc91b602-16`, `cap38.liquidity-pools.p30-withdraw-envelope`, `cap77.frozen-keys.golden-0d70bfa2dc91b602-16` and 16 more |  |
+| `ClaimAtom:liquidity_pool` | 4: `cap03.offer-liabilities.mainnet-44679511`, `cap15.fee-bump.mainnet-57369500`, `cap38.liquidity-pools.p30-path-payment-through-pool` and 1 more |  |
+| `TrustLineEntryV1Ext:v2` | 19: `cap03.offer-liabilities.mainnet-44679511`, `cap15.fee-bump.mainnet-57369500`, `cap38.liquidity-pools.golden-0d70bfa2dc91b602-10` and 16 more |  |
 | `ChangeTrustResult:malformed` | none | `refused-before-ledger` the arm itself: set only in the operation's doCheckValid (stellar-core v30.0.0 src/transactions/*OpFrame.cpp), which reads nothing but the operation and the protocol, so the tx queue and tx set validation refuse the transaction and the identical check at apply never fails Shape seen in: refused by core 1: `cap38.liquidity-pools.p30-change-trust-pool-strkey-order` |
 
 ### `soroban.scval-shapes`
@@ -331,22 +331,22 @@ ScVal shapes: deep nesting, mixed-type map keys in host order, colliding keys, i
 
 | Fragment | Core-emitted entries | Gap |
 |---|---|---|
-| `ScVal:map` | 106: `cap03.offer-liabilities.mainnet-25000000`, `cap27.muxed-accounts.p28-account-merge-destination-id-2p53`, `cap27.muxed-accounts.p28-issued-payment-destination-id-2p53` and 103 more |  |
+| `ScVal:map` | 125: `cap03.offer-liabilities.mainnet-25000000`, `cap03.offer-liabilities.mainnet-37466023`, `cap03.offer-liabilities.mainnet-44679511` and 122 more |  |
 | `:map[].key:u32` | 7: `soroban.scval-shapes.mainnet-63092996-71f6c6ff-meta`, `soroban.scval-shapes.p30-integer-extremes-meta`, `soroban.scval-shapes.p30-map-keys-collide-native-envelope` and 4 more |  |
 | `:map[].key:string` | 6: `soroban.scval-shapes.p30-integer-extremes-meta`, `soroban.scval-shapes.p30-map-keys-collide-native-envelope`, `soroban.scval-shapes.p30-map-keys-collide-native-meta` and 3 more |  |
-| `:map[].key:symbol` | 106: `cap03.offer-liabilities.mainnet-25000000`, `cap27.muxed-accounts.p28-account-merge-destination-id-2p53`, `cap27.muxed-accounts.p28-issued-payment-destination-id-2p53` and 103 more |  |
+| `:map[].key:symbol` | 125: `cap03.offer-liabilities.mainnet-25000000`, `cap03.offer-liabilities.mainnet-37466023`, `cap03.offer-liabilities.mainnet-44679511` and 122 more |  |
 | `:map[].val:map[].val:map` | 4: `soroban.scval-shapes.p30-map-depth-max-envelope`, `soroban.scval-shapes.p30-map-depth-max-meta`, `soroban.scval-shapes.p30-map-depth-over` and 1 more |  |
 | `:vec[]:vec[]:vec[]:vec` | 5: `soroban.scval-shapes.mainnet-57500008-b3475921-meta`, `soroban.scval-shapes.p30-map-depth-max-meta`, `soroban.scval-shapes.p30-vec-depth-max-envelope` and 2 more |  |
-| `ScVal:i128` | 366: `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward`, `cap01.bump-sequence.p30-bump-past-starting-sequence` and 363 more |  |
-| `ScVal:u128` | 11: `cap38.liquidity-pools.testnet-5521432`, `soroban.scval-shapes.mainnet-57500008-b3475921-envelope`, `soroban.scval-shapes.mainnet-57500008-b3475921-meta` and 8 more |  |
-| `ScVal:i256` | 9: `cap38.liquidity-pools.testnet-5521432`, `soroban.scval-shapes.p30-integer-extremes-envelope`, `soroban.scval-shapes.p30-integer-extremes-meta` and 6 more |  |
-| `ScVal:u256` | 9: `soroban.scval-shapes.golden-3c107a86e830c499-7`, `soroban.scval-shapes.p30-integer-extremes-envelope`, `soroban.scval-shapes.p30-integer-extremes-meta` and 6 more |  |
-| `ScVal:string` | 164: `cap03.offer-liabilities.mainnet-25000000`, `cap03.offer-liabilities.p30-buy-offer-crosses-and-rests-meta`, `cap03.offer-liabilities.p30-buy-offer-takes-two-makers-meta` and 161 more |  |
-| `ScVal:symbol` | 412: `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward`, `cap01.bump-sequence.p30-bump-past-starting-sequence` and 409 more |  |
-| `ScVal:bytes` | 70: `cap38.liquidity-pools.testnet-5521432`, `cap40.signed-payload-signer.testnet-4437357`, `cap63.parallel-txset.golden-81af9cfb66a06a01-18` and 67 more |  |
-| `ScError:auth` | 6: `soroban.invoke-basics.golden-7e8aadf36d7d907d-17`, `soroban.invoke-basics.golden-897493fc26f0ff7b-17`, `soroban.scval-shapes.golden-7e8aadf36d7d907d-17` and 3 more |  |
-| `ScError:crypto` | 4: `soroban.invoke-basics.golden-897493fc26f0ff7b-17`, `soroban.scval-shapes.golden-897493fc26f0ff7b-17`, `soroban.scval-shapes.p30-errors-auth-crypto-events-envelope` and 1 more |  |
-| `ScError:events` | 2: `soroban.scval-shapes.p30-errors-auth-crypto-events-envelope`, `soroban.scval-shapes.p30-errors-auth-crypto-events-meta` |  |
+| `ScVal:i128` | 667: `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward`, `cap01.bump-sequence.p30-bump-past-starting-sequence` and 664 more |  |
+| `ScVal:u128` | 13: `cap38.liquidity-pools.testnet-5521432`, `explore.witnesses.f63-p23-r0000-l74`, `explore.witnesses.f63-p26-r0002-l81` and 10 more |  |
+| `ScVal:i256` | 10: `cap38.liquidity-pools.testnet-5521432`, `explore.witnesses.f63-p26-r0002-l81`, `soroban.scval-shapes.p30-integer-extremes-envelope` and 7 more |  |
+| `ScVal:u256` | 11: `explore.witnesses.f63-p22-r0001-l71`, `explore.witnesses.f63-p23-r0000-l70`, `soroban.scval-shapes.golden-3c107a86e830c499-7` and 8 more |  |
+| `ScVal:string` | 216: `cap03.offer-liabilities.mainnet-25000000`, `cap03.offer-liabilities.mainnet-37466023`, `cap03.offer-liabilities.mainnet-44679511` and 213 more |  |
+| `ScVal:symbol` | 715: `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward`, `cap01.bump-sequence.p30-bump-past-starting-sequence` and 712 more |  |
+| `ScVal:bytes` | 94: `cap03.offer-liabilities.mainnet-44679511`, `cap15.fee-bump.mainnet-57369500`, `cap38.liquidity-pools.testnet-5521432` and 91 more |  |
+| `ScError:auth` | 7: `explore.witnesses.f63-error-values-l67`, `soroban.invoke-basics.golden-7e8aadf36d7d907d-17`, `soroban.invoke-basics.golden-897493fc26f0ff7b-17` and 4 more |  |
+| `ScError:crypto` | 5: `explore.witnesses.f63-p30-r0003-l99`, `soroban.invoke-basics.golden-897493fc26f0ff7b-17`, `soroban.scval-shapes.golden-897493fc26f0ff7b-17` and 2 more |  |
+| `ScError:events` | 3: `explore.witnesses.f63-error-values-l67`, `soroban.scval-shapes.p30-errors-auth-crypto-events-envelope`, `soroban.scval-shapes.p30-errors-auth-crypto-events-meta` |  |
 
 ### `classic.max-length`
 
@@ -354,13 +354,13 @@ Every bounded classic vector at its maximum length. CAPs: CAP-0019, CAP-0024. En
 
 | Fragment | Core-emitted entries | Gap |
 |---|---|---|
-| `.operations#max` | 2: `classic.max-length.mainnet-63092988-bf644414-envelope`, `classic.max-length.p30-operations-100` |  |
+| `.operations#max` | 3: `cap03.offer-liabilities.mainnet-44679511`, `classic.max-length.mainnet-63092988-bf644414-envelope`, `classic.max-length.p30-operations-100` |  |
 | `.signatures#max` | 2: `classic.max-length.p30-home-domain-32`, `classic.max-length.p30-signatures-20` |  |
-| `.memo:text#max` | 3: `cap03.offer-liabilities.mainnet-25000000`, `classic.max-length.p30-memo-text-28`, `classic.memo-bytes.p30-memo-truncated-sequence-28` |  |
-| `.data_value#max` | 2: `classic.max-length.p30-data-name-value-64-envelope`, `classic.max-length.p30-data-name-value-64-meta` |  |
-| `.path#max` | 3: `classic.max-length.golden-34519f44ec59503a-22`, `classic.max-length.p30-path-strict-receive-5`, `classic.max-length.p30-path-strict-send-5` |  |
+| `.memo:text#max` | 7: `cap03.offer-liabilities.mainnet-25000000`, `classic.max-length.p30-memo-text-28`, `classic.memo-bytes.p30-memo-truncated-sequence-28` and 4 more |  |
+| `.data_value#max` | 3: `classic.max-length.p30-data-name-value-64-envelope`, `classic.max-length.p30-data-name-value-64-meta`, `explore.witnesses.g2-r0015-l72` |  |
+| `.path#max` | 5: `cap03.offer-liabilities.mainnet-37466023`, `cap03.offer-liabilities.mainnet-44679511`, `classic.max-length.golden-34519f44ec59503a-22` and 2 more |  |
 | `.signers#max` | 5: `classic.max-length.golden-6f067a349543093a-46`, `classic.max-length.p30-account-20-signers`, `classic.max-length.p30-home-domain-32` and 2 more |  |
-| `SetOptionsResult:too_many_signers` | 1: `classic.max-length.p30-signer-21-too-many` |  |
+| `SetOptionsResult:too_many_signers` | 2: `classic.max-length.p30-signer-21-too-many`, `explore.witnesses.g2-r0004-l122` |  |
 
 ### `classic.memo-bytes`
 
@@ -368,7 +368,7 @@ Memo text holding bytes that are not valid UTF-8. CAPs: CAP-0019. Entries: core-
 
 | Fragment | Core-emitted entries | Gap |
 |---|---|---|
-| `Memo:text` | 14: `cap03.offer-liabilities.mainnet-25000000`, `cap38.liquidity-pools.testnet-5521432`, `cap67.unified-events.p22-backfill-payment-memo-text` and 11 more |  |
+| `Memo:text` | 26: `cap03.offer-liabilities.mainnet-25000000`, `cap03.offer-liabilities.mainnet-37466023`, `cap03.offer-liabilities.mainnet-44679511` and 23 more |  |
 
 ### `classic.memo-arms`
 
@@ -376,9 +376,9 @@ Memo id, hash and return values core never checks. CAPs: CAP-0019. Entries: loca
 
 | Fragment | Core-emitted entries | Gap |
 |---|---|---|
-| `Memo:id` | 15: `cap15.fee-bump.p30-inner-bad-auth`, `cap15.fee-bump.p30-inner-bad-auth-extra`, `cap15.fee-bump.p30-inner-bad-min-seq-gap` and 12 more |  |
-| `Memo:hash` | 7: `cap40.signed-payload-signer.testnet-4437357`, `cap67.unified-events.p22-backfill-payment-memo-hash`, `cap67.unified-events.p22-payment-memo-hash` and 4 more |  |
-| `Memo:return` | 4: `cap38.liquidity-pools.testnet-5521432`, `classic.memo-arms.p30-memo-return-ff`, `classic.memo-arms.p30-memo-return-sha256` and 1 more |  |
+| `Memo:id` | 37: `cap03.offer-liabilities.mainnet-37466023`, `cap03.offer-liabilities.mainnet-44679511`, `cap15.fee-bump.p30-inner-bad-auth` and 34 more |  |
+| `Memo:hash` | 16: `cap03.offer-liabilities.mainnet-44679511`, `cap40.signed-payload-signer.testnet-4437357`, `cap67.unified-events.p22-backfill-payment-memo-hash` and 13 more |  |
+| `Memo:return` | 16: `cap38.liquidity-pools.testnet-5521432`, `classic.memo-arms.p30-memo-return-ff`, `classic.memo-arms.p30-memo-return-sha256` and 13 more |  |
 
 ### `cap67.unified-events`
 
@@ -386,32 +386,32 @@ Unified asset events from classic operations, fee events and to_muxed_id map dat
 
 | Fragment | Core-emitted entries | Gap |
 |---|---|---|
-| `TransactionMeta:v4` | 437: `cap01.bump-sequence.golden-b71da06f9ce2dec8-2`, `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward` and 434 more |  |
-| `TransactionEventStage=before_all_txs` | 353: `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward`, `cap01.bump-sequence.p30-bump-past-starting-sequence` and 350 more |  |
-| `TransactionEventStage=after_all_txs` | 83: `cap38.liquidity-pools.testnet-5521432`, `cap40.signed-payload-signer.testnet-4437357`, `cap63.parallel-txset.p30-five-calls-parallel-phase` and 80 more |  |
-| `.operations[].events[].type=contract` | 150: `cap03.offer-liabilities.mainnet-25000000`, `cap03.offer-liabilities.p30-buy-offer-crosses-and-rests-meta`, `cap03.offer-liabilities.p30-buy-offer-takes-two-makers-meta` and 147 more |  |
-| `.operations[].events[].body:v0.data:map` | 63: `cap03.offer-liabilities.mainnet-25000000`, `cap27.muxed-accounts.p28-account-merge-destination-id-2p53`, `cap27.muxed-accounts.p28-issued-payment-destination-id-2p53` and 60 more |  |
-| `ScAddress:muxed_account` | 8: `cap67.unified-events.golden-938fb779c48ac3af-16`, `sep41.muxed-addresses.golden-938fb779c48ac3af-16`, `sep41.muxed-addresses.p28-credit-mint-to-muxed` and 5 more |  |
-| `ScAddress:claimable_balance` | 16: `cap23.claimable-balances.p30-claim-through-depth-4-meta`, `cap23.claimable-balances.p30-create-ten-claimants-depth-4-meta`, `cap27.muxed-accounts.p28-claimable-balance-tx-source-id-1` and 13 more |  |
-| `ScAddress:liquidity_pool` | 7: `cap38.liquidity-pools.p30-deposit-meta`, `cap38.liquidity-pools.p30-path-payment-through-pool`, `cap38.liquidity-pools.p30-revoke-redeems-pool-shares` and 4 more |  |
-| `TransactionMeta:v3` | 18: `cap67.unified-events.p22-account-merge-muxed-destination`, `cap67.unified-events.p22-claim-claimable-balance`, `cap67.unified-events.p22-clawback` and 15 more |  |
+| `TransactionMeta:v4` | 738: `cap01.bump-sequence.golden-b71da06f9ce2dec8-2`, `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward` and 735 more |  |
+| `TransactionEventStage=before_all_txs` | 654: `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward`, `cap01.bump-sequence.p30-bump-past-starting-sequence` and 651 more |  |
+| `TransactionEventStage=after_all_txs` | 133: `cap38.liquidity-pools.testnet-5521432`, `cap40.signed-payload-signer.testnet-4437357`, `cap63.parallel-txset.p30-five-calls-parallel-phase` and 130 more |  |
+| `.operations[].events[].type=contract` | 198: `cap03.offer-liabilities.mainnet-25000000`, `cap03.offer-liabilities.mainnet-37466023`, `cap03.offer-liabilities.mainnet-44679511` and 195 more |  |
+| `.operations[].events[].body:v0.data:map` | 73: `cap03.offer-liabilities.mainnet-25000000`, `cap03.offer-liabilities.mainnet-37466023`, `cap03.offer-liabilities.mainnet-44679511` and 70 more |  |
+| `ScAddress:muxed_account` | 9: `cap67.unified-events.golden-938fb779c48ac3af-16`, `explore.witnesses.f63-p27-r0002-l90`, `sep41.muxed-addresses.golden-938fb779c48ac3af-16` and 6 more |  |
+| `ScAddress:claimable_balance` | 24: `cap03.offer-liabilities.mainnet-37466023`, `cap03.offer-liabilities.mainnet-44679511`, `cap23.claimable-balances.p30-claim-through-depth-4-meta` and 21 more |  |
+| `ScAddress:liquidity_pool` | 13: `cap03.offer-liabilities.mainnet-44679511`, `cap15.fee-bump.mainnet-57369500`, `cap38.liquidity-pools.p30-deposit-meta` and 10 more |  |
+| `TransactionMeta:v3` | 30: `cap67.unified-events.p22-account-merge-muxed-destination`, `cap67.unified-events.p22-claim-claimable-balance`, `cap67.unified-events.p22-clawback` and 27 more |  |
 
 ### `cap15.fee-bump`
 
-Fee-bump envelopes over successful and failed inner transactions, with a muxed fee source. CAPs: CAP-0015. Entries: core-golden 1, local-core 17, mainnet-history 2, synthetic 2.
+Fee-bump envelopes over successful and failed inner transactions, with a muxed fee source. CAPs: CAP-0015. Entries: core-golden 1, local-core 17, mainnet-history 3, synthetic 2.
 
 | Fragment | Core-emitted entries | Gap |
 |---|---|---|
-| `TransactionEnvelope:tx_fee_bump` | 15: `cap15.fee-bump.golden-f5fa0a4b15bfd9d9-12`, `cap15.fee-bump.mainnet-51000294-a25b8226-envelope`, `cap15.fee-bump.p30-fee-source-is-inner-source-envelope` and 12 more |  |
-| `FeeBumpTransactionInnerTx:tx` | 15: `cap15.fee-bump.golden-f5fa0a4b15bfd9d9-12`, `cap15.fee-bump.mainnet-51000294-a25b8226-envelope`, `cap15.fee-bump.p30-fee-source-is-inner-source-envelope` and 12 more |  |
-| `TransactionResultResult:tx_fee_bump_inner_success` | 6: `cap15.fee-bump.golden-f5fa0a4b15bfd9d9-12`, `cap15.fee-bump.p30-fee-source-is-inner-source-meta`, `cap15.fee-bump.p30-fee-source-is-inner-source-pre-auth-signer-meta` and 3 more |  |
-| `TransactionResultResult:tx_fee_bump_inner_failed` | 10: `cap15.fee-bump.golden-f5fa0a4b15bfd9d9-12`, `cap15.fee-bump.mainnet-51000294-a25b8226-meta`, `cap15.fee-bump.p30-inner-bad-auth` and 7 more |  |
-| `.fee_source:muxed_ed25519` | 2: `cap15.fee-bump.p30-muxed-fee-source-inner-failed-envelope`, `cap15.fee-bump.p30-muxed-fee-source-inner-success-envelope` |  |
-| `InnerTransactionResultResult:tx_bad_auth` | 1: `cap15.fee-bump.p30-inner-bad-auth` |  |
-| `InnerTransactionResultResult:tx_bad_seq` | 1: `cap15.fee-bump.p30-inner-bad-seq` |  |
-| `InnerTransactionResultResult:tx_bad_sponsorship` | 1: `cap15.fee-bump.p30-inner-bad-sponsorship` |  |
-| `InnerTransactionResultResult:tx_bad_auth_extra` | 1: `cap15.fee-bump.p30-inner-bad-auth-extra` |  |
-| `InnerTransactionResultResult:tx_bad_min_seq_age_or_gap` | 1: `cap15.fee-bump.p30-inner-bad-min-seq-gap` |  |
+| `TransactionEnvelope:tx_fee_bump` | 49: `cap03.offer-liabilities.mainnet-37466023`, `cap03.offer-liabilities.mainnet-44679511`, `cap15.fee-bump.golden-f5fa0a4b15bfd9d9-12` and 46 more |  |
+| `FeeBumpTransactionInnerTx:tx` | 49: `cap03.offer-liabilities.mainnet-37466023`, `cap03.offer-liabilities.mainnet-44679511`, `cap15.fee-bump.golden-f5fa0a4b15bfd9d9-12` and 46 more |  |
+| `TransactionResultResult:tx_fee_bump_inner_success` | 12: `cap03.offer-liabilities.mainnet-37466023`, `cap03.offer-liabilities.mainnet-44679511`, `cap15.fee-bump.golden-f5fa0a4b15bfd9d9-12` and 9 more |  |
+| `TransactionResultResult:tx_fee_bump_inner_failed` | 39: `cap15.fee-bump.golden-f5fa0a4b15bfd9d9-12`, `cap15.fee-bump.mainnet-51000294-a25b8226-meta`, `cap15.fee-bump.mainnet-57369500` and 36 more |  |
+| `.fee_source:muxed_ed25519` | 3: `cap15.fee-bump.mainnet-57369500`, `cap15.fee-bump.p30-muxed-fee-source-inner-failed-envelope`, `cap15.fee-bump.p30-muxed-fee-source-inner-success-envelope` |  |
+| `InnerTransactionResultResult:tx_bad_auth` | 2: `cap15.fee-bump.p30-inner-bad-auth`, `explore.witnesses.g2-r0005-l102` |  |
+| `InnerTransactionResultResult:tx_bad_seq` | 2: `cap15.fee-bump.p30-inner-bad-seq`, `explore.witnesses.g2-r0009-l78` |  |
+| `InnerTransactionResultResult:tx_bad_sponsorship` | 2: `cap15.fee-bump.p30-inner-bad-sponsorship`, `explore.witnesses.g2-r0017-l129` |  |
+| `InnerTransactionResultResult:tx_bad_auth_extra` | 2: `cap15.fee-bump.p30-inner-bad-auth-extra`, `explore.witnesses.g2-r0009-l83` |  |
+| `InnerTransactionResultResult:tx_bad_min_seq_age_or_gap` | 2: `cap15.fee-bump.p30-inner-bad-min-seq-gap`, `explore.witnesses.g2-r0007-l74` |  |
 
 ### `cap63.parallel-txset`
 
@@ -419,11 +419,11 @@ Parallel Soroban transaction sets and LedgerCloseMetaV2. CAPs: CAP-0063. Entries
 
 | Fragment | Core-emitted entries | Gap |
 |---|---|---|
-| `LedgerCloseMeta:v2` | 356: `cap01.bump-sequence.golden-b71da06f9ce2dec8-2`, `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward` and 353 more |  |
-| `TransactionPhase:v1` | 356: `cap01.bump-sequence.golden-b71da06f9ce2dec8-2`, `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward` and 353 more |  |
+| `LedgerCloseMeta:v2` | 532: `cap01.bump-sequence.golden-b71da06f9ce2dec8-2`, `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward` and 529 more |  |
+| `TransactionPhase:v1` | 532: `cap01.bump-sequence.golden-b71da06f9ce2dec8-2`, `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward` and 529 more |  |
 | `.execution_stages[]#many` | 2: `cap63.parallel-txset.golden-81af9cfb66a06a01-18`, `cap63.parallel-txset.p30-five-calls-parallel-phase` |  |
-| `.post_tx_apply_fee_processing#many` | 132: `cap15.fee-bump.golden-f5fa0a4b15bfd9d9-12`, `cap38.liquidity-pools.testnet-5521432`, `cap40.signed-payload-signer.testnet-4437357` and 129 more |  |
-| `ConfigSettingEntry:contract_parallel_compute_v0` | 7: `cap46.config-upgrades.p30-testnet-settings-upgrade`, `cap63.parallel-txset.golden-308caf2d0fc09c95-12`, `cap63.parallel-txset.p30-parallel-compute-setting` and 4 more |  |
+| `.post_tx_apply_fee_processing#many` | 182: `cap15.fee-bump.golden-f5fa0a4b15bfd9d9-12`, `cap38.liquidity-pools.testnet-5521432`, `cap40.signed-payload-signer.testnet-4437357` and 179 more |  |
+| `ConfigSettingEntry:contract_parallel_compute_v0` | 10: `cap46.config-upgrades.p30-testnet-settings-upgrade`, `cap63.parallel-txset.golden-308caf2d0fc09c95-12`, `cap63.parallel-txset.p30-parallel-compute-setting` and 7 more |  |
 
 ### `cap42.generalized-txset`
 
@@ -432,10 +432,10 @@ Expected source classes with no entry: local-core, mainnet-history.
 
 | Fragment | Core-emitted entries | Gap |
 |---|---|---|
-| `GeneralizedTransactionSet:v1` | 395: `cap01.bump-sequence.golden-b71da06f9ce2dec8-2`, `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward` and 392 more |  |
-| `TransactionPhase:v0` | 395: `cap01.bump-sequence.golden-b71da06f9ce2dec8-2`, `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward` and 392 more |  |
-| `TxSetComponent:txset_comp_txs_maybe_discounted_fee` | 279: `cap01.bump-sequence.golden-b71da06f9ce2dec8-2`, `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward` and 276 more |  |
-| `LedgerCloseMeta:v1` | 39: `cap42.generalized-txset.golden-27003f6cc5cdecc2-5`, `cap46.config-upgrades.golden-27003f6cc5cdecc2-5`, `cap63.parallel-txset.golden-308caf2d0fc09c95-12` and 36 more |  |
+| `GeneralizedTransactionSet:v1` | 616: `cap01.bump-sequence.golden-b71da06f9ce2dec8-2`, `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward` and 613 more |  |
+| `TransactionPhase:v0` | 616: `cap01.bump-sequence.golden-b71da06f9ce2dec8-2`, `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward` and 613 more |  |
+| `TxSetComponent:txset_comp_txs_maybe_discounted_fee` | 435: `cap01.bump-sequence.golden-b71da06f9ce2dec8-2`, `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward` and 432 more |  |
+| `LedgerCloseMeta:v1` | 84: `cap15.fee-bump.mainnet-57369500`, `cap42.generalized-txset.golden-27003f6cc5cdecc2-5`, `cap46.config-upgrades.golden-27003f6cc5cdecc2-5` and 81 more |  |
 
 ### `cap88.ms-close-time`
 
@@ -444,7 +444,7 @@ Expected source classes with no entry: local-core.
 
 | Fragment | Core-emitted entries | Gap |
 |---|---|---|
-| `StellarValueExt:signed_ms` | 332: `cap01.bump-sequence.golden-b71da06f9ce2dec8-2`, `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward` and 329 more |  |
+| `StellarValueExt:signed_ms` | 461: `cap01.bump-sequence.golden-b71da06f9ce2dec8-2`, `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward` and 458 more |  |
 | `StellarValueExt:empty_tx_set_ms` | none | `history-only` the arm itself: written only when the ballot protocol votes to drop a tx set the node cannot download or validate (BallotProtocol.cpp, HerderSCPDriver::makeEmptyTxSetValueFromValue, stellar-core v30.0.0); a standalone node always builds its own valid set, testnet 4.0M to 5.695M holds none, mainnet ledger headers 64458432 to 65444991 (protocol 28 from 64458446, 29 from 64717645, history archive core_live_001 scanned 2026-11-12) hold none, all 986560 are signed, and no ledger in the 1732 core golden files (test-lcm-current and test-lcm-next) takes either arm |
 
 ### `cap83.empty-txset`
@@ -462,124 +462,124 @@ Failed transactions whose envelope names accounts the ledger never touched. CAPs
 
 | Fragment | Core-emitted entries | Gap |
 |---|---|---|
-| `TransactionResultResult:tx_failed` | 169: `cap01.bump-sequence.p30-bump-then-merge-seqnum-too-far-meta`, `cap01.bump-sequence.p30-merge-seqnum-too-far`, `cap03.offer-liabilities.mainnet-25000000` and 166 more |  |
-| `PaymentResult:no_destination` | 6: `cap15.fee-bump.p30-inner-failed-meta`, `cap15.fee-bump.p30-muxed-fee-source-inner-failed-meta`, `cap40.signed-payload-signer.testnet-4437357` and 3 more |  |
-| `SignerKey:pre_auth_tx` | 7: `cap15.fee-bump.p30-fee-source-is-inner-source-pre-auth-signer-meta`, `cap33.sponsorship.golden-6f067a349543093a-48`, `classic.failed-tx.golden-6f067a349543093a-50` and 4 more |  |
-| `ChangeTrustAsset:native` | 1: `classic.failed-tx.p9-change-trust-native-internal-error-envelope` |  |
-| `TransactionResultResult:tx_internal_error` | 3: `classic.failed-tx.golden-e0e11e1fb450f676-32`, `classic.failed-tx.p9-change-trust-native-internal-error-meta`, `classic.memo-bytes.golden-e0e11e1fb450f676-32` |  |
-| `TransactionResultResult:tx_bad_auth` | 1: `classic.failed-tx.golden-8e3126c525875c96-10` |  |
-| `TransactionResultResult:tx_no_account` | 1: `classic.failed-tx.golden-fad872f357f20fe9-12` |  |
-| `AccountMergeResult:has_sub_entries` | 1: `classic.failed-tx.p30-merge-has-sub-entries` |  |
-| `AccountMergeResult:immutable_set` | 1: `classic.failed-tx.p30-merge-immutable-set` |  |
-| `AccountMergeResult:is_sponsor` | 1: `classic.failed-tx.p30-merge-is-sponsor` |  |
-| `AccountMergeResult:no_account` | 1: `classic.failed-tx.p30-merge-no-account` |  |
-| `AllowTrustResult:cant_revoke` | 1: `classic.failed-tx.p30-allow-trust-cant-revoke` |  |
-| `AllowTrustResult:low_reserve` | 1: `classic.failed-tx.p30-allow-trust-low-reserve` |  |
-| `AllowTrustResult:no_trust_line` | 1: `classic.failed-tx.p30-allow-trust-no-trust-line` |  |
-| `ChangeTrustResult:cannot_delete` | 1: `classic.failed-tx.p30-change-trust-cannot-delete` |  |
-| `ChangeTrustResult:invalid_limit` | 1: `classic.failed-tx.p30-change-trust-invalid-limit` |  |
-| `ChangeTrustResult:low_reserve` | 1: `classic.failed-tx.p30-change-trust-low-reserve` |  |
-| `ChangeTrustResult:no_issuer` | 1: `classic.failed-tx.p30-change-trust-no-issuer` |  |
-| `ChangeTrustResult:not_auth_maintain_liabilities` | 1: `classic.failed-tx.p30-change-trust-not-auth-maintain-liabilities` |  |
-| `ChangeTrustResult:trust_line_missing` | 1: `classic.failed-tx.p30-change-trust-trust-line-missing` |  |
-| `ClaimClaimableBalanceResult:does_not_exist` | 1: `classic.failed-tx.p30-claim-does-not-exist` |  |
-| `ClaimClaimableBalanceResult:line_full` | 1: `classic.failed-tx.p30-claim-line-full` |  |
-| `ClaimClaimableBalanceResult:no_trust` | 1: `classic.failed-tx.p30-claim-no-trust` |  |
-| `ClaimClaimableBalanceResult:not_authorized` | 1: `classic.failed-tx.p30-claim-not-authorized` |  |
-| `ClawbackClaimableBalanceResult:does_not_exist` | 1: `classic.failed-tx.p30-clawback-claimable-balance-does-not-exist` |  |
-| `ClawbackClaimableBalanceResult:not_clawback_enabled` | 1: `classic.failed-tx.p30-clawback-claimable-balance-not-clawback-enabled` |  |
-| `ClawbackClaimableBalanceResult:not_issuer` | 1: `classic.failed-tx.p30-clawback-claimable-balance-not-issuer` |  |
-| `ClawbackResult:no_trust` | 1: `classic.failed-tx.p30-clawback-no-trust` |  |
-| `ClawbackResult:underfunded` | 1: `classic.failed-tx.p30-clawback-underfunded` |  |
-| `CreateAccountResult:already_exist` | 1: `classic.failed-tx.p30-create-account-already-exist` |  |
-| `CreateAccountResult:low_reserve` | 1: `classic.failed-tx.p30-create-account-low-reserve` |  |
-| `CreateAccountResult:underfunded` | 1: `classic.failed-tx.p30-create-account-underfunded` |  |
-| `CreateClaimableBalanceResult:low_reserve` | 1: `classic.failed-tx.p30-create-claimable-balance-low-reserve` |  |
-| `CreateClaimableBalanceResult:not_authorized` | 1: `classic.failed-tx.p30-create-claimable-balance-not-authorized` |  |
-| `CreateClaimableBalanceResult:underfunded` | 1: `classic.failed-tx.p30-create-claimable-balance-underfunded` |  |
-| `LiquidityPoolDepositResult:bad_price` | 1: `classic.failed-tx.p30-deposit-bad-price` |  |
-| `LiquidityPoolDepositResult:line_full` | 1: `classic.failed-tx.p30-deposit-line-full` |  |
-| `LiquidityPoolDepositResult:no_trust` | 1: `classic.failed-tx.p30-deposit-no-trust` |  |
-| `LiquidityPoolDepositResult:not_authorized` | 1: `classic.failed-tx.p30-deposit-not-authorized` |  |
-| `LiquidityPoolDepositResult:pool_full` | 1: `classic.failed-tx.p30-deposit-pool-full` |  |
-| `LiquidityPoolDepositResult:underfunded` | 1: `classic.failed-tx.p30-deposit-underfunded` |  |
-| `LiquidityPoolWithdrawResult:line_full` | 1: `classic.failed-tx.p30-withdraw-line-full` |  |
-| `LiquidityPoolWithdrawResult:no_trust` | 1: `classic.failed-tx.p30-withdraw-no-trust` |  |
-| `LiquidityPoolWithdrawResult:under_minimum` | 1: `classic.failed-tx.p30-withdraw-under-minimum` |  |
-| `LiquidityPoolWithdrawResult:underfunded` | 1: `classic.failed-tx.p30-withdraw-underfunded` |  |
-| `ManageBuyOfferResult:buy_no_trust` | 1: `classic.failed-tx.p30-manage-buy-buy-no-trust` |  |
-| `ManageBuyOfferResult:buy_not_authorized` | 1: `classic.failed-tx.p30-manage-buy-buy-not-authorized` |  |
-| `ManageBuyOfferResult:cross_self` | 1: `classic.failed-tx.p30-manage-buy-cross-self` |  |
-| `ManageBuyOfferResult:line_full` | 1: `classic.failed-tx.p30-manage-buy-line-full` |  |
-| `ManageBuyOfferResult:low_reserve` | 1: `classic.failed-tx.p30-manage-buy-low-reserve` |  |
-| `ManageBuyOfferResult:not_found` | 1: `classic.failed-tx.p30-manage-buy-not-found` |  |
-| `ManageBuyOfferResult:sell_no_trust` | 1: `classic.failed-tx.p30-manage-buy-sell-no-trust` |  |
-| `ManageBuyOfferResult:sell_not_authorized` | 1: `classic.failed-tx.p30-manage-buy-sell-not-authorized` |  |
-| `ManageBuyOfferResult:underfunded` | 1: `classic.failed-tx.p30-manage-buy-underfunded` |  |
-| `ManageDataResult:low_reserve` | 1: `classic.failed-tx.p30-manage-data-low-reserve` |  |
-| `ManageDataResult:name_not_found` | 1: `classic.failed-tx.p30-manage-data-name-not-found` |  |
-| `ManageSellOfferResult:buy_no_trust` | 1: `classic.failed-tx.p30-manage-sell-buy-no-trust` |  |
-| `ManageSellOfferResult:buy_not_authorized` | 1: `classic.failed-tx.p30-manage-sell-buy-not-authorized` |  |
-| `ManageSellOfferResult:cross_self` | 1: `classic.failed-tx.p30-manage-sell-cross-self` |  |
-| `ManageSellOfferResult:line_full` | 1: `classic.failed-tx.p30-manage-sell-line-full` |  |
-| `ManageSellOfferResult:low_reserve` | 2: `cap03.offer-liabilities.mainnet-25000000`, `classic.failed-tx.p30-manage-sell-low-reserve` |  |
-| `ManageSellOfferResult:not_found` | 1: `classic.failed-tx.p30-manage-sell-not-found` |  |
-| `ManageSellOfferResult:sell_no_trust` | 1: `classic.failed-tx.p30-manage-sell-sell-no-trust` |  |
-| `ManageSellOfferResult:sell_not_authorized` | 1: `classic.failed-tx.p30-manage-sell-sell-not-authorized` |  |
-| `ManageSellOfferResult:underfunded` | 1: `classic.failed-tx.p30-manage-sell-underfunded` |  |
-| `PathPaymentStrictReceiveResult:line_full` | 1: `classic.failed-tx.p30-path-receive-line-full` |  |
-| `PathPaymentStrictReceiveResult:no_destination` | 1: `classic.failed-tx.p30-path-receive-no-destination` |  |
-| `PathPaymentStrictReceiveResult:no_trust` | 1: `classic.failed-tx.p30-path-receive-no-trust` |  |
-| `PathPaymentStrictReceiveResult:not_authorized` | 1: `classic.failed-tx.p30-path-receive-not-authorized` |  |
-| `PathPaymentStrictReceiveResult:offer_cross_self` | 1: `classic.failed-tx.p30-path-receive-offer-cross-self` |  |
-| `PathPaymentStrictReceiveResult:src_no_trust` | 1: `classic.failed-tx.p30-path-receive-src-no-trust` |  |
-| `PathPaymentStrictReceiveResult:src_not_authorized` | 1: `classic.failed-tx.p30-path-receive-src-not-authorized` |  |
-| `PathPaymentStrictReceiveResult:too_few_offers` | 1: `classic.failed-tx.p30-path-receive-too-few-offers` |  |
-| `PathPaymentStrictReceiveResult:underfunded` | 1: `classic.failed-tx.p30-path-receive-underfunded` |  |
-| `PathPaymentStrictSendResult:line_full` | 1: `classic.failed-tx.p30-path-send-line-full` |  |
-| `PathPaymentStrictSendResult:no_destination` | 1: `classic.failed-tx.p30-path-send-no-destination` |  |
-| `PathPaymentStrictSendResult:no_trust` | 1: `classic.failed-tx.p30-path-send-no-trust` |  |
-| `PathPaymentStrictSendResult:not_authorized` | 1: `classic.failed-tx.p30-path-send-not-authorized` |  |
-| `PathPaymentStrictSendResult:offer_cross_self` | 1: `classic.failed-tx.p30-path-send-offer-cross-self` |  |
-| `PathPaymentStrictSendResult:src_no_trust` | 1: `classic.failed-tx.p30-path-send-src-no-trust` |  |
-| `PathPaymentStrictSendResult:src_not_authorized` | 1: `classic.failed-tx.p30-path-send-src-not-authorized` |  |
-| `PathPaymentStrictSendResult:too_few_offers` | 1: `classic.failed-tx.p30-path-send-too-few-offers` |  |
-| `PathPaymentStrictSendResult:under_destmin` | 1: `classic.failed-tx.p30-path-send-under-destmin` |  |
-| `PathPaymentStrictSendResult:underfunded` | 1: `classic.failed-tx.p30-path-send-underfunded` |  |
-| `PaymentResult:line_full` | 1: `classic.failed-tx.p30-payment-line-full` |  |
-| `PaymentResult:no_trust` | 2: `cap03.offer-liabilities.mainnet-25000000`, `classic.failed-tx.p30-payment-no-trust` |  |
-| `PaymentResult:not_authorized` | 1: `classic.failed-tx.p30-payment-not-authorized` |  |
-| `PaymentResult:src_no_trust` | 1: `classic.failed-tx.p30-payment-src-no-trust` |  |
-| `PaymentResult:src_not_authorized` | 1: `classic.failed-tx.p30-payment-src-not-authorized` |  |
-| `RevokeSponsorshipResult:does_not_exist` | 1: `classic.failed-tx.p30-revoke-does-not-exist` |  |
-| `RevokeSponsorshipResult:low_reserve` | 1: `classic.failed-tx.p30-revoke-low-reserve` |  |
-| `RevokeSponsorshipResult:not_sponsor` | 1: `classic.failed-tx.p30-revoke-not-sponsor` |  |
-| `RevokeSponsorshipResult:only_transferable` | 1: `classic.failed-tx.p30-revoke-only-transferable` |  |
-| `SetOptionsResult:auth_revocable_required` | 1: `classic.failed-tx.p30-set-options-auth-revocable-required` |  |
-| `SetOptionsResult:cant_change` | 1: `classic.failed-tx.p30-set-options-cant-change` |  |
-| `SetOptionsResult:invalid_inflation` | 1: `classic.failed-tx.p30-set-options-invalid-inflation` |  |
-| `SetOptionsResult:low_reserve` | 1: `classic.failed-tx.p30-set-options-low-reserve` |  |
-| `SetTrustLineFlagsResult:cant_revoke` | 1: `classic.failed-tx.p30-set-trust-line-flags-cant-revoke` |  |
-| `SetTrustLineFlagsResult:invalid_state` | 1: `classic.failed-tx.p30-set-trust-line-flags-invalid-state` |  |
-| `SetTrustLineFlagsResult:low_reserve` | 1: `classic.failed-tx.p30-set-trust-line-flags-low-reserve` |  |
-| `SetTrustLineFlagsResult:no_trust_line` | 1: `classic.failed-tx.p30-set-trust-line-flags-no-trust-line` |  |
-| `OperationResult:op_bad_auth` | 1: `classic.failed-tx.p30-op-bad-auth` |  |
-| `OperationResult:op_exceeded_work_limit` | 1: `classic.failed-tx.p30-path-receive-exceeded-work-limit` |  |
-| `TransactionResultResult:tx_bad_auth_extra` | 1: `classic.failed-tx.p30-tx-bad-auth-extra` |  |
-| `TransactionResultResult:tx_bad_min_seq_age_or_gap` | 1: `classic.failed-tx.p30-tx-bad-min-seq-gap` |  |
-| `AccountEntryExtensionV1Ext:v0` | 6: `cap03.offer-liabilities.mainnet-25000000`, `cap03.offer-liabilities.p17-manage-buy-offer-claim-atom-v0`, `cap03.offer-liabilities.p17-manage-sell-offer-claim-atom-v0` and 3 more |  |
-| `LedgerKey:data` | 2: `classic.failed-tx.p30-manage-data-removed`, `classic.failed-tx.p30-revoke-does-not-exist` |  |
-| `TransactionEnvelope:tx_v0` | 14: `cap03.offer-liabilities.mainnet-25000000`, `cap26.inflation.p11-inflation-not-time`, `cap26.inflation.p11-inflation-payout` and 11 more |  |
-| `ManageBuyOfferResult:buy_no_issuer` | 1: `classic.failed-tx.p12-manage-buy-offer-buy-no-issuer` |  |
-| `ManageBuyOfferResult:sell_no_issuer` | 1: `classic.failed-tx.p12-manage-buy-offer-sell-no-issuer` |  |
-| `ManageSellOfferResult:buy_no_issuer` | 1: `classic.failed-tx.p12-manage-sell-offer-buy-no-issuer` |  |
-| `ManageSellOfferResult:sell_no_issuer` | 1: `classic.failed-tx.p12-manage-sell-offer-sell-no-issuer` |  |
-| `PathPaymentStrictReceiveResult:no_issuer` | 1: `classic.failed-tx.p12-path-payment-strict-receive-no-issuer` |  |
-| `PathPaymentStrictSendResult:no_issuer` | 1: `classic.failed-tx.p12-path-payment-strict-send-no-issuer` |  |
-| `PaymentResult:no_issuer` | 1: `classic.failed-tx.p12-payment-no-issuer` |  |
-| `AllowTrustResult:trust_not_required` | 1: `classic.failed-tx.p12-allow-trust-trust-not-required` |  |
-| `AllowTrustResult:self_not_allowed` | 1: `classic.failed-tx.p12-allow-trust-self-not-allowed` |  |
-| `ChangeTrustResult:self_not_allowed` | 1: `classic.failed-tx.p12-change-trust-self-not-allowed` |  |
+| `TransactionResultResult:tx_failed` | 367: `cap01.bump-sequence.p30-bump-then-merge-seqnum-too-far-meta`, `cap01.bump-sequence.p30-merge-seqnum-too-far`, `cap03.offer-liabilities.mainnet-25000000` and 364 more |  |
+| `PaymentResult:no_destination` | 9: `cap03.offer-liabilities.mainnet-37466023`, `cap15.fee-bump.p30-inner-failed-meta`, `cap15.fee-bump.p30-muxed-fee-source-inner-failed-meta` and 6 more |  |
+| `SignerKey:pre_auth_tx` | 9: `cap15.fee-bump.p30-fee-source-is-inner-source-pre-auth-signer-meta`, `cap33.sponsorship.golden-6f067a349543093a-48`, `classic.failed-tx.golden-6f067a349543093a-50` and 6 more |  |
+| `ChangeTrustAsset:native` | 2: `classic.failed-tx.p9-change-trust-native-internal-error-envelope`, `explore.witnesses.g2-r0010-l93` |  |
+| `TransactionResultResult:tx_internal_error` | 4: `classic.failed-tx.golden-e0e11e1fb450f676-32`, `classic.failed-tx.p9-change-trust-native-internal-error-meta`, `classic.memo-bytes.golden-e0e11e1fb450f676-32` and 1 more |  |
+| `TransactionResultResult:tx_bad_auth` | 2: `classic.failed-tx.golden-8e3126c525875c96-10`, `explore.witnesses.g2-r0009-l72` |  |
+| `TransactionResultResult:tx_no_account` | 2: `classic.failed-tx.golden-fad872f357f20fe9-12`, `explore.witnesses.g2-r0009-l87` |  |
+| `AccountMergeResult:has_sub_entries` | 3: `classic.failed-tx.p30-merge-has-sub-entries`, `explore.witnesses.g1-r0004-l123`, `explore.witnesses.g2-r0001-l115` |  |
+| `AccountMergeResult:immutable_set` | 3: `classic.failed-tx.p30-merge-immutable-set`, `explore.witnesses.f62d-r0008-l82`, `explore.witnesses.g2-r0024-l90` |  |
+| `AccountMergeResult:is_sponsor` | 2: `classic.failed-tx.p30-merge-is-sponsor`, `explore.witnesses.g2-r0004-l115` |  |
+| `AccountMergeResult:no_account` | 2: `classic.failed-tx.p30-merge-no-account`, `explore.witnesses.g2-r0008-l71` |  |
+| `AllowTrustResult:cant_revoke` | 4: `classic.failed-tx.p30-allow-trust-cant-revoke`, `explore.witnesses.f62d-r0000-l81`, `explore.witnesses.f63-p24-r0001-l84` and 1 more |  |
+| `AllowTrustResult:low_reserve` | 2: `classic.failed-tx.p30-allow-trust-low-reserve`, `explore.witnesses.g2-r0003-l101` |  |
+| `AllowTrustResult:no_trust_line` | 7: `classic.failed-tx.p30-allow-trust-no-trust-line`, `explore.witnesses.f62c-r0000-l68`, `explore.witnesses.f62c-r0000-l71` and 4 more |  |
+| `ChangeTrustResult:cannot_delete` | 2: `classic.failed-tx.p30-change-trust-cannot-delete`, `explore.witnesses.g2-r0003-l87` |  |
+| `ChangeTrustResult:invalid_limit` | 8: `cap03.offer-liabilities.mainnet-37466023`, `cap03.offer-liabilities.mainnet-44679511`, `classic.failed-tx.p30-change-trust-invalid-limit` and 5 more |  |
+| `ChangeTrustResult:low_reserve` | 4: `cap03.offer-liabilities.mainnet-44679511`, `classic.failed-tx.p30-change-trust-low-reserve`, `explore.witnesses.f62d-r0002-l68` and 1 more |  |
+| `ChangeTrustResult:no_issuer` | 2: `classic.failed-tx.p30-change-trust-no-issuer`, `explore.witnesses.g2-r0004-l127` |  |
+| `ChangeTrustResult:not_auth_maintain_liabilities` | 2: `classic.failed-tx.p30-change-trust-not-auth-maintain-liabilities`, `explore.witnesses.g2-r0002-l90` |  |
+| `ChangeTrustResult:trust_line_missing` | 3: `classic.failed-tx.p30-change-trust-trust-line-missing`, `explore.witnesses.f62d-r0003-l74`, `explore.witnesses.g2-r0016-l78` |  |
+| `ClaimClaimableBalanceResult:does_not_exist` | 10: `classic.failed-tx.p30-claim-does-not-exist`, `explore.witnesses.f62c-r0000-l79`, `explore.witnesses.f62c-r0000-l83` and 7 more |  |
+| `ClaimClaimableBalanceResult:line_full` | 2: `classic.failed-tx.p30-claim-line-full`, `explore.witnesses.g2-r0004-l135` |  |
+| `ClaimClaimableBalanceResult:no_trust` | 4: `cap03.offer-liabilities.mainnet-44679511`, `classic.failed-tx.p30-claim-no-trust`, `explore.witnesses.f62d-r0024-l97` and 1 more |  |
+| `ClaimClaimableBalanceResult:not_authorized` | 2: `classic.failed-tx.p30-claim-not-authorized`, `explore.witnesses.g2-r0000-l108` |  |
+| `ClawbackClaimableBalanceResult:does_not_exist` | 5: `classic.failed-tx.p30-clawback-claimable-balance-does-not-exist`, `explore.witnesses.f62c-r0000-l89`, `explore.witnesses.f62c-r0016-l94` and 2 more |  |
+| `ClawbackClaimableBalanceResult:not_clawback_enabled` | 3: `classic.failed-tx.p30-clawback-claimable-balance-not-clawback-enabled`, `explore.witnesses.f62d-r0008-l84`, `explore.witnesses.g2-r0039-l120` |  |
+| `ClawbackClaimableBalanceResult:not_issuer` | 3: `classic.failed-tx.p30-clawback-claimable-balance-not-issuer`, `explore.witnesses.f62d-r0000-l85`, `explore.witnesses.g2-r0011-l136` |  |
+| `ClawbackResult:no_trust` | 3: `classic.failed-tx.p30-clawback-no-trust`, `explore.witnesses.f62c-r0000-l94`, `explore.witnesses.g2-r0000-l79` |  |
+| `ClawbackResult:underfunded` | 3: `classic.failed-tx.p30-clawback-underfunded`, `explore.witnesses.g2-r0000-l75`, `explore.witnesses.g2-r0022-l146` |  |
+| `CreateAccountResult:already_exist` | 5: `classic.failed-tx.p30-create-account-already-exist`, `explore.witnesses.f62d-r0000-l72`, `explore.witnesses.f63-p28-r0000-l83` and 2 more |  |
+| `CreateAccountResult:low_reserve` | 2: `classic.failed-tx.p30-create-account-low-reserve`, `explore.witnesses.g2-r0011-l148` |  |
+| `CreateAccountResult:underfunded` | 2: `classic.failed-tx.p30-create-account-underfunded`, `explore.witnesses.g2-r0008-l76` |  |
+| `CreateClaimableBalanceResult:low_reserve` | 2: `classic.failed-tx.p30-create-claimable-balance-low-reserve`, `explore.witnesses.g2-r0006-l135` |  |
+| `CreateClaimableBalanceResult:not_authorized` | 2: `classic.failed-tx.p30-create-claimable-balance-not-authorized`, `explore.witnesses.g2-r0001-l84` |  |
+| `CreateClaimableBalanceResult:underfunded` | 3: `classic.failed-tx.p30-create-claimable-balance-underfunded`, `explore.witnesses.f62d-r0008-l75`, `explore.witnesses.g2-r0006-l134` |  |
+| `LiquidityPoolDepositResult:bad_price` | 2: `classic.failed-tx.p30-deposit-bad-price`, `explore.witnesses.g2-r0003-l91` |  |
+| `LiquidityPoolDepositResult:line_full` | 2: `classic.failed-tx.p30-deposit-line-full`, `explore.witnesses.g2-r0003-l90` |  |
+| `LiquidityPoolDepositResult:no_trust` | 5: `classic.failed-tx.p30-deposit-no-trust`, `explore.witnesses.f62c-r0000-l66`, `explore.witnesses.f62d-r0000-l82` and 2 more |  |
+| `LiquidityPoolDepositResult:not_authorized` | 2: `classic.failed-tx.p30-deposit-not-authorized`, `explore.witnesses.g2-r0002-l101` |  |
+| `LiquidityPoolDepositResult:pool_full` | 2: `classic.failed-tx.p30-deposit-pool-full`, `explore.witnesses.g2-r0003-l92` |  |
+| `LiquidityPoolDepositResult:underfunded` | 2: `classic.failed-tx.p30-deposit-underfunded`, `explore.witnesses.g1-r0047-l69` |  |
+| `LiquidityPoolWithdrawResult:line_full` | 2: `classic.failed-tx.p30-withdraw-line-full`, `explore.witnesses.g2-r0003-l98` |  |
+| `LiquidityPoolWithdrawResult:no_trust` | 6: `classic.failed-tx.p30-withdraw-no-trust`, `explore.witnesses.f62c-r0000-l83`, `explore.witnesses.f62d-r0000-l95` and 3 more |  |
+| `LiquidityPoolWithdrawResult:under_minimum` | 2: `classic.failed-tx.p30-withdraw-under-minimum`, `explore.witnesses.g2-r0003-l93` |  |
+| `LiquidityPoolWithdrawResult:underfunded` | 3: `classic.failed-tx.p30-withdraw-underfunded`, `explore.witnesses.f62c-r0005-l97`, `explore.witnesses.g2-r0011-l144` |  |
+| `ManageBuyOfferResult:buy_no_trust` | 3: `classic.failed-tx.p30-manage-buy-buy-no-trust`, `explore.witnesses.f62d-r0000-l91`, `explore.witnesses.g2-r0007-l77` |  |
+| `ManageBuyOfferResult:buy_not_authorized` | 2: `classic.failed-tx.p30-manage-buy-buy-not-authorized`, `explore.witnesses.g2-r0000-l112` |  |
+| `ManageBuyOfferResult:cross_self` | 3: `cap03.offer-liabilities.mainnet-44679511`, `classic.failed-tx.p30-manage-buy-cross-self`, `explore.witnesses.g2-r0035-l154` |  |
+| `ManageBuyOfferResult:line_full` | 2: `classic.failed-tx.p30-manage-buy-line-full`, `explore.witnesses.g2-r0036-l71` |  |
+| `ManageBuyOfferResult:low_reserve` | 3: `classic.failed-tx.p30-manage-buy-low-reserve`, `explore.witnesses.g1-r0004-l103`, `explore.witnesses.g2-r0003-l110` |  |
+| `ManageBuyOfferResult:not_found` | 4: `cap03.offer-liabilities.mainnet-37466023`, `classic.failed-tx.p30-manage-buy-not-found`, `explore.witnesses.f62c-r0017-l78` and 1 more |  |
+| `ManageBuyOfferResult:sell_no_trust` | 3: `classic.failed-tx.p30-manage-buy-sell-no-trust`, `explore.witnesses.f62d-r0001-l72`, `explore.witnesses.g2-r0004-l126` |  |
+| `ManageBuyOfferResult:sell_not_authorized` | 2: `classic.failed-tx.p30-manage-buy-sell-not-authorized`, `explore.witnesses.g2-r0001-l86` |  |
+| `ManageBuyOfferResult:underfunded` | 5: `cap03.offer-liabilities.mainnet-37466023`, `cap03.offer-liabilities.mainnet-44679511`, `cap15.fee-bump.mainnet-57369500` and 2 more |  |
+| `ManageDataResult:low_reserve` | 4: `classic.failed-tx.p30-manage-data-low-reserve`, `explore.witnesses.f62d-r0007-l78`, `explore.witnesses.g1-r0004-l126` and 1 more |  |
+| `ManageDataResult:name_not_found` | 8: `classic.failed-tx.p30-manage-data-name-not-found`, `explore.witnesses.f62c-r0000-l77`, `explore.witnesses.f62c-r0000-l83` and 5 more |  |
+| `ManageSellOfferResult:buy_no_trust` | 4: `classic.failed-tx.p30-manage-sell-buy-no-trust`, `explore.witnesses.f62d-r0007-l73`, `explore.witnesses.g2-r0001-l113` and 1 more |  |
+| `ManageSellOfferResult:buy_not_authorized` | 2: `classic.failed-tx.p30-manage-sell-buy-not-authorized`, `explore.witnesses.g2-r0000-l111` |  |
+| `ManageSellOfferResult:cross_self` | 2: `classic.failed-tx.p30-manage-sell-cross-self`, `explore.witnesses.g2-r0021-l110` |  |
+| `ManageSellOfferResult:line_full` | 3: `cap03.offer-liabilities.mainnet-44679511`, `classic.failed-tx.p30-manage-sell-line-full`, `explore.witnesses.g2-r0003-l79` |  |
+| `ManageSellOfferResult:low_reserve` | 5: `cap03.offer-liabilities.mainnet-25000000`, `cap03.offer-liabilities.mainnet-37466023`, `classic.failed-tx.p30-manage-sell-low-reserve` and 2 more |  |
+| `ManageSellOfferResult:not_found` | 4: `cap03.offer-liabilities.mainnet-37466023`, `classic.failed-tx.p30-manage-sell-not-found`, `explore.witnesses.f62d-r0004-l69` and 1 more |  |
+| `ManageSellOfferResult:sell_no_trust` | 5: `classic.failed-tx.p30-manage-sell-sell-no-trust`, `explore.witnesses.f62c-r0000-l67`, `explore.witnesses.f62c-r0005-l111` and 2 more |  |
+| `ManageSellOfferResult:sell_not_authorized` | 2: `classic.failed-tx.p30-manage-sell-sell-not-authorized`, `explore.witnesses.g2-r0001-l85` |  |
+| `ManageSellOfferResult:underfunded` | 5: `cap03.offer-liabilities.mainnet-37466023`, `cap15.fee-bump.mainnet-57369500`, `classic.failed-tx.p30-manage-sell-underfunded` and 2 more |  |
+| `PathPaymentStrictReceiveResult:line_full` | 3: `classic.failed-tx.p30-path-receive-line-full`, `explore.witnesses.f62d-r0007-l74`, `explore.witnesses.g2-r0014-l154` |  |
+| `PathPaymentStrictReceiveResult:no_destination` | 3: `classic.failed-tx.p30-path-receive-no-destination`, `explore.witnesses.f62d-r0001-l73`, `explore.witnesses.g2-r0022-l146` |  |
+| `PathPaymentStrictReceiveResult:no_trust` | 6: `classic.failed-tx.p30-path-receive-no-trust`, `explore.witnesses.f62c-r0000-l75`, `explore.witnesses.f62d-r0000-l96` and 3 more |  |
+| `PathPaymentStrictReceiveResult:not_authorized` | 2: `classic.failed-tx.p30-path-receive-not-authorized`, `explore.witnesses.g2-r0000-l106` |  |
+| `PathPaymentStrictReceiveResult:offer_cross_self` | 2: `classic.failed-tx.p30-path-receive-offer-cross-self`, `explore.witnesses.g2-r0013-l92` |  |
+| `PathPaymentStrictReceiveResult:src_no_trust` | 2: `classic.failed-tx.p30-path-receive-src-no-trust`, `explore.witnesses.g2-r0023-l119` |  |
+| `PathPaymentStrictReceiveResult:src_not_authorized` | 2: `classic.failed-tx.p30-path-receive-src-not-authorized`, `explore.witnesses.g2-r0001-l83` |  |
+| `PathPaymentStrictReceiveResult:too_few_offers` | 8: `cap03.offer-liabilities.mainnet-37466023`, `cap03.offer-liabilities.mainnet-44679511`, `cap15.fee-bump.mainnet-57369500` and 5 more |  |
+| `PathPaymentStrictReceiveResult:underfunded` | 3: `cap03.offer-liabilities.mainnet-44679511`, `classic.failed-tx.p30-path-receive-underfunded`, `explore.witnesses.g1-r0016-l74` |  |
+| `PathPaymentStrictSendResult:line_full` | 2: `classic.failed-tx.p30-path-send-line-full`, `explore.witnesses.g2-r0003-l96` |  |
+| `PathPaymentStrictSendResult:no_destination` | 2: `classic.failed-tx.p30-path-send-no-destination`, `explore.witnesses.g2-r0001-l112` |  |
+| `PathPaymentStrictSendResult:no_trust` | 2: `classic.failed-tx.p30-path-send-no-trust`, `explore.witnesses.g2-r0018-l122` |  |
+| `PathPaymentStrictSendResult:not_authorized` | 2: `classic.failed-tx.p30-path-send-not-authorized`, `explore.witnesses.g2-r0000-l105` |  |
+| `PathPaymentStrictSendResult:offer_cross_self` | 2: `classic.failed-tx.p30-path-send-offer-cross-self`, `explore.witnesses.g2-r0025-l134` |  |
+| `PathPaymentStrictSendResult:src_no_trust` | 6: `classic.failed-tx.p30-path-send-src-no-trust`, `explore.witnesses.f62c-r0000-l80`, `explore.witnesses.f62d-r0000-l100` and 3 more |  |
+| `PathPaymentStrictSendResult:src_not_authorized` | 2: `classic.failed-tx.p30-path-send-src-not-authorized`, `explore.witnesses.g2-r0001-l82` |  |
+| `PathPaymentStrictSendResult:too_few_offers` | 7: `cap03.offer-liabilities.mainnet-44679511`, `cap15.fee-bump.mainnet-57369500`, `classic.failed-tx.p30-path-send-too-few-offers` and 4 more |  |
+| `PathPaymentStrictSendResult:under_destmin` | 5: `cap03.offer-liabilities.mainnet-44679511`, `cap15.fee-bump.mainnet-57369500`, `classic.failed-tx.p30-path-send-under-destmin` and 2 more |  |
+| `PathPaymentStrictSendResult:underfunded` | 4: `cap15.fee-bump.mainnet-57369500`, `classic.failed-tx.p30-path-send-underfunded`, `explore.witnesses.f62d-r0007-l66` and 1 more |  |
+| `PaymentResult:line_full` | 3: `classic.failed-tx.p30-payment-line-full`, `explore.witnesses.f62c-r0000-l94`, `explore.witnesses.g2-r0035-l144` |  |
+| `PaymentResult:no_trust` | 7: `cap03.offer-liabilities.mainnet-25000000`, `cap15.fee-bump.mainnet-57369500`, `classic.failed-tx.p30-payment-no-trust` and 4 more |  |
+| `PaymentResult:not_authorized` | 2: `classic.failed-tx.p30-payment-not-authorized`, `explore.witnesses.g2-r0000-l104` |  |
+| `PaymentResult:src_no_trust` | 2: `classic.failed-tx.p30-payment-src-no-trust`, `explore.witnesses.g2-r0013-l93` |  |
+| `PaymentResult:src_not_authorized` | 2: `classic.failed-tx.p30-payment-src-not-authorized`, `explore.witnesses.g2-r0001-l81` |  |
+| `RevokeSponsorshipResult:does_not_exist` | 10: `classic.failed-tx.p30-revoke-does-not-exist`, `explore.witnesses.f62c-r0000-l86`, `explore.witnesses.f62c-r0000-l91` and 7 more |  |
+| `RevokeSponsorshipResult:low_reserve` | 2: `classic.failed-tx.p30-revoke-low-reserve`, `explore.witnesses.g2-r0000-l100` |  |
+| `RevokeSponsorshipResult:not_sponsor` | 3: `classic.failed-tx.p30-revoke-not-sponsor`, `explore.witnesses.f62d-r0000-l90`, `explore.witnesses.g2-r0003-l80` |  |
+| `RevokeSponsorshipResult:only_transferable` | 2: `classic.failed-tx.p30-revoke-only-transferable`, `explore.witnesses.g2-r0014-l143` |  |
+| `SetOptionsResult:auth_revocable_required` | 3: `classic.failed-tx.p30-set-options-auth-revocable-required`, `explore.witnesses.f62d-r0000-l72`, `explore.witnesses.g2-r0018-l116` |  |
+| `SetOptionsResult:cant_change` | 3: `classic.failed-tx.p30-set-options-cant-change`, `explore.witnesses.f62d-r0008-l87`, `explore.witnesses.g2-r0024-l92` |  |
+| `SetOptionsResult:invalid_inflation` | 3: `classic.failed-tx.p30-set-options-invalid-inflation`, `explore.witnesses.f62d-r0007-l77`, `explore.witnesses.g2-r0022-l171` |  |
+| `SetOptionsResult:low_reserve` | 3: `classic.failed-tx.p30-set-options-low-reserve`, `explore.witnesses.f62d-r0003-l73`, `explore.witnesses.g2-r0026-l107` |  |
+| `SetTrustLineFlagsResult:cant_revoke` | 3: `classic.failed-tx.p30-set-trust-line-flags-cant-revoke`, `explore.witnesses.f62d-r0024-l87`, `explore.witnesses.g2-r0027-l69` |  |
+| `SetTrustLineFlagsResult:invalid_state` | 2: `classic.failed-tx.p30-set-trust-line-flags-invalid-state`, `explore.witnesses.g2-r0002-l93` |  |
+| `SetTrustLineFlagsResult:low_reserve` | 2: `classic.failed-tx.p30-set-trust-line-flags-low-reserve`, `explore.witnesses.g2-r0003-l100` |  |
+| `SetTrustLineFlagsResult:no_trust_line` | 2: `classic.failed-tx.p30-set-trust-line-flags-no-trust-line`, `explore.witnesses.g2-r0034-l115` |  |
+| `OperationResult:op_bad_auth` | 2: `classic.failed-tx.p30-op-bad-auth`, `explore.witnesses.g2-r0012-l78` |  |
+| `OperationResult:op_exceeded_work_limit` | 2: `classic.failed-tx.p30-path-receive-exceeded-work-limit`, `explore.witnesses.scale-exceeded-work-limit-l78` |  |
+| `TransactionResultResult:tx_bad_auth_extra` | 2: `classic.failed-tx.p30-tx-bad-auth-extra`, `explore.witnesses.g2-r0005-l72` |  |
+| `TransactionResultResult:tx_bad_min_seq_age_or_gap` | 2: `classic.failed-tx.p30-tx-bad-min-seq-gap`, `explore.witnesses.g2-r0009-l76` |  |
+| `AccountEntryExtensionV1Ext:v0` | 10: `cap03.offer-liabilities.mainnet-25000000`, `cap03.offer-liabilities.mainnet-37466023`, `cap03.offer-liabilities.p17-manage-buy-offer-claim-atom-v0` and 7 more |  |
+| `LedgerKey:data` | 3: `classic.failed-tx.p30-manage-data-removed`, `classic.failed-tx.p30-revoke-does-not-exist`, `explore.witnesses.g2-r0007-l84` |  |
+| `TransactionEnvelope:tx_v0` | 53: `cap03.offer-liabilities.mainnet-25000000`, `cap26.inflation.p11-inflation-not-time`, `cap26.inflation.p11-inflation-payout` and 50 more |  |
+| `ManageBuyOfferResult:buy_no_issuer` | 2: `classic.failed-tx.p12-manage-buy-offer-buy-no-issuer`, `explore.witnesses.g2-r0038-l67` |  |
+| `ManageBuyOfferResult:sell_no_issuer` | 2: `classic.failed-tx.p12-manage-buy-offer-sell-no-issuer`, `explore.witnesses.g2-r0033-l66` |  |
+| `ManageSellOfferResult:buy_no_issuer` | 2: `classic.failed-tx.p12-manage-sell-offer-buy-no-issuer`, `explore.witnesses.g2-r0010-l92` |  |
+| `ManageSellOfferResult:sell_no_issuer` | 2: `classic.failed-tx.p12-manage-sell-offer-sell-no-issuer`, `explore.witnesses.g2-r0029-l98` |  |
+| `PathPaymentStrictReceiveResult:no_issuer` | 3: `classic.failed-tx.p12-path-payment-strict-receive-no-issuer`, `explore.witnesses.g2-r0008-l73`, `explore.witnesses.g2-r0038-l68` |  |
+| `PathPaymentStrictSendResult:no_issuer` | 2: `classic.failed-tx.p12-path-payment-strict-send-no-issuer`, `explore.witnesses.g2-r0038-l68` |  |
+| `PaymentResult:no_issuer` | 2: `classic.failed-tx.p12-payment-no-issuer`, `explore.witnesses.g2-r0028-l66` |  |
+| `AllowTrustResult:trust_not_required` | 2: `classic.failed-tx.p12-allow-trust-trust-not-required`, `explore.witnesses.g2-r0015-l71` |  |
+| `AllowTrustResult:self_not_allowed` | 4: `classic.failed-tx.p12-allow-trust-self-not-allowed`, `explore.witnesses.f62d-r0002-l66`, `explore.witnesses.g1-r0004-l141` and 1 more |  |
+| `ChangeTrustResult:self_not_allowed` | 2: `classic.failed-tx.p12-change-trust-self-not-allowed`, `explore.witnesses.g2-r0008-l73` |  |
 
 ### `cap23.claimable-balances`
 
@@ -587,12 +587,12 @@ Claimable balances with ten claimants and predicates at the maximum depth. CAPs:
 
 | Fragment | Core-emitted entries | Gap |
 |---|---|---|
-| `OperationBody:create_claimable_balance` | 14: `cap23.claimable-balances.golden-3635a80135f66ca8-0`, `cap23.claimable-balances.p30-create-ten-claimants-depth-4-envelope`, `cap27.muxed-accounts.p28-claimable-balance-tx-source-id-1` and 11 more |  |
-| `OperationBody:claim_claimable_balance` | 11: `cap23.claimable-balances.golden-67b49513ed2f1609-1`, `cap23.claimable-balances.p30-claim-through-depth-4-envelope`, `cap67.unified-events.p22-backfill-claim-claimable-balance` and 8 more |  |
-| `LedgerEntryData:claimable_balance` | 22: `cap23.claimable-balances.golden-3635a80135f66ca8-0`, `cap23.claimable-balances.p30-claim-through-depth-4-meta`, `cap23.claimable-balances.p30-create-ten-claimants-depth-4-meta` and 19 more |  |
+| `OperationBody:create_claimable_balance` | 27: `cap03.offer-liabilities.mainnet-37466023`, `cap23.claimable-balances.golden-3635a80135f66ca8-0`, `cap23.claimable-balances.p30-create-ten-claimants-depth-4-envelope` and 24 more |  |
+| `OperationBody:claim_claimable_balance` | 31: `cap03.offer-liabilities.mainnet-37466023`, `cap03.offer-liabilities.mainnet-44679511`, `cap23.claimable-balances.golden-67b49513ed2f1609-1` and 28 more |  |
+| `LedgerEntryData:claimable_balance` | 31: `cap03.offer-liabilities.mainnet-37466023`, `cap03.offer-liabilities.mainnet-44679511`, `cap23.claimable-balances.golden-3635a80135f66ca8-0` and 28 more |  |
 | `.claimants#max` | 4: `cap23.claimable-balances.p30-claim-through-depth-4-meta`, `cap23.claimable-balances.p30-create-ten-claimants-depth-4-envelope`, `cap23.claimable-balances.p30-create-ten-claimants-depth-4-meta` and 1 more |  |
 | `.predicate:and[]:or[]:not:before_absolute_time` | 4: `cap23.claimable-balances.p30-claim-through-depth-4-meta`, `cap23.claimable-balances.p30-create-ten-claimants-depth-4-envelope`, `cap23.claimable-balances.p30-create-ten-claimants-depth-4-meta` and 1 more |  |
-| `ClaimPredicate:before_relative_time` | 2: `cap23.claimable-balances.p30-create-ten-claimants-depth-4-envelope`, `classic.max-length.mainnet-63092988-bf644414-envelope` |  |
+| `ClaimPredicate:before_relative_time` | 6: `cap03.offer-liabilities.mainnet-37466023`, `cap23.claimable-balances.p30-create-ten-claimants-depth-4-envelope`, `classic.max-length.mainnet-63092988-bf644414-envelope` and 3 more |  |
 | `CreateClaimableBalanceResult:malformed` | none | `refused-before-ledger` the arm itself: set only in the operation's doCheckValid (stellar-core v30.0.0 src/transactions/*OpFrame.cpp), which reads nothing but the operation and the protocol, so the tx queue and tx set validation refuse the transaction and the identical check at apply never fails Shape seen in: refused by core 1: `cap23.claimable-balances.p30-create-predicate-depth-5` |
 
 ### `cap21.preconditions`
@@ -601,10 +601,10 @@ Version 2 preconditions: ledger bounds, minimum sequence, age, ledger gap, two e
 
 | Fragment | Core-emitted entries | Gap |
 |---|---|---|
-| `Preconditions:v2` | 12: `cap15.fee-bump.p30-inner-bad-min-seq-gap`, `cap21.preconditions.golden-27d2533d64835282-1`, `cap21.preconditions.p30-all-preconditions-envelope` and 9 more |  |
-| `.ledger_bounds.max_ledger` | 4: `cap21.preconditions.p30-all-preconditions-envelope`, `cap21.preconditions.p30-ledger-and-time-bounds-envelope`, `cap21.preconditions.p30-ledger-bounds-no-maximum-envelope` and 1 more |  |
+| `Preconditions:v2` | 17: `cap03.offer-liabilities.mainnet-44679511`, `cap15.fee-bump.mainnet-57369500`, `cap15.fee-bump.p30-inner-bad-min-seq-gap` and 14 more |  |
+| `.ledger_bounds.max_ledger` | 7: `cap03.offer-liabilities.mainnet-44679511`, `cap15.fee-bump.mainnet-57369500`, `cap21.preconditions.p30-all-preconditions-envelope` and 4 more |  |
 | `.extra_signers#max` | 2: `cap21.preconditions.p30-all-preconditions-envelope`, `cap21.preconditions.p30-two-extra-signers-envelope` |  |
-| `AccountEntryExtensionV2Ext:v3` | 457: `cap01.bump-sequence.golden-b71da06f9ce2dec8-2`, `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward` and 454 more |  |
+| `AccountEntryExtensionV2Ext:v3` | 700: `cap01.bump-sequence.golden-b71da06f9ce2dec8-2`, `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward` and 697 more |  |
 
 ### `cap33.sponsorship`
 
@@ -612,17 +612,17 @@ Sponsored accounts, trustlines, signers and claimable balances, and sponsorship 
 
 | Fragment | Core-emitted entries | Gap |
 |---|---|---|
-| `OperationBody:begin_sponsoring_future_reserves` | 15: `cap15.fee-bump.p30-inner-bad-sponsorship`, `cap33.sponsorship.golden-16ca002da0d1fd67-1`, `cap33.sponsorship.golden-1c7fb8566ea79e53-1` and 12 more |  |
-| `OperationBody:end_sponsoring_future_reserves` | 12: `cap33.sponsorship.golden-1c7fb8566ea79e53-1`, `cap33.sponsorship.golden-5a03a46b7b48bb06-2`, `cap33.sponsorship.golden-6f067a349543093a-48` and 9 more |  |
-| `OperationBody:revoke_sponsorship` | 9: `cap33.sponsorship.p30-revoke-hash-x-signer-sponsorship-envelope`, `cap33.sponsorship.p30-revoke-signer-sponsorship-envelope`, `cap33.sponsorship.p30-revoke-trustline-sponsorship-envelope` and 6 more |  |
-| `RevokeSponsorshipOp:ledger_entry` | 5: `cap33.sponsorship.p30-revoke-trustline-sponsorship-envelope`, `classic.failed-tx.p30-revoke-does-not-exist`, `classic.failed-tx.p30-revoke-low-reserve` and 2 more |  |
-| `RevokeSponsorshipOp:signer` | 4: `cap33.sponsorship.p30-revoke-hash-x-signer-sponsorship-envelope`, `cap33.sponsorship.p30-revoke-signer-sponsorship-envelope`, `cap40.signed-payload-signer.p28-revoke-sponsorship-payload-64-envelope` and 1 more |  |
-| `LedgerEntryExt:v1` | 32: `cap15.fee-bump.mainnet-51000294-a25b8226-meta`, `cap23.claimable-balances.golden-3635a80135f66ca8-0`, `cap23.claimable-balances.p30-claim-through-depth-4-meta` and 29 more |  |
-| `AccountEntryExtensionV1Ext:v2` | 458: `cap01.bump-sequence.golden-b71da06f9ce2dec8-2`, `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward` and 455 more |  |
-| `.signer_sponsoring_i_ds[]:public_key_type_ed25519` | 18: `cap33.sponsorship.golden-6f067a349543093a-48`, `cap33.sponsorship.p30-revoke-hash-x-signer-sponsorship-meta`, `cap33.sponsorship.p30-revoke-signer-sponsorship-meta` and 15 more |  |
-| `BeginSponsoringFutureReservesResult:already_sponsored` | 1: `cap33.sponsorship.golden-16ca002da0d1fd67-1` |  |
-| `BeginSponsoringFutureReservesResult:recursive` | 1: `cap33.sponsorship.golden-5a03a46b7b48bb06-2` |  |
-| `EndSponsoringFutureReservesResult:not_sponsored` | 1: `cap33.sponsorship.golden-5a03a46b7b48bb06-2` |  |
+| `OperationBody:begin_sponsoring_future_reserves` | 29: `cap03.offer-liabilities.mainnet-37466023`, `cap15.fee-bump.p30-inner-bad-sponsorship`, `cap33.sponsorship.golden-16ca002da0d1fd67-1` and 26 more |  |
+| `OperationBody:end_sponsoring_future_reserves` | 25: `cap03.offer-liabilities.mainnet-37466023`, `cap33.sponsorship.golden-1c7fb8566ea79e53-1`, `cap33.sponsorship.golden-5a03a46b7b48bb06-2` and 22 more |  |
+| `OperationBody:revoke_sponsorship` | 26: `cap03.offer-liabilities.mainnet-44679511`, `cap33.sponsorship.p30-revoke-hash-x-signer-sponsorship-envelope`, `cap33.sponsorship.p30-revoke-signer-sponsorship-envelope` and 23 more |  |
+| `RevokeSponsorshipOp:ledger_entry` | 15: `cap03.offer-liabilities.mainnet-44679511`, `cap33.sponsorship.p30-revoke-trustline-sponsorship-envelope`, `classic.failed-tx.p30-revoke-does-not-exist` and 12 more |  |
+| `RevokeSponsorshipOp:signer` | 11: `cap33.sponsorship.p30-revoke-hash-x-signer-sponsorship-envelope`, `cap33.sponsorship.p30-revoke-signer-sponsorship-envelope`, `cap40.signed-payload-signer.p28-revoke-sponsorship-payload-64-envelope` and 8 more |  |
+| `LedgerEntryExt:v1` | 43: `cap03.offer-liabilities.mainnet-37466023`, `cap03.offer-liabilities.mainnet-44679511`, `cap15.fee-bump.mainnet-51000294-a25b8226-meta` and 40 more |  |
+| `AccountEntryExtensionV1Ext:v2` | 725: `cap01.bump-sequence.golden-b71da06f9ce2dec8-2`, `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward` and 722 more |  |
+| `.signer_sponsoring_i_ds[]:public_key_type_ed25519` | 19: `cap15.fee-bump.mainnet-57369500`, `cap33.sponsorship.golden-6f067a349543093a-48`, `cap33.sponsorship.p30-revoke-hash-x-signer-sponsorship-meta` and 16 more |  |
+| `BeginSponsoringFutureReservesResult:already_sponsored` | 2: `cap33.sponsorship.golden-16ca002da0d1fd67-1`, `explore.witnesses.g2-r0031-l66` |  |
+| `BeginSponsoringFutureReservesResult:recursive` | 2: `cap33.sponsorship.golden-5a03a46b7b48bb06-2`, `explore.witnesses.g2-r0030-l95` |  |
+| `EndSponsoringFutureReservesResult:not_sponsored` | 10: `cap33.sponsorship.golden-5a03a46b7b48bb06-2`, `explore.witnesses.f62c-r0000-l71`, `explore.witnesses.f62d-r0000-l86` and 7 more |  |
 
 ### `cap35.clawback`
 
@@ -630,10 +630,10 @@ Clawback, claimable balance clawback and trustline flag changes. CAPs: CAP-0035.
 
 | Fragment | Core-emitted entries | Gap |
 |---|---|---|
-| `OperationBody:clawback` | 9: `cap27.muxed-accounts.p28-clawback-from-id-2p64-1`, `cap27.muxed-accounts.p30-clawback-from-id-2p64-1`, `cap35.clawback.p30-clawback` and 6 more |  |
-| `OperationBody:clawback_claimable_balance` | 7: `cap35.clawback.p30-clawback-claimable-balance-envelope`, `cap67.unified-events.p22-backfill-clawback-claimable-balance`, `cap67.unified-events.p22-clawback-claimable-balance` and 4 more |  |
-| `OperationBody:set_trust_line_flags` | 15: `cap18.maintain-liabilities.p30-set-flags-and-allow-trust-maintain`, `cap35.clawback.golden-3f24be68a9962089-11`, `cap35.clawback.p30-set-flags-authorized-to-maintain` and 12 more |  |
-| `ClaimableBalanceEntryExt:v1` | 12: `cap35.clawback.p30-clawback-claimable-balance-meta`, `cap35.clawback.p30-clawback-enabled-balance-entry`, `cap35.clawback.p30-create-clawback-enabled-balance` and 9 more |  |
+| `OperationBody:clawback` | 15: `cap27.muxed-accounts.p28-clawback-from-id-2p64-1`, `cap27.muxed-accounts.p30-clawback-from-id-2p64-1`, `cap35.clawback.p30-clawback` and 12 more |  |
+| `OperationBody:clawback_claimable_balance` | 18: `cap35.clawback.p30-clawback-claimable-balance-envelope`, `cap67.unified-events.p22-backfill-clawback-claimable-balance`, `cap67.unified-events.p22-clawback-claimable-balance` and 15 more |  |
+| `OperationBody:set_trust_line_flags` | 21: `cap18.maintain-liabilities.p30-set-flags-and-allow-trust-maintain`, `cap35.clawback.golden-3f24be68a9962089-11`, `cap35.clawback.p30-set-flags-authorized-to-maintain` and 18 more |  |
+| `ClaimableBalanceEntryExt:v1` | 15: `cap03.offer-liabilities.mainnet-44679511`, `cap35.clawback.p30-clawback-claimable-balance-meta`, `cap35.clawback.p30-clawback-enabled-balance-entry` and 12 more |  |
 
 ### `soroban.invoke-basics`
 
@@ -641,27 +641,27 @@ Wasm upload, contract creation with and without constructor, invocation, TTL ext
 
 | Fragment | Core-emitted entries | Gap |
 |---|---|---|
-| `HostFunction:upload_contract_wasm` | 6: `cap15.fee-bump.golden-f5fa0a4b15bfd9d9-12`, `cap67.unified-events.golden-60000be2e73a4207-10`, `classic.failed-tx.golden-8e3126c525875c96-10` and 3 more |  |
-| `HostFunction:create_contract` | 10: `cap73.sac-trust.golden-504393015a71bc7a-8`, `cap73.sac-trust.golden-a8df5d4dbdc85ac8-2`, `cap73.sac-trust.p28-deploy-credit-sac-envelope` and 7 more |  |
-| `HostFunction:create_contract_v2` | 4: `cap85.executable-tag.p30-create-external-ref-envelope`, `cap85.executable-tag.p30-create-external-ref-missing-tag`, `soroban.invoke-basics.golden-bf1c69a28fed2564-6` and 1 more |  |
-| `HostFunction:invoke_contract` | 91: `cap38.liquidity-pools.testnet-5521432`, `cap40.signed-payload-signer.testnet-4437357`, `cap63.parallel-txset.golden-81af9cfb66a06a01-18` and 88 more |  |
-| `OperationBody:extend_footprint_ttl` | 10: `cap63.parallel-txset.golden-04667ce620bffee7-24`, `soroban.invoke-basics.golden-04667ce620bffee7-24`, `soroban.invoke-basics.golden-568d51258ccf9080-9` and 7 more |  |
-| `OperationBody:restore_footprint` | 14: `cap66.archival.golden-04667ce620bffee7-26`, `cap66.archival.p30-restore-footprint`, `cap76.archival-remediation.golden-04667ce620bffee7-26` and 11 more |  |
-| `InvokeHostFunctionResult:trapped` | 28: `cap38.liquidity-pools.testnet-5521432`, `cap67.unified-events.golden-938fb779c48ac3af-16`, `cap67.unified-events.golden-938fb779c48ac3af-19` and 25 more |  |
-| `ContractCodeEntryExt:v1` | 7: `soroban.events-max.golden-a8df5d4dbdc85ac8-1`, `soroban.invoke-basics.golden-7b59aa36c1776fe1-32`, `soroban.invoke-basics.golden-a8df5d4dbdc85ac8-1` and 4 more |  |
-| `ContractExecutable:wasm` | 23: `cap40.signed-payload-signer.testnet-4437357`, `cap73.sac-trust.golden-a8df5d4dbdc85ac8-2`, `cap85.executable-tag.p30-update-to-external-ref-meta` and 20 more |  |
-| `LedgerEntryData:contract_code` | 7: `soroban.events-max.golden-a8df5d4dbdc85ac8-1`, `soroban.invoke-basics.golden-7b59aa36c1776fe1-32`, `soroban.invoke-basics.golden-a8df5d4dbdc85ac8-1` and 4 more |  |
-| `LedgerEntryData:contract_data` | 64: `cap38.liquidity-pools.testnet-5521432`, `cap40.signed-payload-signer.testnet-4437357`, `cap63.parallel-txset.golden-81af9cfb66a06a01-18` and 61 more |  |
-| `LedgerEntryData:ttl` | 65: `cap38.liquidity-pools.testnet-5521432`, `cap40.signed-payload-signer.testnet-4437357`, `cap63.parallel-txset.golden-81af9cfb66a06a01-18` and 62 more |  |
-| `ContractDataDurability=temporary` | 31: `cap38.liquidity-pools.testnet-5521432`, `cap66.archival.p30-evicted-temporary`, `cap71.credentials.golden-e25799a2e2e9eea2-17` and 28 more |  |
-| `ContractEventType=contract` | 359: `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward`, `cap01.bump-sequence.p30-bump-past-starting-sequence` and 356 more |  |
+| `HostFunction:upload_contract_wasm` | 14: `cap15.fee-bump.golden-f5fa0a4b15bfd9d9-12`, `cap67.unified-events.golden-60000be2e73a4207-10`, `classic.failed-tx.golden-8e3126c525875c96-10` and 11 more |  |
+| `HostFunction:create_contract` | 18: `cap73.sac-trust.golden-504393015a71bc7a-8`, `cap73.sac-trust.golden-a8df5d4dbdc85ac8-2`, `cap73.sac-trust.p28-deploy-credit-sac-envelope` and 15 more |  |
+| `HostFunction:create_contract_v2` | 10: `cap85.executable-tag.p30-create-external-ref-envelope`, `cap85.executable-tag.p30-create-external-ref-missing-tag`, `explore.pairs.sac-trust-p30-a-l65` and 7 more |  |
+| `HostFunction:invoke_contract` | 120: `cap15.fee-bump.mainnet-57369500`, `cap38.liquidity-pools.testnet-5521432`, `cap40.signed-payload-signer.testnet-4437357` and 117 more |  |
+| `OperationBody:extend_footprint_ttl` | 15: `cap63.parallel-txset.golden-04667ce620bffee7-24`, `explore.witnesses.f63-footprint-limits-p22-l66`, `explore.witnesses.f63-p21-r0001-l86` and 12 more |  |
+| `OperationBody:restore_footprint` | 20: `cap66.archival.golden-04667ce620bffee7-26`, `cap66.archival.p30-restore-footprint`, `cap76.archival-remediation.golden-04667ce620bffee7-26` and 17 more |  |
+| `InvokeHostFunctionResult:trapped` | 30: `cap15.fee-bump.mainnet-57369500`, `cap38.liquidity-pools.testnet-5521432`, `cap67.unified-events.golden-938fb779c48ac3af-16` and 27 more |  |
+| `ContractCodeEntryExt:v1` | 17: `explore.pairs.sac-trust-p30-a-l64`, `explore.pairs.sac-trust-p30-b-l64`, `explore.witnesses.f63-p21-r0001-l66` and 14 more |  |
+| `ContractExecutable:wasm` | 32: `cap15.fee-bump.mainnet-57369500`, `cap40.signed-payload-signer.testnet-4437357`, `cap73.sac-trust.golden-a8df5d4dbdc85ac8-2` and 29 more |  |
+| `LedgerEntryData:contract_code` | 17: `explore.pairs.sac-trust-p30-a-l64`, `explore.pairs.sac-trust-p30-b-l64`, `explore.witnesses.f63-p21-r0001-l66` and 14 more |  |
+| `LedgerEntryData:contract_data` | 93: `cap15.fee-bump.mainnet-57369500`, `cap38.liquidity-pools.testnet-5521432`, `cap40.signed-payload-signer.testnet-4437357` and 90 more |  |
+| `LedgerEntryData:ttl` | 107: `cap15.fee-bump.mainnet-57369500`, `cap38.liquidity-pools.testnet-5521432`, `cap40.signed-payload-signer.testnet-4437357` and 104 more |  |
+| `ContractDataDurability=temporary` | 43: `cap15.fee-bump.mainnet-57369500`, `cap38.liquidity-pools.testnet-5521432`, `cap66.archival.p30-evicted-temporary` and 40 more |  |
+| `ContractEventType=contract` | 661: `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward`, `cap01.bump-sequence.p30-bump-past-starting-sequence` and 658 more |  |
 | `ContractCodeEntryExt:v0` | none | `old-protocol-only` the arm itself: soroban-env-host writes ContractCodeEntryExt v1 with the module's cost inputs on every wasm upload (upload_contract_wasm in host/lifecycle.rs, 22.1.3 and 30.0.0; v0 stays only for the test build's empty wasm), so v0 entries are code uploaded at protocol 20 and show in later meta only when such an entry changes. the recipes' soroban hosts start at protocol 22. the one golden holding it (test-lcm-current/InvokeHostFunctionTests/27003f6cc5cdecc2.xdr record 2) is a protocol 20 ledger, below soroban.invoke-basics' range from 22, so the golden index lists it as not imported, and 29 protocol 20 mainnet ledgers sampled from 50460000 to 52140000 hold no upload |
-| `ExtendFootprintTtlResult:insufficient_refundable_fee` | 1: `soroban.invoke-basics.golden-568d51258ccf9080-9` |  |
-| `ExtendFootprintTtlResult:resource_limit_exceeded` | 1: `soroban.invoke-basics.golden-8299635e181e651c-11` |  |
-| `InvokeHostFunctionResult:insufficient_refundable_fee` | 1: `soroban.invoke-basics.golden-e14cf5fee65b0fed-7` |  |
-| `RestoreFootprintResult:insufficient_refundable_fee` | 1: `soroban.invoke-basics.golden-d8e7a355b968f3df-28` |  |
-| `ScError:auth` | 6: `soroban.invoke-basics.golden-7e8aadf36d7d907d-17`, `soroban.invoke-basics.golden-897493fc26f0ff7b-17`, `soroban.scval-shapes.golden-7e8aadf36d7d907d-17` and 3 more |  |
-| `ScError:crypto` | 4: `soroban.invoke-basics.golden-897493fc26f0ff7b-17`, `soroban.scval-shapes.golden-897493fc26f0ff7b-17`, `soroban.scval-shapes.p30-errors-auth-crypto-events-envelope` and 1 more |  |
+| `ExtendFootprintTtlResult:insufficient_refundable_fee` | 2: `explore.witnesses.f63-refundable-fee-l67`, `soroban.invoke-basics.golden-568d51258ccf9080-9` |  |
+| `ExtendFootprintTtlResult:resource_limit_exceeded` | 2: `explore.witnesses.f63-footprint-limits-p22-l66`, `soroban.invoke-basics.golden-8299635e181e651c-11` |  |
+| `InvokeHostFunctionResult:insufficient_refundable_fee` | 2: `explore.witnesses.f63-refundable-fee-l65`, `soroban.invoke-basics.golden-e14cf5fee65b0fed-7` |  |
+| `RestoreFootprintResult:insufficient_refundable_fee` | 2: `explore.witnesses.f63-refundable-fee-l80`, `soroban.invoke-basics.golden-d8e7a355b968f3df-28` |  |
+| `ScError:auth` | 7: `explore.witnesses.f63-error-values-l67`, `soroban.invoke-basics.golden-7e8aadf36d7d907d-17`, `soroban.invoke-basics.golden-897493fc26f0ff7b-17` and 4 more |  |
+| `ScError:crypto` | 5: `explore.witnesses.f63-p30-r0003-l99`, `soroban.invoke-basics.golden-897493fc26f0ff7b-17`, `soroban.scval-shapes.golden-897493fc26f0ff7b-17` and 2 more |  |
 
 ### `soroban.events-max`
 
@@ -669,11 +669,11 @@ Contract events and return values at the configured size limits. CAPs: CAP-0046-
 
 | Fragment | Core-emitted entries | Gap |
 |---|---|---|
-| `ContractEventType=contract` | 359: `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward`, `cap01.bump-sequence.p30-bump-past-starting-sequence` and 356 more |  |
-| `.operations[].events#many` | 15: `cap03.offer-liabilities.p30-buy-offer-crosses-and-rests-meta`, `cap03.offer-liabilities.p30-buy-offer-takes-two-makers-meta`, `cap03.offer-liabilities.p30-credit-pair-cross-partial` and 12 more |  |
-| `.body:v0.topics#many` | 383: `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward`, `cap01.bump-sequence.p30-bump-past-starting-sequence` and 380 more |  |
+| `ContractEventType=contract` | 661: `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward`, `cap01.bump-sequence.p30-bump-past-starting-sequence` and 658 more |  |
+| `.operations[].events#many` | 24: `cap03.offer-liabilities.mainnet-37466023`, `cap03.offer-liabilities.mainnet-44679511`, `cap03.offer-liabilities.p30-buy-offer-crosses-and-rests-meta` and 21 more |  |
+| `.body:v0.topics#many` | 684: `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward`, `cap01.bump-sequence.p30-bump-past-starting-sequence` and 681 more |  |
 | `.body:v0.data:bytes` | 7: `cap40.signed-payload-signer.testnet-4437357`, `cap73.sac-trust.golden-504393015a71bc7a-8`, `soroban.events-max.golden-a8df5d4dbdc85ac8-7` and 4 more |  |
-| `.return_value:bytes` | 4: `soroban.events-max.golden-a8df5d4dbdc85ac8-1`, `soroban.events-max.p30-echo-bytes-at-limit`, `soroban.invoke-basics.golden-a8df5d4dbdc85ac8-1` and 1 more |  |
+| `.return_value:bytes` | 11: `explore.pairs.sac-trust-p30-a-l64`, `explore.pairs.sac-trust-p30-b-l64`, `explore.witnesses.f63-p21-r0001-l66` and 8 more |  |
 
 Planned shapes no fragment can express, not in the corpus:
 
@@ -685,8 +685,8 @@ Address-v2 and with-delegates Soroban credentials. CAPs: CAP-0071, CAP-0071-01, 
 
 | Fragment | Core-emitted entries | Gap |
 |---|---|---|
-| `SorobanCredentials:address_v2` | 6: `cap71.credentials.golden-e25799a2e2e9eea2-17`, `cap71.credentials.p30-address-v2`, `soroban.auth-trees.golden-57a486abce28859d-17` and 3 more |  |
-| `SorobanCredentials:address_with_delegates` | 2: `cap71.credentials.p30-with-delegates-nested`, `cap71.credentials.p30-with-delegates-unsorted` |  |
+| `SorobanCredentials:address_v2` | 7: `cap71.credentials.golden-e25799a2e2e9eea2-17`, `cap71.credentials.p30-address-v2`, `explore.witnesses.f63-p27-r0004-l99` and 4 more |  |
+| `SorobanCredentials:address_with_delegates` | 3: `cap71.credentials.p30-with-delegates-nested`, `cap71.credentials.p30-with-delegates-unsorted`, `explore.witnesses.f63-delegates-l72` |  |
 | `.delegates[].nested_delegates[]` | 2: `cap71.credentials.p30-with-delegates-nested`, `cap71.credentials.p30-with-delegates-unsorted` |  |
 
 ### `cap66.archival`
@@ -695,11 +695,11 @@ Archived entries restored explicitly and automatically, and evicted keys. CAPs: 
 
 | Fragment | Core-emitted entries | Gap |
 |---|---|---|
-| `LedgerEntryChange:restored` | 10: `cap66.archival.golden-04667ce620bffee7-26`, `cap66.archival.p30-auto-restore-invoke-meta`, `cap66.archival.p30-restore-footprint` and 7 more |  |
-| `SorobanTransactionDataExt:v1` | 2: `cap66.archival.golden-9b704e753d572789-23`, `cap66.archival.p30-auto-restore-invoke-envelope` |  |
-| `.archived_soroban_entries#one` | 2: `cap66.archival.golden-9b704e753d572789-23`, `cap66.archival.p30-auto-restore-invoke-envelope` |  |
-| `.evicted_keys[]:contract_data` | 6: `cap66.archival.golden-7b59aa36c1776fe1-31`, `cap66.archival.p30-evicted-persistent`, `cap66.archival.p30-evicted-temporary` and 3 more |  |
-| `InvokeHostFunctionResult:entry_archived` | 1: `cap66.archival.golden-04667ce620bffee7-23` |  |
+| `LedgerEntryChange:restored` | 14: `cap66.archival.golden-04667ce620bffee7-26`, `cap66.archival.p30-auto-restore-invoke-meta`, `cap66.archival.p30-restore-footprint` and 11 more |  |
+| `SorobanTransactionDataExt:v1` | 4: `cap66.archival.golden-9b704e753d572789-23`, `cap66.archival.p30-auto-restore-invoke-envelope`, `explore.witnesses.f63-p23-r0000-l80` and 1 more |  |
+| `.archived_soroban_entries#one` | 4: `cap66.archival.golden-9b704e753d572789-23`, `cap66.archival.p30-auto-restore-invoke-envelope`, `explore.witnesses.f63-p23-r0000-l80` and 1 more |  |
+| `.evicted_keys[]:contract_data` | 8: `cap15.fee-bump.mainnet-57369500`, `cap66.archival.golden-7b59aa36c1776fe1-31`, `cap66.archival.p30-evicted-persistent` and 5 more |  |
+| `InvokeHostFunctionResult:entry_archived` | 3: `cap66.archival.golden-04667ce620bffee7-23`, `explore.witnesses.f63-p23-r0000-l76`, `explore.witnesses.f63-p25-r0001-l77` |  |
 
 ### `cap85.executable-tag`
 
@@ -707,8 +707,8 @@ Externally managed contract executables and the executable-tag value. CAPs: CAP-
 
 | Fragment | Core-emitted entries | Gap |
 |---|---|---|
-| `ContractExecutable:external_ref` | 5: `cap85.executable-tag.p30-contract-deploys-external-ref-meta`, `cap85.executable-tag.p30-create-external-ref-envelope`, `cap85.executable-tag.p30-create-external-ref-meta` and 2 more |  |
-| `ScVal:executable_tag` | 8: `cap85.executable-tag.p30-contract-deploys-external-ref-envelope`, `cap85.executable-tag.p30-create-external-ref-envelope`, `cap85.executable-tag.p30-create-external-ref-missing-tag` and 5 more |  |
+| `ContractExecutable:external_ref` | 6: `cap85.executable-tag.p30-contract-deploys-external-ref-meta`, `cap85.executable-tag.p30-create-external-ref-envelope`, `cap85.executable-tag.p30-create-external-ref-meta` and 3 more |  |
+| `ScVal:executable_tag` | 10: `cap85.executable-tag.p30-contract-deploys-external-ref-envelope`, `cap85.executable-tag.p30-create-external-ref-envelope`, `cap85.executable-tag.p30-create-external-ref-missing-tag` and 7 more |  |
 
 ### `cap77.frozen-keys`
 
@@ -716,13 +716,13 @@ Frozen ledger keys: config settings and operations failing on a frozen trustline
 
 | Fragment | Core-emitted entries | Gap |
 |---|---|---|
-| `ConfigSettingEntry:frozen_ledger_keys` | 4: `cap76.archival-remediation.golden-e6b26f2ad89e0e1b-1`, `cap77.frozen-keys.golden-34d6c37c6481e487-7`, `cap77.frozen-keys.p30-freeze-upgrade` and 1 more |  |
+| `ConfigSettingEntry:frozen_ledger_keys` | 7: `cap76.archival-remediation.golden-e6b26f2ad89e0e1b-1`, `cap77.frozen-keys.golden-34d6c37c6481e487-7`, `cap77.frozen-keys.p30-freeze-upgrade` and 4 more |  |
 | `ConfigSettingEntry:frozen_ledger_keys_delta` | none | `never-emitted` the arm itself: a delta exists only inside a ConfigUpgradeSet, which reaches the ledger as opaque bytes in contract data; ConfigUpgradeSetFrame::applyTo merges it into the stored FROZEN_LEDGER_KEYS or FREEZE_BYPASS_TXS entry (stellar-core v30.0.0 herder/Upgrades.cpp), so meta never holds the arm |
 | `ConfigSettingEntry:freeze_bypass_txs` | 4: `cap76.archival-remediation.golden-e6b26f2ad89e0e1b-1`, `cap77.frozen-keys.golden-750ccb6ad63c37bb-9`, `cap77.frozen-keys.p30-bypass-entry` and 1 more |  |
 | `ConfigSettingEntry:freeze_bypass_txs_delta` | none | `never-emitted` the arm itself: a delta exists only inside a ConfigUpgradeSet, which reaches the ledger as opaque bytes in contract data; ConfigUpgradeSetFrame::applyTo merges it into the stored FROZEN_LEDGER_KEYS or FREEZE_BYPASS_TXS entry (stellar-core v30.0.0 herder/Upgrades.cpp), so meta never holds the arm |
-| `ClaimClaimableBalanceResult:trustline_frozen` | 2: `cap77.frozen-keys.golden-a0fb94c314b8bb2f-15`, `cap77.frozen-keys.p30-claim-into-frozen-trustline` |  |
-| `LiquidityPoolDepositResult:trustline_frozen` | 3: `cap38.liquidity-pools.golden-d637d6474c6d185d-16`, `cap77.frozen-keys.golden-d637d6474c6d185d-16`, `cap77.frozen-keys.p30-deposit-frozen-trustline` |  |
-| `LiquidityPoolWithdrawResult:trustline_frozen` | 3: `cap38.liquidity-pools.golden-0d70bfa2dc91b602-16`, `cap77.frozen-keys.golden-0d70bfa2dc91b602-16`, `cap77.frozen-keys.p30-withdraw-frozen-trustline` |  |
+| `ClaimClaimableBalanceResult:trustline_frozen` | 3: `cap77.frozen-keys.golden-a0fb94c314b8bb2f-15`, `cap77.frozen-keys.p30-claim-into-frozen-trustline`, `explore.witnesses.g2-r0005-l98` |  |
+| `LiquidityPoolDepositResult:trustline_frozen` | 4: `cap38.liquidity-pools.golden-d637d6474c6d185d-16`, `cap77.frozen-keys.golden-d637d6474c6d185d-16`, `cap77.frozen-keys.p30-deposit-frozen-trustline` and 1 more |  |
+| `LiquidityPoolWithdrawResult:trustline_frozen` | 4: `cap38.liquidity-pools.golden-0d70bfa2dc91b602-16`, `cap77.frozen-keys.golden-0d70bfa2dc91b602-16`, `cap77.frozen-keys.p30-withdraw-frozen-trustline` and 1 more |  |
 | `TransactionResultResult:tx_frozen_key_accessed` | none | `refused-before-ledger` the arm itself: TransactionFrame::commonValidPreSeqNum checks frozen keys against the network config (stellar-core v30.0.0), which only changes through config upgrades applied after a ledger's transactions, so validation already refused any transaction that fails at apply; none of the 1732 core golden files (test-lcm-current and test-lcm-next) holds it |
 
 ### `cap46.config-upgrades`
@@ -731,17 +731,17 @@ Soroban network config upgrades and cost parameter entries in upgrade meta. CAPs
 
 | Fragment | Core-emitted entries | Gap |
 |---|---|---|
-| `LedgerUpgrade:config` | 8: `cap42.generalized-txset.golden-27003f6cc5cdecc2-5`, `cap46.config-upgrades.golden-27003f6cc5cdecc2-5`, `cap46.config-upgrades.p30-testnet-settings-upgrade` and 5 more |  |
-| `LedgerUpgrade:max_soroban_tx_set_size` | 2: `cap46.config-upgrades.golden-182fa2818edaf743-1`, `cap46.config-upgrades.p30-max-soroban-tx-set-size-upgrade` |  |
-| `LedgerEntryData:config_setting` | 20: `cap42.generalized-txset.golden-27003f6cc5cdecc2-5`, `cap46.config-upgrades.golden-182fa2818edaf743-1`, `cap46.config-upgrades.golden-27003f6cc5cdecc2-0` and 17 more |  |
-| `ConfigSettingEntry:contract_cost_params_cpu_instructions` | 4: `cap46.config-upgrades.golden-27003f6cc5cdecc2-0`, `cap46.config-upgrades.p30-cost-params-cpu`, `cap46.config-upgrades.p30-testnet-settings-upgrade` and 1 more |  |
-| `ConfigSettingEntry:contract_cost_params_memory_bytes` | 4: `cap46.config-upgrades.golden-27003f6cc5cdecc2-0`, `cap46.config-upgrades.p30-cost-params-memory`, `cap46.config-upgrades.p30-testnet-settings-upgrade` and 1 more |  |
-| `LedgerUpgrade:base_fee` | 1: `cap46.config-upgrades.p30-header-upgrades` |  |
-| `LedgerUpgrade:base_reserve` | 1: `cap46.config-upgrades.p30-header-upgrades` |  |
-| `LedgerUpgrade:max_tx_set_size` | 1: `cap46.config-upgrades.p30-header-upgrades` |  |
-| `LedgerUpgrade:flags` | 1: `cap46.config-upgrades.p30-header-upgrades` |  |
-| `LedgerHeaderExt:v1` | 1: `cap46.config-upgrades.p30-header-upgrades` |  |
-| `LedgerHeaderExtensionV1Ext:v0` | 1: `cap46.config-upgrades.p30-header-upgrades` |  |
+| `LedgerUpgrade:config` | 13: `cap42.generalized-txset.golden-27003f6cc5cdecc2-5`, `cap46.config-upgrades.golden-27003f6cc5cdecc2-5`, `cap46.config-upgrades.p30-testnet-settings-upgrade` and 10 more |  |
+| `LedgerUpgrade:max_soroban_tx_set_size` | 3: `cap46.config-upgrades.golden-182fa2818edaf743-1`, `cap46.config-upgrades.p30-max-soroban-tx-set-size-upgrade`, `explore.witnesses.f63-soroban-tx-set-size-upgrade-l65` |  |
+| `LedgerEntryData:config_setting` | 29: `cap42.generalized-txset.golden-27003f6cc5cdecc2-5`, `cap46.config-upgrades.golden-182fa2818edaf743-1`, `cap46.config-upgrades.golden-27003f6cc5cdecc2-0` and 26 more |  |
+| `ConfigSettingEntry:contract_cost_params_cpu_instructions` | 8: `cap46.config-upgrades.golden-27003f6cc5cdecc2-0`, `cap46.config-upgrades.p30-cost-params-cpu`, `cap46.config-upgrades.p30-testnet-settings-upgrade` and 5 more |  |
+| `ConfigSettingEntry:contract_cost_params_memory_bytes` | 8: `cap46.config-upgrades.golden-27003f6cc5cdecc2-0`, `cap46.config-upgrades.p30-cost-params-memory`, `cap46.config-upgrades.p30-testnet-settings-upgrade` and 5 more |  |
+| `LedgerUpgrade:base_fee` | 3: `cap46.config-upgrades.p30-header-upgrades`, `explore.witnesses.f62d-r0000-l102`, `explore.witnesses.g2-r0016-l69` |  |
+| `LedgerUpgrade:base_reserve` | 5: `cap46.config-upgrades.p30-header-upgrades`, `explore.witnesses.f62c-r0005-l99`, `explore.witnesses.f62d-r0002-l75` and 2 more |  |
+| `LedgerUpgrade:max_tx_set_size` | 5: `cap46.config-upgrades.p30-header-upgrades`, `explore.witnesses.f62c-r0000-l78`, `explore.witnesses.f62d-r0001-l66` and 2 more |  |
+| `LedgerUpgrade:flags` | 4: `cap46.config-upgrades.p30-header-upgrades`, `explore.witnesses.f62d-r0000-l94`, `explore.witnesses.f63-p28-r0000-l73` and 1 more |  |
+| `LedgerHeaderExt:v1` | 28: `cap46.config-upgrades.p30-header-upgrades`, `explore.witnesses.f62d-r0000-l100`, `explore.witnesses.f62d-r0000-l102` and 25 more |  |
+| `LedgerHeaderExtensionV1Ext:v0` | 28: `cap46.config-upgrades.p30-header-upgrades`, `explore.witnesses.f62d-r0000-l100`, `explore.witnesses.f62d-r0000-l102` and 25 more |  |
 
 ### `cap70.scp-timing`
 
@@ -749,7 +749,7 @@ SCP timing config setting in upgrade meta. CAPs: CAP-0070. Entries: core-golden 
 
 | Fragment | Core-emitted entries | Gap |
 |---|---|---|
-| `ConfigSettingEntry:scp_timing` | 8: `cap46.config-upgrades.p30-testnet-settings-upgrade`, `cap63.parallel-txset.golden-308caf2d0fc09c95-12`, `cap70.scp-timing.golden-308caf2d0fc09c95-12` and 5 more |  |
+| `ConfigSettingEntry:scp_timing` | 11: `cap46.config-upgrades.p30-testnet-settings-upgrade`, `cap63.parallel-txset.golden-308caf2d0fc09c95-12`, `cap70.scp-timing.golden-308caf2d0fc09c95-12` and 8 more |  |
 
 ### `cap76.archival-remediation`
 
@@ -758,8 +758,8 @@ Expected source classes with no entry: mainnet-history.
 
 | Fragment | Core-emitted entries | Gap |
 |---|---|---|
-| `LedgerUpgrade:version` | 4: `cap46.config-upgrades.golden-27003f6cc5cdecc2-0`, `cap63.parallel-txset.golden-308caf2d0fc09c95-12`, `cap70.scp-timing.golden-308caf2d0fc09c95-12` and 1 more |  |
-| `LedgerEntryChange:restored` | 10: `cap66.archival.golden-04667ce620bffee7-26`, `cap66.archival.p30-auto-restore-invoke-meta`, `cap66.archival.p30-restore-footprint` and 7 more |  |
+| `LedgerUpgrade:version` | 7: `cap46.config-upgrades.golden-27003f6cc5cdecc2-0`, `cap63.parallel-txset.golden-308caf2d0fc09c95-12`, `cap70.scp-timing.golden-308caf2d0fc09c95-12` and 4 more |  |
+| `LedgerEntryChange:restored` | 14: `cap66.archival.golden-04667ce620bffee7-26`, `cap66.archival.p30-auto-restore-invoke-meta`, `cap66.archival.p30-restore-footprint` and 11 more |  |
 
 ### `cap01.bump-sequence`
 
@@ -767,24 +767,24 @@ Bump sequence and merges refused for a sequence number too far ahead. CAPs: CAP-
 
 | Fragment | Core-emitted entries | Gap |
 |---|---|---|
-| `OperationBody:bump_sequence` | 10: `cap01.bump-sequence.golden-b71da06f9ce2dec8-2`, `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward` and 7 more |  |
+| `OperationBody:bump_sequence` | 19: `cap01.bump-sequence.golden-b71da06f9ce2dec8-2`, `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward` and 16 more |  |
 | `BumpSequenceResult:bad_seq` | none | `refused-before-ledger` the arm itself: set only in the operation's doCheckValid (stellar-core v30.0.0 src/transactions/*OpFrame.cpp), which reads nothing but the operation and the protocol, so the tx queue and tx set validation refuse the transaction and the identical check at apply never fails Shape seen in: refused by core 1: `cap01.bump-sequence.p30-bump-negative` |
-| `AccountMergeResult:seqnum_too_far` | 2: `cap01.bump-sequence.p30-bump-then-merge-seqnum-too-far-meta`, `cap01.bump-sequence.p30-merge-seqnum-too-far` |  |
+| `AccountMergeResult:seqnum_too_far` | 3: `cap01.bump-sequence.p30-bump-then-merge-seqnum-too-far-meta`, `cap01.bump-sequence.p30-merge-seqnum-too-far`, `explore.witnesses.g2-r0040-l74` |  |
 
 ### `cap03.offer-liabilities`
 
-Offers with buying and selling liabilities, including manage-buy offers. CAPs: CAP-0003, CAP-0006. Entries: core-golden 6, local-core 16, mainnet-history 1, synthetic 5.
+Offers with buying and selling liabilities, including manage-buy offers. CAPs: CAP-0003, CAP-0006. Entries: core-golden 6, local-core 16, mainnet-history 3, synthetic 5.
 
 | Fragment | Core-emitted entries | Gap |
 |---|---|---|
-| `OperationBody:manage_buy_offer` | 16: `cap03.offer-liabilities.golden-1184dd64bb4ead8c-20`, `cap03.offer-liabilities.p17-manage-buy-offer-claim-atom-v0`, `cap03.offer-liabilities.p30-buy-offer-crosses-and-rests-envelope` and 13 more |  |
-| `AccountEntryExt:v1` | 463: `cap01.bump-sequence.golden-b71da06f9ce2dec8-2`, `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward` and 460 more |  |
-| `TrustLineEntryExt:v1` | 34: `cap03.offer-liabilities.golden-00c0553ff45607f9-10`, `cap03.offer-liabilities.golden-1184dd64bb4ead8c-20`, `cap03.offer-liabilities.golden-12c04cf739c52eac-20` and 31 more |  |
-| `ManageOfferSuccessResultOffer:created` | 8: `cap03.offer-liabilities.golden-0ebc576d9b25b85a-8`, `cap03.offer-liabilities.mainnet-25000000`, `cap03.offer-liabilities.p30-buy-offer-crosses-and-rests-meta` and 5 more |  |
-| `ClaimAtom:order_book` | 9: `cap03.offer-liabilities.golden-00c0553ff45607f9-10`, `cap03.offer-liabilities.golden-1184dd64bb4ead8c-20`, `cap03.offer-liabilities.golden-12c04cf739c52eac-20` and 6 more |  |
-| `AccountMergeResult:dest_full` | 1: `cap03.offer-liabilities.p30-merge-dest-full` |  |
-| `OperationBody:create_passive_sell_offer` | 2: `cap03.offer-liabilities.golden-12c04cf739c52eac-20`, `classic.failed-tx.p30-passive-offer-operation-source` |  |
-| `ClaimAtom:v0` | 4: `cap03.offer-liabilities.p17-manage-buy-offer-claim-atom-v0`, `cap03.offer-liabilities.p17-manage-sell-offer-claim-atom-v0`, `cap03.offer-liabilities.p17-path-payment-strict-receive-claim-atom-v0` and 1 more |  |
+| `OperationBody:manage_buy_offer` | 37: `cap03.offer-liabilities.golden-1184dd64bb4ead8c-20`, `cap03.offer-liabilities.mainnet-37466023`, `cap03.offer-liabilities.mainnet-44679511` and 34 more |  |
+| `AccountEntryExt:v1` | 732: `cap01.bump-sequence.golden-b71da06f9ce2dec8-2`, `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward` and 729 more |  |
+| `TrustLineEntryExt:v1` | 46: `cap03.offer-liabilities.golden-00c0553ff45607f9-10`, `cap03.offer-liabilities.golden-1184dd64bb4ead8c-20`, `cap03.offer-liabilities.golden-12c04cf739c52eac-20` and 43 more |  |
+| `ManageOfferSuccessResultOffer:created` | 19: `cap03.offer-liabilities.golden-0ebc576d9b25b85a-8`, `cap03.offer-liabilities.mainnet-25000000`, `cap03.offer-liabilities.mainnet-37466023` and 16 more |  |
+| `ClaimAtom:order_book` | 12: `cap03.offer-liabilities.golden-00c0553ff45607f9-10`, `cap03.offer-liabilities.golden-1184dd64bb4ead8c-20`, `cap03.offer-liabilities.golden-12c04cf739c52eac-20` and 9 more |  |
+| `AccountMergeResult:dest_full` | 2: `cap03.offer-liabilities.p30-merge-dest-full`, `explore.witnesses.g2-r0003-l72` |  |
+| `OperationBody:create_passive_sell_offer` | 13: `cap03.offer-liabilities.golden-12c04cf739c52eac-20`, `classic.failed-tx.p30-passive-offer-operation-source`, `explore.witnesses.f62c-r0000-l67` and 10 more |  |
+| `ClaimAtom:v0` | 6: `cap03.offer-liabilities.mainnet-37466023`, `cap03.offer-liabilities.p17-manage-buy-offer-claim-atom-v0`, `cap03.offer-liabilities.p17-manage-sell-offer-claim-atom-v0` and 3 more |  |
 
 ### `cap18.maintain-liabilities`
 
@@ -792,9 +792,9 @@ Trustlines authorized to maintain liabilities through allow trust. CAPs: CAP-001
 
 | Fragment | Core-emitted entries | Gap |
 |---|---|---|
-| `OperationBody:allow_trust` | 12: `cap18.maintain-liabilities.golden-3f24be68a9962089-4`, `cap18.maintain-liabilities.p30-allow-trust-authorize-alphanum4`, `cap18.maintain-liabilities.p30-allow-trust-authorized-to-maintain-alphanum4` and 9 more |  |
-| `.body:allow_trust.asset:credit_alphanum4` | 11: `cap18.maintain-liabilities.golden-3f24be68a9962089-4`, `cap18.maintain-liabilities.p30-allow-trust-authorize-alphanum4`, `cap18.maintain-liabilities.p30-allow-trust-authorized-to-maintain-alphanum4` and 8 more |  |
-| `.body:allow_trust.asset:credit_alphanum12` | 1: `cap18.maintain-liabilities.p30-allow-trust-unauthorized-to-maintain-alphanum12` |  |
+| `OperationBody:allow_trust` | 28: `cap03.offer-liabilities.mainnet-37466023`, `cap18.maintain-liabilities.golden-3f24be68a9962089-4`, `cap18.maintain-liabilities.p30-allow-trust-authorize-alphanum4` and 25 more |  |
+| `.body:allow_trust.asset:credit_alphanum4` | 23: `cap03.offer-liabilities.mainnet-37466023`, `cap18.maintain-liabilities.golden-3f24be68a9962089-4`, `cap18.maintain-liabilities.p30-allow-trust-authorize-alphanum4` and 20 more |  |
+| `.body:allow_trust.asset:credit_alphanum12` | 7: `cap03.offer-liabilities.mainnet-37466023`, `cap18.maintain-liabilities.p30-allow-trust-unauthorized-to-maintain-alphanum12`, `explore.witnesses.f62c-r0000-l68` and 4 more |  |
 
 ### `cap26.inflation`
 
@@ -802,10 +802,10 @@ Inflation operations and payouts from before CAP-0026 disabled them. CAPs: CAP-0
 
 | Fragment | Core-emitted entries | Gap |
 |---|---|---|
-| `OperationBody:inflation` | 2: `cap26.inflation.p11-inflation-not-time`, `cap26.inflation.p11-inflation-payout` |  |
-| `OperationResultTr:inflation` | 2: `cap26.inflation.p11-inflation-not-time`, `cap26.inflation.p11-inflation-payout` |  |
-| `InflationResult:success` | 1: `cap26.inflation.p11-inflation-payout` |  |
-| `InflationResult:not_time` | 1: `cap26.inflation.p11-inflation-not-time` |  |
+| `OperationBody:inflation` | 4: `cap26.inflation.p11-inflation-not-time`, `cap26.inflation.p11-inflation-payout`, `explore.witnesses.f62d-r0004-l74` and 1 more |  |
+| `OperationResultTr:inflation` | 4: `cap26.inflation.p11-inflation-not-time`, `cap26.inflation.p11-inflation-payout`, `explore.witnesses.f62d-r0004-l74` and 1 more |  |
+| `InflationResult:success` | 3: `cap26.inflation.p11-inflation-payout`, `explore.witnesses.f62d-r0004-l74`, `explore.witnesses.g2-r0010-l74` |  |
+| `InflationResult:not_time` | 2: `cap26.inflation.p11-inflation-not-time`, `explore.witnesses.g2-r0010-l74` |  |
 
 ### `format.xdr-grammar`
 
@@ -814,7 +814,7 @@ Expected source classes with no entry: synthetic.
 
 | Fragment | Core-emitted entries | Gap |
 |---|---|---|
-| `LedgerCloseMeta:v2` | 356: `cap01.bump-sequence.golden-b71da06f9ce2dec8-2`, `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward` and 353 more |  |
+| `LedgerCloseMeta:v2` | 532: `cap01.bump-sequence.golden-b71da06f9ce2dec8-2`, `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward` and 529 more |  |
 
 ### `probe.envelope-fields`
 
@@ -823,7 +823,7 @@ Expected source classes with no entry: local-core, local-core-refused, synthetic
 
 | Fragment | Core-emitted entries | Gap |
 |---|---|---|
-| `TransactionEnvelope:tx` | 447: `cap01.bump-sequence.golden-b71da06f9ce2dec8-2`, `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward` and 444 more |  |
+| `TransactionEnvelope:tx` | 735: `cap01.bump-sequence.golden-b71da06f9ce2dec8-2`, `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward` and 732 more |  |
 
 ### `probe.limits`
 
@@ -832,29 +832,27 @@ Expected source classes with no entry: local-core, local-core-refused, synthetic
 
 | Fragment | Core-emitted entries | Gap |
 |---|---|---|
-| `TransactionEnvelope:tx` | 447: `cap01.bump-sequence.golden-b71da06f9ce2dec8-2`, `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward` and 444 more |  |
+| `TransactionEnvelope:tx` | 735: `cap01.bump-sequence.golden-b71da06f9ce2dec8-2`, `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward` and 732 more |  |
 
 ### `explore.witnesses`
 
-Ledgers of recipes the explorer found, one per union arm they first hold. CAPs: . Entries: none.
-Expected source classes with no entry: local-core.
+Ledgers of recipes the explorer found, one per union arm they first hold. CAPs: . Entries: local-core 350.
 
 | Fragment | Core-emitted entries | Gap |
 |---|---|---|
-| `LedgerCloseMeta:v0` | 19: `cap03.offer-liabilities.mainnet-25000000`, `cap03.offer-liabilities.p17-manage-buy-offer-claim-atom-v0`, `cap03.offer-liabilities.p17-manage-sell-offer-claim-atom-v0` and 16 more |  |
-| `LedgerCloseMeta:v1` | 39: `cap42.generalized-txset.golden-27003f6cc5cdecc2-5`, `cap46.config-upgrades.golden-27003f6cc5cdecc2-5`, `cap63.parallel-txset.golden-308caf2d0fc09c95-12` and 36 more |  |
-| `LedgerCloseMeta:v2` | 356: `cap01.bump-sequence.golden-b71da06f9ce2dec8-2`, `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward` and 353 more |  |
+| `LedgerCloseMeta:v0` | 174: `cap03.offer-liabilities.mainnet-25000000`, `cap03.offer-liabilities.mainnet-37466023`, `cap03.offer-liabilities.mainnet-44679511` and 171 more |  |
+| `LedgerCloseMeta:v1` | 84: `cap15.fee-bump.mainnet-57369500`, `cap42.generalized-txset.golden-27003f6cc5cdecc2-5`, `cap46.config-upgrades.golden-27003f6cc5cdecc2-5` and 81 more |  |
+| `LedgerCloseMeta:v2` | 532: `cap01.bump-sequence.golden-b71da06f9ce2dec8-2`, `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward` and 529 more |  |
 
 ### `explore.pairs`
 
-The two ledgers of a recipe pair that name the same account in two ways. CAPs: . Entries: none.
-Expected source classes with no entry: local-core.
+The two ledgers of a recipe pair that name the same account in two ways. CAPs: . Entries: local-core 23.
 
 | Fragment | Core-emitted entries | Gap |
 |---|---|---|
-| `LedgerCloseMeta:v0` | 19: `cap03.offer-liabilities.mainnet-25000000`, `cap03.offer-liabilities.p17-manage-buy-offer-claim-atom-v0`, `cap03.offer-liabilities.p17-manage-sell-offer-claim-atom-v0` and 16 more |  |
-| `LedgerCloseMeta:v1` | 39: `cap42.generalized-txset.golden-27003f6cc5cdecc2-5`, `cap46.config-upgrades.golden-27003f6cc5cdecc2-5`, `cap63.parallel-txset.golden-308caf2d0fc09c95-12` and 36 more |  |
-| `LedgerCloseMeta:v2` | 356: `cap01.bump-sequence.golden-b71da06f9ce2dec8-2`, `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward` and 353 more |  |
+| `LedgerCloseMeta:v0` | 174: `cap03.offer-liabilities.mainnet-25000000`, `cap03.offer-liabilities.mainnet-37466023`, `cap03.offer-liabilities.mainnet-44679511` and 171 more |  |
+| `LedgerCloseMeta:v1` | 84: `cap15.fee-bump.mainnet-57369500`, `cap42.generalized-txset.golden-27003f6cc5cdecc2-5`, `cap46.config-upgrades.golden-27003f6cc5cdecc2-5` and 81 more |  |
+| `LedgerCloseMeta:v2` | 532: `cap01.bump-sequence.golden-b71da06f9ce2dec8-2`, `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward` and 529 more |  |
 
 ## Obligations
 

@@ -374,7 +374,9 @@ version and leaves the entry in the lane. `--dry-run` prints every decision with
 anything. The command promotes the entries it accepts and exits with 1 when it refused any.
 
 An entry cut from a chain needs that chain under `corpus/chains`, where the harness replays
-it from. A chain of the lane's `candidate/recipes/chains.toml` moves with the first of its
+it from, and its ledger must come after the chain's first history checkpoint: wallet-backend
+and stellar-rpc bootstrap from the checkpoint before the first entry of a chain, so one entry
+before it would leave every entry of the chain unevaluated. A chain of the lane's `candidate/recipes/chains.toml` moves with the first of its
 entries that is promoted. The chain directory goes to `corpus/chains/<chain>/`, its recipe
 IR file to the same path under `corpus/recipes/`, and its row to `corpus/recipes/chains.toml`.
 The other files of the recipe's directories, such as a run's `run.toml` or a pair's

@@ -33,6 +33,52 @@
       }
     },
     {
+      "id": "cap03.offer-liabilities.mainnet-37466023",
+      "cells": {
+        "php@1.18.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/finding-candidates.toml",
+          "checks": [
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk's XDR-JSON differs from the expected value"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: Expected string for XdrClaimableBalanceID JSON value, got array"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cap03.offer-liabilities.mainnet-44679511",
+      "cells": {
+        "php@1.18.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/finding-candidates.toml",
+          "checks": [
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk's XDR-JSON differs from the expected value"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: Expected string for XdrClaimableBalanceID JSON value, got array"
+            }
+          ]
+        }
+      }
+    },
+    {
       "id": "cap15.fee-bump.golden-f5fa0a4b15bfd9d9-12",
       "cells": {
         "php@1.18.0": {
@@ -61,6 +107,29 @@
         "php@1.18.0": {
           "result": "diverges-from-network",
           "known_issue": "candidate/findings/issues/php-cap15.fee-bump.p30-fee-source-is-inner-source-meta.md",
+          "checks": [
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk's XDR-JSON differs from the expected value"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: Unexpected length for value. Has length 16, expected 32"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cap15.fee-bump.mainnet-57369500",
+      "cells": {
+        "php@1.18.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/finding-candidates.toml",
           "checks": [
             {
               "check": "mainnet/decode_json",
@@ -1806,6 +1875,1637 @@
               "op": "decode_encode",
               "result": "diverges-from-network",
               "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "explore.pairs.sac-trust-p30-a-l67",
+      "cells": {
+        "php@1.18.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/finding-candidates.toml",
+          "checks": [
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk's XDR-JSON differs from the expected value"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk crashed instead of answering: TypeError: Soneso\\StellarSDK\\Xdr\\XdrEncoder::opaqueFixed(): Argument #1 ($value) must be of type string, false given, called in vendor/soneso/stellar-php-sdk/Soneso/StellarSDK/Xdr/XdrConfigUpgradeSetKey.php on line 12"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk's XDR-JSON differs from the expected value"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk crashed instead of answering: TypeError: Soneso\\StellarSDK\\Xdr\\XdrEncoder::opaqueFixed(): Argument #1 ($value) must be of type string, false given, called in vendor/soneso/stellar-php-sdk/Soneso/StellarSDK/Xdr/XdrConfigUpgradeSetKey.php on line 12"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "explore.pairs.sac-trust-p30-b-l67",
+      "cells": {
+        "php@1.18.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/finding-candidates.toml",
+          "checks": [
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk's XDR-JSON differs from the expected value"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk crashed instead of answering: TypeError: Soneso\\StellarSDK\\Xdr\\XdrEncoder::opaqueFixed(): Argument #1 ($value) must be of type string, false given, called in vendor/soneso/stellar-php-sdk/Soneso/StellarSDK/Xdr/XdrConfigUpgradeSetKey.php on line 12"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk's XDR-JSON differs from the expected value"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk crashed instead of answering: TypeError: Soneso\\StellarSDK\\Xdr\\XdrEncoder::opaqueFixed(): Argument #1 ($value) must be of type string, false given, called in vendor/soneso/stellar-php-sdk/Soneso/StellarSDK/Xdr/XdrConfigUpgradeSetKey.php on line 12"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "explore.witnesses.f62c-r0000-l86",
+      "cells": {
+        "php@1.18.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/finding-candidates.toml",
+          "checks": [
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk's XDR-JSON differs from the expected value"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: Expected string for XdrClaimableBalanceID JSON value, got array"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk's XDR-JSON differs from the expected value"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: Expected string for XdrClaimableBalanceID JSON value, got array"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "explore.witnesses.f62c-r0000-l89",
+      "cells": {
+        "php@1.18.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/finding-candidates.toml",
+          "checks": [
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk's XDR-JSON differs from the expected value"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: Unexpected length for value. Has length 16, expected 32"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk's XDR-JSON differs from the expected value"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: Unexpected length for value. Has length 16, expected 32"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "explore.witnesses.f62c-r0000-l90",
+      "cells": {
+        "php@1.18.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/finding-candidates.toml",
+          "checks": [
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk's XDR-JSON differs from the expected value"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: Unexpected length for value. Has length 16, expected 32"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk's XDR-JSON differs from the expected value"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: Unexpected length for value. Has length 16, expected 32"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "explore.witnesses.f62c-r0000-l92",
+      "cells": {
+        "php@1.18.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/finding-candidates.toml",
+          "checks": [
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk's XDR-JSON differs from the expected value"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: Unexpected length for value. Has length 16, expected 32"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk's XDR-JSON differs from the expected value"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: Unexpected length for value. Has length 16, expected 32"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "explore.witnesses.f62c-r0005-l112",
+      "cells": {
+        "php@1.18.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/finding-candidates.toml",
+          "checks": [
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk's XDR-JSON differs from the expected value"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: Unexpected length for value. Has length 16, expected 32"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk's XDR-JSON differs from the expected value"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: Unexpected length for value. Has length 16, expected 32"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "explore.witnesses.f62c-r0005-l97",
+      "cells": {
+        "php@1.18.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/finding-candidates.toml",
+          "checks": [
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk's XDR-JSON differs from the expected value"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: Unexpected length for value. Has length 16, expected 32"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk's XDR-JSON differs from the expected value"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: Unexpected length for value. Has length 16, expected 32"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "explore.witnesses.f62c-r0016-l94",
+      "cells": {
+        "php@1.18.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/finding-candidates.toml",
+          "checks": [
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk's XDR-JSON differs from the expected value"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: Unexpected length for value. Has length 16, expected 32"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk's XDR-JSON differs from the expected value"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: Unexpected length for value. Has length 16, expected 32"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "explore.witnesses.f62d-r0000-l100",
+      "cells": {
+        "php@1.18.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/finding-candidates.toml",
+          "checks": [
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk's XDR-JSON differs from the expected value"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: Unexpected length for value. Has length 16, expected 32"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk's XDR-JSON differs from the expected value"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: Unexpected length for value. Has length 16, expected 32"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "explore.witnesses.f62d-r0000-l80",
+      "cells": {
+        "php@1.18.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/finding-candidates.toml",
+          "checks": [
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: uint64ToString accepts only non-negative values; got -1. For uint64 values above PHP_INT_MAX, pass the value as a string to stringToUint64()."
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: uint64ToString accepts only non-negative values; got -1. For uint64 values above PHP_INT_MAX, pass the value as a string to stringToUint64()."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "explore.witnesses.f62d-r0000-l96",
+      "cells": {
+        "php@1.18.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/finding-candidates.toml",
+          "checks": [
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: uint64ToString accepts only non-negative values; got -1. For uint64 values above PHP_INT_MAX, pass the value as a string to stringToUint64()."
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: uint64ToString accepts only non-negative values; got -1. For uint64 values above PHP_INT_MAX, pass the value as a string to stringToUint64()."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "explore.witnesses.f62d-r0003-l73",
+      "cells": {
+        "php@1.18.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/finding-candidates.toml",
+          "checks": [
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk's XDR-JSON differs from the expected value"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: Unexpected length for value. Has length 16, expected 32"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk's XDR-JSON differs from the expected value"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: Unexpected length for value. Has length 16, expected 32"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "explore.witnesses.f62d-r0004-l69",
+      "cells": {
+        "php@1.18.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/finding-candidates.toml",
+          "checks": [
+            {
+              "check": "testnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: Invalid offer id: -1"
+            },
+            {
+              "check": "mainnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: Invalid offer id: -1"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "explore.witnesses.f62d-r0004-l74",
+      "cells": {
+        "php@1.18.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/finding-candidates.toml",
+          "checks": [
+            {
+              "check": "testnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: Unknown operation type: 9"
+            },
+            {
+              "check": "mainnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: Unknown operation type: 9"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "explore.witnesses.f62d-r0007-l72",
+      "cells": {
+        "php@1.18.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/finding-candidates.toml",
+          "checks": [
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk's XDR-JSON differs from the expected value"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: Unexpected length for value. Has length 16, expected 32"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk's XDR-JSON differs from the expected value"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: Unexpected length for value. Has length 16, expected 32"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "explore.witnesses.f62d-r0007-l74",
+      "cells": {
+        "php@1.18.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/finding-candidates.toml",
+          "checks": [
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk's XDR-JSON differs from the expected value"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: Unexpected length for value. Has length 16, expected 32"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk's XDR-JSON differs from the expected value"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: Unexpected length for value. Has length 16, expected 32"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "explore.witnesses.f62d-r0007-l77",
+      "cells": {
+        "php@1.18.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/finding-candidates.toml",
+          "checks": [
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk's XDR-JSON differs from the expected value"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: Unexpected length for value. Has length 16, expected 32"
+            },
+            {
+              "check": "testnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk's hash differs from the one the network wrote"
+            },
+            {
+              "check": "testnet/tx_hash 0 inner",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk's hash differs from the one the network wrote"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk's XDR-JSON differs from the expected value"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: Unexpected length for value. Has length 16, expected 32"
+            },
+            {
+              "check": "mainnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk's hash differs from the one the network wrote"
+            },
+            {
+              "check": "mainnet/tx_hash 0 inner",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk's hash differs from the one the network wrote"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "explore.witnesses.f62d-r0008-l84",
+      "cells": {
+        "php@1.18.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/finding-candidates.toml",
+          "checks": [
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk's XDR-JSON differs from the expected value"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: Unexpected length for value. Has length 16, expected 32"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk's XDR-JSON differs from the expected value"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: Unexpected length for value. Has length 16, expected 32"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "explore.witnesses.f62d-r0008-l87",
+      "cells": {
+        "php@1.18.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/finding-candidates.toml",
+          "checks": [
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk's XDR-JSON differs from the expected value"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: Unexpected length for value. Has length 16, expected 32"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk's XDR-JSON differs from the expected value"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: Unexpected length for value. Has length 16, expected 32"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "explore.witnesses.f62d-r0022-l76",
+      "cells": {
+        "php@1.18.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/finding-candidates.toml",
+          "checks": [
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk's XDR-JSON differs from the expected value"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: Unexpected length for value. Has length 16, expected 32"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk's XDR-JSON differs from the expected value"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: Unexpected length for value. Has length 16, expected 32"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "explore.witnesses.f62d-r0022-l82",
+      "cells": {
+        "php@1.18.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/finding-candidates.toml",
+          "checks": [
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk's XDR-JSON differs from the expected value"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk crashed instead of answering: TypeError: Soneso\\StellarSDK\\Xdr\\XdrEncoder::opaqueFixed(): Argument #1 ($value) must be of type string, false given, called in vendor/soneso/stellar-php-sdk/Soneso/StellarSDK/Xdr/XdrConfigUpgradeSetKey.php on line 12"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk's XDR-JSON differs from the expected value"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk crashed instead of answering: TypeError: Soneso\\StellarSDK\\Xdr\\XdrEncoder::opaqueFixed(): Argument #1 ($value) must be of type string, false given, called in vendor/soneso/stellar-php-sdk/Soneso/StellarSDK/Xdr/XdrConfigUpgradeSetKey.php on line 12"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "explore.witnesses.f62d-r0024-l97",
+      "cells": {
+        "php@1.18.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/finding-candidates.toml",
+          "checks": [
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk's XDR-JSON differs from the expected value"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: Unexpected length for value. Has length 16, expected 32"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk's XDR-JSON differs from the expected value"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: Unexpected length for value. Has length 16, expected 32"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "explore.witnesses.f63-p26-r0002-l89",
+      "cells": {
+        "php@1.18.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/finding-candidates.toml",
+          "checks": [
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: uint64ToString accepts only non-negative values; got -1. For uint64 values above PHP_INT_MAX, pass the value as a string to stringToUint64()."
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: uint64ToString accepts only non-negative values; got -1. For uint64 values above PHP_INT_MAX, pass the value as a string to stringToUint64()."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "explore.witnesses.f63-p27-r0002-l90",
+      "cells": {
+        "php@1.18.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/finding-candidates.toml",
+          "checks": [
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: uint64ToString accepts only non-negative values; got -1. For uint64 values above PHP_INT_MAX, pass the value as a string to stringToUint64()."
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: uint64ToString accepts only non-negative values; got -1. For uint64 values above PHP_INT_MAX, pass the value as a string to stringToUint64()."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "explore.witnesses.f63-p28-r0000-l79",
+      "cells": {
+        "php@1.18.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/finding-candidates.toml",
+          "checks": [
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk's XDR-JSON differs from the expected value"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: Unexpected length for value. Has length 16, expected 32"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk's XDR-JSON differs from the expected value"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: Unexpected length for value. Has length 16, expected 32"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "explore.witnesses.f63-p29-r0003-l105",
+      "cells": {
+        "php@1.18.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/finding-candidates.toml",
+          "checks": [
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk's XDR-JSON differs from the expected value"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk crashed instead of answering: TypeError: Soneso\\StellarSDK\\Xdr\\XdrEncoder::opaqueFixed(): Argument #1 ($value) must be of type string, false given, called in vendor/soneso/stellar-php-sdk/Soneso/StellarSDK/Xdr/XdrConfigUpgradeSetKey.php on line 12"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk's XDR-JSON differs from the expected value"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk crashed instead of answering: TypeError: Soneso\\StellarSDK\\Xdr\\XdrEncoder::opaqueFixed(): Argument #1 ($value) must be of type string, false given, called in vendor/soneso/stellar-php-sdk/Soneso/StellarSDK/Xdr/XdrConfigUpgradeSetKey.php on line 12"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "explore.witnesses.g2-r0000-l77",
+      "cells": {
+        "php@1.18.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/finding-candidates.toml",
+          "checks": [
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk's XDR-JSON differs from the expected value"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: Expected string for XdrClaimableBalanceID JSON value, got array"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk's XDR-JSON differs from the expected value"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: Expected string for XdrClaimableBalanceID JSON value, got array"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "explore.witnesses.g2-r0001-l113",
+      "cells": {
+        "php@1.18.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/finding-candidates.toml",
+          "checks": [
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk's XDR-JSON differs from the expected value"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: Unexpected length for value. Has length 16, expected 32"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk's XDR-JSON differs from the expected value"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: Unexpected length for value. Has length 16, expected 32"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "explore.witnesses.g2-r0001-l114",
+      "cells": {
+        "php@1.18.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/finding-candidates.toml",
+          "checks": [
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk's XDR-JSON differs from the expected value"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: Unexpected length for value. Has length 16, expected 32"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk's XDR-JSON differs from the expected value"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: Unexpected length for value. Has length 16, expected 32"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "explore.witnesses.g2-r0003-l77",
+      "cells": {
+        "php@1.18.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/finding-candidates.toml",
+          "checks": [
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk's XDR-JSON differs from the expected value"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: Unexpected length for value. Has length 16, expected 32"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk's XDR-JSON differs from the expected value"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: Unexpected length for value. Has length 16, expected 32"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "explore.witnesses.g2-r0004-l125",
+      "cells": {
+        "php@1.18.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/finding-candidates.toml",
+          "checks": [
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: uint64ToString accepts only non-negative values; got -1. For uint64 values above PHP_INT_MAX, pass the value as a string to stringToUint64()."
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: uint64ToString accepts only non-negative values; got -1. For uint64 values above PHP_INT_MAX, pass the value as a string to stringToUint64()."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "explore.witnesses.g2-r0005-l102",
+      "cells": {
+        "php@1.18.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/finding-candidates.toml",
+          "checks": [
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk's XDR-JSON differs from the expected value"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: Unexpected length for value. Has length 16, expected 32"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk's XDR-JSON differs from the expected value"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: Unexpected length for value. Has length 16, expected 32"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "explore.witnesses.g2-r0005-l68",
+      "cells": {
+        "php@1.18.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/finding-candidates.toml",
+          "checks": [
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk's XDR-JSON differs from the expected value"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: Unexpected length for value. Has length 16, expected 32"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk's XDR-JSON differs from the expected value"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: Unexpected length for value. Has length 16, expected 32"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "explore.witnesses.g2-r0005-l95",
+      "cells": {
+        "php@1.18.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/finding-candidates.toml",
+          "checks": [
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk's XDR-JSON differs from the expected value"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk crashed instead of answering: TypeError: Soneso\\StellarSDK\\Xdr\\XdrEncoder::opaqueFixed(): Argument #1 ($value) must be of type string, false given, called in vendor/soneso/stellar-php-sdk/Soneso/StellarSDK/Xdr/XdrConfigUpgradeSetKey.php on line 12"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk's XDR-JSON differs from the expected value"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk crashed instead of answering: TypeError: Soneso\\StellarSDK\\Xdr\\XdrEncoder::opaqueFixed(): Argument #1 ($value) must be of type string, false given, called in vendor/soneso/stellar-php-sdk/Soneso/StellarSDK/Xdr/XdrConfigUpgradeSetKey.php on line 12"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "explore.witnesses.g2-r0006-l121",
+      "cells": {
+        "php@1.18.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/finding-candidates.toml",
+          "checks": [
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk's XDR-JSON differs from the expected value"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: Unexpected length for value. Has length 16, expected 32"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk's XDR-JSON differs from the expected value"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: Unexpected length for value. Has length 16, expected 32"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "explore.witnesses.g2-r0006-l126",
+      "cells": {
+        "php@1.18.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/finding-candidates.toml",
+          "checks": [
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk's XDR-JSON differs from the expected value"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: Expected string for XdrClaimableBalanceID JSON value, got array"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk's XDR-JSON differs from the expected value"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: Expected string for XdrClaimableBalanceID JSON value, got array"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "explore.witnesses.g2-r0007-l71",
+      "cells": {
+        "php@1.18.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/finding-candidates.toml",
+          "checks": [
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk's XDR-JSON differs from the expected value"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: Unexpected length for value. Has length 16, expected 32"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk's XDR-JSON differs from the expected value"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: Unexpected length for value. Has length 16, expected 32"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "explore.witnesses.g2-r0007-l74",
+      "cells": {
+        "php@1.18.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/finding-candidates.toml",
+          "checks": [
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk's XDR-JSON differs from the expected value"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: Unexpected length for value. Has length 16, expected 32"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk's XDR-JSON differs from the expected value"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: Unexpected length for value. Has length 16, expected 32"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "explore.witnesses.g2-r0007-l81",
+      "cells": {
+        "php@1.18.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/finding-candidates.toml",
+          "checks": [
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk's XDR-JSON differs from the expected value"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: Unexpected length for value. Has length 16, expected 32"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk's XDR-JSON differs from the expected value"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: Unexpected length for value. Has length 16, expected 32"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "explore.witnesses.g2-r0009-l78",
+      "cells": {
+        "php@1.18.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/finding-candidates.toml",
+          "checks": [
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk's XDR-JSON differs from the expected value"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: Unexpected length for value. Has length 16, expected 32"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk's XDR-JSON differs from the expected value"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: Unexpected length for value. Has length 16, expected 32"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "explore.witnesses.g2-r0009-l83",
+      "cells": {
+        "php@1.18.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/finding-candidates.toml",
+          "checks": [
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk's XDR-JSON differs from the expected value"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: Unexpected length for value. Has length 16, expected 32"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk's XDR-JSON differs from the expected value"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: Unexpected length for value. Has length 16, expected 32"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "explore.witnesses.g2-r0010-l74",
+      "cells": {
+        "php@1.18.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/finding-candidates.toml",
+          "checks": [
+            {
+              "check": "testnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: Unknown operation type: 9"
+            },
+            {
+              "check": "mainnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: Unknown operation type: 9"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "explore.witnesses.g2-r0014-l143",
+      "cells": {
+        "php@1.18.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/finding-candidates.toml",
+          "checks": [
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk's XDR-JSON differs from the expected value"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: Expected string for XdrClaimableBalanceID JSON value, got array"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk's XDR-JSON differs from the expected value"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: Expected string for XdrClaimableBalanceID JSON value, got array"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "explore.witnesses.g2-r0015-l71",
+      "cells": {
+        "php@1.18.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/finding-candidates.toml",
+          "checks": [
+            {
+              "check": "testnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk's hash differs from the one the network wrote"
+            },
+            {
+              "check": "mainnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk's hash differs from the one the network wrote"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "explore.witnesses.g2-r0017-l129",
+      "cells": {
+        "php@1.18.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/finding-candidates.toml",
+          "checks": [
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk's XDR-JSON differs from the expected value"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: Unexpected length for value. Has length 16, expected 32"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk's XDR-JSON differs from the expected value"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: Unexpected length for value. Has length 16, expected 32"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "explore.witnesses.g2-r0018-l122",
+      "cells": {
+        "php@1.18.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/finding-candidates.toml",
+          "checks": [
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk's XDR-JSON differs from the expected value"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: Unexpected length for value. Has length 16, expected 32"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk's XDR-JSON differs from the expected value"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: Unexpected length for value. Has length 16, expected 32"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "explore.witnesses.g2-r0021-l101",
+      "cells": {
+        "php@1.18.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/finding-candidates.toml",
+          "checks": [
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: uint64ToString accepts only non-negative values; got -1. For uint64 values above PHP_INT_MAX, pass the value as a string to stringToUint64()."
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: Unexpected length for value. Has length 16, expected 32"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: uint64ToString accepts only non-negative values; got -1. For uint64 values above PHP_INT_MAX, pass the value as a string to stringToUint64()."
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: Unexpected length for value. Has length 16, expected 32"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "explore.witnesses.g2-r0022-l171",
+      "cells": {
+        "php@1.18.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/finding-candidates.toml",
+          "checks": [
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk's XDR-JSON differs from the expected value"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: Unexpected length for value. Has length 16, expected 32"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk's XDR-JSON differs from the expected value"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidArgumentException: Unexpected length for value. Has length 16, expected 32"
             }
           ]
         }

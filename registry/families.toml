@@ -1013,13 +1013,13 @@ source_classes = ["local-core"]
 fields = []
 linked_issues = []
 priority = 15
-notes = "written by shapekit explore entries into the candidate lane from the chains under candidate/chains/ that explorer recipes recorded (candidate/recipes/explore.witnesses/). a greedy cover picks the fewest ledgers of a chain that together hold every reachable union arm the chain holds, and each picked ledger is one entry with the bytes of both passphrases. the recipe and the run that found it are in the entry's notes and source"
+notes = "written by shapekit explore entries from the chains that explorer recipes recorded (corpus/recipes/explore.witnesses/, chains listed in corpus/recipes/chains.toml), first into the candidate lane and promoted into the corpus with their chains. a greedy cover picks the fewest ledgers of a chain that together hold every reachable union arm the chain holds, and each picked ledger is one entry with the bytes of both passphrases. the recipe and the run that found it are in the entry's notes and source"
 
 [[family]]
 id = "explore.pairs"
 title = "The two ledgers of a recipe pair that name the same account in two ways"
 caps = []
-no_cap_reason = "a pair holds two recipes that start from the same state and differ in how one transaction names an account, a muxed or a plain address, a contract call or a classic operation, so the CAP depends on the pair; candidate/recipes/explore.pairs/README.md names each pair"
+no_cap_reason = "a pair holds two recipes that start from the same state and differ in how one transaction names an account, a muxed or a plain address, a contract call or a classic operation, so the CAP depends on the pair; corpus/recipes/explore.pairs/README.md names each pair"
 protocol_introduced = 0
 protocol_valid = { min = 0 }
 signature = ["LedgerCloseMeta:v0", "LedgerCloseMeta:v1", "LedgerCloseMeta:v2"]
@@ -1027,4 +1027,4 @@ source_classes = ["local-core"]
 fields = []
 linked_issues = []
 priority = 15
-notes = "written by shapekit explore entries from the pair chains pairs.<pair>.a and pairs.<pair>.b under candidate/chains/: per side, the ledgers that hold the side's union arms and the last ledger, whose changed entries pair.json compares. core writes those entries byte for byte the same under both sides, so an indexer stores the same state for both"
+notes = "written by shapekit explore entries from the pair chains pairs.<pair>.a and pairs.<pair>.b under corpus/chains/: per side, the ledgers that hold the side's union arms and the last ledger, whose changed entries pair.json compares. core writes those entries byte for byte the same under both sides, so an indexer stores the same state for both"

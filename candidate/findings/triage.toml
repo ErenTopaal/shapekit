@@ -36,7 +36,7 @@ component = "stellar-etl"
 severity = "robustness"
 status = "wont-fix"
 reason = "intended for the data stellar-etl reads: the public ledger lake holds history re-emitted by a current core, so every ledger there carries TransactionMeta v4, which unified events need. Only locally recorded chains below protocol 23 hold v2 or v3 meta"
-cause = "export_token_transfer builds the processor with NewEventsProcessorForUnifiedEvents (internal/transform/token_transfer.go L15 at 2b24ec89), which reads the CAP-67 unified events stream and returns \"expected version 4 got N\" for any other meta version (go-stellar-sdk processors/token_transfer/token_transfer_processor.go L474-L478 at e31e3b146d00, the pseudo-version stellar-etl pins). The command exits 1, the adapter retries it, and the harness stops the chain at its first ledger with a transaction: every entry of the five corpus chains recorded at protocols 9 to 22 (meta v2 or v3) is not evaluated, on both networks."
+cause = "export_token_transfer builds the processor with NewEventsProcessorForUnifiedEvents (internal/transform/token_transfer.go L15 at 2b24ec89), which reads the CAP-67 unified events stream and returns \"expected version 4 got N\" for any other meta version (go-stellar-sdk processors/token_transfer/token_transfer_processor.go L474-L478 at e31e3b146d00, the pseudo-version stellar-etl pins). The command exits 1, the adapter retries it, and the harness stops the chain at its first ledger with a transaction: every entry of the five corpus chains recorded at protocols 9 to 22 (meta v2 or v3), and of the 20 explorer chains below protocol 23 recorded with classic events and their backfill off, is not evaluated, on both networks."
 
 [[finding.harness]]
 target = "stellar-etl"
@@ -47,6 +47,28 @@ entries = [
   "cap67.unified-events.p22-*",
   "classic.failed-tx.p9-*",
   "classic.failed-tx.p12-*",
+  # explorer chains below protocol 23 recorded with classic events and their backfill off, so
+  # core wrote the meta of their day (v2 or v3)
+  "explore.witnesses.f62c-r0016-*",
+  "explore.witnesses.f62c-r0017-*",
+  "explore.witnesses.f62d-r0001-*",
+  "explore.witnesses.f62d-r0002-*",
+  "explore.witnesses.f63-p21-r0001-*",
+  "explore.witnesses.g1-r0016-*",
+  "explore.witnesses.g2-r0001-*",
+  "explore.witnesses.g2-r0015-*",
+  "explore.witnesses.g2-r0017-*",
+  "explore.witnesses.g2-r0019-*",
+  "explore.witnesses.g2-r0020-*",
+  "explore.witnesses.g2-r0023-*",
+  "explore.witnesses.g2-r0027-*",
+  "explore.witnesses.g2-r0030-*",
+  "explore.witnesses.g2-r0031-*",
+  "explore.witnesses.g2-r0033-*",
+  "explore.witnesses.g2-r0036-*",
+  "explore.witnesses.g2-r0040-*",
+  "explore.witnesses.g2-r0041-*",
+  "explore.witnesses.g2-r0042-*",
 ]
 
 [[finding]]
@@ -215,6 +237,13 @@ cause = "XdrManageSellOfferOp.offerID is an XdrUint64 (lib/src/xdr/xdr_manage_se
 sdk = "dart"
 entries = ["cap03.offer-liabilities.synth-negative-offer-id"]
 
+# the explorer entries and audit ledgers promoted into the corpus that fail the same way
+[[finding.conformance]]
+sdk = "dart"
+entries = [
+  "explore.witnesses.f62d-r0004-l69",
+]
+
 [[finding]]
 id = "DART-SIGNEDPAYLOAD-JSON"
 title = "question: XDR-JSON rendering refuses a signed-payload signer with an empty payload"
@@ -240,6 +269,14 @@ cause = "Operation.fromXdr has no case for INFLATION and throws \"Unknown operat
 [[finding.conformance]]
 sdk = "dart"
 entries = ["cap26.inflation.*"]
+
+# the explorer entries and audit ledgers promoted into the corpus that fail the same way
+[[finding.conformance]]
+sdk = "dart"
+entries = [
+  "explore.witnesses.f62d-r0004-l74",
+  "explore.witnesses.g2-r0010-l74",
+]
 
 [[inputs.import]]
 kind = "conformance"
@@ -316,6 +353,17 @@ entries = [
   "soroban.scval-shapes.p30-string-not-utf8-meta",
 ]
 
+# the explorer entries and audit ledgers promoted into the corpus that fail the same way
+[[finding.conformance]]
+sdk = "php"
+entries = [
+  "explore.witnesses.f62d-r0000-l80",
+  "explore.witnesses.f62d-r0000-l96",
+  "explore.witnesses.f63-p26-r0002-l89",
+  "explore.witnesses.f63-p27-r0002-l90",
+  "explore.witnesses.g2-r0004-l125",
+]
+
 [[finding]]
 id = "PHP-HEXHASH"
 title = "inner transaction hashes and config upgrade content hashes render as the hex of their hex in XDR-JSON, and their XDR-JSON does not encode"
@@ -353,6 +401,49 @@ entries = [
   "soroban.scval-shapes.mainnet-63092996-71f6c6ff-meta",
 ]
 
+# the explorer entries and audit ledgers promoted into the corpus that fail the same way
+[[finding.conformance]]
+sdk = "php"
+entries = [
+  "cap15.fee-bump.mainnet-57369500",
+  "explore.pairs.sac-trust-p30-a-l67",
+  "explore.pairs.sac-trust-p30-b-l67",
+  "explore.witnesses.f62c-r0000-l89",
+  "explore.witnesses.f62c-r0000-l90",
+  "explore.witnesses.f62c-r0000-l92",
+  "explore.witnesses.f62c-r0005-l112",
+  "explore.witnesses.f62c-r0005-l97",
+  "explore.witnesses.f62c-r0016-l94",
+  "explore.witnesses.f62d-r0000-l100",
+  "explore.witnesses.f62d-r0003-l73",
+  "explore.witnesses.f62d-r0007-l72",
+  "explore.witnesses.f62d-r0007-l74",
+  "explore.witnesses.f62d-r0007-l77",
+  "explore.witnesses.f62d-r0008-l84",
+  "explore.witnesses.f62d-r0008-l87",
+  "explore.witnesses.f62d-r0022-l76",
+  "explore.witnesses.f62d-r0022-l82",
+  "explore.witnesses.f62d-r0024-l97",
+  "explore.witnesses.f63-p28-r0000-l79",
+  "explore.witnesses.f63-p29-r0003-l105",
+  "explore.witnesses.g2-r0001-l113",
+  "explore.witnesses.g2-r0001-l114",
+  "explore.witnesses.g2-r0003-l77",
+  "explore.witnesses.g2-r0005-l102",
+  "explore.witnesses.g2-r0005-l68",
+  "explore.witnesses.g2-r0005-l95",
+  "explore.witnesses.g2-r0006-l121",
+  "explore.witnesses.g2-r0007-l71",
+  "explore.witnesses.g2-r0007-l74",
+  "explore.witnesses.g2-r0007-l81",
+  "explore.witnesses.g2-r0009-l78",
+  "explore.witnesses.g2-r0009-l83",
+  "explore.witnesses.g2-r0017-l129",
+  "explore.witnesses.g2-r0018-l122",
+  "explore.witnesses.g2-r0021-l101",
+  "explore.witnesses.g2-r0022-l171",
+]
+
 [[finding]]
 id = "PHP-CBKEY-JSON"
 title = "a claimable balance ledger key renders without its balance_id member in XDR-JSON"
@@ -374,6 +465,18 @@ entries = [
   "cap67.unified-events.p30-claim-claimable-balance",
   "cap67.unified-events.p30-clawback-claimable-balance",
   "classic.failed-tx.p30-revoke-only-transferable",
+]
+
+# the explorer entries and audit ledgers promoted into the corpus that fail the same way
+[[finding.conformance]]
+sdk = "php"
+entries = [
+  "cap03.offer-liabilities.mainnet-37466023",
+  "cap03.offer-liabilities.mainnet-44679511",
+  "explore.witnesses.f62c-r0000-l86",
+  "explore.witnesses.g2-r0000-l77",
+  "explore.witnesses.g2-r0006-l126",
+  "explore.witnesses.g2-r0014-l143",
 ]
 
 [[finding]]
@@ -430,6 +533,14 @@ entries = [
   "cap26.inflation.p11-inflation-payout",
 ]
 
+# the explorer entries and audit ledgers promoted into the corpus that fail the same way
+[[finding.conformance]]
+sdk = "php"
+entries = [
+  "explore.witnesses.f62d-r0004-l74",
+  "explore.witnesses.g2-r0010-l74",
+]
+
 [[finding]]
 id = "PHP-MUXEDID"
 title = "MuxedAccount takes a negative id and writes it as the unsigned id it wraps to"
@@ -477,6 +588,20 @@ entries = [
   "soroban.invoke-basics.p30-create-contract-v1-envelope",
 ]
 
+# the explorer entries and audit ledgers promoted into the corpus that fail the same way
+[[finding.conformance]]
+sdk = "dotnet"
+entries = [
+  "explore.pairs.sac-trust-p28-a-l65",
+  "explore.pairs.sac-trust-p28-b-l65",
+  "explore.pairs.sac-trust-p30-a-l69",
+  "explore.pairs.sac-trust-p30-b-l69",
+  "explore.witnesses.f63-p21-r0001-l67",
+  "explore.witnesses.f63-p21-r0001-l69",
+  "explore.witnesses.f63-p24-r0001-l71",
+  "explore.witnesses.f63-p28-r0000-l81",
+]
+
 [[finding]]
 id = "NET-DEPRECATED-OPS"
 title = "Transaction.FromEnvelopeXdr refuses envelopes with an allow trust or inflation operation"
@@ -503,6 +628,29 @@ entries = [
   "classic.failed-tx.p30-allow-trust-cant-revoke",
   "classic.failed-tx.p30-allow-trust-low-reserve",
   "classic.failed-tx.p30-allow-trust-no-trust-line",
+]
+
+# the explorer entries and audit ledgers promoted into the corpus that fail the same way
+[[finding.conformance]]
+sdk = "dotnet"
+entries = [
+  "explore.witnesses.f62c-r0000-l68",
+  "explore.witnesses.f62c-r0000-l71",
+  "explore.witnesses.f62c-r0005-l124",
+  "explore.witnesses.f62d-r0000-l72",
+  "explore.witnesses.f62d-r0000-l81",
+  "explore.witnesses.f62d-r0002-l66",
+  "explore.witnesses.f62d-r0004-l74",
+  "explore.witnesses.f63-p24-r0001-l84",
+  "explore.witnesses.g1-r0004-l141",
+  "explore.witnesses.g2-r0000-l69",
+  "explore.witnesses.g2-r0001-l102",
+  "explore.witnesses.g2-r0003-l101",
+  "explore.witnesses.g2-r0003-l75",
+  "explore.witnesses.g2-r0010-l74",
+  "explore.witnesses.g2-r0013-l92",
+  "explore.witnesses.g2-r0015-l71",
+  "explore.witnesses.g2-r0026-l107",
 ]
 
 [[finding]]
@@ -672,6 +820,23 @@ entries = [
   "soroban.scval-shapes.p30-symbol-not-utf8",
 ]
 
+# the explorer entries and audit ledgers promoted into the corpus that fail the same way
+[[finding.conformance]]
+sdk = "kmp"
+entries = [
+  "explore.witnesses.f62c-r0000-l69",
+  "explore.witnesses.f62c-r0000-l77",
+  "explore.witnesses.f62c-r0000-l86",
+  "explore.witnesses.f62c-r0017-l77",
+  "explore.witnesses.f62d-r0000-l85",
+  "explore.witnesses.f62d-r0003-l79",
+  "explore.witnesses.f62d-r0008-l75",
+  "explore.witnesses.g2-r0007-l77",
+  "explore.witnesses.g2-r0012-l78",
+  "explore.witnesses.g2-r0013-l93",
+  "explore.witnesses.g2-r0018-l122",
+]
+
 [[finding]]
 id = "KMP-UTF8"
 title = "XDR strings are decoded to Kotlin strings, so memos, symbols and strings that are not UTF-8 change"
@@ -832,6 +997,85 @@ entries = [
   "classic.failed-tx.p9-change-trust-native-internal-error-envelope",
 ]
 
+# the explorer entries and audit ledgers promoted into the corpus that fail the same way
+[[finding.conformance]]
+sdk = "stellar-cli"
+entries = [
+  "cap03.offer-liabilities.mainnet-37466023",
+  "cap03.offer-liabilities.mainnet-44679511",
+  "cap15.fee-bump.mainnet-57369500",
+  "explore.witnesses.f62c-r0000-l89",
+  "explore.witnesses.f62c-r0000-l90",
+  "explore.witnesses.f62c-r0000-l92",
+  "explore.witnesses.f62c-r0005-l112",
+  "explore.witnesses.f62c-r0005-l97",
+  "explore.witnesses.f62c-r0016-l94",
+  "explore.witnesses.f62d-r0000-l100",
+  "explore.witnesses.f62d-r0001-l67",
+  "explore.witnesses.f62d-r0001-l69",
+  "explore.witnesses.f62d-r0001-l72",
+  "explore.witnesses.f62d-r0001-l73",
+  "explore.witnesses.f62d-r0002-l66",
+  "explore.witnesses.f62d-r0002-l68",
+  "explore.witnesses.f62d-r0002-l77",
+  "explore.witnesses.f62d-r0002-l79",
+  "explore.witnesses.f62d-r0002-l84",
+  "explore.witnesses.f62d-r0003-l73",
+  "explore.witnesses.f62d-r0004-l66",
+  "explore.witnesses.f62d-r0004-l69",
+  "explore.witnesses.f62d-r0004-l74",
+  "explore.witnesses.f62d-r0004-l75",
+  "explore.witnesses.f62d-r0007-l72",
+  "explore.witnesses.f62d-r0007-l74",
+  "explore.witnesses.f62d-r0007-l77",
+  "explore.witnesses.f62d-r0008-l84",
+  "explore.witnesses.f62d-r0008-l87",
+  "explore.witnesses.f62d-r0022-l76",
+  "explore.witnesses.f62d-r0024-l97",
+  "explore.witnesses.f63-p28-r0000-l79",
+  "explore.witnesses.g1-r0004-l102",
+  "explore.witnesses.g1-r0004-l103",
+  "explore.witnesses.g1-r0004-l104",
+  "explore.witnesses.g1-r0004-l122",
+  "explore.witnesses.g1-r0004-l123",
+  "explore.witnesses.g1-r0004-l126",
+  "explore.witnesses.g1-r0004-l141",
+  "explore.witnesses.g1-r0004-l142",
+  "explore.witnesses.g2-r0001-l113",
+  "explore.witnesses.g2-r0001-l114",
+  "explore.witnesses.g2-r0003-l77",
+  "explore.witnesses.g2-r0005-l102",
+  "explore.witnesses.g2-r0005-l68",
+  "explore.witnesses.g2-r0006-l121",
+  "explore.witnesses.g2-r0007-l71",
+  "explore.witnesses.g2-r0007-l74",
+  "explore.witnesses.g2-r0007-l81",
+  "explore.witnesses.g2-r0008-l71",
+  "explore.witnesses.g2-r0008-l73",
+  "explore.witnesses.g2-r0008-l76",
+  "explore.witnesses.g2-r0008-l77",
+  "explore.witnesses.g2-r0008-l78",
+  "explore.witnesses.g2-r0008-l80",
+  "explore.witnesses.g2-r0009-l78",
+  "explore.witnesses.g2-r0009-l83",
+  "explore.witnesses.g2-r0010-l74",
+  "explore.witnesses.g2-r0010-l92",
+  "explore.witnesses.g2-r0010-l93",
+  "explore.witnesses.g2-r0015-l67",
+  "explore.witnesses.g2-r0015-l71",
+  "explore.witnesses.g2-r0015-l72",
+  "explore.witnesses.g2-r0017-l129",
+  "explore.witnesses.g2-r0018-l122",
+  "explore.witnesses.g2-r0021-l101",
+  "explore.witnesses.g2-r0022-l171",
+  "explore.witnesses.g2-r0028-l66",
+  "explore.witnesses.g2-r0029-l98",
+  "explore.witnesses.g2-r0033-l66",
+  "explore.witnesses.g2-r0038-l67",
+  "explore.witnesses.g2-r0038-l68",
+  "explore.witnesses.g2-r0041-l89",
+]
+
 [[finding]]
 id = "CLI-DEPTH"
 title = "stellar tx hash decodes with a depth limit of 500, below what stellar-core accepts"
@@ -919,4 +1163,106 @@ entries = [
   "cap40.signed-payload-signer.synth-strkey-x-invalid",
   "cap84.muxed-contract.synth-strkey-w-invalid",
   "soroban.invoke-basics.synth-strkey-c-invalid",
+]
+
+[[finding]]
+id = "DART-PRICE"
+title = "a transaction whose offer price is not in lowest terms hashes to another value once the sdk rebuilds it"
+component = "stellar_flutter_sdk"
+severity = "divergence"
+status = "draft"
+draft = "candidate/findings/issues/dart-cap03.offer-liabilities.mainnet-37466023.md"
+cause = "AbstractTransaction.fromEnvelopeXdr(..).hash(network) rebuilds every operation before hashing. ManageSellOfferOperation builder() turns the XDR price into Price(n, d).toDecimalString() and toOperationBody reads it back with Price.fromString (lib/src/manage_sell_offer_operation.dart L109 and L135-L143 at 3.12.0), which writes the reduced or approximated fraction, so an offer or liquidity pool deposit bound such as 6836306/1144362402, 7/7 or 2147483647/2147483647 is hashed as another fraction (lib/src/transaction.dart L109)."
+
+[[finding.conformance]]
+sdk = "dart"
+entries = [
+  "cap03.offer-liabilities.mainnet-37466023",
+  "cap15.fee-bump.mainnet-57369500",
+  "explore.witnesses.g1-r0047-l69",
+  "explore.witnesses.g2-r0007-l69",
+  "explore.witnesses.g2-r0010-l92",
+  "explore.witnesses.g2-r0038-l67",
+]
+
+[[finding]]
+id = "DART-MAXTIME"
+title = "a transaction with max time 2^64-1 hashes to another value once the sdk rebuilds it"
+component = "stellar_flutter_sdk"
+severity = "divergence"
+status = "draft"
+draft = "candidate/findings/issues/dart-explore.witnesses.f62d-r0000-l96.md"
+cause = "TimeBounds.fromXdr reads the max time with BigInt.toInt (lib/src/transaction.dart L1087-L1092 at 3.12.0), which clamps 18446744073709551615 to 9223372036854775807, and toXdr writes the clamped value back (L1095-L1100), so a transaction core applied with max_time 2^64-1 hashes to another value."
+
+[[finding.conformance]]
+sdk = "dart"
+entries = [
+  "explore.witnesses.f62d-r0000-l96",
+]
+
+[[finding]]
+id = "NET-PRICE"
+title = "a transaction whose offer price the sdk does not get back from a decimal hashes to another value"
+component = "stellar-dotnet-sdk"
+severity = "divergence"
+status = "draft"
+draft = "candidate/findings/issues/dotnet-cap03.offer-liabilities.mainnet-37466023.md"
+cause = "ManageSellOfferOperation.FromXdr turns the price into decimal.Divide(N, D) written as a string, and ToOperationBody reads it back with Price.FromString (StellarDotnetSdk/Operations/ManageSellOfferOperation.cs L83 and L95-L106, Price.cs L55-L96, a continued fraction bounded by int.MaxValue), which writes another fraction for prices not in lowest terms and turns 1/2147483647 into 0/1, so Transaction.FromEnvelopeXdr(..).Hash(network) is not the network hash."
+
+[[finding.conformance]]
+sdk = "dotnet"
+entries = [
+  "cap03.offer-liabilities.mainnet-37466023",
+  "cap15.fee-bump.mainnet-57369500",
+  "explore.witnesses.g2-r0007-l69",
+  "explore.witnesses.g2-r0010-l92",
+  "explore.witnesses.g2-r0027-l67",
+  "explore.witnesses.g2-r0031-l67",
+  "explore.witnesses.g2-r0038-l67",
+]
+
+[[finding]]
+id = "KMP-TXOBJECT"
+title = "the transaction object refuses values the network applied: max time 2^64-1 and offer id -1"
+component = "kmp-stellar-sdk"
+severity = "divergence"
+status = "draft"
+draft = "candidate/findings/issues/kmp-explore.witnesses.f62d-r0000-l96.md"
+cause = "AbstractTransaction.fromEnvelopeXdr refuses transactions core applied: TimeBounds reads the uint64 max time into a signed Long and requires it to be >= 0 (commonMain/com/soneso/stellar/sdk/TimeBounds.kt L26 at 1.18.0, \"maxTime must be >= 0\" for 2^64-1), and the manage offer operations refuse offer id -1 (\"Offer ID must be non-negative\"), so the transaction hash cannot be had; the class of the candidate lane's other transaction-object refusals."
+
+[[finding.conformance]]
+sdk = "kmp"
+entries = [
+  "explore.witnesses.f62d-r0000-l96",
+  "explore.witnesses.f62d-r0004-l69",
+]
+
+[[finding]]
+id = "PHP-OFFERID"
+title = "rebuilding a transaction with a manage sell offer of offer id -1 throws"
+component = "soneso/stellar-php-sdk"
+severity = "divergence"
+status = "draft"
+draft = "candidate/findings/issues/php-explore.witnesses.f62d-r0004-l69.md"
+cause = "The offer id check of ManageSellOfferOperationBuilder::setOfferId (Soneso/StellarSDK/ManageSellOfferOperationBuilder.php L69-L72 at 1.18.0) throws \"Invalid offer id: -1\" for a value the int64 field holds and core applied in a failed transaction, so the transaction cannot be rebuilt and hashed."
+
+[[finding.conformance]]
+sdk = "php"
+entries = [
+  "explore.witnesses.f62d-r0004-l69",
+]
+
+[[finding]]
+id = "PHP-SETOPTIONS"
+title = "a set options operation with clear_flags 0 or an empty home domain hashes to another value once the sdk rebuilds it"
+component = "soneso/stellar-php-sdk"
+severity = "divergence"
+status = "draft"
+draft = "candidate/findings/issues/php-explore.witnesses.g2-r0015-l71.md"
+cause = "AbstractTransaction::fromEnvelopeXdr(..)->hash(network) rebuilds the operation, and SetOptionsOperation::toOperationBody writes inflationDestination, clearFlags, setFlags and homeDomain only when they are truthy (Soneso/StellarSDK/SetOptionsOperation.php L200-L224 at 1.18.0, `if ($this->clearFlags)`), so a present 0 or empty home domain becomes absent and the sdk hashes other bytes than the network."
+
+[[finding.conformance]]
+sdk = "php"
+entries = [
+  "explore.witnesses.g2-r0015-l71",
 ]

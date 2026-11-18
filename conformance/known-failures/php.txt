@@ -85,3 +85,63 @@ soroban.scval-shapes.synth-scmap-depth-198-over-cap * diverges-from-network cand
 soroban.scval-shapes.synth-scvec-depth-247-over-cap * diverges-from-network candidate/findings/issues/php-classic.max-length.synth-tx-101-operations.md any/decode_encode
 soroban.scval-shapes.synth-string-nonzero-padding * diverges-from-network candidate/findings/issues/php-classic.max-length.synth-tx-101-operations.md any/decode_encode
 soroban.scval-shapes.synth-symbol-33-bytes * diverges-from-network candidate/findings/issues/php-classic.max-length.synth-tx-101-operations.md any/decode_encode
+# a candidate: rebuilding a transaction core applied (and failed) whose manage sell offer has offer id -1 throws "Invalid offer id: -1": the offer id check of ManageSellOfferOperationBuilder::setOfferId (Soneso/StellarSDK/ManageSellOfferOperationBuilder.php L69-L72 at 1.18.0) refuses a value the int64 field holds, the class of the kmp sdk's transaction-object refusals
+explore.witnesses.f62d-r0004-l69 1.18.0 diverges-from-network candidate/finding-candidates.toml mainnet/tx_hash 0, testnet/tx_hash 0
+# a candidate: the set options candidate of the php sdk above: clear_flags 0 and an empty home domain left out when the sdk rebuilds the operation
+explore.witnesses.g2-r0015-l71 1.18.0 diverges-from-network candidate/finding-candidates.toml mainnet/tx_hash 0, testnet/tx_hash 0
+# as PHP-CBKEY-JSON: a removed claimable balance's ledger key without its balance_id member
+explore.witnesses.f62c-r0000-l86 1.18.0 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0000-l77 1.18.0 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0006-l126 1.18.0 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0014-l143 1.18.0 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+# as PHP-CBKEY-JSON: claimable balance ledger keys without their balance_id member ("Expected string for XdrClaimableBalanceID JSON value, got array")
+cap03.offer-liabilities.mainnet-37466023 1.18.0 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json
+cap03.offer-liabilities.mainnet-44679511 1.18.0 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json
+# as PHP-HEXHASH: hashes (transaction hashes in results, the config upgrade set content hash) written as the hex of their hex, which then read back with the wrong length ("Has length 16, expected 32") or crash opaqueFixed
+explore.pairs.sac-trust-p30-a-l67 1.18.0 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.pairs.sac-trust-p30-b-l67 1.18.0 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62c-r0000-l89 1.18.0 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62c-r0000-l90 1.18.0 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62c-r0000-l92 1.18.0 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62c-r0005-l112 1.18.0 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62c-r0005-l97 1.18.0 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62c-r0016-l94 1.18.0 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0000-l100 1.18.0 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0003-l73 1.18.0 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0007-l72 1.18.0 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0007-l74 1.18.0 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0007-l77 1.18.0 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, mainnet/tx_hash 0, mainnet/tx_hash 0 inner, testnet/decode_json, testnet/encode_json, testnet/tx_hash 0, testnet/tx_hash 0 inner
+explore.witnesses.f62d-r0008-l84 1.18.0 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0008-l87 1.18.0 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0022-l76 1.18.0 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0022-l82 1.18.0 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0024-l97 1.18.0 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p28-r0000-l79 1.18.0 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p29-r0003-l105 1.18.0 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0001-l113 1.18.0 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0001-l114 1.18.0 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0003-l77 1.18.0 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0005-l102 1.18.0 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0005-l68 1.18.0 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0005-l95 1.18.0 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0006-l121 1.18.0 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0007-l71 1.18.0 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0007-l74 1.18.0 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0007-l81 1.18.0 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0009-l78 1.18.0 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0009-l83 1.18.0 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0017-l129 1.18.0 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0018-l122 1.18.0 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0021-l101 1.18.0 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0022-l171 1.18.0 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+# as PHP-HEXHASH: hashes written as the hex of their hex ("Unexpected length for value. Has length 16, expected 32")
+cap15.fee-bump.mainnet-57369500 1.18.0 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json
+# as PHP-INFLATION: an inflation operation has no transaction object ("Unknown operation type: 9")
+explore.witnesses.f62d-r0004-l74 1.18.0 diverges-from-network candidate/finding-candidates.toml mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.g2-r0010-l74 1.18.0 diverges-from-network candidate/finding-candidates.toml mainnet/tx_hash 0, testnet/tx_hash 0
+# as PHP-UINT64: a max time of 2^64-1 and other uint64 values above 2^63-1 ("uint64ToString accepts only non-negative values; got -1")
+explore.witnesses.f62d-r0000-l80 1.18.0 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, testnet/decode_json
+explore.witnesses.f62d-r0000-l96 1.18.0 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, testnet/decode_json
+explore.witnesses.f63-p26-r0002-l89 1.18.0 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, testnet/decode_json
+explore.witnesses.f63-p27-r0002-l90 1.18.0 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, testnet/decode_json
+explore.witnesses.g2-r0004-l125 1.18.0 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, testnet/decode_json

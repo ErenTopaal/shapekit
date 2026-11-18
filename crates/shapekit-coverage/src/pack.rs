@@ -301,8 +301,10 @@ fn verify_chains(corpus: &Path, files: &[String]) -> Result<(), CoverageError> {
 
 /// The members allowed outside `entries/`, `vectors/` and `chains/`: the required files, the
 /// generated coverage reports, the golden agreement exceptions, one `index.json` per golden
-/// snapshot, and the recipe IR files (`recipes/<family>/<name>.json`) entries name as
-/// `source.recipe_ir`.
+/// snapshot, the recipe IR files entries name as `source.recipe_ir`
+/// (`recipes/<family>/[<dir>/...]<name>.json`, a recipe pair's `pair.json` among them), the
+/// `run.toml` and `README.md` that describe them, and `recipes/chains.toml`, the chains
+/// recorded from them.
 fn outside_member(f: &str) -> bool {
     if REQUIRED.contains(&f) || REPORTS.contains(&f) || f == "goldens/agree-exceptions.toml" {
         return true;
@@ -310,8 +312,13 @@ fn outside_member(f: &str) -> bool {
     let parts: Vec<&str> = f.split('/').collect();
     match parts.as_slice() {
         ["goldens", snapshot, "index.json"] => !snapshot.is_empty(),
-        ["recipes", family, name] => {
-            !family.is_empty() && name.ends_with(".json") && name.len() > 5
+        ["recipes", "chains.toml"] => true,
+        ["recipes", family, rest @ ..] if !family.is_empty() && !rest.is_empty() => {
+            let name = rest[rest.len() - 1];
+            rest.iter().all(|p| !p.is_empty())
+                && ((name.ends_with(".json") && name.len() > 5)
+                    || name == "run.toml"
+                    || name == "README.md")
         }
         _ => false,
     }

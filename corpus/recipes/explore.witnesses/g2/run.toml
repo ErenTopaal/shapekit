@@ -1,0 +1,272 @@
+# the explorer run these recipes come from
+run = "g2"
+command = "shapekit explore run --budget 60 --protocol 30,30,30,22,19,17,14,12,10,9 --jobs 3 --actions 60 --coverage --seed 202"
+seed = 202
+twin_image = "sha256:50c420e6768f2e4df73ce2fed6339f485a159495eb59cb764e37ed6d33916a6f"
+load_average_at_start = "7.45, 12.78, 13.77"
+load_average_at_end = "16.96, 15.30, 15.70"
+episodes = 267
+recipes_written = 44
+classic_target_arms = 327
+classic_target_arms_witnessed = 321
+left_out_history_only = ["StellarValueExt:basic"]
+kept_here = "the recipes a greedy cover over this run's witnesses picked; the run's other recipes are not kept"
+verified = "explore verify --repeat 2: each recipe recorded twice under each passphrase, every one byte for byte with its credited arms"
+
+[recipes.r0000]
+id = "explore.sca.e2"
+protocol = 17
+steps = 102
+arms_first_witnessed = ["AccountEntryExt:v0", "AccountEntryExt:v1", "AccountEntryExtensionV1Ext:v2", "AccountEntryExtensionV2Ext:v0", "AccountMergeResult:success", "AllowTrustResult:cant_revoke", "Asset:credit_alphanum12", "Asset:credit_alphanum4", "Asset:native", "AssetCode:credit_alphanum4", "BeginSponsoringFutureReservesResult:success", "ChangeTrustAsset:credit_alphanum12", "ChangeTrustAsset:credit_alphanum4", "ChangeTrustResult:invalid_limit", "ChangeTrustResult:success", "ClaimClaimableBalanceResult:does_not_exist", "ClaimClaimableBalanceResult:not_authorized", "ClaimPredicate:unconditional", "ClaimableBalanceEntryExt:v1", "ClaimableBalanceEntryExtensionV1Ext:v0", "ClaimableBalanceId:claimable_balance_id_type_v0", "Claimant:claimant_type_v0", "ClawbackClaimableBalanceResult:success", "ClawbackResult:no_trust", "ClawbackResult:success", "ClawbackResult:underfunded", "ContractEventBody:v0", "CreateAccountResult:already_exist", "CreateAccountResult:success", "CreateClaimableBalanceResult:success", "EndSponsoringFutureReservesResult:success", "ExtensionPoint:v0", "LedgerCloseMeta:v0", "LedgerEntryChange:created", "LedgerEntryChange:removed", "LedgerEntryChange:state", "LedgerEntryChange:updated", "LedgerEntryData:account", "LedgerEntryData:claimable_balance", "LedgerEntryData:trustline", "LedgerEntryExt:v0", "LedgerEntryExt:v1", "LedgerEntryExtensionV1Ext:v0", "LedgerHeaderExt:v0", "LedgerHeaderHistoryEntryExt:v0", "LedgerKey:claimable_balance", "LedgerKey:trustline", "ManageBuyOfferResult:buy_not_authorized", "ManageBuyOfferResult:underfunded", "ManageSellOfferResult:buy_not_authorized", "ManageSellOfferResult:underfunded", "Memo:hash", "Memo:none", "Memo:return", "MuxedAccount:ed25519", "MuxedAccount:muxed_ed25519", "OperationBody:account_merge", "OperationBody:allow_trust", "OperationBody:begin_sponsoring_future_reserves", "OperationBody:change_trust", "OperationBody:claim_claimable_balance", "OperationBody:clawback", "OperationBody:clawback_claimable_balance", "OperationBody:create_account", "OperationBody:create_claimable_balance", "OperationBody:end_sponsoring_future_reserves", "OperationBody:manage_buy_offer", "OperationBody:manage_sell_offer", "OperationBody:path_payment_strict_receive", "OperationBody:path_payment_strict_send", "OperationBody:payment", "OperationBody:revoke_sponsorship", "OperationBody:set_options", "OperationBody:set_trust_line_flags", "OperationResult:op_inner", "OperationResult:op_no_account", "OperationResultTr:account_merge", "OperationResultTr:allow_trust", "OperationResultTr:begin_sponsoring_future_reserves", "OperationResultTr:change_trust", "OperationResultTr:claim_claimable_balance", "OperationResultTr:clawback", "OperationResultTr:clawback_claimable_balance", "OperationResultTr:create_account", "OperationResultTr:create_claimable_balance", "OperationResultTr:end_sponsoring_future_reserves", "OperationResultTr:manage_buy_offer", "OperationResultTr:manage_sell_offer", "OperationResultTr:path_payment_strict_receive", "OperationResultTr:path_payment_strict_send", "OperationResultTr:payment", "OperationResultTr:revoke_sponsorship", "OperationResultTr:set_options", "OperationResultTr:set_trust_line_flags", "PathPaymentStrictReceiveResult:no_trust", "PathPaymentStrictReceiveResult:not_authorized", "PathPaymentStrictSendResult:not_authorized", "PathPaymentStrictSendResult:under_destmin", "PaymentResult:no_trust", "PaymentResult:not_authorized", "PaymentResult:success", "Preconditions:none", "PublicKey:public_key_type_ed25519", "RevokeSponsorshipOp:ledger_entry", "RevokeSponsorshipResult:low_reserve", "ScAddress:account", "ScAddress:claimable_balance", "ScVal:address", "ScVal:bool", "ScVal:i128", "ScVal:string", "ScVal:symbol", "SetOptionsResult:success", "SetTrustLineFlagsResult:success", "StellarValueExt:signed", "TransactionEnvelope:tx", "TransactionExt:v0", "TransactionMeta:v4", "TransactionResultExt:v0", "TransactionResultResult:tx_bad_sponsorship", "TransactionResultResult:tx_failed", "TransactionResultResult:tx_success", "TrustLineAsset:credit_alphanum12", "TrustLineAsset:credit_alphanum4", "TrustLineEntryExt:v0"]
+
+[recipes.r0001]
+id = "explore.sca.e1"
+protocol = 14
+steps = 104
+arms_first_witnessed = ["AccountMergeResult:has_sub_entries", "AllowTrustResult:success", "AssetCode:credit_alphanum12", "ClaimableBalanceEntryExt:v0", "CreateClaimableBalanceResult:not_authorized", "FeeBumpTransactionExt:v0", "FeeBumpTransactionInnerTx:tx", "InnerTransactionResultExt:v0", "InnerTransactionResultResult:tx_failed", "InnerTransactionResultResult:tx_success", "ManageBuyOfferResult:sell_not_authorized", "ManageSellOfferResult:buy_no_trust", "ManageSellOfferResult:sell_no_trust", "ManageSellOfferResult:sell_not_authorized", "PathPaymentStrictReceiveResult:src_not_authorized", "PathPaymentStrictSendResult:no_destination", "PathPaymentStrictSendResult:src_not_authorized", "PaymentResult:src_not_authorized", "TransactionEnvelope:tx_fee_bump", "TransactionMeta:v2", "TransactionResultResult:tx_fee_bump_inner_failed", "TransactionResultResult:tx_fee_bump_inner_success"]
+
+[recipes.r0002]
+id = "explore.sca.e0"
+protocol = 30
+steps = 120
+arms_first_witnessed = ["AccountEntryExtensionV2Ext:v3", "ChangeTrustAsset:pool_share", "ChangeTrustResult:not_auth_maintain_liabilities", "CreateClaimableBalanceResult:no_trust", "GeneralizedTransactionSet:v1", "LedgerCloseMeta:v2", "LedgerCloseMetaExt:v0", "LedgerEntryData:liquidity_pool", "LiquidityPoolDepositResult:not_authorized", "LiquidityPoolDepositResult:success", "LiquidityPoolEntryBody:liquidity_pool_constant_product", "LiquidityPoolParameters:liquidity_pool_constant_product", "ManageDataResult:name_not_found", "OperationBody:liquidity_pool_deposit", "OperationBody:manage_data", "OperationResultTr:liquidity_pool_deposit", "OperationResultTr:manage_data", "ScAddress:liquidity_pool", "SetTrustLineFlagsResult:invalid_state", "StellarValueExt:signed_ms", "TransactionPhase:v0", "TransactionPhase:v1", "TrustLineAsset:pool_share", "TrustLineEntryExt:v1", "TrustLineEntryExtensionV2Ext:v0", "TrustLineEntryV1Ext:v2", "TxSetComponent:txset_comp_txs_maybe_discounted_fee"]
+
+[recipes.r0003]
+id = "explore.sca.e3"
+protocol = 19
+steps = 102
+arms_first_witnessed = ["AccountMergeResult:dest_full", "AllowTrustResult:low_reserve", "AllowTrustResult:no_trust_line", "ChangeTrustResult:cannot_delete", "ClaimAtom:liquidity_pool", "ClaimPredicate:before_absolute_time", "ClaimPredicate:before_relative_time", "ClawbackClaimableBalanceResult:does_not_exist", "LedgerEntryData:offer", "LedgerKey:account", "LiquidityPoolDepositResult:bad_price", "LiquidityPoolDepositResult:line_full", "LiquidityPoolDepositResult:pool_full", "LiquidityPoolWithdrawResult:line_full", "LiquidityPoolWithdrawResult:success", "LiquidityPoolWithdrawResult:under_minimum", "ManageBuyOfferResult:low_reserve", "ManageDataResult:low_reserve", "ManageOfferSuccessResultOffer:created", "ManageSellOfferResult:line_full", "ManageSellOfferResult:low_reserve", "ManageSellOfferResult:success", "Memo:text", "OfferEntryExt:v0", "OperationBody:liquidity_pool_withdraw", "OperationResultTr:liquidity_pool_withdraw", "PathPaymentStrictSendResult:line_full", "PathPaymentStrictSendResult:success", "Preconditions:time", "RevokeSponsorshipResult:not_sponsor", "SetTrustLineFlagsResult:low_reserve"]
+
+[recipes.r0004]
+id = "explore.sca.e2"
+protocol = 17
+steps = 158
+arms_first_witnessed = ["AccountMergeResult:is_sponsor", "BumpSequenceResult:success", "ChangeTrustResult:no_issuer", "ClaimClaimableBalanceResult:line_full", "EndSponsoringFutureReservesResult:not_sponsored", "ManageBuyOfferResult:sell_no_trust", "Memo:id", "OperationBody:bump_sequence", "OperationResultTr:bump_sequence", "SetOptionsResult:too_many_signers", "SignerKey:hash_x"]
+
+[recipes.r0005]
+id = "explore.sca.e4"
+protocol = 30
+steps = 103
+arms_first_witnessed = ["ChangeTrustResult:low_reserve", "ClaimClaimableBalanceResult:cannot_claim", "ClaimClaimableBalanceResult:trustline_frozen", "ConfigSettingEntry:frozen_ledger_keys", "InnerTransactionResultResult:tx_bad_auth", "LedgerEntryData:config_setting", "LedgerUpgrade:config", "LiquidityPoolDepositResult:trustline_frozen", "LiquidityPoolWithdrawResult:no_trust", "LiquidityPoolWithdrawResult:trustline_frozen", "SignerKey:ed25519", "TransactionResultResult:tx_bad_auth_extra"]
+
+[recipes.r0006]
+id = "explore.sca.e2"
+protocol = 17
+steps = 153
+arms_first_witnessed = ["ClaimClaimableBalanceResult:success", "ClaimPredicate:and", "ClaimPredicate:not", "ClaimPredicate:or", "CreateClaimableBalanceResult:low_reserve", "CreateClaimableBalanceResult:underfunded", "PathPaymentStrictSendResult:src_no_trust", "PathPaymentStrictSendResult:underfunded"]
+
+[recipes.r0007]
+id = "explore.sca.e7"
+protocol = 30
+steps = 48
+arms_first_witnessed = ["InnerTransactionResultResult:tx_bad_min_seq_age_or_gap", "InnerTransactionResultResult:tx_no_account", "LedgerKey:data", "ManageBuyOfferResult:buy_no_trust", "OperationBody:create_passive_sell_offer", "PathPaymentStrictReceiveResult:too_few_offers", "PathPaymentStrictSendResult:too_few_offers", "PaymentResult:underfunded", "Preconditions:v2", "RevokeSponsorshipResult:does_not_exist"]
+
+[recipes.r0008]
+id = "explore.sca.e9"
+protocol = 12
+steps = 37
+arms_first_witnessed = ["AccountMergeResult:no_account", "ChangeTrustResult:self_not_allowed", "CreateAccountResult:underfunded", "LedgerUpgrade:max_tx_set_size", "PathPaymentStrictReceiveResult:no_issuer", "PathPaymentStrictReceiveResult:over_sendmax", "PathPaymentStrictReceiveResult:success", "PaymentResult:no_destination", "TransactionEnvelope:tx_v0", "TransactionV0Ext:v0"]
+
+[recipes.r0009]
+id = "explore.sca.e11"
+protocol = 30
+steps = 81
+arms_first_witnessed = ["InnerTransactionResultResult:tx_bad_auth_extra", "InnerTransactionResultResult:tx_bad_seq", "SignerKey:ed25519_signed_payload", "TransactionResultResult:tx_bad_auth", "TransactionResultResult:tx_bad_min_seq_age_or_gap", "TransactionResultResult:tx_bad_seq", "TransactionResultResult:tx_no_account"]
+
+[recipes.r0010]
+id = "explore.sca.e12"
+protocol = 9
+steps = 59
+arms_first_witnessed = ["ChangeTrustAsset:native", "InflationResult:not_time", "InflationResult:success", "ManageSellOfferResult:buy_no_issuer", "OperationBody:inflation", "OperationResultTr:inflation", "TransactionResultResult:tx_internal_error"]
+
+[recipes.r0011]
+id = "explore.sca.e4"
+protocol = 30
+steps = 177
+arms_first_witnessed = ["ClawbackClaimableBalanceResult:not_issuer", "CreateAccountResult:low_reserve", "LiquidityPoolDepositResult:no_trust", "LiquidityPoolWithdrawResult:underfunded", "ScVal:map", "ScVal:u64"]
+
+[recipes.r0012]
+id = "explore.sca.e13"
+protocol = 22
+steps = 30
+arms_first_witnessed = ["ConfigSettingEntry:contract_ledger_cost_ext_v0", "ConfigSettingEntry:contract_ledger_cost_v0", "ConfigSettingEntry:contract_parallel_compute_v0", "ConfigSettingEntry:live_soroban_state_size_window", "ConfigSettingEntry:scp_timing", "ConfigSettingEntry:state_archival", "LedgerCloseMeta:v1", "LedgerUpgrade:version", "OperationResult:op_bad_auth", "RevokeSponsorshipOp:signer"]
+
+[recipes.r0013]
+id = "explore.sca.e7"
+protocol = 30
+steps = 68
+arms_first_witnessed = ["PathPaymentStrictReceiveResult:offer_cross_self", "PaymentResult:src_no_trust"]
+
+[recipes.r0014]
+id = "explore.sca.e2"
+protocol = 17
+steps = 196
+arms_first_witnessed = ["LedgerHeaderExt:v1", "LedgerHeaderExtensionV1Ext:v0", "LedgerUpgrade:flags", "PathPaymentStrictReceiveResult:line_full", "RevokeSponsorshipResult:only_transferable"]
+
+[recipes.r0015]
+id = "explore.sca.e16"
+protocol = 10
+steps = 17
+arms_first_witnessed = ["AllowTrustResult:self_not_allowed", "AllowTrustResult:trust_not_required", "DataEntryExt:v0", "LedgerEntryData:data", "LedgerUpgrade:base_reserve", "ManageDataResult:success", "SignerKey:pre_auth_tx"]
+
+[recipes.r0016]
+id = "explore.sca.e17"
+protocol = 30
+steps = 41
+arms_first_witnessed = ["ChangeTrustResult:trust_line_missing", "LedgerUpgrade:base_fee"]
+
+[recipes.r0017]
+id = "explore.sca.e1"
+protocol = 14
+steps = 140
+arms_first_witnessed = ["InnerTransactionResultResult:tx_bad_sponsorship", "RevokeSponsorshipResult:success"]
+
+[recipes.r0018]
+id = "explore.sca.e3"
+protocol = 19
+steps = 123
+arms_first_witnessed = ["ClaimAtom:order_book", "ConfigSettingEntry:contract_bandwidth_v0", "ConfigSettingEntry:contract_compute_v0", "ConfigSettingEntry:contract_cost_params_cpu_instructions", "ConfigSettingEntry:contract_cost_params_memory_bytes", "ConfigSettingEntry:contract_data_entry_size_bytes", "ConfigSettingEntry:contract_data_key_size_bytes", "ConfigSettingEntry:contract_events_v0", "ConfigSettingEntry:contract_execution_lanes", "ConfigSettingEntry:contract_historical_data_v0", "ConfigSettingEntry:contract_max_size_bytes", "ConfigSettingEntry:eviction_iterator", "PathPaymentStrictSendResult:no_trust", "ScVal:bytes", "SetOptionsResult:auth_revocable_required"]
+
+[recipes.r0019]
+id = "explore.sca.e25"
+protocol = 19
+steps = 40
+arms_first_witnessed = ["TransactionMeta:v3"]
+
+[recipes.r0020]
+id = "explore.sca.e23"
+protocol = 19
+steps = 20
+arms_first_witnessed = ["AccountEntryExtensionV1Ext:v0"]
+
+[recipes.r0021]
+id = "explore.sca.e7"
+protocol = 30
+steps = 129
+arms_first_witnessed = ["LedgerKey:offer", "ManageSellOfferResult:cross_self", "ManageSellOfferResult:not_found"]
+
+[recipes.r0022]
+id = "explore.sca.e2"
+protocol = 17
+steps = 222
+arms_first_witnessed = ["ManageBuyOfferResult:success", "PathPaymentStrictReceiveResult:no_destination", "SetOptionsResult:invalid_inflation"]
+
+[recipes.r0023]
+id = "explore.sca.e1"
+protocol = 14
+steps = 118
+arms_first_witnessed = ["PathPaymentStrictReceiveResult:src_no_trust"]
+
+[recipes.r0024]
+id = "explore.sca.e41"
+protocol = 30
+steps = 67
+arms_first_witnessed = ["AccountMergeResult:immutable_set", "SetOptionsResult:cant_change"]
+
+[recipes.r0025]
+id = "explore.sca.e7"
+protocol = 30
+steps = 140
+arms_first_witnessed = ["PathPaymentStrictSendResult:offer_cross_self"]
+
+[recipes.r0026]
+id = "explore.sca.e37"
+protocol = 30
+steps = 91
+arms_first_witnessed = ["SetOptionsResult:low_reserve"]
+
+[recipes.r0027]
+id = "explore.sca.e50"
+protocol = 19
+steps = 14
+arms_first_witnessed = ["ManageOfferSuccessResultOffer:deleted", "SetTrustLineFlagsResult:cant_revoke"]
+
+[recipes.r0028]
+id = "explore.sca.e57"
+protocol = 9
+steps = 10
+arms_first_witnessed = ["PaymentResult:no_issuer"]
+
+[recipes.r0029]
+id = "explore.sca.e12"
+protocol = 9
+steps = 67
+arms_first_witnessed = ["ManageSellOfferResult:sell_no_issuer"]
+
+[recipes.r0030]
+id = "explore.sca.e35"
+protocol = 14
+steps = 111
+arms_first_witnessed = ["BeginSponsoringFutureReservesResult:recursive", "ManageOfferSuccessResultOffer:updated"]
+
+[recipes.r0031]
+id = "explore.sca.e62"
+protocol = 14
+steps = 10
+arms_first_witnessed = ["BeginSponsoringFutureReservesResult:already_sponsored", "ManageBuyOfferResult:not_found"]
+
+[recipes.r0032]
+id = "explore.sca.e66"
+protocol = 22
+steps = 37
+arms_first_witnessed = ["LedgerCloseMetaExt:v1"]
+
+[recipes.r0033]
+id = "explore.sca.e71"
+protocol = 12
+steps = 7
+arms_first_witnessed = ["ManageBuyOfferResult:sell_no_issuer"]
+
+[recipes.r0034]
+id = "explore.sca.e2"
+protocol = 17
+steps = 104
+arms_first_witnessed = ["SetTrustLineFlagsResult:no_trust_line"]
+
+[recipes.r0035]
+id = "explore.sca.e7"
+protocol = 30
+steps = 193
+arms_first_witnessed = ["ManageBuyOfferResult:cross_self", "PaymentResult:line_full"]
+
+[recipes.r0036]
+id = "explore.sca.e50"
+protocol = 19
+steps = 20
+arms_first_witnessed = ["ManageBuyOfferResult:line_full"]
+
+[recipes.r0037]
+id = "explore.sca.e3"
+protocol = 19
+steps = 112
+arms_first_witnessed = ["ClawbackResult:not_clawback_enabled"]
+
+[recipes.r0038]
+id = "explore.sca.e94"
+protocol = 12
+steps = 10
+arms_first_witnessed = ["ManageBuyOfferResult:buy_no_issuer", "PathPaymentStrictSendResult:no_issuer"]
+
+[recipes.r0039]
+id = "explore.sca.e3"
+protocol = 19
+steps = 118
+arms_first_witnessed = ["ClawbackClaimableBalanceResult:not_clawback_enabled"]
+
+[recipes.r0040]
+id = "explore.sca.e112"
+protocol = 22
+steps = 43
+arms_first_witnessed = ["AccountMergeResult:seqnum_too_far"]
+
+[recipes.r0041]
+id = "explore.sca.e146"
+protocol = 12
+steps = 65
+arms_first_witnessed = ["TrustLineEntryV1Ext:v0"]
+
+[recipes.r0042]
+id = "explore.sca.e180"
+protocol = 14
+steps = 8
+arms_first_witnessed = ["ClaimClaimableBalanceResult:no_trust"]

@@ -127,7 +127,7 @@ pub struct RunArgs {
 
 #[derive(Subcommand)]
 pub enum StateCommand {
-    /// Route equivalence over a recipe pair (candidate/recipes/explore.pairs/<pair>): the
+    /// Route equivalence over a recipe pair (corpus/recipes/explore.pairs/<pair>): the
     /// target must keep the same rows for every entry core holds identically at the end of
     /// both chains.
     Pair {

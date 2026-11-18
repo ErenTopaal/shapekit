@@ -400,10 +400,13 @@ fn main_findings_take_a_failure_before_the_candidate_lane() {
     assert_eq!(again.status.code(), Some(2), "{}", text(&again));
 }
 
+const PAIR_B: &str = "explore.pairs.muxed-payment-b-l64";
+
+/// Two entries of side a after its first checkpoint (63), and one at ledger 2, before it.
 const PAIR_ENTRIES: [&str; 3] = [
-    "explore.pairs.muxed-payment-a-l2",
     "explore.pairs.muxed-payment-a-l64",
     "explore.pairs.muxed-payment-a-l65",
+    "explore.pairs.muxed-payment-a-l2",
 ];
 
 /// The layout with both sides of the muxed-payment pair in the candidate lane: their chains,
@@ -413,16 +416,25 @@ fn pair_layout() -> tempfile::TempDir {
     let dir = layout();
     let d = dir.path();
     let r = repo();
+    // the pair was promoted into the repository's corpus, all but its ledger 2 entries, so it
+    // is put back into the candidate lane as it was before
+    let lane_of = |rel: &str| {
+        ["candidate", "corpus"]
+            .into_iter()
+            .map(|lane| r.join(lane).join(rel))
+            .find(|p| p.exists())
+            .unwrap_or_else(|| panic!("{rel} is in neither lane"))
+    };
     for side in ["a", "b"] {
-        let chain = format!("candidate/chains/pairs.muxed-payment.{side}");
-        copy_dir(&r.join(&chain), &d.join(&chain));
+        let chain = format!("chains/pairs.muxed-payment.{side}");
+        copy_dir(&lane_of(&chain), &d.join("candidate").join(&chain));
     }
     copy_dir(
-        &r.join("candidate/recipes/explore.pairs/muxed-payment"),
+        &lane_of("recipes/explore.pairs/muxed-payment"),
         &d.join("candidate/recipes/explore.pairs/muxed-payment"),
     );
     fs::copy(
-        r.join("candidate/recipes/explore.pairs/README.md"),
+        lane_of("recipes/explore.pairs/README.md"),
         d.join("candidate/recipes/explore.pairs/README.md"),
     )
     .unwrap();
@@ -431,9 +443,18 @@ fn pair_layout() -> tempfile::TempDir {
         "schema = 1\n\n[[chain]]\nid = \"pairs.muxed-payment.a\"\nfamily = \"explore.pairs\"\nrecipe = \"explore.pairs/muxed-payment/a.json\"\n\n[[chain]]\nid = \"pairs.muxed-payment.b\"\nfamily = \"explore.pairs\"\nrecipe = \"explore.pairs/muxed-payment/b.json\"\n",
     )
     .unwrap();
-    for id in PAIR_ENTRIES {
-        let e = format!("candidate/entries/explore.pairs/{id}");
-        copy_dir(&r.join(&e), &d.join(&e));
+    for id in PAIR_ENTRIES.iter().chain(&[PAIR_B]) {
+        let rel = format!("entries/explore.pairs/{id}");
+        let to = d.join("candidate").join(&rel);
+        copy_dir(&lane_of(&rel), &to);
+        let file = to.join("entry.json");
+        let text = fs::read_to_string(&file).unwrap().replace(
+            "corpus/recipes/explore.pairs/",
+            "candidate/recipes/explore.pairs/",
+        );
+        let mut entry: serde_json::Value = serde_json::from_str(&text).unwrap();
+        entry["source"].as_object_mut().unwrap().remove("recipe_ir");
+        fs::write(&file, serde_json::to_string_pretty(&entry).unwrap()).unwrap();
     }
     fs::create_dir_all(d.join("registry/generated")).unwrap();
     fs::write(
@@ -497,7 +518,10 @@ fn an_entry_whose_chain_is_not_listed_stays_a_candidate() {
     let dir = pair_layout();
     let d = dir.path();
     fs::write(d.join("candidate/recipes/chains.toml"), "schema = 1\n").unwrap();
-    let matrix = passing_matrix(d, &PAIR_ENTRIES);
+    let matrix = passing_matrix(
+        d,
+        &[PAIR_ENTRIES[0], PAIR_ENTRIES[1], PAIR_ENTRIES[2], PAIR_B],
+    );
     let out = shapekit(
         d,
         &["corpus", "promote", PAIR_ENTRIES[0], "--matrix", &matrix],
@@ -517,7 +541,10 @@ fn an_entry_whose_chain_is_not_listed_stays_a_candidate() {
 fn a_listed_chain_moves_with_its_first_promoted_entry() {
     let dir = pair_layout();
     let d = dir.path();
-    let matrix = passing_matrix(d, &PAIR_ENTRIES);
+    let matrix = passing_matrix(
+        d,
+        &[PAIR_ENTRIES[0], PAIR_ENTRIES[1], PAIR_ENTRIES[2], PAIR_B],
+    );
     let out = shapekit(
         d,
         &[
@@ -535,8 +562,8 @@ fn a_listed_chain_moves_with_its_first_promoted_entry() {
         "{}",
         text(&out)
     );
-    // the layout's strkey entry stays in the lane beside the third pair entry
-    assert_eq!((entries(d, "candidate"), entries(d, "corpus")), (2, 2));
+    // the layout's strkey entry and side b's entry stay in the lane beside the third pair entry
+    assert_eq!((entries(d, "candidate"), entries(d, "corpus")), (3, 2));
     for (path, there) in [
         (
             "corpus/chains/pairs.muxed-payment.a/testnet/chain.json",
@@ -623,14 +650,19 @@ fn a_listed_chain_moves_with_its_first_promoted_entry() {
         assert!(out.status.success(), "{lane}: {}", text(&out));
     }
 
-    // the last entry of side a needs no move; side b's entries are not in this layout
+    // the entry at ledger 2 comes before the chain's first checkpoint, so an indexer that
+    // bootstraps from a checkpoint could not replay the chain with it
     let out = shapekit(
         d,
         &["corpus", "promote", PAIR_ENTRIES[2], "--matrix", &matrix],
     );
-    assert_eq!(out.status.code(), Some(0), "{}", text(&out));
-    assert!(!text(&out).contains("moved chain"), "{}", text(&out));
-    assert_eq!((entries(d, "candidate"), entries(d, "corpus")), (1, 3));
+    assert_eq!(out.status.code(), Some(1), "{}", text(&out));
+    assert!(
+        text(&out).contains("its ledger 2 is not after its chain's first history checkpoint 63"),
+        "{}",
+        text(&out)
+    );
+    assert_eq!((entries(d, "candidate"), entries(d, "corpus")), (3, 2));
 }
 
 #[test]
@@ -669,4 +701,48 @@ fn a_dry_run_decides_several_entries_and_an_id_given_twice_is_an_error() {
         text(&out)
     );
     assert_eq!(entries(d, "corpus"), 0);
+}
+
+#[test]
+fn both_sides_of_a_pair_move_in_one_call() {
+    let dir = pair_layout();
+    let d = dir.path();
+    let matrix = passing_matrix(
+        d,
+        &[PAIR_ENTRIES[0], PAIR_ENTRIES[1], PAIR_ENTRIES[2], PAIR_B],
+    );
+    let out = shapekit(
+        d,
+        &[
+            "corpus",
+            "promote",
+            PAIR_ENTRIES[0],
+            PAIR_ENTRIES[1],
+            PAIR_ENTRIES[2],
+            PAIR_B,
+            "--matrix",
+            &matrix,
+        ],
+    );
+    // side a's entry at ledger 2 is refused, the other three move with both chains
+    assert_eq!(out.status.code(), Some(1), "{}", text(&out));
+    assert_eq!((entries(d, "candidate"), entries(d, "corpus")), (2, 3));
+    for side in ["a", "b"] {
+        assert!(
+            d.join(format!("corpus/chains/pairs.muxed-payment.{side}"))
+                .is_dir()
+        );
+        assert!(
+            !d.join(format!("candidate/chains/pairs.muxed-payment.{side}"))
+                .exists()
+        );
+    }
+    assert!(
+        d.join("corpus/recipes/explore.pairs/muxed-payment/pair.json")
+            .is_file()
+    );
+    assert!(d.join("corpus/recipes/explore.pairs/README.md").is_file());
+    assert!(!d.join("candidate/recipes/explore.pairs").exists());
+    let candidate_index = fs::read_to_string(d.join("candidate/recipes/chains.toml")).unwrap();
+    assert!(!candidate_index.contains("[[chain]]"), "{candidate_index}");
 }

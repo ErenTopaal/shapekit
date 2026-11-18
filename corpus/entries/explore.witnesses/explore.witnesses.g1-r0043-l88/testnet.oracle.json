@@ -1,0 +1,116 @@
+{
+  "ledgers": [
+    {
+      "close_time": "1774828800",
+      "evicted": [],
+      "ledger_hash": "8bc81fdf5cb718e42c3f1ec2b4349104f14d60038c4922e609ae964a5306bcae",
+      "ledger_seq": 88,
+      "protocol": 30,
+      "transactions": [
+        {
+          "apply_index": 0,
+          "changes": [
+            {
+              "after": "99999999100",
+              "asset": "native",
+              "before": "99999999200",
+              "delta": "-100",
+              "held_in": "account",
+              "holder": "GAK6YG7KVW565X5C5RFORSWIV6GXTOB4SII4WVCBNGX3LE6V6PS7BNVV",
+              "kind": "balance-change",
+              "scope": "fee-processing"
+            },
+            {
+              "amount": "100",
+              "asset": "native",
+              "contract": "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC",
+              "event": "fee",
+              "from": "GAK6YG7KVW565X5C5RFORSWIV6GXTOB4SII4WVCBNGX3LE6V6PS7BNVV",
+              "kind": "token-event",
+              "scope": "fee-processing",
+              "stage": "before-all-txs"
+            },
+            {
+              "account": "GAK6YG7KVW565X5C5RFORSWIV6GXTOB4SII4WVCBNGX3LE6V6PS7BNVV",
+              "after": "274877906953",
+              "before": "274877906952",
+              "kind": "sequence",
+              "scope": "tx-before"
+            },
+            {
+              "action": "removed",
+              "asset_a": "USD:GAK6YG7KVW565X5C5RFORSWIV6GXTOB4SII4WVCBNGX3LE6V6PS7BNVV",
+              "asset_b": "LONGASSET12:GAK6YG7KVW565X5C5RFORSWIV6GXTOB4SII4WVCBNGX3LE6V6PS7BNVV",
+              "kind": "liquidity-pool",
+              "op_index": 0,
+              "pool": "LBQXFCQMZTPQZBLZEFDB2ISMAKLYEKTI544RROYXMVFORXTG5YNLALSZ",
+              "reserve_a_after": "0",
+              "reserve_a_before": "0",
+              "reserve_b_after": "0",
+              "reserve_b_before": "0",
+              "scope": "operation",
+              "shares_after": "0",
+              "shares_before": "0"
+            },
+            {
+              "account": "GAK6YG7KVW565X5C5RFORSWIV6GXTOB4SII4WVCBNGX3LE6V6PS7BNVV",
+              "asset": "pool-share:LBQXFCQMZTPQZBLZEFDB2ISMAKLYEKTI544RROYXMVFORXTG5YNLALSZ",
+              "kind": "trustline-removed",
+              "op_index": 0,
+              "scope": "operation"
+            }
+          ],
+          "declared": {
+            "participants": [
+              {
+                "address": "GAK6YG7KVW565X5C5RFORSWIV6GXTOB4SII4WVCBNGX3LE6V6PS7BNVV",
+                "kind": "account",
+                "roles": [
+                  "tx-source"
+                ]
+              }
+            ],
+            "source": "GAK6YG7KVW565X5C5RFORSWIV6GXTOB4SII4WVCBNGX3LE6V6PS7BNVV"
+          },
+          "events": "unified",
+          "fee": {
+            "balance_delta": "-100",
+            "charged": "100",
+            "source": "GAK6YG7KVW565X5C5RFORSWIV6GXTOB4SII4WVCBNGX3LE6V6PS7BNVV"
+          },
+          "hash": "b7374c96ed099e57da64b5d99bf89745e230e438b93429bbebfccfe7e0f0bdbf",
+          "participants": [
+            {
+              "address": "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC",
+              "kind": "contract",
+              "roles": [
+                "event-contract"
+              ]
+            },
+            {
+              "address": "GAK6YG7KVW565X5C5RFORSWIV6GXTOB4SII4WVCBNGX3LE6V6PS7BNVV",
+              "kind": "account",
+              "roles": [
+                "entry-changed",
+                "event-address",
+                "fee-source"
+              ]
+            },
+            {
+              "address": "LBQXFCQMZTPQZBLZEFDB2ISMAKLYEKTI544RROYXMVFORXTG5YNLALSZ",
+              "kind": "liquidity-pool",
+              "roles": [
+                "entry-changed"
+              ]
+            }
+          ],
+          "result": "tx_success",
+          "successful": true
+        }
+      ],
+      "upgrades": []
+    }
+  ],
+  "network_passphrase": "Test SDF Network ; September 2015",
+  "oracle_vocab_version": 2
+}

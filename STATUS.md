@@ -6,11 +6,30 @@ A dated public log of what has landed in shapekit. Newest entry first.
 
 What 0.2.0 holds:
 
-- Corpus: 716 entries, 594 of them emitted by stellar-core. They cover 436 of the 499
+- Corpus: 1,092 entries, 970 of them emitted by stellar-core. They cover 436 of the 499
   `LedgerCloseMeta` union arms, 318 of the 328 family fragments and 44 of the 45 CAPs an indexer
-  can see; the per-CAP view is `corpus/coverage/COVERAGE.md`.
+  can see; the per-CAP view is `corpus/coverage/COVERAGE.md`. 376 of them came from the
+  candidate lane: 373 explorer ledgers (`explore.witnesses`, `explore.pairs`) with the 91
+  chains they are cut from, and the three mainnet ledgers of the random audit (57369500,
+  37466023, 44679511), stored as the other network history entries are, without a chain.
+- Promotion follows the rule of the plan: the current versions of rust, go and js pass every
+  promoted entry, and each failure of another SDK, or of an older version, is attributed to a
+  finding, a candidate finding or a record in `candidate/finding-candidates.toml`
+  (`shapekit corpus promote`, described in `docs/adding-a-shape.md`). 14 explorer ledgers stay
+  in the lane. They are cut at ledger 2 or 3, before their chain's first checkpoint, and
+  wallet-backend and stellar-rpc, which bootstrap from a checkpoint, could then evaluate no entry
+  of the chain. The 26 union arms those 14 were picked for are all held by other corpus
+  entries.
+- Chains: the moved chains are under `corpus/chains/`, with their recipes under
+  `corpus/recipes/explore.witnesses/` and `corpus/recipes/explore.pairs/`, listed in
+  `corpus/recipes/chains.toml`. That list registers them as recipes: `shapekit gen families`,
+  `scripts/select-repro.sh --check-chains` and `shapekit pack verify` (270 chain directories)
+  cover them, and `shapekit gen verify-repro --family explore.witnesses --family explore.pairs`
+  records each again under both passphrases with 0 differences over 182 chains and 373
+  entries. The moved chains hold 47.7 MB.
 - Obligations: every obligation in `corpus/coverage/obligations.json` has a status, met,
-  unmeetable or open, and `shapekit coverage --check` fails on one without. By kind: format
+  unmeetable or open, and `shapekit coverage --check` fails on one without, and on a witness
+  that names an entry, chain, recipe or dataset that does not exist. By kind: format
   3,869 of 3,869 met; core test sections 29,691 of 29,691; fields 203 of 203; SDK versions 28 of
   28; gaps 9 met and 4 open of 13; protocol gate sides 505 met (375 by branch count, 130
   inferred from an execution count) and 185 open of 690; seeds 72 met and 142 open of 214. No
@@ -19,17 +38,39 @@ What 0.2.0 holds:
   v0.7.1 to v0.9.0, `@stellar/stellar-sdk` 16.3.0 to 17.4.0, soroban-sdk 28.0.0 and 29.0.1, the
   Python `stellar-sdk` 16.1.1 and 17.0.1, the Java `network.lightsail:stellar-sdk` 5.0.0 and
   6.0.0, `stellar_flutter_sdk` 3.12.0, `soneso/stellar-php-sdk` 1.18.0, `stellar-dotnet-sdk`
-  16.0.0 and 17.0.0, the Kotlin Multiplatform SDK 1.18.0 and stellar-cli 28.1.0 and 30.0.1.
-- Harness: wallet-backend at `3e22515a`, stellar-rpc from its pinned release image and
-  stellar-etl, every chain on both networks; the numbers are in the entry below. Indexer checks
-  need a Linux host with Docker; on macOS `check indexer` stops and says so.
-- Findings: 24 findings covering 611 failures, 0 unmapped, none pending filing
-  (`shapekit findings check`). The candidate lane holds 39 drafted findings, not filed
-  (`candidate/findings/FINDINGS.md`).
+  16.0.0 and 17.0.0, the Kotlin Multiplatform SDK 1.18.0 and stellar-cli 28.1.0 and 30.0.1. At
+  the current versions: rust, go and js pass every promoted entry; python 17.0.1 diverges on
+  862 entries (504 before the promotion), java 6.0.0 on 841 (488), php on 137 (85), stellar-cli
+  30.0.1 on 132 (59), dotnet 17.0.0 on 90 (58), kmp on 80 (67) and dart on 47 (37). Every one of
+  those failures has a line in `conformance/known-failures/`.
+- Harness, every chain on both networks, 1,652 entries per run:
+  - wallet-backend at `3e22515a`, twice in one process: 1,206 pass, 166 mishandled, 56 dropped
+    and 224 out of scope (906 entries before: 678, 106, 44, 78).
+  - stellar-etl: 1,388 pass, 28 dropped, 54 out of scope and 182 not evaluated.
+  - stellar-rpc from its pinned release image: 1,416 pass and 236 out of scope, the same with
+    events read from events, transactions or ledgers, as
+    `crates/shapekit-harness/expect/stellar-rpc.toml` says.
+
+  Indexer checks need a Linux host with Docker; on macOS `check indexer` stops and says so.
+- Findings: 25 findings covering 891 failures, 0 unmapped, none pending filing
+  (`shapekit findings check`); 215 of the failures are held by candidate findings. The explorer
+  ledgers add wallet-backend failures to WB-W1 (18), WB-W2 (52, now also mints into a
+  claimable balance), WB-W3 (8), WB-W4 (4), WB-W5 (12) and WB-W9 (66). WB-FLAGS-OP is new,
+  recorded as intended: flags rows follow the operation's parameters, also when the ledger's
+  flags stay the same, as Horizon's effects do. Of stellar-etl's new failures, 112 are
+  ETL-META-V4 (20 explorer chains below protocol 23 recorded with classic events off, so their
+  meta is v2 or v3) and 4 are ETL-1.
+- Candidate lane: 46 findings, 45 drafted and not filed, covering 847 failures, 0 unmapped
+  (`candidate/findings/FINDINGS.md`). New with the promoted entries: DART-PRICE and NET-PRICE
+  (offer prices not in lowest terms rebuilt as another fraction, so the hash changes),
+  DART-MAXTIME (a max time of 2^64-1 clamped), KMP-TXOBJECT and PHP-OFFERID (values core
+  applied refused when the transaction is rebuilt) and PHP-SETOPTIONS (a present 0 or empty
+  home domain dropped).
 - Release build: two independent local builds of the Linux x86-64 assets from clean checkouts
   of this tree (`shapekit`, `indexerlint`, `wb-adapter`, `corpus-0.2.0.tar.zst` and the golden
   snapshot, made with the commands of `release.yml`) give the same SHA256SUMS. The builds for
-  Linux arm64 and macOS run only on the release runners.
+  Linux arm64 and macOS run only on the release runners. They were made before the promotion,
+  so they hold the 716-entry corpus.
 
 ## 2026-11-17: explorer witnesses in the candidate lane, stellar-etl in the findings, version 0.2.0
 

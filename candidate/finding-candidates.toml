@@ -973,6 +973,25 @@ evidence = "the generated decoders cap their own recursion per type: SorobanDele
 # stellar-cli@30.0.1 (70), php@1.18.0 (49), dotnet@17.0.0 (30), kmp@1.18.0 (13) and
 # dart@3.12.0 (8), none of whose findings is in findings/triage.toml.
 #
+# the older versions (python 16.1.1, java 5.0.0, dotnet 16.0.0, stellar-cli 28.1.0) fail a subset
+# of the checks the current version fails on every explorer entry, with the same answers, so the
+# records below name both versions; python 16.1.1 also fails five entries the current version
+# passes, recorded on their own.
+#
+# with these records `shapekit corpus promote` moved 376 of the 390 entries (the explorer entries
+# and the three audit ledgers) into the corpus with 91 of the 92 chains. 14 stay in the lane,
+# refused with the reason: cut before the chain's first checkpoint; checkpoint-bootstrapping
+# indexers cannot evaluate them. they are cut at ledger 2 (13) or 3 (1), before checkpoint 63,
+# and wallet-backend and stellar-rpc start a chain at the checkpoint before its first entry:
+#   explore.pairs.{muxed-payment,sac-trust-p28,sac-trust-p30}-{a,b}-l2,
+#   explore.witnesses.{f62d-r0004,f63-p21-r0001,f63-p23-r0000,f63-p24-r0001,f63-p26-r0002,
+#   f63-p28-r0000,f63-restore-archived-code}-l2 and explore.witnesses.g2-r0032-l3.
+# explore.g2.r0032, whose only entry is the last one, stays here with its recipe. the 26 union
+# arms these 14 were picked for (config setting entries, LedgerUpgrade:version,
+# LedgerCloseMetaExt:v1) are all witnessed in the corpus; 25 by promoted entries too, and
+# ConfigSettingEntry:freeze_bypass_txs only by the corpus entries that held it before (2
+# local-core, 2 core-golden), none of them promoted. no arm is witnessed only by one of the 14.
+#
 # the three mainnet ledgers of the audit's coverage step (cap15.fee-bump.mainnet-57369500,
 # cap03.offer-liabilities.mainnet-37466023 and -44679511) pass rust, go, js, soroban-sdk and
 # kmp and are refused by python, java, php and stellar-cli on all three, and by dart and
@@ -981,7 +1000,7 @@ evidence = "the generated decoders cap their own recursion per type: SorobanDele
 [[candidate]]
 finding = "new"
 sdk = "python"
-versions = ["17.0.1"]
+versions = ["16.1.1", "17.0.1"]
 entries = ["explore.witnesses.*", "explore.pairs.*"]
 checks = "decode_json and encode_json on 355 of the explorer entries"
 observed = "the XDR-JSON naming of the python candidate above: to_json writes txsuccess for tx_success and the other multi-word names without SEP-51's word breaks, and from_json raises KeyError on the SEP-51 names"
@@ -989,7 +1008,7 @@ observed = "the XDR-JSON naming of the python candidate above: to_json writes tx
 [[candidate]]
 finding = "new"
 sdk = "python"
-versions = ["17.0.1"]
+versions = ["16.1.1", "17.0.1"]
 entries = [
   "explore.witnesses.f62c-r0000-l68",
   "explore.witnesses.f62c-r0000-l71",
@@ -1013,7 +1032,7 @@ observed = "the AssetCode form of the python candidate above: from_json refuses 
 [[candidate]]
 finding = "new"
 sdk = "python"
-versions = ["17.0.1"]
+versions = ["16.1.1", "17.0.1"]
 entries = [
   "explore.witnesses.f62c-r0000-l94",
   "explore.witnesses.g2-r0000-l74",
@@ -1028,7 +1047,7 @@ observed = "the ClawbackOp field from_ of the python candidate above"
 [[candidate]]
 finding = "new"
 sdk = "python"
-versions = ["17.0.1"]
+versions = ["16.1.1", "17.0.1"]
 entries = ["explore.witnesses.f63-sac-transfer-to-muxed-contract-l72"]
 checks = "decode_json and encode_json on 1 of the explorer entries"
 observed = "the muxed contract address of the python candidate above (\"Unknown SCAddress type: 5\")"
@@ -1036,7 +1055,7 @@ observed = "the muxed contract address of the python candidate above (\"Unknown 
 [[candidate]]
 finding = "new"
 sdk = "java"
-versions = ["6.0.0"]
+versions = ["5.0.0", "6.0.0"]
 entries = ["explore.witnesses.*", "explore.pairs.*"]
 checks = "decode_json and encode_json on 350 of the explorer entries"
 observed = "the XDR-JSON naming of the java candidate above: toJson writes the lowercased .x names and fromJson refuses the SEP-51 names"
@@ -1044,7 +1063,7 @@ observed = "the XDR-JSON naming of the java candidate above: toJson writes the l
 [[candidate]]
 finding = "new"
 sdk = "java"
-versions = ["6.0.0"]
+versions = ["5.0.0", "6.0.0"]
 entries = [
   "explore.witnesses.f62c-r0000-l68",
   "explore.witnesses.f62c-r0000-l71",
@@ -1068,7 +1087,7 @@ observed = "the AssetCode form of the java candidate above: fromJson casts the b
 [[candidate]]
 finding = "new"
 sdk = "java"
-versions = ["6.0.0"]
+versions = ["5.0.0", "6.0.0"]
 entries = ["explore.witnesses.f63-sac-transfer-to-muxed-contract-l72"]
 checks = "decode_json on 1 of the explorer entries"
 observed = "the muxed contract address of the java candidate above: toJson throws \"Unknown SCAddress type\""
@@ -1210,7 +1229,7 @@ observed = "the set options candidate of the php sdk above: clear_flags 0 and an
 [[candidate]]
 finding = "NET-DEPRECATED-OPS"
 sdk = "dotnet"
-versions = ["17.0.0"]
+versions = ["16.0.0", "17.0.0"]
 entries = [
   "explore.witnesses.f62c-r0000-l68",
   "explore.witnesses.f62c-r0000-l71",
@@ -1236,7 +1255,7 @@ observed = "allow trust and inflation operations refused (\"AllowTrustOperation 
 [[candidate]]
 finding = "NET-CREATECONTRACT"
 sdk = "dotnet"
-versions = ["17.0.0"]
+versions = ["16.0.0", "17.0.0"]
 entries = [
   "explore.pairs.sac-trust-p28-a-l65",
   "explore.pairs.sac-trust-p28-b-l65",
@@ -1253,7 +1272,7 @@ observed = "CreateContractOperation.FromXdr crashes (NullReferenceException) on 
 [[candidate]]
 finding = "new"
 sdk = "dotnet"
-versions = ["17.0.0"]
+versions = ["16.0.0", "17.0.0"]
 entries = [
   "explore.witnesses.g2-r0007-l69",
   "explore.witnesses.g2-r0010-l92",
@@ -1295,7 +1314,83 @@ observed = "the transaction-object refusals of the kmp candidate above: max time
 [[candidate]]
 finding = "CLI-TXHASH-V1"
 sdk = "stellar-cli"
-versions = ["30.0.1"]
+versions = ["28.1.0", "30.0.1"]
 entries = ["explore.witnesses.*", "explore.pairs.*"]
 checks = "tx_hash on 70 of the explorer entries"
 observed = "stellar tx hash refuses v0 and fee bump envelopes (\"only transaction v1 is supported\")"
+
+[[candidate]]
+finding = "new"
+sdk = "python"
+versions = ["16.1.1"]
+entries = [
+  "explore.witnesses.f62d-r0000-l94",
+  "explore.witnesses.f62d-r0000-l102",
+  "explore.witnesses.f63-eviction-l85",
+  "explore.witnesses.f63-soroban-tx-set-size-upgrade-l65",
+  "explore.witnesses.g2-r0016-l69",
+]
+checks = "encode_json on 5 of the explorer entries, which 17.0.1 passes"
+observed = "from_json raises KeyError: 'signed_ms' on the StellarValue arm of protocol 23 its XDR does not know, the 16.1.1 candidate above; its XDR's age, fixed in 17.0.1"
+
+# the three mainnet ledgers of the audit's coverage step: every failing check, by sdk
+
+[[candidate]]
+finding = "new"
+sdk = "python"
+versions = ["16.1.1", "17.0.1"]
+entries = [
+  "cap03.offer-liabilities.mainnet-37466023",
+  "cap03.offer-liabilities.mainnet-44679511",
+  "cap15.fee-bump.mainnet-57369500",
+]
+checks = "mainnet/decode_json and mainnet/encode_json of all three"
+observed = "the XDR-JSON naming of the python candidate above (KeyError: 'tx_failed' on 44679511, 'tx_success' on 57369500), and on 37466023 the AssetCode form (\"Expected a single-key object for AssetCode, got: TSLA\")"
+
+[[candidate]]
+finding = "new"
+sdk = "java"
+versions = ["5.0.0", "6.0.0"]
+entries = [
+  "cap03.offer-liabilities.mainnet-37466023",
+  "cap03.offer-liabilities.mainnet-44679511",
+  "cap15.fee-bump.mainnet-57369500",
+]
+checks = "mainnet/decode_json and mainnet/encode_json of all three"
+observed = "the XDR-JSON naming of the java candidate above (\"Unknown JSON value: tx_failed\" on 44679511, tx_success on 57369500), and on 37466023 the AssetCode form (ClassCastException)"
+
+[[candidate]]
+finding = "PHP-CBKEY-JSON"
+sdk = "php"
+versions = ["1.18.0"]
+entries = ["cap03.offer-liabilities.mainnet-37466023", "cap03.offer-liabilities.mainnet-44679511"]
+checks = "mainnet/decode_json and mainnet/encode_json"
+observed = "claimable balance ledger keys without their balance_id member (\"Expected string for XdrClaimableBalanceID JSON value, got array\")"
+
+[[candidate]]
+finding = "PHP-HEXHASH"
+sdk = "php"
+versions = ["1.18.0"]
+entries = ["cap15.fee-bump.mainnet-57369500"]
+checks = "mainnet/decode_json and mainnet/encode_json"
+observed = "hashes written as the hex of their hex (\"Unexpected length for value. Has length 16, expected 32\")"
+
+[[candidate]]
+finding = "CLI-TXHASH-V1"
+sdk = "stellar-cli"
+versions = ["28.1.0", "30.0.1"]
+entries = [
+  "cap03.offer-liabilities.mainnet-37466023",
+  "cap03.offer-liabilities.mainnet-44679511",
+  "cap15.fee-bump.mainnet-57369500",
+]
+checks = "mainnet/tx_hash of the v0 and fee bump envelopes of all three"
+observed = "stellar tx hash refuses v0 and fee bump envelopes (\"only transaction v1 is supported\") and hashes only the outer transaction"
+
+[[candidate]]
+finding = "new"
+sdk = "dart"
+versions = ["3.12.0"]
+entries = ["cap15.fee-bump.mainnet-57369500"]
+checks = "mainnet/tx_hash 26, 29, 38, 52, 60, 75, 83 and 104"
+observed = "the price candidate of the dart sdk above: the eight transactions whose manage offer prices are not in lowest terms (the same eight the dotnet sdk hashes wrongly) are rebuilt with the reduced fraction, so the hash is another one"

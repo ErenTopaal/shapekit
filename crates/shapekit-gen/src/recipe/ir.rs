@@ -127,11 +127,17 @@ mod tests {
                     _ => continue,
                 };
                 if let Some(r) = &expect.result {
-                    let _: TransactionResultResult = typed(r, "result", &mut |r| {
-                        bail!(
-                            "{} holds a reference in an expected result: {r}",
+                    // an expected result may name a role's account (a claimant, a trustor),
+                    // which the interpreter replaces on the running chain; any account key
+                    // parses the same way here
+                    let _: TransactionResultResult = typed(r, "result", &mut |r| match r {
+                        SymRef::Account(_) => {
+                            Ok("GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF".to_owned())
+                        }
+                        other => bail!(
+                            "{} holds a reference other than an account in an expected result: {other}",
                             path.display()
-                        )
+                        ),
                     })
                     .unwrap();
                 }

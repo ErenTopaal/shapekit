@@ -983,3 +983,726 @@ cap38.liquidity-pools.synth-assets-dotnet257 16.1.1 diverges-from-network candid
 cap38.liquidity-pools.synth-assets-js1766-issuers 16.1.1 diverges-from-network candidate/finding-candidates.toml case 0/asset_order, case 1/asset_order, case 2/pool_id, case 3/pool_id
 cap38.liquidity-pools.synth-assets-py1246-testnet-pool 16.1.1 diverges-from-network candidate/finding-candidates.toml case 0/asset_order, case 1/asset_order, case 2/pool_id, case 3/pool_id
 cap38.liquidity-pools.testnet-5521432 16.1.1 diverges-from-network candidate/finding-candidates.toml testnet/tx_hash 3
+# a candidate: the XDR-JSON naming of the python candidate above (KeyError: 'tx_failed' on 44679511, 'tx_success' on 57369500), and on 37466023 the AssetCode form ("Expected a single-key object for AssetCode, got: TSLA")
+cap03.offer-liabilities.mainnet-37466023 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json
+cap03.offer-liabilities.mainnet-37466023 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json
+cap03.offer-liabilities.mainnet-44679511 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json
+cap03.offer-liabilities.mainnet-44679511 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json
+cap15.fee-bump.mainnet-57369500 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json
+cap15.fee-bump.mainnet-57369500 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json
+# a candidate: the XDR-JSON naming of the python candidate above: to_json writes txsuccess for tx_success and the other multi-word names without SEP-51's word breaks, and from_json raises KeyError on the SEP-51 names
+explore.pairs.muxed-payment-a-l64 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.pairs.muxed-payment-a-l64 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.pairs.muxed-payment-a-l65 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.pairs.muxed-payment-a-l65 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.pairs.muxed-payment-b-l64 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.pairs.muxed-payment-b-l64 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.pairs.muxed-payment-b-l65 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.pairs.muxed-payment-b-l65 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.pairs.sac-trust-p28-a-l64 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.pairs.sac-trust-p28-a-l64 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.pairs.sac-trust-p28-a-l65 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.pairs.sac-trust-p28-a-l65 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.pairs.sac-trust-p28-a-l66 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.pairs.sac-trust-p28-a-l66 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.pairs.sac-trust-p28-b-l64 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.pairs.sac-trust-p28-b-l64 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.pairs.sac-trust-p28-b-l65 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.pairs.sac-trust-p28-b-l65 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.pairs.sac-trust-p28-b-l66 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.pairs.sac-trust-p28-b-l66 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.pairs.sac-trust-p30-a-l64 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.pairs.sac-trust-p30-a-l64 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.pairs.sac-trust-p30-a-l65 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.pairs.sac-trust-p30-a-l65 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.pairs.sac-trust-p30-a-l67 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.pairs.sac-trust-p30-a-l67 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.pairs.sac-trust-p30-a-l68 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.pairs.sac-trust-p30-a-l68 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.pairs.sac-trust-p30-a-l69 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.pairs.sac-trust-p30-a-l69 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.pairs.sac-trust-p30-a-l70 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.pairs.sac-trust-p30-a-l70 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.pairs.sac-trust-p30-b-l64 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.pairs.sac-trust-p30-b-l64 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.pairs.sac-trust-p30-b-l65 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.pairs.sac-trust-p30-b-l65 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.pairs.sac-trust-p30-b-l66 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.pairs.sac-trust-p30-b-l66 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.pairs.sac-trust-p30-b-l67 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.pairs.sac-trust-p30-b-l67 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.pairs.sac-trust-p30-b-l68 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.pairs.sac-trust-p30-b-l68 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.pairs.sac-trust-p30-b-l69 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.pairs.sac-trust-p30-b-l69 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.pairs.sac-trust-p30-b-l70 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.pairs.sac-trust-p30-b-l70 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62c-r0000-l64 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62c-r0000-l64 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62c-r0000-l66 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62c-r0000-l66 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62c-r0000-l67 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62c-r0000-l67 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62c-r0000-l68 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62c-r0000-l68 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62c-r0000-l69 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62c-r0000-l69 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62c-r0000-l71 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62c-r0000-l71 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62c-r0000-l72 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62c-r0000-l72 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62c-r0000-l74 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62c-r0000-l74 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62c-r0000-l75 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62c-r0000-l75 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62c-r0000-l77 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62c-r0000-l77 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62c-r0000-l79 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62c-r0000-l79 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62c-r0000-l80 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62c-r0000-l80 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62c-r0000-l81 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62c-r0000-l81 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62c-r0000-l83 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62c-r0000-l83 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62c-r0000-l86 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62c-r0000-l86 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62c-r0000-l87 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62c-r0000-l87 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62c-r0000-l89 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62c-r0000-l89 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62c-r0000-l90 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62c-r0000-l90 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62c-r0000-l91 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62c-r0000-l91 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62c-r0000-l92 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62c-r0000-l92 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62c-r0000-l94 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62c-r0000-l94 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62c-r0005-l111 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62c-r0005-l111 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62c-r0005-l112 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62c-r0005-l112 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62c-r0005-l124 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62c-r0005-l124 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62c-r0005-l97 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62c-r0005-l97 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62c-r0016-l94 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62c-r0016-l94 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62c-r0017-l77 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62c-r0017-l77 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62c-r0017-l78 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62c-r0017-l78 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0000-l100 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.f62d-r0000-l100 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0000-l102 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.f62d-r0000-l103 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.f62d-r0000-l103 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0000-l64 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.f62d-r0000-l64 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0000-l66 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.f62d-r0000-l66 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0000-l68 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.f62d-r0000-l68 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0000-l69 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.f62d-r0000-l69 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0000-l70 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.f62d-r0000-l70 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0000-l71 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.f62d-r0000-l71 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0000-l72 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.f62d-r0000-l72 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0000-l73 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.f62d-r0000-l73 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0000-l75 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.f62d-r0000-l75 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0000-l76 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.f62d-r0000-l76 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0000-l78 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.f62d-r0000-l78 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0000-l80 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.f62d-r0000-l80 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0000-l81 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.f62d-r0000-l81 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0000-l82 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.f62d-r0000-l82 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0000-l83 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.f62d-r0000-l83 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0000-l85 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.f62d-r0000-l85 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0000-l86 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.f62d-r0000-l86 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0000-l87 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.f62d-r0000-l87 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0000-l89 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.f62d-r0000-l89 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0000-l90 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.f62d-r0000-l90 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0000-l91 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.f62d-r0000-l91 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0000-l94 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.f62d-r0000-l95 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.f62d-r0000-l95 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0000-l96 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.f62d-r0000-l96 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0000-l99 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.f62d-r0000-l99 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0001-l67 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0001-l67 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0001-l69 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0001-l69 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0001-l72 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0001-l72 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0001-l73 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0001-l73 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0002-l66 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0002-l66 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0002-l68 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0002-l68 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0002-l77 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0002-l77 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0002-l79 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0002-l79 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0002-l84 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0002-l84 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0003-l73 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.f62d-r0003-l73 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0003-l74 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.f62d-r0003-l74 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0003-l79 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.f62d-r0003-l79 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0003-l86 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.f62d-r0003-l86 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0004-l66 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0004-l66 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0004-l69 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0004-l69 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0004-l74 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0004-l74 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0004-l75 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0004-l75 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0007-l66 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.f62d-r0007-l66 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0007-l69 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.f62d-r0007-l69 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0007-l72 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.f62d-r0007-l72 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0007-l73 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.f62d-r0007-l73 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0007-l74 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.f62d-r0007-l74 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0007-l77 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.f62d-r0007-l77 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0007-l78 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.f62d-r0007-l78 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0007-l79 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.f62d-r0007-l79 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0007-l81 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.f62d-r0007-l81 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0008-l66 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0008-l66 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0008-l75 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0008-l75 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0008-l82 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0008-l82 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0008-l84 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0008-l84 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0008-l87 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0008-l87 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0022-l76 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.f62d-r0022-l76 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0022-l82 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.f62d-r0022-l82 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0024-l87 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.f62d-r0024-l87 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0024-l97 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.f62d-r0024-l97 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-delegates-l72 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.f63-delegates-l72 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-error-values-l67 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.f63-error-values-l67 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-eviction-l85 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.f63-external-ref-l73 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.f63-external-ref-l73 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-footprint-limits-p22-l66 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-footprint-limits-p22-l66 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-footprint-limits-p22-l79 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-footprint-limits-p22-l79 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p21-r0001-l66 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p21-r0001-l66 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p21-r0001-l67 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p21-r0001-l67 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p21-r0001-l68 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p21-r0001-l68 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p21-r0001-l69 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p21-r0001-l69 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p21-r0001-l72 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p21-r0001-l72 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p21-r0001-l73 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p21-r0001-l73 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p21-r0001-l86 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p21-r0001-l86 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p22-r0001-l68 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p22-r0001-l68 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p22-r0001-l71 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p22-r0001-l71 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p23-r0000-l70 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p23-r0000-l70 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p23-r0000-l74 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p23-r0000-l74 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p23-r0000-l76 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p23-r0000-l76 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p23-r0000-l80 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p23-r0000-l80 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p23-r0002-l79 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p23-r0002-l79 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p24-r0001-l64 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p24-r0001-l64 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p24-r0001-l66 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p24-r0001-l66 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p24-r0001-l68 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p24-r0001-l68 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p24-r0001-l70 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p24-r0001-l70 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p24-r0001-l71 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p24-r0001-l71 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p24-r0001-l72 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p24-r0001-l72 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p24-r0001-l75 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p24-r0001-l75 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p24-r0001-l78 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p24-r0001-l78 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p24-r0001-l80 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p24-r0001-l80 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p24-r0001-l81 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p24-r0001-l81 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p24-r0001-l82 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p24-r0001-l82 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p24-r0001-l83 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p24-r0001-l83 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p24-r0001-l84 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p24-r0001-l84 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p25-r0001-l77 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p25-r0001-l77 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p26-r0002-l81 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p26-r0002-l81 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p26-r0002-l89 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p26-r0002-l89 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p26-r0002-l92 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p26-r0002-l92 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p27-r0002-l90 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p27-r0002-l90 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p27-r0004-l99 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p27-r0004-l99 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p28-r0000-l64 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p28-r0000-l64 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p28-r0000-l66 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p28-r0000-l66 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p28-r0000-l69 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p28-r0000-l69 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p28-r0000-l74 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p28-r0000-l74 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p28-r0000-l75 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p28-r0000-l75 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p28-r0000-l76 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p28-r0000-l76 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p28-r0000-l79 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p28-r0000-l79 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p28-r0000-l80 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p28-r0000-l80 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p28-r0000-l81 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p28-r0000-l81 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p28-r0000-l82 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p28-r0000-l82 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p28-r0000-l83 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p28-r0000-l83 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p29-r0003-l105 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p29-r0003-l105 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p29-r0003-l81 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p29-r0003-l81 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p30-r0003-l83 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.f63-p30-r0003-l83 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-p30-r0003-l99 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.f63-p30-r0003-l99 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-pool-deposit-events-l68 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.f63-pool-deposit-events-l68 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-refundable-fee-l65 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.f63-refundable-fee-l65 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-refundable-fee-l67 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.f63-refundable-fee-l67 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-refundable-fee-l80 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.f63-refundable-fee-l80 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-restore-archived-code-l64 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.f63-restore-archived-code-l64 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-restore-archived-code-l65 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.f63-restore-archived-code-l65 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-restore-archived-code-l77 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.f63-restore-archived-code-l77 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-sac-transfer-to-muxed-contract-l72 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.f63-sac-transfer-to-muxed-contract-l72 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-soroban-meta-ext-v1-l64 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.f63-soroban-meta-ext-v1-l64 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f63-soroban-tx-set-size-upgrade-l65 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.f63-unsimulated-trap-l71 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.f63-unsimulated-trap-l71 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g1-r0004-l102 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g1-r0004-l102 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g1-r0004-l103 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g1-r0004-l103 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g1-r0004-l104 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g1-r0004-l104 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g1-r0004-l122 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g1-r0004-l122 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g1-r0004-l123 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g1-r0004-l123 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g1-r0004-l126 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g1-r0004-l126 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g1-r0004-l141 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g1-r0004-l141 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g1-r0004-l142 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g1-r0004-l142 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g1-r0016-l66 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g1-r0016-l66 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g1-r0016-l74 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g1-r0016-l74 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g1-r0043-l88 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.g1-r0043-l88 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g1-r0047-l69 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g1-r0047-l69 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0000-l100 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0000-l100 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0000-l104 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0000-l104 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0000-l105 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0000-l105 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0000-l106 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0000-l106 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0000-l108 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0000-l108 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0000-l111 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0000-l111 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0000-l112 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0000-l112 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0000-l64 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0000-l64 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0000-l66 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0000-l66 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0000-l67 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0000-l67 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0000-l68 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0000-l68 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0000-l69 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0000-l69 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0000-l73 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0000-l73 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0000-l74 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0000-l74 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0000-l75 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0000-l75 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0000-l76 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0000-l76 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0000-l77 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0000-l77 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0000-l78 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0000-l78 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0000-l79 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0000-l79 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0000-l80 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0000-l80 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0000-l81 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0000-l81 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0000-l83 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0000-l83 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0000-l86 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0000-l86 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0000-l87 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0000-l87 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0000-l93 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0000-l93 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0000-l96 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0000-l96 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0000-l97 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0000-l97 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0000-l99 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0000-l99 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0001-l102 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0001-l102 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0001-l112 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0001-l112 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0001-l113 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0001-l113 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0001-l114 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0001-l114 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0001-l115 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0001-l115 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0001-l72 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0001-l72 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0001-l81 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0001-l81 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0001-l82 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0001-l82 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0001-l83 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0001-l83 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0001-l84 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0001-l84 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0001-l85 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0001-l85 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0001-l86 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0001-l86 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0002-l101 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.g2-r0002-l101 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0002-l74 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.g2-r0002-l74 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0002-l77 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.g2-r0002-l77 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0002-l90 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.g2-r0002-l90 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0002-l93 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.g2-r0002-l93 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0002-l95 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.g2-r0002-l95 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0003-l100 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0003-l100 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0003-l101 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0003-l101 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0003-l105 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0003-l105 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0003-l109 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0003-l109 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0003-l110 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0003-l110 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0003-l67 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0003-l67 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0003-l68 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0003-l68 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0003-l71 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0003-l71 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0003-l72 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0003-l72 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0003-l75 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0003-l75 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0003-l77 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0003-l77 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0003-l79 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0003-l79 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0003-l80 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0003-l80 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0003-l87 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0003-l87 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0003-l90 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0003-l90 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0003-l91 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0003-l91 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0003-l92 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0003-l92 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0003-l93 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0003-l93 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0003-l94 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0003-l94 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0003-l95 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0003-l95 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0003-l96 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0003-l96 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0003-l98 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0003-l98 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0004-l115 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0004-l115 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0004-l122 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0004-l122 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0004-l125 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0004-l125 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0004-l126 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0004-l126 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0004-l127 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0004-l127 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0004-l135 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0004-l135 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0004-l141 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0004-l141 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0005-l102 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.g2-r0005-l102 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0005-l104 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.g2-r0005-l104 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0005-l68 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.g2-r0005-l68 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0005-l72 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.g2-r0005-l72 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0005-l95 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.g2-r0005-l95 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0005-l96 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.g2-r0005-l96 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0005-l97 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.g2-r0005-l97 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0005-l98 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.g2-r0005-l98 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0005-l99 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.g2-r0005-l99 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0006-l118 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0006-l118 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0006-l121 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0006-l121 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0006-l126 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0006-l126 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0006-l134 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0006-l134 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0006-l135 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0006-l135 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0007-l69 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.g2-r0007-l69 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0007-l71 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.g2-r0007-l71 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0007-l72 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.g2-r0007-l72 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0007-l74 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.g2-r0007-l74 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0007-l77 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.g2-r0007-l77 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0007-l81 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.g2-r0007-l81 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0007-l84 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.g2-r0007-l84 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0008-l71 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0008-l71 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0008-l73 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0008-l73 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0008-l76 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0008-l76 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0008-l77 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0008-l77 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0008-l78 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0008-l78 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0008-l80 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0008-l80 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0009-l104 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.g2-r0009-l104 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0009-l72 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.g2-r0009-l72 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0009-l74 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.g2-r0009-l74 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0009-l76 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.g2-r0009-l76 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0009-l78 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.g2-r0009-l78 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0009-l83 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.g2-r0009-l83 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0009-l87 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.g2-r0009-l87 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0010-l74 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0010-l74 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0010-l92 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0010-l92 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0010-l93 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0010-l93 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0011-l128 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.g2-r0011-l128 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0011-l136 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.g2-r0011-l136 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0011-l142 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.g2-r0011-l142 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0011-l144 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.g2-r0011-l144 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0011-l148 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.g2-r0011-l148 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0012-l71 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0012-l71 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0012-l78 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0012-l78 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0013-l92 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.g2-r0013-l92 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0013-l93 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.g2-r0013-l93 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0014-l143 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0014-l143 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0014-l154 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0014-l154 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0015-l67 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0015-l67 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0015-l71 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0015-l71 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0015-l72 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0015-l72 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0016-l69 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.g2-r0016-l78 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.g2-r0016-l78 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0017-l129 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0017-l129 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0017-l130 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0017-l130 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0018-l115 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0018-l115 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0018-l116 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0018-l116 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0018-l119 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0018-l119 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0018-l122 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0018-l122 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0019-l69 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0019-l69 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0020-l69 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0020-l69 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0021-l101 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.g2-r0021-l101 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0021-l110 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.g2-r0021-l110 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0021-l126 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.g2-r0021-l126 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0022-l146 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0022-l146 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0022-l159 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0022-l159 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0022-l171 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0022-l171 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0023-l119 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0023-l119 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0024-l90 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.g2-r0024-l90 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0024-l92 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.g2-r0024-l92 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0025-l134 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.g2-r0025-l134 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0026-l107 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.g2-r0026-l107 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0027-l67 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0027-l67 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0027-l69 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0027-l69 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0028-l66 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0028-l66 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0029-l98 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0029-l98 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0030-l95 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0030-l95 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0030-l99 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0030-l99 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0031-l66 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0031-l66 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0031-l67 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0031-l67 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0033-l66 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0033-l66 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0034-l115 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0034-l115 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0035-l144 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.g2-r0035-l144 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0035-l154 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.g2-r0035-l154 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0036-l71 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0036-l71 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0037-l118 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0037-l118 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0038-l67 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0038-l67 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0038-l68 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0038-l68 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0039-l120 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0039-l120 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0040-l74 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0040-l74 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0041-l89 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0041-l89 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0042-l67 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.g2-r0042-l67 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.scale-exceeded-work-limit-l78 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.scale-exceeded-work-limit-l78 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.scale-too-many-subentries-l75 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+explore.witnesses.scale-too-many-subentries-l75 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json

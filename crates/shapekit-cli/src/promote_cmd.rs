@@ -252,6 +252,9 @@ pub fn run(args: PromoteArgs) -> Result<bool> {
                 ChainsIndex::path(&args.candidate).display()
             ));
         }
+        if let Some(why) = before_first_checkpoint(&args, entry)? {
+            refusals.push(why);
+        }
         for a in &accepted {
             println!(
                 "{id}: {}@{}: {} {}",
@@ -311,6 +314,43 @@ pub fn run(args: PromoteArgs) -> Result<bool> {
         entries.len()
     );
     Ok(refused == 0)
+}
+
+/// Why an entry cut from a chain at or before the chain's first history checkpoint cannot
+/// move: an indexer that bootstraps from a checkpoint (wallet-backend, stellar-rpc) starts the
+/// chain at the checkpoint before its first entry, and there is none, so the harness could
+/// evaluate no entry of the chain.
+fn before_first_checkpoint(args: &PromoteArgs, entry: &Entry) -> Result<Option<String>> {
+    let (Some(chain), Some(seq)) = (&entry.source.chain, entry.source.ledger_seq) else {
+        return Ok(None);
+    };
+    let dir = [&args.corpus, &args.candidate]
+        .into_iter()
+        .map(|lane| lane.join("chains").join(chain))
+        .find(|d| d.is_dir());
+    let Some(dir) = dir else {
+        return Ok(None);
+    };
+    let file = dir.join("testnet").join("chain.json");
+    let file = if file.is_file() {
+        file
+    } else {
+        dir.join("mainnet").join("chain.json")
+    };
+    let doc: serde_json::Value = serde_json::from_slice(
+        &std::fs::read(&file).with_context(|| format!("reading {}", file.display()))?,
+    )
+    .with_context(|| format!("parsing {}", file.display()))?;
+    let first = doc
+        .get("checkpoints")
+        .and_then(serde_json::Value::as_array)
+        .and_then(|c| c.iter().filter_map(serde_json::Value::as_u64).min());
+    Ok(match first {
+        Some(c) if u64::from(seq) <= c => Some(format!(
+            "its ledger {seq} is not after its chain's first history checkpoint {c}, so an indexer that bootstraps from a checkpoint could replay no entry of chain {chain}"
+        )),
+        _ => None,
+    })
 }
 
 struct Decide<'a> {
@@ -567,9 +607,17 @@ fn remove(path: &Path) -> Result<()> {
     .with_context(|| format!("removing {}", path.display()))
 }
 
-/// Removes `dir` and its parents below `stop` while they are empty.
+/// Removes `dir` and its parents below `stop` while they are empty; one already gone, as the
+/// directory two moved recipes share, is skipped.
 fn prune_empty(mut dir: PathBuf, stop: &Path) -> Result<()> {
     while dir != stop && dir.starts_with(stop) {
+        if !dir.exists() {
+            dir = match dir.parent() {
+                Some(p) => p.to_path_buf(),
+                None => break,
+            };
+            continue;
+        }
         let empty = std::fs::read_dir(&dir)
             .with_context(|| format!("reading {}", dir.display()))?
             .next()

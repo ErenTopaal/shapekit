@@ -1099,25 +1099,35 @@ fn footprint_steps_take_resource_overrides() {
 }
 
 // the committed recipes are formatted by hand and leave defaults out, so the check is that
-// each reads, writes and reads back to the same recipe, and that writing it adds no
-// emit_ledger_close_meta_ext_v1 key: a new option off by default changes no file
+// each reads, writes and reads back to the same recipe, and that writing it adds no option key
+// the file does not have: a new option off by default changes no file
 #[test]
 fn committed_recipes_round_trip_unchanged() {
     let dir = root().join("corpus/recipes");
     let mut n = 0;
     for item in walkdir::WalkDir::new(&dir) {
         let item = item.unwrap();
-        if item.path().extension().is_some_and(|x| x == "json") {
+        // a recipe pair's pair.json, beside its two recipes, lists the entries it compares
+        if item.path().extension().is_some_and(|x| x == "json") && item.file_name() != "pair.json" {
             let text = std::fs::read_to_string(item.path()).unwrap();
             let r: RecipeIr = serde_json::from_str(&text).unwrap();
             let written = render(&r);
             let back: RecipeIr = serde_json::from_str(&written).unwrap();
             assert_eq!(back, r, "{}", item.path().display());
             assert_eq!(render(&back), written, "{}", item.path().display());
-            assert!(!written.contains("emit_ledger_close_meta_ext_v1"));
-            assert!(!written.contains("emit_soroban_transaction_meta_ext_v1"));
-            assert!(!written.contains("\"simulate\""));
-            assert!(!written.contains("\"delegates\""));
+            // an option the file does not set is not written; the explorer's recipes set some
+            for key in [
+                "emit_ledger_close_meta_ext_v1",
+                "emit_soroban_transaction_meta_ext_v1",
+                "\"simulate\"",
+                "\"delegates\"",
+            ] {
+                assert!(
+                    text.contains(key) || !written.contains(key),
+                    "{}: {key}",
+                    item.path().display()
+                );
+            }
             n += 1;
         }
     }

@@ -1,0 +1,154 @@
+{
+  "ledgers": [
+    {
+      "close_time": "1773878400",
+      "evicted": [],
+      "ledger_hash": "5c63d35338b0b1e5b52ad9897c7b9f9928902174d0704913397a4afea7c3dd70",
+      "ledger_seq": 77,
+      "protocol": 17,
+      "transactions": [
+        {
+          "apply_index": 0,
+          "changes": [
+            {
+              "after": "99999999400",
+              "asset": "native",
+              "before": "99999999500",
+              "delta": "-100",
+              "held_in": "account",
+              "holder": "GB7LH3XLHKSR7LP4QTK7VDB7E4AJBUIGLLFU4SMDEOWRYEXB2QAALWJO",
+              "kind": "balance-change",
+              "scope": "fee-processing"
+            },
+            {
+              "amount": "100",
+              "asset": "native",
+              "contract": "CAS3J7GYLGXMF6TDJBBYYSE3HQ6BBSMLNUQ34T6TZMYMW2EVH34XOWMA",
+              "event": "fee",
+              "from": "GB7LH3XLHKSR7LP4QTK7VDB7E4AJBUIGLLFU4SMDEOWRYEXB2QAALWJO",
+              "kind": "token-event",
+              "scope": "fee-processing",
+              "stage": "before-all-txs"
+            },
+            {
+              "account": "GB7LH3XLHKSR7LP4QTK7VDB7E4AJBUIGLLFU4SMDEOWRYEXB2QAALWJO",
+              "after": "274877906950",
+              "before": "274877906949",
+              "kind": "sequence",
+              "scope": "tx-before"
+            },
+            {
+              "after": "0",
+              "asset": "LONGASSET12:GB7LH3XLHKSR7LP4QTK7VDB7E4AJBUIGLLFU4SMDEOWRYEXB2QAALWJO",
+              "before": "100",
+              "delta": "-100",
+              "held_in": "claimable-balance",
+              "holder": "BAAD4LFAWLQLOW5D6GY75NYQRHB4XD5EJIZFBQNLXRBLRUBVY7JWMJWE4I",
+              "kind": "balance-change",
+              "op_index": 0,
+              "scope": "operation"
+            },
+            {
+              "amount": "100",
+              "asset": "LONGASSET12:GB7LH3XLHKSR7LP4QTK7VDB7E4AJBUIGLLFU4SMDEOWRYEXB2QAALWJO",
+              "balance_id": "BAAD4LFAWLQLOW5D6GY75NYQRHB4XD5EJIZFBQNLXRBLRUBVY7JWMJWE4I",
+              "kind": "claimable-balance-clawed-back",
+              "op_index": 0,
+              "scope": "operation"
+            },
+            {
+              "kind": "sponsorship",
+              "op_index": 0,
+              "scope": "operation",
+              "sponsor_before": "GCBMPXXFV5CCVEZD54PBTUCEJ7MGKB5FRIU72HZB2JWXVP4DMDX3PUJ7",
+              "target": "claimable balance BAAD4LFAWLQLOW5D6GY75NYQRHB4XD5EJIZFBQNLXRBLRUBVY7JWMJWE4I"
+            },
+            {
+              "amount": "100",
+              "asset": "LONGASSET12:GB7LH3XLHKSR7LP4QTK7VDB7E4AJBUIGLLFU4SMDEOWRYEXB2QAALWJO",
+              "asset_topic": "LONGASSET12:GB7LH3XLHKSR7LP4QTK7VDB7E4AJBUIGLLFU4SMDEOWRYEXB2QAALWJO",
+              "contract": "CARGOXMZGSJUIFFDXWGOZ2H2KT4WJZLW3RUPJQ7RIYVYEKDIIYRAR4GK",
+              "event": "clawback",
+              "from": "BAAD4LFAWLQLOW5D6GY75NYQRHB4XD5EJIZFBQNLXRBLRUBVY7JWMJWE4I",
+              "kind": "token-event",
+              "op_index": 0,
+              "scope": "operation",
+              "stage": "operation"
+            }
+          ],
+          "declared": {
+            "participants": [
+              {
+                "address": "BAAD4LFAWLQLOW5D6GY75NYQRHB4XD5EJIZFBQNLXRBLRUBVY7JWMJWE4I",
+                "kind": "claimable-balance",
+                "roles": [
+                  "claimable-balance"
+                ]
+              },
+              {
+                "address": "GB7LH3XLHKSR7LP4QTK7VDB7E4AJBUIGLLFU4SMDEOWRYEXB2QAALWJO",
+                "kind": "account",
+                "roles": [
+                  "tx-source"
+                ]
+              }
+            ],
+            "source": "GB7LH3XLHKSR7LP4QTK7VDB7E4AJBUIGLLFU4SMDEOWRYEXB2QAALWJO"
+          },
+          "events": "unified",
+          "fee": {
+            "balance_delta": "-100",
+            "charged": "100",
+            "source": "GB7LH3XLHKSR7LP4QTK7VDB7E4AJBUIGLLFU4SMDEOWRYEXB2QAALWJO"
+          },
+          "hash": "d700c630aa87608329075a45513911f8a11811af73a987d4ebc81124e0c9b6de",
+          "participants": [
+            {
+              "address": "BAAD4LFAWLQLOW5D6GY75NYQRHB4XD5EJIZFBQNLXRBLRUBVY7JWMJWE4I",
+              "kind": "claimable-balance",
+              "roles": [
+                "entry-changed",
+                "event-address"
+              ]
+            },
+            {
+              "address": "CARGOXMZGSJUIFFDXWGOZ2H2KT4WJZLW3RUPJQ7RIYVYEKDIIYRAR4GK",
+              "kind": "contract",
+              "roles": [
+                "event-contract"
+              ]
+            },
+            {
+              "address": "CAS3J7GYLGXMF6TDJBBYYSE3HQ6BBSMLNUQ34T6TZMYMW2EVH34XOWMA",
+              "kind": "contract",
+              "roles": [
+                "event-contract"
+              ]
+            },
+            {
+              "address": "GB7LH3XLHKSR7LP4QTK7VDB7E4AJBUIGLLFU4SMDEOWRYEXB2QAALWJO",
+              "kind": "account",
+              "roles": [
+                "entry-changed",
+                "event-address",
+                "fee-source"
+              ]
+            },
+            {
+              "address": "GCBMPXXFV5CCVEZD54PBTUCEJ7MGKB5FRIU72HZB2JWXVP4DMDX3PUJ7",
+              "kind": "account",
+              "roles": [
+                "entry-changed"
+              ]
+            }
+          ],
+          "result": "tx_success",
+          "successful": true
+        }
+      ],
+      "upgrades": []
+    }
+  ],
+  "network_passphrase": "Public Global Stellar Network ; September 2015",
+  "oracle_vocab_version": 2
+}

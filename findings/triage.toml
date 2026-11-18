@@ -112,6 +112,14 @@ facts = ["token-event"]
 problems = ["extra"]
 events = ["burn"]
 
+# explorer ledgers whose transactions claw back (Clawback and ClawbackClaimableBalance)
+[[finding.harness]]
+target = "wallet-backend"
+entries = ["explore.witnesses.g2-r0000-l74", "explore.witnesses.g2-r0000-l77"]
+facts = ["token-event"]
+problems = ["extra"]
+events = ["burn"]
+
 [[finding]]
 id = "WB-W1"
 title = "transaction participants from meta are never collected (participantsForMeta reads the TransactionMeta V0 arm)"
@@ -165,6 +173,23 @@ facts = ["token-event"]
 problems = ["extra"]
 events = ["transfer"]
 null = ["from"]
+
+# an issuer's create claimable balance mints into the balance: the credit row of a B
+# destination is skipped (handleMint, internal/indexer/processors/token_transfer.go L336-L340 at
+# 3e22515a, the same skip as for transfers), so only the issuer's MINT row is stored
+[[finding.harness]]
+target = "wallet-backend"
+facts = ["token-event"]
+problems = ["dropped"]
+events = ["mint"]
+prefix = { to = ["B", "L"] }
+
+[[finding.harness]]
+target = "wallet-backend"
+entries = ["explore.witnesses.f62d-r0000-l73", "explore.witnesses.f63-p23-r0002-l79"]
+facts = ["token-event"]
+problems = ["extra"]
+events = ["mint"]
 
 [[finding]]
 id = "WB-W4"
@@ -534,3 +559,17 @@ cause = "xdrpp's xdr_traits<bool>::from_uint is u != 0, and the enum check runs 
 [[finding.answer]]
 entries = ["soroban.invoke-basics.synth-invoke-arg-bool-2"]
 split = 3
+
+[[finding]]
+id = "WB-FLAGS-OP"
+title = "account and trustline flags rows follow the operation's parameters, also when the ledger's flags do not change"
+component = "wallet-backend"
+severity = "wrong-data"
+status = "wont-fix"
+reason = "intended, recorded and not filed: the effects code is a port of Horizon's (internal/indexer/processors/effects_horizon.go L3-L4 at 3e22515a), whose account_flags_updated and trustline_flags_updated effects describe what the operation asked for, not what changed"
+cause = "addSetOptionsEffects writes account flags from op.SetFlags and op.ClearFlags whenever either is present (effects_horizon.go L165-L175 at 3e22515a), and addAllowTrustEffects writes trustline flags from op.Authorize on every AllowTrust (L307-L340), without reading the ledger change. A set options that clears flags already clear, or an allow trust that authorizes a trustline already authorized, leaves the entry's flags as they were, so the meta shows no flag change while a flags row is stored."
+
+[[finding.harness]]
+target = "wallet-backend"
+facts = ["account-flags", "trustline-flags"]
+problems = ["extra"]

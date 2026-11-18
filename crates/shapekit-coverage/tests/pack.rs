@@ -363,18 +363,31 @@ fn ships_the_generated_coverage_reports() {
 }
 
 #[test]
-fn ships_recipe_ir_files_and_refuses_others_under_recipes() {
+fn ships_recipe_ir_files_with_their_notes_and_refuses_others_under_recipes() {
     let dir = tempfile::tempdir().unwrap();
     let corpus = dir.path().join("corpus");
     let m = fixture(&corpus);
-    write(&corpus, "recipes/f/r.json", b"{}\n");
+    let shipped = [
+        "recipes/f/r.json",
+        "recipes/f/g/r.json",
+        "recipes/f/g/run.toml",
+        "recipes/f/README.md",
+        "recipes/chains.toml",
+    ];
+    for f in shipped {
+        write(&corpus, f, b"{}\n");
+    }
     let report = pack(&corpus, &m, &dir.path().join("out")).unwrap();
-    assert!(
-        members(&report.archive)
-            .iter()
-            .any(|m| m.0.ends_with("recipes/f/r.json"))
-    );
-    for stray in ["recipes/notes.txt", "recipes/f/r.txt", "recipes/f/g/r.json"] {
+    let names = members(&report.archive);
+    for f in shipped {
+        assert!(names.iter().any(|m| m.0.ends_with(f)), "{f}");
+    }
+    for stray in [
+        "recipes/notes.txt",
+        "recipes/f/r.txt",
+        "recipes/f/g/notes.toml",
+        "recipes/run.toml",
+    ] {
         let dir = tempfile::tempdir().unwrap();
         let corpus = dir.path().join("corpus");
         let m = fixture(&corpus);
