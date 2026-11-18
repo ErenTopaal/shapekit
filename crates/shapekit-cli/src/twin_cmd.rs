@@ -547,31 +547,14 @@ fn parse_show(s: &str) -> Result<(String, u32, u32)> {
 
 fn coverage(a: CoverageArgs) -> Result<bool> {
     use shapekit_gen::recipe::{self, Network, chain_id};
-    use shapekit_twin::coverage as cov;
-    use shapekit_twin::verify::{RecordSetup, record_all};
+    use shapekit_twin::verify::RecordSetup;
 
     let shows = a
         .show
         .iter()
         .map(|s| parse_show(s))
         .collect::<Result<Vec<_>>>()?;
-    if a.out.exists() {
-        bail!("{} already exists", a.out.display());
-    }
-    let mut twin = CoreImage::from_pins(&a.twin_pins)
-        .with_context(|| format!("reading the twin image pin from {}", a.twin_pins.display()))?;
-    if !twin.local {
-        bail!(
-            "{} pins a registry image; the twin is a local build pinned by image_id",
-            a.twin_pins.display()
-        );
-    }
-    let profiles = a.out.join("profiles");
-    std::fs::create_dir_all(&profiles)
-        .with_context(|| format!("creating {}", profiles.display()))?;
-    let profiles = profiles.canonicalize()?;
-    twin.profile_dir = Some(profiles.clone());
-
+    let mut twin = twin_image(&a.twin_pins)?;
     let registry = Registry::load(&a.registry)
         .with_context(|| format!("loading the registry in {}", a.registry.display()))?;
     let setup = RecordSetup {
@@ -580,6 +563,7 @@ fn coverage(a: CoverageArgs) -> Result<bool> {
         jobs: 1,
         networks: Network::BOTH.to_vec(),
     };
+    let core = pinned_core(&a.pins)?;
     let all = recipe::all();
     let recipes: Vec<&dyn recipe::Recipe> = if a.chain == SMOKE {
         Vec::new()
@@ -591,13 +575,31 @@ fn coverage(a: CoverageArgs) -> Result<bool> {
                 .as_ref(),
         ]
     };
-    let recorded = record_all(
-        &twin,
-        &recipes,
-        a.chain == SMOKE,
-        &a.out.join("chain"),
-        &setup,
-    )?;
+    into_new_dir(&a.out, || {
+        let profiles = a.out.join("profiles");
+        std::fs::create_dir(&profiles)
+            .with_context(|| format!("creating {}", profiles.display()))?;
+        let profiles = profiles.canonicalize()?;
+        twin.profile_dir = Some(profiles.clone());
+        coverage_into(&a, &twin, &recipes, &setup, core, &profiles, &shows)
+    })
+}
+
+#[allow(clippy::too_many_arguments)]
+fn coverage_into(
+    a: &CoverageArgs,
+    twin: &CoreImage,
+    recipes: &[&dyn shapekit_gen::recipe::Recipe],
+    setup: &shapekit_twin::verify::RecordSetup<'_>,
+    mut core: CoreRef,
+    profiles: &Path,
+    shows: &[(String, u32, u32)],
+) -> Result<bool> {
+    use shapekit_gen::recipe::Network;
+    use shapekit_twin::coverage as cov;
+    use shapekit_twin::verify::record_all;
+
+    let recorded = record_all(twin, recipes, a.chain == SMOKE, &a.out.join("chain"), setup)?;
     for network in Network::BOTH {
         let run = recorded
             .get(&(a.chain.clone(), network.name()))
@@ -633,19 +635,18 @@ fn coverage(a: CoverageArgs) -> Result<bool> {
         }
     }
 
-    let export = cov::merge_and_export(&twin, &profiles)?;
+    let export = cov::merge_and_export(twin, profiles)?;
     let (counts, branches) = cov::read_export_with_branches(&export)?;
     // the export and the raw profiles are large and fully represented by the
     // merged profile and the summary
     std::fs::remove_file(&export)?;
-    for e in std::fs::read_dir(&profiles)? {
+    for e in std::fs::read_dir(profiles)? {
         let e = e?;
         if e.file_name().to_string_lossy().ends_with(".profraw") {
             std::fs::remove_file(e.path())?;
         }
     }
-    let mut core = pinned_core(&a.pins)?;
-    core.image = Some(cov::image_ref(&twin));
+    core.image = Some(cov::image_ref(twin));
     cov::write_counts(&a.out.join("counts.json"), &counts)?;
     cov::write_branches(&a.out.join("branches.json"), &branches)?;
     let summary = cov::summary(&counts, core, vec![format!("chain:{}", a.chain)], &[]);
@@ -661,7 +662,7 @@ fn coverage(a: CoverageArgs) -> Result<bool> {
         summary.unreached.len(),
         file.display()
     );
-    for (f, from, to) in &shows {
+    for (f, from, to) in shows {
         let spans = cov::spans_in(&counts, f, *from, *to);
         if spans.is_empty() {
             println!("{f}:{from}-{to}: no region");
@@ -676,7 +677,7 @@ fn coverage(a: CoverageArgs) -> Result<bool> {
     Ok(true)
 }
 
-fn twin_image(path: &Path) -> Result<CoreImage> {
+pub(crate) fn twin_image(path: &Path) -> Result<CoreImage> {
     let twin = CoreImage::from_pins(path)
         .with_context(|| format!("reading the twin image pin from {}", path.display()))?;
     if !twin.local {
@@ -936,6 +937,9 @@ fn gate_witnesses(
                 .trim()
                 .parse()
                 .with_context(|| format!("{} holds no protocol", d.join("protocol").display()))?,
+            Err(e) if e.kind() != std::io::ErrorKind::NotFound => {
+                return Err(e).with_context(|| format!("reading {}", d.join("protocol").display()));
+            }
             Err(_) => chain
                 .rsplit_once(".p")
                 .and_then(|(_, n)| n.parse().ok())
@@ -947,17 +951,19 @@ fn gate_witnesses(
             cov::read_branches(&d.join("branches.json"))?,
         ));
     }
-    let mut sources: std::collections::BTreeMap<String, Vec<String>> = Default::default();
-    let mut line_of = |file: &str, line: u32| -> Option<String> {
-        if !sources.contains_key(file) {
-            let text = std::fs::read_to_string(core_src.join(file)).ok()?;
-            sources.insert(file.to_owned(), text.lines().map(str::to_owned).collect());
-        }
-        sources[file].get(line as usize - 1).cloned()
-    };
-    let mut lines: std::collections::BTreeMap<(String, u32), Option<String>> = Default::default();
+    gate_sides::distinct_chains(&chains)?;
+    let mut sources: std::collections::BTreeMap<String, String> = Default::default();
+    let mut lines: std::collections::BTreeMap<(String, u32), String> = Default::default();
     for g in &list.gates {
-        lines.insert((g.file.clone(), g.line), line_of(&g.file, g.line));
+        if !sources.contains_key(&g.file) {
+            let path = core_src.join(&g.file);
+            let text = std::fs::read_to_string(&path)
+                .with_context(|| format!("reading {}", path.display()))?;
+            sources.insert(g.file.clone(), text);
+        }
+        let text = source_line(&sources[&g.file], g.line)
+            .with_context(|| format!("gate {}:{}:{}", g.file, g.line, g.column))?;
+        lines.insert((g.file.clone(), g.line), text.to_owned());
     }
     let root = std::env::current_dir()?.canonicalize()?;
     let mut merged: Option<gate_sides::ExploreSides> = None;
@@ -1002,7 +1008,7 @@ fn gate_witnesses(
     }
     let explore = merged;
     let w = gate_sides::witness(&list, &chains, explore.as_ref(), |f, l| {
-        lines.get(&(f.to_owned(), l)).cloned().flatten()
+        lines.get(&(f.to_owned(), l)).cloned()
     });
     shapekit_contracts::write(gates_path, &w.list)?;
     let open_by: std::collections::BTreeMap<String, usize> = w
@@ -1050,6 +1056,16 @@ fn gate_witnesses(
     }
     println!("written to {}", gates_path.display());
     Ok(true)
+}
+
+/// Line `line` (1-based, as the gate list counts) of a source text.
+fn source_line(text: &str, line: u32) -> Result<&str> {
+    let index = line
+        .checked_sub(1)
+        .context("line 0 is no line; lines count from 1")?;
+    text.lines()
+        .nth(index as usize)
+        .with_context(|| format!("the source has no line {line}"))
 }
 
 fn targets(unknown: &Path, counts: &[PathBuf]) -> Result<bool> {
@@ -1123,63 +1139,74 @@ fn coverage_ir(
         bail!("{} already exists", out.display());
     }
     let mut twin = twin_image(twin_pins)?;
-    let profiles = out.join("profiles");
-    std::fs::create_dir_all(&profiles)?;
-    let profiles = profiles.canonicalize()?;
-    twin.profile_dir = Some(profiles.clone());
     let root = std::env::current_dir()?;
     let ir = IrRecipe::load(ir_path, &root)?;
-    let work = out.join("work");
-    std::fs::create_dir_all(&work)?;
+    let mut core = pinned_core(pins_path)?;
+    let mut want = Vec::new();
     for n in Network::BOTH {
-        let target = out.join("chain").join(n.name());
-        let started = std::time::Instant::now();
-        let (hash, _) = shapekit_explore::verify::record_into(&ir, n, &twin, &work, &target)
-            .with_context(|| {
-                format!("recording {} ({}) on the twin", ir_path.display(), n.name())
-            })?;
         let file = committed.join(n.name()).join("chain.json");
         let v: serde_json::Value = serde_json::from_slice(
             &std::fs::read(&file).with_context(|| format!("reading {}", file.display()))?,
-        )?;
-        if v["canonical_stream_sha256"].as_str() != Some(hash.as_str()) {
-            bail!(
-                "the twin's chain ({}) differs from {} ({}); its coverage would not describe the committed chain",
+        )
+        .with_context(|| format!("parsing {}", file.display()))?;
+        let hash = v["canonical_stream_sha256"]
+            .as_str()
+            .with_context(|| format!("{} has no canonical_stream_sha256", file.display()))?
+            .to_owned();
+        want.push((n, file, hash));
+    }
+    into_new_dir(out, || {
+        let profiles = out.join("profiles");
+        std::fs::create_dir(&profiles)?;
+        let profiles = profiles.canonicalize()?;
+        twin.profile_dir = Some(profiles.clone());
+        let work = out.join("work");
+        std::fs::create_dir(&work)?;
+        for (n, file, want) in &want {
+            let n = *n;
+            let target = out.join("chain").join(n.name());
+            let started = std::time::Instant::now();
+            let (hash, _) = shapekit_explore::verify::record_into(&ir, n, &twin, &work, &target)
+                .with_context(|| {
+                    format!("recording {} ({}) on the twin", ir_path.display(), n.name())
+                })?;
+            if *want != hash {
+                bail!(
+                    "the twin's chain ({}) differs from {} ({want}); its coverage would not describe the committed chain",
+                    n.name(),
+                    file.display(),
+                );
+            }
+            println!(
+                "{} ({}) on the twin in {:.1}s, canonical stream {hash}, equal to the committed chain",
+                ir_path.display(),
                 n.name(),
-                file.display(),
-                v["canonical_stream_sha256"]
+                started.elapsed().as_secs_f64()
             );
         }
-        println!(
-            "{} ({}) on the twin in {:.1}s, canonical stream {hash}, equal to the committed chain",
-            ir_path.display(),
-            n.name(),
-            started.elapsed().as_secs_f64()
-        );
-    }
-    std::fs::remove_dir_all(&work)?;
-    std::fs::remove_dir_all(out.join("chain"))?;
-    let export = cov::merge_and_export(&twin, &profiles)?;
-    let (counts, branches) = cov::read_export_with_branches(&export)?;
-    std::fs::remove_file(&export)?;
-    for e in std::fs::read_dir(&profiles)? {
-        let e = e?;
-        if e.file_name().to_string_lossy().ends_with(".profraw") {
-            std::fs::remove_file(e.path())?;
+        std::fs::remove_dir_all(&work)?;
+        std::fs::remove_dir_all(out.join("chain"))?;
+        let export = cov::merge_and_export(&twin, &profiles)?;
+        let (counts, branches) = cov::read_export_with_branches(&export)?;
+        std::fs::remove_file(&export)?;
+        for e in std::fs::read_dir(&profiles)? {
+            let e = e?;
+            if e.file_name().to_string_lossy().ends_with(".profraw") {
+                std::fs::remove_file(e.path())?;
+            }
         }
-    }
-    cov::write_counts(&out.join("counts.json"), &counts)?;
-    cov::write_branches(&out.join("branches.json"), &branches)?;
-    // the chain id need not end in .p<N>, so the protocol is kept beside it
-    std::fs::write(out.join("protocol"), format!("{}\n", ir.ir().protocol))?;
-    let mut core = pinned_core(pins_path)?;
-    core.image = Some(cov::image_ref(&twin));
-    let summary = cov::summary(&counts, core, vec![label.to_owned()], &[]);
-    shapekit_contracts::write(&out.join("core-coverage.json"), &summary)?;
-    let reached: u64 = summary.files.iter().map(|f| f.regions_reached).sum();
-    let missed: u64 = summary.files.iter().map(|f| f.regions_unreached).sum();
-    println!("{label}: {reached} of {} regions reached", reached + missed);
-    Ok(true)
+        cov::write_counts(&out.join("counts.json"), &counts)?;
+        cov::write_branches(&out.join("branches.json"), &branches)?;
+        // the chain id need not end in .p<N>, so the protocol is kept beside it
+        std::fs::write(out.join("protocol"), format!("{}\n", ir.ir().protocol))?;
+        core.image = Some(cov::image_ref(&twin));
+        let summary = cov::summary(&counts, core, vec![label.to_owned()], &[]);
+        shapekit_contracts::write(&out.join("core-coverage.json"), &summary)?;
+        let reached: u64 = summary.files.iter().map(|f| f.regions_reached).sum();
+        let missed: u64 = summary.files.iter().map(|f| f.regions_unreached).sum();
+        println!("{label}: {reached} of {} regions reached", reached + missed);
+        Ok(true)
+    })
 }
 
 fn profiles(
@@ -1199,42 +1226,124 @@ fn profiles(
         bail!("{} already exists", out.display());
     }
     let twin = twin_image(twin_pins)?;
-    // merge in a copy, so the input directory stays as the tool left it
-    let work = out.join("profiles");
-    std::fs::create_dir_all(&work)?;
-    let mut n = 0;
+    let mut core = pinned_core(pins_path)?;
+    let mut inputs = Vec::new();
     for e in std::fs::read_dir(dir).with_context(|| format!("reading {}", dir.display()))? {
-        let e = e?;
+        let e = e.with_context(|| format!("reading {}", dir.display()))?;
         if e.file_name().to_string_lossy().ends_with(".profraw") {
-            std::fs::copy(e.path(), work.join(e.file_name()))?;
-            n += 1;
+            inputs.push(e);
         }
     }
-    if n == 0 {
+    if inputs.is_empty() {
         bail!("no .profraw file in {}", dir.display());
     }
-    let work = work.canonicalize()?;
-    let export = cov::merge_and_export(&twin, &work)?;
-    let (counts, branches) = cov::read_export_with_branches(&export)?;
-    std::fs::remove_file(&export)?;
-    for e in std::fs::read_dir(&work)? {
-        let e = e?;
-        if e.file_name().to_string_lossy().ends_with(".profraw") {
-            std::fs::remove_file(e.path())?;
+    let n = inputs.len();
+    into_new_dir(out, || {
+        // merge in a copy, so the input directory stays as the tool left it
+        let work = out.join("profiles");
+        std::fs::create_dir(&work)?;
+        for e in &inputs {
+            std::fs::copy(e.path(), work.join(e.file_name()))?;
         }
+        let work = work.canonicalize()?;
+        let export = cov::merge_and_export(&twin, &work)?;
+        let (counts, branches) = cov::read_export_with_branches(&export)?;
+        std::fs::remove_file(&export)?;
+        for e in std::fs::read_dir(&work)? {
+            let e = e?;
+            if e.file_name().to_string_lossy().ends_with(".profraw") {
+                std::fs::remove_file(e.path())?;
+            }
+        }
+        cov::write_counts(&out.join("counts.json"), &counts)?;
+        cov::write_branches(&out.join("branches.json"), &branches)?;
+        std::fs::write(out.join("protocol"), format!("{protocol}\n"))?;
+        core.image = Some(cov::image_ref(&twin));
+        let summary = cov::summary(&counts, core, vec![label.to_owned()], &[]);
+        shapekit_contracts::write(&out.join("core-coverage.json"), &summary)?;
+        let reached: u64 = summary.files.iter().map(|f| f.regions_reached).sum();
+        let missed: u64 = summary.files.iter().map(|f| f.regions_unreached).sum();
+        println!(
+            "{label}: {n} profiles, {reached} of {} regions reached",
+            reached + missed
+        );
+        Ok(true)
+    })
+}
+
+/// Runs `f`, which writes into `out`, after creating `out`; `out` must not exist yet. When
+/// `f` fails, `out` is removed again, so a rerun of the same command does not stop at a
+/// half-written directory this run left.
+fn into_new_dir(out: &Path, f: impl FnOnce() -> Result<bool>) -> Result<bool> {
+    if out.exists() {
+        bail!("{} already exists", out.display());
     }
-    cov::write_counts(&out.join("counts.json"), &counts)?;
-    cov::write_branches(&out.join("branches.json"), &branches)?;
-    std::fs::write(out.join("protocol"), format!("{protocol}\n"))?;
-    let mut core = pinned_core(pins_path)?;
-    core.image = Some(cov::image_ref(&twin));
-    let summary = cov::summary(&counts, core, vec![label.to_owned()], &[]);
-    shapekit_contracts::write(&out.join("core-coverage.json"), &summary)?;
-    let reached: u64 = summary.files.iter().map(|f| f.regions_reached).sum();
-    let missed: u64 = summary.files.iter().map(|f| f.regions_unreached).sum();
-    println!(
-        "{label}: {n} profiles, {reached} of {} regions reached",
-        reached + missed
-    );
-    Ok(true)
+    if let Some(parent) = out.parent().filter(|p| !p.as_os_str().is_empty()) {
+        std::fs::create_dir_all(parent)
+            .with_context(|| format!("creating {}", parent.display()))?;
+    }
+    std::fs::create_dir(out).with_context(|| format!("creating {}", out.display()))?;
+    match f() {
+        Ok(v) => Ok(v),
+        Err(e) => match std::fs::remove_dir_all(out) {
+            Ok(()) => Err(e),
+            Err(r) => Err(e.context(format!(
+                "removing {} afterwards also failed: {r}",
+                out.display()
+            ))),
+        },
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn source_lines_count_from_one() {
+        let text = "first\nsecond\n";
+        assert_eq!(source_line(text, 1).unwrap(), "first");
+        assert_eq!(source_line(text, 2).unwrap(), "second");
+        assert!(source_line(text, 0).is_err());
+        assert!(source_line(text, 3).is_err());
+    }
+
+    #[test]
+    fn a_failed_run_leaves_no_output_directory() {
+        let base = tempfile::tempdir().unwrap();
+        let out = base.path().join("a").join("out");
+        let e = into_new_dir(&out, || {
+            std::fs::write(out.join("half"), "x")?;
+            bail!("the run failed")
+        })
+        .unwrap_err();
+        assert_eq!(format!("{e:#}"), "the run failed");
+        assert!(!out.exists());
+        // so the same command runs again
+        assert!(into_new_dir(&out, || Ok(true)).unwrap());
+        assert!(out.is_dir());
+        let e = into_new_dir(&out, || Ok(true)).unwrap_err();
+        assert!(format!("{e:#}").contains("already exists"));
+    }
+
+    #[test]
+    fn profiles_without_profiles_creates_no_output() {
+        let base = tempfile::tempdir().unwrap();
+        let input = base.path().join("in");
+        std::fs::create_dir(&input).unwrap();
+        let pins = base.path().join("twin-pins.toml");
+        std::fs::write(
+            &pins,
+            format!(
+                "[[image]]\nname = \"stellar-core\"\nrepository = \"shapekit/core-twin\"\ntag = \"t\"\nimage_id = \"sha256:{}\"\n",
+                "0".repeat(64)
+            ),
+        )
+        .unwrap();
+        let out = base.path().join("out");
+        let core_pins = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../pins.toml");
+        let e = profiles(&input, "chain:x.p30", 30, &core_pins, &pins, &out).unwrap_err();
+        assert!(format!("{e:#}").contains("no .profraw"), "{e:#}");
+        assert!(!out.exists());
+    }
 }

@@ -237,9 +237,7 @@ pub fn run(command: ExploreCommand) -> Result<bool> {
             let release = CoreImage::from_pins(&pins)
                 .with_context(|| format!("reading the core image pin from {}", pins.display()))?;
             let image = if coverage {
-                CoreImage::from_pins(&twin_pins).with_context(|| {
-                    format!("reading the twin image pin from {}", twin_pins.display())
-                })?
+                crate::twin_cmd::twin_image(&twin_pins)?
             } else {
                 release.clone()
             };
@@ -260,7 +258,8 @@ pub fn run(command: ExploreCommand) -> Result<bool> {
             let schema = Schema::pinned();
             let root = std::env::current_dir().context("reading the working directory")?;
             let wasms = shapekit_explore::contract::load_all(&root)?;
-            let work = scratch()?;
+            let scratch = scratch()?;
+            let work = scratch.path();
             let seen = Seen::default();
             let env = Env {
                 schema: &schema,
@@ -269,7 +268,7 @@ pub fn run(command: ExploreCommand) -> Result<bool> {
                 release: &release,
                 root: &root,
                 reachable: &reachable,
-                work: &work,
+                work,
                 seen: &seen,
                 contracts: &wasms,
             };
@@ -286,6 +285,7 @@ pub fn run(command: ExploreCommand) -> Result<bool> {
                 history_only: history_only.into_iter().collect(),
             };
             let r = explore::run(&env, &opts)?;
+            close(scratch)?;
             println!(
                 "{} episodes ({} replays) in {:.0}s: {} recipes, {} of {} target arms witnessed ({:.1}%), {} more arms beyond the targets",
                 r.episodes,
@@ -348,16 +348,18 @@ pub fn run(command: ExploreCommand) -> Result<bool> {
                 .with_context(|| format!("reading the core image pin from {}", pins.display()))?;
             let root = std::env::current_dir()?;
             let ir = IrRecipe::load(&recipe, &root)?;
-            let work = scratch()?;
+            let scratch = scratch()?;
+            let work = scratch.path();
             for n in shapekit_gen::recipe::Network::BOTH {
                 let target = out.join(n.name());
-                let (hash, _) = verify::record_into(&ir, n, &image, &work, &target)?;
+                let (hash, _) = verify::record_into(&ir, n, &image, work, &target)?;
                 println!(
                     "{} ({}): canonical stream {hash}",
                     recipe.display(),
                     n.name()
                 );
             }
+            close(scratch)?;
             Ok(true)
         }
         ExploreCommand::Verify {
@@ -436,8 +438,9 @@ fn chain_entries(
         slug,
         about,
     };
-    let removed = entries::remove_chain_entries(out, &src.family, &src.chain_id)?;
+    // the cover first: a chain that cannot be covered keeps the entries it has
     let picks = entries::cover(&ledgers, credited, last)?;
+    let removed = entries::remove_chain_entries(out, &src.family, &src.chain_id)?;
     let held: BTreeSet<&String> = ledgers.iter().flat_map(|l| &l.arms).collect();
     for p in &picks {
         let e = entries::entry(&src, p);
@@ -540,10 +543,21 @@ fn witnessed(chains: &[PathBuf], coverage_report: &Path, registry: &Path) -> Res
     Ok(true)
 }
 
-fn scratch() -> Result<PathBuf> {
-    let dir = std::env::temp_dir().join("shapekit-explore");
-    std::fs::create_dir_all(&dir).with_context(|| format!("creating {}", dir.display()))?;
-    Ok(dir)
+/// A scratch directory for this call alone, under the temporary directory: concurrent calls
+/// never share one, and it is removed when the returned value is dropped or closed.
+fn scratch() -> Result<tempfile::TempDir> {
+    tempfile::Builder::new()
+        .prefix("shapekit-explore-")
+        .tempdir()
+        .context("creating a scratch directory")
+}
+
+/// Removes a scratch directory, reporting a failure rather than leaving it behind unseen.
+fn close(scratch: tempfile::TempDir) -> Result<()> {
+    let path = scratch.path().display().to_string();
+    scratch
+        .close()
+        .with_context(|| format!("removing the scratch directory {path}"))
 }
 
 /// `30`, `9,12,30` or `9-30`.
@@ -570,29 +584,12 @@ pub fn parse_protocols(s: &str) -> Result<Vec<u32>> {
 fn verify_dir(dir: &Path, repeat: usize, jobs: usize, pins: &Path) -> Result<bool> {
     let image = CoreImage::from_pins(pins)
         .with_context(|| format!("reading the core image pin from {}", pins.display()))?;
-    let report: serde_json::Value = serde_json::from_slice(
-        &std::fs::read(dir.join(REPORT))
-            .with_context(|| format!("reading {}", dir.join(REPORT).display()))?,
-    )?;
-    let witnesses = report["witnesses"]
-        .as_object()
-        .with_context(|| format!("{} has no witnesses", dir.join(REPORT).display()))?;
+    let checks = verify::recipes_to_check(dir)?;
+    let names: Vec<&String> = checks.keys().collect();
     let root = std::env::current_dir()?;
     let reachable = arms::reachable()?;
-    let work = scratch()?;
-    let mut names: Vec<String> = Vec::new();
-    for e in std::fs::read_dir(dir.join(RECIPES))? {
-        let p = e?.path();
-        if p.extension().is_some_and(|x| x == "json") {
-            names.push(
-                p.file_stem()
-                    .unwrap_or_default()
-                    .to_string_lossy()
-                    .into_owned(),
-            );
-        }
-    }
-    names.sort();
+    let scratch = scratch()?;
+    let work = scratch.path();
     let next = std::sync::atomic::AtomicUsize::new(0);
     let results = std::sync::Mutex::new(Vec::new());
     std::thread::scope(|s| -> Result<()> {
@@ -601,20 +598,16 @@ fn verify_dir(dir: &Path, repeat: usize, jobs: usize, pins: &Path) -> Result<boo
                 loop {
                     let i = next.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
                     let Some(name) = names.get(i) else { break };
-                    let credited: BTreeSet<String> = witnesses
-                        .iter()
-                        .filter(|(_, w)| w["recipe"].as_str() == Some(name.as_str()))
-                        .map(|(a, _)| a.clone())
-                        .collect();
+                    let credited = &checks[name.as_str()];
                     let checked = match IrRecipe::load(
                         &dir.join(RECIPES).join(format!("{name}.json")),
                         &root,
                     ) {
-                        Ok(recipe) => verify::check(
-                            name, &recipe, &credited, &image, &reachable, &work, repeat,
-                        ),
+                        Ok(recipe) => {
+                            verify::check(name, &recipe, credited, &image, &reachable, work, repeat)
+                        }
                         Err(e) => verify::Checked {
-                            recipe: name.clone(),
+                            recipe: name.to_string(),
                             runs: Vec::new(),
                             problems: vec![format!("{e:#}")],
                         },
@@ -639,6 +632,7 @@ fn verify_dir(dir: &Path, repeat: usize, jobs: usize, pins: &Path) -> Result<boo
         }
         Ok(())
     })?;
+    close(scratch)?;
     let mut results = results
         .into_inner()
         .expect("no thread panics holding the lock");
@@ -673,29 +667,33 @@ fn pairs(recipes: &Path, max: usize, jobs: usize, out: &Path, pins: &Path) -> Re
     let root = std::env::current_dir()?;
     let wasms = shapekit_explore::contract::load_all(&root)?;
     let mut irs = Vec::new();
-    let mut files: Vec<PathBuf> = std::fs::read_dir(recipes)
-        .with_context(|| format!("reading {}", recipes.display()))?
-        .filter_map(|e| e.ok().map(|e| e.path()))
-        .filter(|p| p.extension().is_some_and(|x| x == "json"))
-        .collect();
+    let mut files: Vec<PathBuf> = Vec::new();
+    for e in std::fs::read_dir(recipes).with_context(|| format!("reading {}", recipes.display()))? {
+        let p = e
+            .with_context(|| format!("reading {}", recipes.display()))?
+            .path();
+        if p.extension().is_some_and(|x| x == "json") {
+            files.push(p);
+        }
+    }
     files.sort();
     for f in files {
         let name = f
             .file_stem()
-            .unwrap_or_default()
-            .to_string_lossy()
-            .into_owned();
+            .and_then(|n| n.to_str())
+            .with_context(|| format!("{} has no UTF-8 file name", f.display()))?
+            .to_owned();
         irs.push((name, shapekit_gen::recipe::ir::load(&f)?));
     }
-    let mut cands = pairs::candidates(&irs);
+    let cands = pairs::candidates(&irs);
     let total = cands.len();
     // one candidate per recipe and rewrite first, so a small budget still sees every kind
-    let mut seen = BTreeSet::new();
-    cands.sort_by_key(|c| !seen.insert((c.from.clone(), c.rewrite as u8)));
+    let mut cands = pairs::firsts_first(cands, |c| (c.from.clone(), c.rewrite as u8));
     cands.truncate(max);
     let schema = Schema::pinned();
     let reachable = arms::reachable()?;
-    let work = scratch()?;
+    let scratch = scratch()?;
+    let work = scratch.path();
     let seenf = Seen::default();
     let env = Env {
         schema: &schema,
@@ -704,7 +702,7 @@ fn pairs(recipes: &Path, max: usize, jobs: usize, out: &Path, pins: &Path) -> Re
         release: &image,
         root: &root,
         reachable: &reachable,
-        work: &work,
+        work,
         seen: &seenf,
         contracts: &wasms,
     };
@@ -757,6 +755,7 @@ fn pairs(recipes: &Path, max: usize, jobs: usize, out: &Path, pins: &Path) -> Re
             });
         }
     });
+    close(scratch)?;
     let results = results
         .into_inner()
         .expect("no thread panics holding the lock");
@@ -803,6 +802,20 @@ fn recipe_files(dir: &Path, out: &mut Vec<PathBuf>) -> Result<()> {
     Ok(())
 }
 
+/// `<directory>.<file stem>`: how `explore gates` names a recipe file.
+fn recipe_name(f: &Path) -> Result<String> {
+    let dir = f
+        .parent()
+        .and_then(|p| p.file_name())
+        .and_then(|n| n.to_str())
+        .with_context(|| format!("{} has no UTF-8 directory name", f.display()))?;
+    let stem = f
+        .file_stem()
+        .and_then(|n| n.to_str())
+        .with_context(|| format!("{} has no UTF-8 file name", f.display()))?;
+    Ok(format!("{dir}.{stem}"))
+}
+
 fn gates_cmd(
     gates_path: &Path,
     dirs: &[PathBuf],
@@ -820,39 +833,46 @@ fn gates_cmd(
     let protocols = parse_protocols(protocol)?;
     let release = CoreImage::from_pins(pins)
         .with_context(|| format!("reading the core image pin from {}", pins.display()))?;
-    let twin = CoreImage::from_pins(twin_pins)
-        .with_context(|| format!("reading the twin image pin from {}", twin_pins.display()))?;
+    let twin = crate::twin_cmd::twin_image(twin_pins)?;
     let mut files = Vec::new();
     for d in dirs {
         recipe_files(d, &mut files)?;
     }
     files.sort();
-    let mut recipes = Vec::new();
+    let mut recipes: Vec<(String, shapekit_contracts::RecipeIr, String)> = Vec::new();
+    let mut named: std::collections::BTreeMap<String, &PathBuf> = Default::default();
     for f in &files {
         let ir = shapekit_gen::recipe::ir::load(f)?;
-        let name = format!(
-            "{}.{}",
-            f.parent()
-                .and_then(|p| p.file_name())
-                .unwrap_or_default()
-                .to_string_lossy(),
-            f.file_stem().unwrap_or_default().to_string_lossy()
-        );
-        recipes.push((name, ir));
+        let name = recipe_name(f)?;
+        // runs, witnesses and the sides file all name a recipe by this alone
+        if let Some(other) = named.insert(name.clone(), f) {
+            bail!(
+                "{} and {} are both named {name}; recipes of one call need distinct <directory>.<file stem> names",
+                other.display(),
+                f.display()
+            );
+        }
+        let hash = gates::recipe_hash(&ir)?;
+        recipes.push((name, ir, hash));
     }
+    let current: BTreeSet<(&str, &str)> = recipes
+        .iter()
+        .map(|(n, _, h)| (n.as_str(), h.as_str()))
+        .collect();
     let root = std::env::current_dir()?;
-    let runs_dir = out.join("runs");
-    std::fs::create_dir_all(&runs_dir)?;
+    let runs_dir = gates::runs_dir(out, &twin)?;
+    std::fs::create_dir_all(&runs_dir)
+        .with_context(|| format!("creating {}", runs_dir.display()))?;
     let done: BTreeSet<String> = gates::load_all(&runs_dir)?
         .iter()
-        .map(|r| r.name())
+        .map(|r| r.key())
         .collect();
     // genesis and padded references at every protocol, then each recipe at every protocol
     let mut todo: Vec<(RunKind, Option<usize>, u32)> = Vec::new();
     for &p in &protocols {
         todo.push((RunKind::Genesis, None, p));
         todo.push((RunKind::Padded, None, p));
-        for (i, (_, ir)) in recipes.iter().enumerate() {
+        for (i, (_, ir, _)) in recipes.iter().enumerate() {
             // a recipe that uploads code runs only where the host accepts that code
             if p >= gates::lowest_protocol(ir, &root)? {
                 todo.push((RunKind::Recipe, Some(i), p));
@@ -865,7 +885,10 @@ fn gates_cmd(
         (_, Some(i)) => format!("{}@p{p}", recipes[*i].0),
         _ => unreachable!("a recipe run names its recipe"),
     };
-    todo.retain(|t| !done.contains(&name_of(t)));
+    let key_of = |t: &(RunKind, Option<usize>, u32)| {
+        gates::run_key(&name_of(t), t.1.map(|i| recipes[i].2.as_str()))
+    };
+    todo.retain(|t| !done.contains(&key_of(t)));
     println!(
         "{} recipes at {} protocols: {} runs recorded before, {} to record",
         recipes.len(),
@@ -876,7 +899,8 @@ fn gates_cmd(
     let schema = Schema::pinned();
     let reachable = arms::reachable()?;
     let wasms = shapekit_explore::contract::load_all(&root)?;
-    let work = scratch()?;
+    let scratch = scratch()?;
+    let work = scratch.path();
     let seen = Seen::default();
     let env = Env {
         schema: &schema,
@@ -885,7 +909,7 @@ fn gates_cmd(
         release: &release,
         root: &root,
         reachable: &reachable,
-        work: &work,
+        work,
         seen: &seen,
         contracts: &wasms,
     };
@@ -904,6 +928,7 @@ fn gates_cmd(
                             gates::genesis(&env, *p).map(|counts| gates::GateRun {
                                 kind: RunKind::Genesis,
                                 recipe: None,
+                                recipe_sha256: None,
                                 protocol: *p,
                                 counts,
                                 answers: Vec::new(),
@@ -911,7 +936,7 @@ fn gates_cmd(
                         }
                         (RunKind::Padded, _, p) => gates::record(&env, None, *p),
                         (_, Some(r), p) => {
-                            let (n, ir) = &recipes[*r];
+                            let (n, ir, _) = &recipes[*r];
                             gates::record(&env, Some((n, ir)), *p)
                         }
                         _ => unreachable!("a recipe run names its recipe"),
@@ -930,11 +955,30 @@ fn gates_cmd(
             });
         }
     });
-    let runs = gates::load_all(&runs_dir)?;
-    let sides = gates::side_witnesses(&list, &runs);
+    close(scratch)?;
+    // this call's runs: the references and exactly these recipes at exactly these protocols.
+    // runs of other recipes, of an earlier version of one or at other protocols stay saved
+    // for the call that asks for them, but are not what this call's output describes
+    let runs: Vec<gates::GateRun> = gates::load_all(&runs_dir)?
+        .into_iter()
+        .filter(|r| protocols.contains(&r.protocol))
+        .filter(|r| match (&r.recipe, &r.recipe_sha256) {
+            (Some(n), Some(h)) => current.contains(&(n.as_str(), h.as_str())),
+            _ => r.kind != RunKind::Recipe,
+        })
+        .collect();
+    // a reference run that failed or was never recorded leaves its protocol's recipe runs
+    // with nothing to subtract, so nothing is written until every reference is there
+    gates::references(&runs, &protocols).with_context(|| {
+        format!(
+            "not writing {}; rerun to record the missing references",
+            out.join("explore-gate-sides.json").display()
+        )
+    })?;
+    let sides = gates::side_witnesses(&list, &runs)?;
     // the counts below describe what these runs alone show; the gate list itself is written
     // by `twin gates` and its owner, which take this file as one input
-    let (summary, diffs) = gates::statuses(&mut list, &runs);
+    let (summary, diffs) = gates::statuses(&mut list, &runs)?;
     let file = gates::GateSides {
         schema_version: 1,
         core: list.core.clone(),
@@ -943,7 +987,7 @@ fn gates_cmd(
         recipes: recipes
             .iter()
             .zip(&files)
-            .map(|((n, ir), f)| gates::RecipeRef {
+            .map(|((n, ir, _), f)| gates::RecipeRef {
                 name: n.clone(),
                 id: ir.id.clone(),
                 protocol: ir.protocol,
@@ -990,7 +1034,8 @@ fn pair(a: &Path, b: &Path, only: Option<&str>, out: &Path, pins: &Path) -> Resu
     let image = CoreImage::from_pins(pins)
         .with_context(|| format!("reading the core image pin from {}", pins.display()))?;
     let root = std::env::current_dir()?;
-    let work = scratch()?;
+    let scratch = scratch()?;
+    let work = scratch.path();
     let mut states = Vec::new();
     for (name, file) in [("a", a), ("b", b)] {
         let ir = IrRecipe::load(file, &root)?;
@@ -999,7 +1044,7 @@ fn pair(a: &Path, b: &Path, only: Option<&str>, out: &Path, pins: &Path) -> Resu
         let mut last = None;
         for n in Network::BOTH {
             let (hash, lcm) =
-                verify::record_into(&ir, n, &image, &work, &out.join(name).join(n.name()))?;
+                verify::record_into(&ir, n, &image, work, &out.join(name).join(n.name()))?;
             println!("{name} ({}): canonical stream {hash}", n.name());
             if n == Network::Testnet {
                 last = Some(lcm);
@@ -1017,6 +1062,7 @@ fn pair(a: &Path, b: &Path, only: Option<&str>, out: &Path, pins: &Path) -> Resu
         }
         states.push(state);
     }
+    close(scratch)?;
     let rows = compare(&states[0], &states[1])?;
     let equal = !rows.is_empty() && rows.iter().all(|r| r.equal);
     let v = serde_json::json!({
@@ -1040,4 +1086,46 @@ fn pair(a: &Path, b: &Path, only: Option<&str>, out: &Path, pins: &Path) -> Resu
         }
     );
     Ok(equal)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn a_rerun_that_cannot_cover_keeps_the_chains_entries() {
+        let chain = Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../../corpus/chains/cap01.bump-sequence.p30");
+        let lane = tempfile::tempdir().unwrap();
+        let run = |credited: Option<&BTreeSet<String>>| {
+            chain_entries(
+                &chain,
+                "cap01.bump-sequence.p30".into(),
+                "corpus/recipes/cap01.bump-sequence/bump-sequence.json".into(),
+                "explore.witnesses".into(),
+                "t".into(),
+                "A test.".into(),
+                credited,
+                false,
+                lane.path(),
+            )
+        };
+        assert!(run(None).unwrap());
+        let family = lane.path().join("entries/explore.witnesses");
+        let before = std::fs::read_dir(&family).unwrap().count();
+        assert!(before > 0);
+        // an arm no ledger of the chain holds: the cover fails, and nothing is removed
+        let missing = BTreeSet::from(["NoSuchType::NoSuchArm".to_owned()]);
+        assert!(run(Some(&missing)).is_err());
+        assert_eq!(std::fs::read_dir(&family).unwrap().count(), before);
+    }
+
+    #[test]
+    fn recipe_names_are_directory_and_stem() {
+        assert_eq!(
+            recipe_name(Path::new("candidate/recipes/g2/r0003.json")).unwrap(),
+            "g2.r0003"
+        );
+        assert!(recipe_name(Path::new("r0003.json")).is_err());
+    }
 }

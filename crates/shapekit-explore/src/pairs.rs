@@ -181,6 +181,20 @@ pub struct Candidate {
     pub b: Step,
 }
 
+/// `items` with the first of each key ahead of the rest, each part in its original order.
+/// Whether an item is the first of its key is decided once, in the original order, before
+/// anything moves.
+pub fn firsts_first<T, K: Ord>(items: Vec<T>, key: impl Fn(&T) -> K) -> Vec<T> {
+    let mut seen = std::collections::BTreeSet::new();
+    let mut flagged: Vec<(bool, T)> = items
+        .into_iter()
+        .map(|t| (seen.insert(key(&t)), t))
+        .collect();
+    // stable, so each part keeps its order
+    flagged.sort_by_key(|(first, _)| !*first);
+    flagged.into_iter().map(|(_, t)| t).collect()
+}
+
 /// Every candidate in `recipes` (name and recipe): each successful transaction that a close
 /// follows, under each rewrite that changes it.
 pub fn candidates(recipes: &[(String, shapekit_contracts::RecipeIr)]) -> Vec<Candidate> {
@@ -290,6 +304,16 @@ pub fn run_candidate(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn firsts_of_each_key_come_first_in_order() {
+        let items = vec![("a", 1), ("a", 2), ("b", 1), ("a", 3), ("b", 2), ("c", 1)];
+        let got = firsts_first(items, |(k, _)| *k);
+        assert_eq!(
+            got,
+            vec![("a", 1), ("b", 1), ("c", 1), ("a", 2), ("a", 3), ("b", 2)]
+        );
+    }
     use shapekit_contracts::recipe_ir::TxExpect;
 
     fn tx(ops: Vec<Value>) -> Step {

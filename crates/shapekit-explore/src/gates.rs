@@ -10,9 +10,9 @@
 //! each transaction: the output difference the gate makes, when a recipe shows one.
 
 use std::collections::{BTreeMap, BTreeSet};
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
-use anyhow::{Context, Result};
+use anyhow::{Context, Result, bail};
 use serde::Serialize;
 use shapekit_contracts::RecipeIr;
 use shapekit_contracts::gates::{Branch, Gate, GateList};
@@ -26,7 +26,7 @@ use shapekit_twin::coverage::{Counts, merge_and_export};
 use crate::coverage::{count_at, read_export_all};
 use crate::episode::{self, Env, Spec};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, serde::Deserialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum RunKind {
     /// Only ledger 2, which upgrades from protocol 0.
@@ -41,6 +41,9 @@ pub struct GateRun {
     pub kind: RunKind,
     /// The recipe's name, for a recipe run.
     pub recipe: Option<String>,
+    /// [`recipe_hash`] of the recipe, for a recipe run: a saved run is reused only for the
+    /// recipe it was recorded from, not for another file that has its name.
+    pub recipe_sha256: Option<String>,
     pub protocol: u32,
     pub counts: Counts,
     /// What core answered each transaction, in order.
@@ -55,6 +58,37 @@ impl GateRun {
             _ => format!("empty-ledgers@p{}", self.protocol),
         }
     }
+
+    /// The name its files are saved under: the run's name, and for a recipe run the recipe's
+    /// hash as well.
+    pub fn key(&self) -> String {
+        run_key(&self.name(), self.recipe_sha256.as_deref())
+    }
+}
+
+/// [`GateRun::key`] of a run named `name` of a recipe hashing to `recipe_sha256`.
+pub fn run_key(name: &str, recipe_sha256: Option<&str>) -> String {
+    match recipe_sha256 {
+        Some(h) => format!("{name}.{h}"),
+        None => name.to_owned(),
+    }
+}
+
+/// Hex sha256 of a recipe's IR as JSON: what a saved recipe run was recorded from. The IR
+/// names its code by hash, so the hash covers the code as well.
+pub fn recipe_hash(ir: &RecipeIr) -> Result<String> {
+    use sha2::{Digest, Sha256};
+    Ok(hex::encode(Sha256::digest(serde_json::to_vec(ir)?)))
+}
+
+/// Where the runs recorded on `twin` under `out` are kept: a directory per twin image, so a
+/// rebuilt twin never reuses another build's counts.
+pub fn runs_dir(out: &Path, twin: &shapekit_core_driver::config::CoreImage) -> Result<PathBuf> {
+    let id = twin
+        .digest
+        .strip_prefix("sha256:")
+        .with_context(|| format!("twin image digest {} is not sha256:<hex>", twin.digest))?;
+    Ok(out.join("runs").join(id))
 }
 
 /// A recipe at another protocol: the chain is upgraded to `protocol` instead, and its own
@@ -71,16 +105,18 @@ pub fn at_protocol(ir: &RecipeIr, protocol: u32) -> RecipeIr {
         .steps
         .iter()
         .map(|s| match s {
+            // an upgrade of the protocol alone becomes a plain close, keeping its label
             Step::Upgrade {
+                label,
                 protocol_version: Some(_),
                 base_fee: None,
                 base_reserve: None,
                 max_tx_set_size: None,
+                max_soroban_tx_set_size: None,
                 flags: None,
                 config,
-                ..
             } if config.is_empty() => Step::Close {
-                label: None,
+                label: label.clone(),
                 order: Vec::new(),
             },
             Step::Upgrade { .. } => {
@@ -186,9 +222,14 @@ pub fn record(env: &Env<'_>, name: Option<(&str, &RecipeIr)>, protocol: u32) -> 
     };
     let mut menu = crate::action::OpMenu::empty();
     let ep = episode::run(env, &spec, &mut menu)?;
+    let recipe_sha256 = match name {
+        Some((_, ir)) => Some(recipe_hash(ir)?),
+        None => None,
+    };
     Ok(GateRun {
         kind,
         recipe,
+        recipe_sha256,
         protocol,
         counts: ep.counts.context("the twin wrote no counts")?,
         answers: ep.answers,
@@ -202,15 +243,66 @@ pub fn takes(gate: &Gate, branch: Branch, protocol: u32) -> bool {
         .any(|(lo, hi)| protocol >= *lo && hi.is_none_or(|h| protocol <= h))
 }
 
-/// How often a gate call ran during what is particular to `run` (see the module docs).
-fn own_count(gate: &Gate, run: &GateRun, refs: &BTreeMap<(RunKind, u32), &GateRun>) -> u64 {
+/// How often a gate call ran during what is particular to `run` (see the module docs), or
+/// `None` when the run it is measured against is missing: without it the setup and padding
+/// ledgers' calls would count as the run's own.
+fn own_count(gate: &Gate, run: &GateRun, refs: &BTreeMap<(RunKind, u32), &GateRun>) -> Option<u64> {
     let at = |r: &GateRun| count_at(&r.counts, &gate.file, gate.line, gate.column).unwrap_or(0);
     let base = match run.kind {
-        RunKind::Recipe => refs.get(&(RunKind::Padded, run.protocol)),
-        RunKind::Padded => refs.get(&(RunKind::Genesis, run.protocol)),
-        RunKind::Genesis => None,
+        RunKind::Recipe => *refs.get(&(RunKind::Padded, run.protocol))?,
+        RunKind::Padded => *refs.get(&(RunKind::Genesis, run.protocol))?,
+        RunKind::Genesis => return Some(at(run)),
     };
-    at(run).saturating_sub(base.map_or(0, |b| at(b)))
+    Some(at(run).saturating_sub(at(base)))
+}
+
+/// The genesis and padded runs of `runs` by kind and protocol, once every protocol a run in
+/// `runs` is at, and every one of `protocols`, has both. A side counted against a missing
+/// reference would take the reference's own calls as the recipe's, so nothing is counted
+/// until they are all there.
+pub fn references<'a>(
+    runs: &'a [GateRun],
+    protocols: &[u32],
+) -> Result<BTreeMap<(RunKind, u32), &'a GateRun>> {
+    let mut refs = BTreeMap::new();
+    for r in runs.iter().filter(|r| r.kind != RunKind::Recipe) {
+        if refs.insert((r.kind, r.protocol), r).is_some() {
+            bail!("two {} runs", r.name());
+        }
+    }
+    let wanted: BTreeSet<u32> = runs
+        .iter()
+        .map(|r| r.protocol)
+        .chain(protocols.iter().copied())
+        .collect();
+    let missing: Vec<String> = wanted
+        .iter()
+        .flat_map(|p| {
+            [
+                (RunKind::Genesis, "genesis"),
+                (RunKind::Padded, "empty-ledgers"),
+            ]
+            .into_iter()
+            .filter(|(k, _)| !refs.contains_key(&(*k, *p)))
+            .map(move |(_, n)| format!("{n}@p{p}"))
+        })
+        .collect();
+    if !missing.is_empty() {
+        bail!(
+            "reference runs missing: {}; no side is counted without them",
+            missing.join(", ")
+        );
+    }
+    Ok(refs)
+}
+
+/// [`own_count`] for a run whose references [`references`] checked.
+fn checked_own(
+    gate: &Gate,
+    run: &GateRun,
+    refs: &BTreeMap<(RunKind, u32), &GateRun>,
+) -> Result<u64> {
+    own_count(gate, run, refs).with_context(|| format!("{} has no reference run", run.name()))
 }
 
 /// One run that executed a gate call where the comparison takes the side.
@@ -268,36 +360,31 @@ pub struct GateSides {
     pub differences: Vec<GateDifference>,
 }
 
-/// The witnessing runs of every gate side.
-pub fn side_witnesses(list: &GateList, runs: &[GateRun]) -> Vec<SideWitnesses> {
-    let refs: BTreeMap<(RunKind, u32), &GateRun> = runs
-        .iter()
-        .filter(|r| r.kind != RunKind::Recipe)
-        .map(|r| ((r.kind, r.protocol), r))
-        .collect();
+/// The witnessing runs of every gate side. Fails when a reference run is missing.
+pub fn side_witnesses(list: &GateList, runs: &[GateRun]) -> Result<Vec<SideWitnesses>> {
+    let refs = references(runs, &[])?;
     let mut out = Vec::new();
     for gate in &list.gates {
         for branch in [Branch::True, Branch::False] {
-            let at =
-                |r: &GateRun| count_at(&r.counts, &gate.file, gate.line, gate.column).unwrap_or(0);
-            let mut side_runs: Vec<SideRun> = runs
+            let mut side_runs = Vec::new();
+            for r in runs
                 .iter()
                 .filter(|r| r.kind != RunKind::Genesis && takes(gate, branch, r.protocol))
-                .filter_map(|r| {
-                    let own = own_count(gate, r, &refs);
-                    (own > 0).then(|| {
-                        let count = at(r);
-                        SideRun {
-                            run: r.name(),
-                            kind: r.kind,
-                            recipe: r.recipe.clone(),
-                            protocol: r.protocol,
-                            count,
-                            reference_count: count - own,
-                        }
-                    })
-                })
-                .collect();
+            {
+                let own = checked_own(gate, r, &refs)?;
+                if own > 0 {
+                    let count =
+                        count_at(&r.counts, &gate.file, gate.line, gate.column).unwrap_or(0);
+                    side_runs.push(SideRun {
+                        run: r.name(),
+                        kind: r.kind,
+                        recipe: r.recipe.clone(),
+                        protocol: r.protocol,
+                        count,
+                        reference_count: count - own,
+                    });
+                }
+            }
             side_runs.sort_by(|a, b| a.run.cmp(&b.run));
             if !side_runs.is_empty() {
                 out.push(SideWitnesses {
@@ -310,7 +397,7 @@ pub fn side_witnesses(list: &GateList, runs: &[GateRun]) -> Vec<SideWitnesses> {
             }
         }
     }
-    out
+    Ok(out)
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -337,13 +424,12 @@ pub struct GateSummary {
 }
 
 /// Fills every side of every gate from the runs. Sides no run meets stay open, with what is
-/// known about them.
-pub fn statuses(list: &mut GateList, runs: &[GateRun]) -> (GateSummary, Vec<GateDifference>) {
-    let refs: BTreeMap<(RunKind, u32), &GateRun> = runs
-        .iter()
-        .filter(|r| r.kind != RunKind::Recipe)
-        .map(|r| ((r.kind, r.protocol), r))
-        .collect();
+/// known about them. Fails when a reference run is missing.
+pub fn statuses(
+    list: &mut GateList,
+    runs: &[GateRun],
+) -> Result<(GateSummary, Vec<GateDifference>)> {
+    let refs = references(runs, &[])?;
     let protocols: BTreeSet<u32> = runs.iter().map(|r| r.protocol).collect();
     let measured: BTreeSet<&String> = runs.iter().flat_map(|r| r.counts.keys()).collect();
     let mut s = GateSummary {
@@ -380,12 +466,15 @@ pub fn statuses(list: &mut GateList, runs: &[GateRun]) -> (GateSummary, Vec<Gate
                 s.unmeetable += 1;
                 continue;
             }
-            let mut witnesses: Vec<String> = runs
+            let mut witnesses = Vec::new();
+            for r in runs
                 .iter()
                 .filter(|r| r.kind != RunKind::Genesis && takes(g, branch, r.protocol))
-                .filter(|r| own_count(g, r, &refs) > 0)
-                .map(GateRun::name)
-                .collect();
+            {
+                if checked_own(g, r, &refs)? > 0 {
+                    witnesses.push(r.name());
+                }
+            }
             witnesses.sort();
             if witnesses.is_empty() {
                 side.status = ObligationStatus::Open;
@@ -448,7 +537,7 @@ pub fn statuses(list: &mut GateList, runs: &[GateRun]) -> (GateSummary, Vec<Gate
             };
             for (name, pair) in by_recipe {
                 let (Some(a), Some(b)) = pair else { continue };
-                if own_count(&g, a, &refs) == 0 || own_count(&g, b, &refs) == 0 {
+                if checked_own(&g, a, &refs)? == 0 || checked_own(&g, b, &refs)? == 0 {
                     continue;
                 }
                 if a.answers != b.answers {
@@ -465,7 +554,7 @@ pub fn statuses(list: &mut GateList, runs: &[GateRun]) -> (GateSummary, Vec<Gate
             }
         }
     }
-    (s, diffs)
+    Ok((s, diffs))
 }
 
 fn gate_clone(
@@ -487,53 +576,300 @@ fn gate_clone(
     }
 }
 
-/// Writes counts compactly so a run can be read back without recording it again.
+/// Writes `bytes` to `path` through a temporary file in the same directory, renamed into
+/// place: a run cut short leaves no partial file that a later call would read as recorded.
+fn write_atomic(path: &Path, write: impl FnOnce(&Path) -> Result<()>) -> Result<()> {
+    let dir = path
+        .parent()
+        .with_context(|| format!("{} has no directory", path.display()))?;
+    let tmp = tempfile::Builder::new()
+        .prefix(".partial-")
+        .tempfile_in(dir)
+        .with_context(|| format!("creating a temporary file in {}", dir.display()))?;
+    write(tmp.path())?;
+    tmp.persist(path)
+        .with_context(|| format!("renaming into {}", path.display()))?;
+    Ok(())
+}
+
+/// Writes a run compactly so it can be read back without recording it again: the counts
+/// first, then the run file, whose presence is what marks the run recorded.
 pub fn save(run: &GateRun, dir: &Path) -> Result<()> {
-    let path = dir.join(format!("{}.json", run.name()));
+    let key = run.key();
+    write_atomic(&dir.join(format!("{key}.counts.json")), |p| {
+        shapekit_twin::coverage::write_counts(p, &run.counts)
+    })?;
     let v = serde_json::json!({
         "kind": run.kind,
         "recipe": run.recipe,
+        "recipe_sha256": run.recipe_sha256,
         "protocol": run.protocol,
         "answers": run.answers,
     });
-    std::fs::write(&path, serde_json::to_vec(&v)?)
-        .with_context(|| format!("writing {}", path.display()))?;
-    shapekit_twin::coverage::write_counts(
-        &dir.join(format!("{}.counts.json", run.name())),
-        &run.counts,
-    )
+    let path = dir.join(format!("{key}.json"));
+    write_atomic(&path, |p| {
+        std::fs::write(p, serde_json::to_vec(&v)?)
+            .with_context(|| format!("writing {}", p.display()))
+    })
 }
 
-/// Reads back every run [`save`] wrote into `dir`.
+#[derive(serde::Deserialize)]
+#[serde(deny_unknown_fields)]
+struct SavedRun {
+    kind: RunKind,
+    recipe: Option<String>,
+    recipe_sha256: Option<String>,
+    protocol: u32,
+    answers: Vec<String>,
+}
+
+/// Reads back every run [`save`] wrote into `dir`, each under the key it was saved as.
 pub fn load_all(dir: &Path) -> Result<Vec<GateRun>> {
     let mut out = Vec::new();
     for e in std::fs::read_dir(dir).with_context(|| format!("reading {}", dir.display()))? {
-        let p = e?.path();
+        let p = e
+            .with_context(|| format!("reading {}", dir.display()))?
+            .path();
         let name = p
             .file_name()
-            .unwrap_or_default()
-            .to_string_lossy()
-            .into_owned();
-        let Some(stem) = name.strip_suffix(".json") else {
+            .and_then(|n| n.to_str())
+            .with_context(|| format!("{} has no UTF-8 name", p.display()))?;
+        if name.starts_with(".partial-") {
+            // a save cut short before its rename; the run was never recorded
             continue;
+        }
+        let Some(stem) = name.strip_suffix(".json") else {
+            bail!("{} is not a saved run", p.display());
         };
         if stem.ends_with(".counts") {
             continue;
         }
-        let v: serde_json::Value = serde_json::from_slice(&std::fs::read(&p)?)?;
-        let kind = match v["kind"].as_str() {
-            Some("genesis") => RunKind::Genesis,
-            Some("padded") => RunKind::Padded,
-            _ => RunKind::Recipe,
-        };
-        out.push(GateRun {
-            kind,
-            recipe: v["recipe"].as_str().map(str::to_owned),
-            protocol: v["protocol"].as_u64().unwrap_or(0) as u32,
+        let saved: SavedRun = serde_json::from_slice(
+            &std::fs::read(&p).with_context(|| format!("reading {}", p.display()))?,
+        )
+        .with_context(|| format!("parsing {}", p.display()))?;
+        let is_recipe = saved.kind == RunKind::Recipe;
+        if is_recipe != saved.recipe.is_some() || is_recipe != saved.recipe_sha256.is_some() {
+            bail!(
+                "{}: a recipe run, and only one, names its recipe and the recipe's hash",
+                p.display()
+            );
+        }
+        let run = GateRun {
+            kind: saved.kind,
+            recipe: saved.recipe,
+            recipe_sha256: saved.recipe_sha256,
+            protocol: saved.protocol,
             counts: shapekit_twin::coverage::read_counts(&dir.join(format!("{stem}.counts.json")))?,
-            answers: serde_json::from_value(v["answers"].clone()).unwrap_or_default(),
-        });
+            answers: saved.answers,
+        };
+        if run.key() != stem {
+            bail!("{} holds run {}", p.display(), run.key());
+        }
+        out.push(run);
     }
     out.sort_by_key(|r| (r.kind, r.protocol, r.recipe.clone()));
     Ok(out)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use shapekit_contracts::gates::Comparison;
+
+    fn upgrade(label: &str, protocol: Option<u32>, soroban_set: Option<u32>) -> Step {
+        Step::Upgrade {
+            label: Some(label.into()),
+            protocol_version: protocol,
+            base_fee: None,
+            base_reserve: None,
+            max_tx_set_size: None,
+            max_soroban_tx_set_size: soroban_set,
+            flags: None,
+            config: Vec::new(),
+        }
+    }
+
+    fn ir(steps: Vec<Step>) -> RecipeIr {
+        RecipeIr {
+            schema_version: 1,
+            id: "t.at".into(),
+            family: "t".into(),
+            protocol: 30,
+            node: Default::default(),
+            below_protocol_valid: false,
+            steps,
+        }
+    }
+
+    #[test]
+    fn another_protocol_keeps_labels_and_the_soroban_set_size() {
+        let out = at_protocol(
+            &ir(vec![
+                upgrade("to-21", Some(21), None),
+                upgrade("to-22", Some(22), Some(5)),
+            ]),
+            25,
+        );
+        assert_eq!(out.protocol, 25);
+        assert_eq!(
+            out.steps[0],
+            Step::Close {
+                label: Some("to-21".into()),
+                order: Vec::new(),
+            }
+        );
+        assert_eq!(out.steps[1], upgrade("to-22", None, Some(5)));
+    }
+
+    fn gate() -> Gate {
+        Gate {
+            file: "src/a.cpp".into(),
+            line: 10,
+            column: 5,
+            function: "f".into(),
+            comparison: Comparison::IsBefore,
+            version: 19,
+            sides: vec![],
+        }
+    }
+
+    fn run(kind: RunKind, recipe: Option<&str>, protocol: u32, count: u64) -> GateRun {
+        let mut counts = Counts::new();
+        counts.entry("src/a.cpp".into()).or_default().insert(
+            shapekit_twin::coverage::Span {
+                line_start: 10,
+                column_start: 5,
+                line_end: 10,
+                column_end: 30,
+            },
+            count,
+        );
+        GateRun {
+            kind,
+            recipe: recipe.map(str::to_owned),
+            recipe_sha256: recipe.map(|_| "ab".repeat(32)),
+            protocol,
+            counts,
+            answers: Vec::new(),
+        }
+    }
+
+    fn list() -> GateList {
+        GateList {
+            schema_version: 1,
+            core: shapekit_contracts::CoreRef {
+                version: "v30.0.0".into(),
+                commit: "0e49751aa9ddf892302cca02cea7f3f5d97df9f1".into(),
+                image: None,
+            },
+            gates: vec![gate()],
+        }
+    }
+
+    #[test]
+    fn a_recipe_run_without_its_padded_reference_counts_nothing() {
+        let runs = vec![
+            run(RunKind::Genesis, None, 18, 2),
+            run(RunKind::Recipe, Some("d.r"), 18, 7),
+        ];
+        let refs: BTreeMap<(RunKind, u32), &GateRun> = runs
+            .iter()
+            .filter(|r| r.kind != RunKind::Recipe)
+            .map(|r| ((r.kind, r.protocol), r))
+            .collect();
+        assert_eq!(own_count(&gate(), &runs[1], &refs), None);
+        let e = side_witnesses(&list(), &runs).unwrap_err();
+        assert!(format!("{e:#}").contains("empty-ledgers@p18"), "{e:#}");
+        assert!(statuses(&mut list(), &runs).is_err());
+    }
+
+    #[test]
+    fn a_requested_protocol_without_references_is_refused() {
+        let runs = vec![
+            run(RunKind::Genesis, None, 18, 2),
+            run(RunKind::Padded, None, 18, 4),
+        ];
+        assert!(references(&runs, &[18]).is_ok());
+        let e = references(&runs, &[18, 19]).unwrap_err();
+        let e = format!("{e:#}");
+        assert!(
+            e.contains("genesis@p19") && e.contains("empty-ledgers@p19"),
+            "{e}"
+        );
+    }
+
+    #[test]
+    fn calls_beyond_the_padded_reference_witness_the_side() {
+        let runs = vec![
+            run(RunKind::Genesis, None, 18, 2),
+            run(RunKind::Padded, None, 18, 4),
+            run(RunKind::Recipe, Some("d.r"), 18, 4),
+            run(RunKind::Genesis, None, 17, 2),
+            run(RunKind::Padded, None, 17, 2),
+            run(RunKind::Recipe, Some("d.r"), 17, 6),
+        ];
+        let sides = side_witnesses(&list(), &runs).unwrap();
+        // true side (before 19): the p18 recipe ran nothing of its own, the p18 padding did
+        let names: Vec<&str> = sides[0].runs.iter().map(|r| r.run.as_str()).collect();
+        assert_eq!(names, vec!["d.r@p17", "empty-ledgers@p18"]);
+        assert_eq!(sides[0].runs[0].reference_count, 2);
+    }
+
+    #[test]
+    fn saved_runs_read_back_under_their_recipe_hash() {
+        let dir = tempfile::tempdir().unwrap();
+        let runs = vec![
+            run(RunKind::Genesis, None, 18, 2),
+            run(RunKind::Padded, None, 18, 4),
+            run(RunKind::Recipe, Some("d.r"), 18, 7),
+        ];
+        for r in &runs {
+            save(r, dir.path()).unwrap();
+        }
+        // a save cut short leaves only its temporary file
+        std::fs::write(dir.path().join(".partial-x"), "{").unwrap();
+        let back = load_all(dir.path()).unwrap();
+        let keys: Vec<String> = back.iter().map(GateRun::key).collect();
+        assert_eq!(
+            keys,
+            vec![
+                "genesis@p18".to_owned(),
+                "empty-ledgers@p18".to_owned(),
+                format!("d.r@p18.{}", "ab".repeat(32)),
+            ]
+        );
+        assert_eq!(back[2].counts, runs[2].counts);
+        // a recipe run file without the recipe's hash is refused, not taken as any recipe's
+        std::fs::write(
+            dir.path().join("x.r@p18.json"),
+            r#"{"kind":"recipe","recipe":"x.r","recipe_sha256":null,"protocol":18,"answers":[]}"#,
+        )
+        .unwrap();
+        assert!(load_all(dir.path()).is_err());
+    }
+
+    #[test]
+    fn a_changed_recipe_has_another_hash_and_each_twin_its_own_runs() {
+        let a = ir(vec![upgrade("to-21", Some(21), None)]);
+        let b = ir(vec![upgrade("to-22", Some(22), None)]);
+        assert_ne!(recipe_hash(&a).unwrap(), recipe_hash(&b).unwrap());
+        assert_eq!(recipe_hash(&a).unwrap(), recipe_hash(&a.clone()).unwrap());
+        let twin = |d: &str| shapekit_core_driver::config::CoreImage {
+            repository: "shapekit/core-twin".into(),
+            tag: "t".into(),
+            digest: format!("sha256:{d}"),
+            local: true,
+            profile_dir: None,
+        };
+        let out = Path::new("out");
+        assert_ne!(
+            runs_dir(out, &twin(&"1".repeat(64))).unwrap(),
+            runs_dir(out, &twin(&"2".repeat(64))).unwrap()
+        );
+        assert_eq!(
+            runs_dir(out, &twin(&"1".repeat(64))).unwrap(),
+            Path::new("out/runs").join("1".repeat(64))
+        );
+    }
 }
