@@ -20,5 +20,7 @@ fi
 rm -rf "$root/target/testees/kmp/$version"
 mvn -B -q -f "$pom" -DskipTests package
 cd "$root/target/testees/kmp/$version/lib"
-LC_ALL=C sha256sum -- *.jar > "$root/testees/kmp/versions/$version/lib.sha256"
+# the jacoco agent jar the coverage build starts with sits next to lib/, so it is listed with
+# its path from there and checked by the same sha256sum --check
+LC_ALL=C sha256sum -- *.jar ../jacocoagent.jar > "$root/testees/kmp/versions/$version/lib.sha256"
 echo "wrote testees/kmp/versions/$version/lib.sha256 ($(wc -l < "$root/testees/kmp/versions/$version/lib.sha256") jars)"
