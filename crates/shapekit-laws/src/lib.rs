@@ -102,8 +102,9 @@ pub struct Report {
     pub protocols: BTreeMap<u32, u64>,
     pub laws: BTreeMap<Law, Tally>,
     /// Instances a law could not decide, by law: created contracts whose preimage is not in a
-    /// top-level host function, tx sets with the empty-set hash core skips the check for, and
-    /// ledgers checked without a network id.
+    /// top-level host function, tx sets with the empty-set hash core skips the check for,
+    /// ledgers checked without a network id, and ledgers that do not follow the ledger checked
+    /// before them (header chain).
     pub undecided: BTreeMap<Law, u64>,
     pub violations: Vec<Violation>,
 }
@@ -168,14 +169,39 @@ pub enum Input {
     Batch,
 }
 
+impl Input {
+    /// The decode depth bound for one input of this type. A ledger gets
+    /// [`shapekit_manifest::META_DEPTH`], the bound every crate decodes ledgers with; a batch
+    /// holds its ledgers two levels further down (the batch struct and its ledger array).
+    /// Without a bound a deeply nested input overflows the stack instead of failing to decode.
+    pub fn depth(self) -> u32 {
+        match self {
+            Input::Ledger => shapekit_manifest::META_DEPTH,
+            Input::Batch => shapekit_manifest::META_DEPTH + 2,
+        }
+    }
+}
+
+/// `depth` with the length budget set to the bytes being decoded, so a decoder can never be
+/// talked into allocating more than it was given.
+fn limits(depth: u32, bytes: &[u8]) -> Limits {
+    Limits {
+        depth,
+        len: bytes.len(),
+    }
+}
+
 /// The encoding laws over raw bytes of type `T`: the bytes decode and re-encode to themselves,
 /// and the two nearest non-canonical neighbours (a trailing zero word, the last byte cut) do not
-/// decode. Returns the decoded value when the input decodes at all.
+/// decode. Every decode is bounded by `depth` (see [`Input::depth`]). Returns the decoded
+/// value when the input decodes at all.
 pub fn check_encoding<T: ReadXdr + WriteXdr>(
     bytes: &[u8],
+    depth: u32,
     report: &mut Report,
 ) -> Result<T, stellar_xdr::Error> {
-    let value = T::from_xdr(bytes, Limits::none())?;
+    let value = T::from_xdr(bytes, limits(depth, bytes))?;
+    // the value decoded within `depth`, so encoding it again recurses no deeper
     let again = value.to_xdr(Limits::none());
     let failure = match again {
         Ok(b) if b == bytes => None,
@@ -192,10 +218,10 @@ pub fn check_encoding<T: ReadXdr + WriteXdr>(
     longer.extend_from_slice(&[0; 4]);
     let shorter = &bytes[..bytes.len().saturating_sub(1)];
     let mut failures = Vec::new();
-    if T::from_xdr(&longer, Limits::none()).is_ok() {
+    if T::from_xdr(&longer, limits(depth, &longer)).is_ok() {
         failures.push("the input plus a trailing zero word decodes");
     }
-    if T::from_xdr(shorter, Limits::none()).is_ok() {
+    if T::from_xdr(shorter, limits(depth, shorter)).is_ok() {
         failures.push("the input without its last byte decodes");
     }
     report.record(
@@ -244,11 +270,13 @@ impl Checker {
     pub fn bytes(&mut self, bytes: &[u8], input: Input) -> Result<(), stellar_xdr::Error> {
         match input {
             Input::Ledger => {
-                let lcm = check_encoding::<LedgerCloseMeta>(bytes, &mut self.report)?;
+                let lcm =
+                    check_encoding::<LedgerCloseMeta>(bytes, input.depth(), &mut self.report)?;
                 self.ledger(&lcm);
             }
             Input::Batch => {
-                let batch = check_encoding::<LedgerCloseMetaBatch>(bytes, &mut self.report)?;
+                let batch =
+                    check_encoding::<LedgerCloseMetaBatch>(bytes, input.depth(), &mut self.report)?;
                 for lcm in batch.ledger_close_metas.iter() {
                     self.ledger(lcm);
                 }
@@ -258,34 +286,68 @@ impl Checker {
     }
 
     /// Checks every ledger law on one decoded ledger, the header chain against the ledger
-    /// checked just before it when that one is its direct predecessor.
+    /// checked just before it when that one is its direct predecessor. A ledger that follows
+    /// another one but not its predecessor (a gap, a repeat or a step back between inputs)
+    /// leaves the header chain undecided: the ledger its `previousLedgerHash` names was never
+    /// seen, so the law can neither hold nor fail.
     pub fn ledger(&mut self, lcm: &LedgerCloseMeta) {
         let (seq, hash, prev_hash) =
             ledger::check_ledger(lcm, self.network.as_ref(), &mut self.report);
-        if let Some(p) = &self.previous
-            && p.seq.checked_add(1) == Some(seq)
-        {
-            let failure = (prev_hash != p.hash).then(|| {
-                format!(
-                    "previousLedgerHash {} is not the hash {} of ledger {}",
-                    hex::encode(prev_hash),
-                    hex::encode(p.hash),
-                    p.seq
-                )
-            });
-            self.report.record(Law::HeaderChain, Some(seq), failure);
+        match &self.previous {
+            Some(p) if p.seq.checked_add(1) == Some(seq) => {
+                let failure = (prev_hash != p.hash).then(|| {
+                    format!(
+                        "previousLedgerHash {} is not the hash {} of ledger {}",
+                        hex::encode(prev_hash),
+                        hex::encode(p.hash),
+                        p.seq
+                    )
+                });
+                self.report.record(Law::HeaderChain, Some(seq), failure);
+            }
+            Some(_) => self.report.undecided(Law::HeaderChain),
+            None => {}
         }
         self.previous = Some(Previous { seq, hash });
     }
 }
 
 /// Reads an input file: zstd frames are decompressed first (SEP-54 lake objects are
-/// `.xdr.zst`).
+/// `.xdr.zst`). A frame that decompresses to more than
+/// [`shapekit_pack::lake::MAX_BATCH_LEN`] bytes is refused as corrupt, the bound every lake
+/// reader uses, rather than read into memory whatever its size.
 pub fn read_input(bytes: Vec<u8>) -> std::io::Result<Vec<u8>> {
     const ZSTD_MAGIC: [u8; 4] = [0x28, 0xb5, 0x2f, 0xfd];
     if bytes.starts_with(&ZSTD_MAGIC) {
-        zstd::decode_all(bytes.as_slice())
+        decompress_at_most(&bytes, shapekit_pack::lake::MAX_BATCH_LEN)
     } else {
         Ok(bytes)
+    }
+}
+
+fn decompress_at_most(frame: &[u8], max: u64) -> std::io::Result<Vec<u8>> {
+    use std::io::Read;
+    let mut out = Vec::new();
+    zstd::stream::Decoder::new(frame)?
+        .take(max + 1)
+        .read_to_end(&mut out)?;
+    if out.len() as u64 > max {
+        return Err(std::io::Error::new(
+            std::io::ErrorKind::InvalidData,
+            format!("decompresses to more than {max} bytes"),
+        ));
+    }
+    Ok(out)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::decompress_at_most;
+
+    #[test]
+    fn a_frame_past_the_bound_is_refused() {
+        let frame = zstd::encode_all(&[1u8, 2, 3][..], 1).unwrap();
+        assert_eq!(decompress_at_most(&frame, 3).unwrap(), [1, 2, 3]);
+        assert!(decompress_at_most(&frame, 2).is_err());
     }
 }

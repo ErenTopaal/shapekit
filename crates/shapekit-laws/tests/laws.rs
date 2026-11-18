@@ -173,8 +173,19 @@ fn the_chain_law_links_consecutive_ledgers() {
     next.ledger_header.header.previous_ledger_hash.0[0] ^= 1;
     let mut c = Checker::new(&pass);
     c.ledger(&lcm);
-    c.ledger(&LedgerCloseMeta::V2(next));
+    c.ledger(&LedgerCloseMeta::V2(next.clone()));
     assert_eq!(c.report.laws[&Law::HeaderChain].violated, 1);
+
+    // a gap, a step back and a repeat leave the chain undecided rather than unchecked
+    let mut after_gap = v.clone();
+    after_gap.ledger_header.header.ledger_seq += 2;
+    let mut c = Checker::new(&pass);
+    c.ledger(&lcm);
+    c.ledger(&LedgerCloseMeta::V2(after_gap));
+    c.ledger(&lcm);
+    c.ledger(&lcm);
+    assert_eq!(c.report.laws[&Law::HeaderChain].checked, 0);
+    assert_eq!(c.report.undecided.get(&Law::HeaderChain), Some(&3));
 }
 
 #[test]

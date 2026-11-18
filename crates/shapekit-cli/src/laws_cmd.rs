@@ -13,7 +13,9 @@ pub enum LawsCommand {
     /// corpus. Exits 1 when a law fails.
     Check {
         /// LedgerCloseMeta files, checked in the order given; consecutive ledgers are also
-        /// checked against each other. zstd-compressed files are decompressed first.
+        /// checked against each other, and a ledger that does not follow the one before it
+        /// (a gap, a repeat or a step back) counts as undecided for header-chain.
+        /// zstd-compressed files are decompressed first.
         #[arg(long, num_args = 1.., required_unless_present = "corpus", conflicts_with = "corpus")]
         lcm: Vec<PathBuf>,
         /// The network passphrase the ledgers were closed under.

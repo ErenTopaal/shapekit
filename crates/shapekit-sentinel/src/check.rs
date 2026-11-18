@@ -6,7 +6,7 @@ use std::collections::BTreeMap;
 use anyhow::{Context, Result, ensure};
 use shapekit_contracts::AuditReport;
 use shapekit_contracts::audit::{EnvelopeCounts, LawResult, Violation};
-use shapekit_laws::{Checker, Law, check_encoding};
+use shapekit_laws::{Checker, Input, Law, check_encoding};
 use stellar_xdr::{LedgerCloseMeta, LedgerCloseMetaBatch, LedgerHeaderHistoryEntry};
 
 use crate::lake::{Network, Object, decompress};
@@ -100,8 +100,12 @@ impl Audit {
         self.compressed_bytes += object.bytes.len() as u64;
         self.raw_bytes += raw.len() as u64;
         let before = self.checker.report.violations.len();
-        let batch = check_encoding::<LedgerCloseMetaBatch>(&raw, &mut self.checker.report)
-            .with_context(|| format!("{} does not decode as LedgerCloseMetaBatch", object.key))?;
+        let batch = check_encoding::<LedgerCloseMetaBatch>(
+            &raw,
+            Input::Batch.depth(),
+            &mut self.checker.report,
+        )
+        .with_context(|| format!("{} does not decode as LedgerCloseMetaBatch", object.key))?;
         // the sdk gets each ledger's bytes as the lake holds them, not a re-encoding
         let spans = match &self.sdk {
             Some(_) => Some(
