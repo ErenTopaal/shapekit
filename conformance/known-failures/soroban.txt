@@ -1,8 +1,0 @@
-# known failures of the soroban-sdk testee (soroban-sdk).
-# format: <entry-id> <version|*> <result> <issue> <check>[, <check>...]; see
-# crates/shapekit-conformance/src/known.rs and docs/testee-protocol.md, "Known failures".
-#
-# soroban-sdk reads ScVal bytes through the host's stellar-xdr, which reads a bool word other
-# than 0 or 1 as false and writes it back as 0 (RS-3, rs-stellar-xdr#629). go, js and java refuse
-# the word, so in a run with them the sdk diverges from its peers
-soroban.scval-shapes.synth-bool-value-2 * diverges-from-peers https://github.com/stellar/rs-stellar-xdr/issues/629 any/decode_encode

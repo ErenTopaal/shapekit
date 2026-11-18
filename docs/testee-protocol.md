@@ -420,7 +420,7 @@ strkey). A case the runner cannot map is an `error` (a runner bug), never skippe
 | `xdr`, `decode = must-reject` | `decode_encode` | the answer is `rejected` |
 | `xdr` `LedgerCloseMeta` that the network wrote (`validity = valid`, not synthetic) | also `tx_hash` for every envelope of the transaction set (and `inner: true` for each applied fee bump), `balance_id` for every successful `CreateClaimableBalance`, `contract_id` for every contract a successful `InvokeHostFunction` created | the hash or ID equals the one the ledger holds: the `transactionHash` of the envelope's result pair, the balance ID the operation returned, the ID of the contract instance the operation created |
 | `xdr` `TransactionEnvelope` applied in a committed chain (`source.chain`, `source.ledger_seq`) | also `tx_hash` | the hash equals the `transactionHash` of the envelope's result pair in that ledger of `corpus/chains/<chain>/<variant>/` |
-| `xdr`, `decode = implementation-defined` | `decode_encode`, `decode_json` | every SDK that answers gives the same outcome (same status, same bytes, same JSON) |
+| `xdr`, `decode = implementation-defined` | `decode_encode`, `decode_json` | the SDK answers without crashing; the answer is recorded, not judged (see below) |
 | `ordering`, `asset_order` cases | `asset_order` | `expected` `less`, `equal`, `greater` is the order core uses (`Asset` comparison by type, code, then issuer key bytes) |
 | `ordering`, `pool_id` cases | `pool_id` | the pool ID equals `expected.pool_id`, or the answer is `rejected` when `expected.reject` is set |
 | `ordering`, `map_sort` cases | `map_sort` | the result equals `expected.map` byte for byte, or is `rejected` when the case expects a rejection |
@@ -460,13 +460,15 @@ Because an entry is as bad as its worst check, one op an SDK lacks (Go has no `e
 makes the whole entry `unsupported`. The matrix therefore also counts every check on its own,
 per testee (`check_summary`) and per testee and op (`op_summary`).
 
-Implementation-defined checks are decided by one vote per SDK: the SDK's `current` version in
-`versions.toml` votes when the run holds it, otherwise its last version in the run
-(versions.toml order, or the order of `--version`). An SDK whose voting version does not answer
-casts no vote. The most common vote is the majority; every testee, voting or not, whose answer
-differs from it is `diverges-from-peers`, and with a tie no answer is the majority. With fewer
-than two votes, as in any run of a single SDK however many versions it holds, there is no peer
-to compare with and the check counts as `unsupported`, not as a pass.
+An implementation-defined entry has no required answer: the references disagree on it (for the
+bool word 2, stellar-core's xdrpp reads true and stellar-xdr reads false), so no answer is
+wrong. Its checks pass whenever the SDK answers without crashing, and the matrix keeps each
+answer in the check's `actual` and the spread of answers in its `detail`: how many SDKs
+answered and how many different answers they gave, counting each SDK once (its `current`
+version when the run holds it, otherwise its last version in the run). A crash is still
+`diverges-from-network`. Nothing is decided by a vote across SDKs, so a check's result does not
+change when an SDK is added to or left out of a run. A matrix or known-failures file from before
+this rule can hold `diverges-from-peers`; no run writes it any more.
 
 An SDK version in `versions.toml` can carry a `max_protocol`. A divergence on an entry
 generated at a later protocol (`protocol.generated_at`, else `protocol.valid_min`) is then
@@ -522,8 +524,8 @@ that no line lists fails it, even when other checks of the same entry are listed
 regression next to a known failure is caught. A listed check that now passes, is `reference`,
 is unsupported, fails with another result, or is not a check of the entry fails the run too,
 until the line is fixed. Every line must name an entry in the manifest and a version in
-`versions.toml`. A `diverges-from-peers` result needs more than one SDK in the run, so a
-single-SDK run accepts a `diverges-from-peers` line whose check passes.
+`versions.toml`. A `diverges-from-peers` line can no longer fail: in a run with other SDKs its
+check passing fails the run, so remove the line.
 
 ## Limits the runner applies
 

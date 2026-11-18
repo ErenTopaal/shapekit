@@ -781,27 +781,30 @@ fn corpus_cases_map_to_protocol_requests() {
 }
 
 #[test]
-fn peers_are_compared_with_each_other() {
+fn implementation_defined_answers_are_recorded_not_judged() {
     use shapekit_conformance::compare::judge_peers;
     let all = [true, true, true];
-    let same = judge_peers(&[Some(json!(1)), Some(json!(1)), None], &all);
-    assert_eq!(same[0].as_ref().unwrap().result, ResultClass::Pass);
-    assert!(same[2].is_none());
     let split = judge_peers(&[Some(json!(1)), Some(json!(1)), Some(json!(2))], &all);
-    assert_eq!(
-        split[2].as_ref().unwrap().result,
-        ResultClass::DivergesFromPeers
-    );
-    let tie = judge_peers(&[Some(json!(1)), Some(json!(2))], &[true, true]);
+    for v in &split {
+        assert_eq!(v.as_ref().unwrap().result, ResultClass::Pass);
+    }
+    assert_eq!(split[2].as_ref().unwrap().actual, json!(2));
     assert!(
-        tie.iter()
-            .all(|v| v.as_ref().unwrap().result == ResultClass::DivergesFromPeers)
+        split[2]
+            .as_ref()
+            .unwrap()
+            .detail
+            .as_deref()
+            .unwrap()
+            .contains("2 different answers, 1 of them this one")
     );
+    let none = judge_peers(&[Some(json!(1)), None], &[true, true]);
+    assert!(none[1].is_none());
     let alone = judge_peers(&[Some(json!(1))], &[true]);
-    assert_eq!(alone[0].as_ref().unwrap().result, ResultClass::Unsupported);
+    assert_eq!(alone[0].as_ref().unwrap().result, ResultClass::Pass);
 }
 
-// an sdk run at many versions gets one vote, so three go versions cannot outvote rust and js
+// an sdk run at many versions speaks once in the spread of answers
 #[test]
 fn one_vote_per_sdk() {
     use shapekit_conformance::compare::judge_peers;
@@ -831,24 +834,22 @@ fn one_vote_per_sdk() {
         Some(json!({"xdr": "AAAA"})),
         Some(json!({"xdr": "AAAA"})),
     ];
+    // every answer is recorded as a pass; the spread counts go once, not three times
     let v = judge_peers(&outcomes, &voters);
-    let results: Vec<ResultClass> = v.iter().map(|x| x.as_ref().unwrap().result).collect();
-    assert_eq!(
-        results,
-        vec![
-            ResultClass::DivergesFromPeers,
-            ResultClass::DivergesFromPeers,
-            ResultClass::DivergesFromPeers,
-            ResultClass::Pass,
-            ResultClass::Pass
-        ]
+    assert!(
+        v.iter()
+            .all(|x| x.as_ref().unwrap().result == ResultClass::Pass)
     );
-    // one sdk at many versions has a single vote, so nothing is compared
+    let detail = v[0].as_ref().unwrap().detail.clone().unwrap();
+    assert!(
+        detail.contains("the 3 sdks gave 2 different answers, 1 of them this one"),
+        "{detail}"
+    );
     let go_only = &refs[..3];
     let v = judge_peers(&outcomes[..3], &runner::voters(go_only));
     assert!(
         v.iter()
-            .all(|x| x.as_ref().unwrap().result == ResultClass::Unsupported)
+            .all(|x| x.as_ref().unwrap().result == ResultClass::Pass)
     );
     // without the current version the last one in the run votes
     let old = [&targets[0], &targets[1]];

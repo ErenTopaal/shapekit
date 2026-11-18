@@ -185,7 +185,7 @@ pub fn expected_view(expect: &Expect) -> Value {
         Expect::NoEntryLost { entries } => {
             json!({"native": "a map keeping all entries", "entries": entries})
         }
-        Expect::Peers => json!("the same answer as every other sdk"),
+        Expect::Peers => json!("any answer: implementation-defined, recorded and not judged"),
         Expect::Unmappable(why) => json!({"runner-cannot-map-case": why}),
     })
 }
@@ -400,12 +400,15 @@ fn native_map_entries(native: &Value) -> Option<usize> {
         .map(Vec::len)
 }
 
-/// Decides implementation-defined checks across sdks. `voters` marks, per outcome, the testee
-/// that votes for its sdk: one per sdk (its `current` version when the run holds it), so an sdk
-/// run at many versions does not outvote one run at few. The most common answer among the
-/// votes is the majority; every testee, voter or not, whose outcome differs from it diverges
-/// from its peers, and with a tie nobody agrees. With fewer than two votes there is no other
-/// sdk to compare with, which is reported as such and never as a pass.
+/// Records implementation-defined checks across sdks. Such an entry has no required answer:
+/// the references (core's xdrpp and stellar-xdr, for the bool word 2) themselves disagree, so
+/// no answer is wrong and none is outvoted. Every answer the sdk gives without crashing is a
+/// pass, with the answer kept in `actual` and the spread of answers in `detail`, so a
+/// difference between sdks stays visible without depending on which sdks a run holds: a vote
+/// would turn into a failure or stop being one each time an sdk joins. A crash is still
+/// decided by `judge` before this, as diverges-from-network. `voters` marks, per outcome, the
+/// testee that speaks for its sdk (its `current` version when the run holds it), so the spread
+/// counts each sdk once however many versions run.
 pub fn judge_peers(outcomes: &[Option<Value>], voters: &[bool]) -> Vec<Option<Verdict>> {
     assert_eq!(outcomes.len(), voters.len(), "one voter flag per outcome");
     let votes: Vec<&Value> = outcomes
@@ -414,48 +417,33 @@ pub fn judge_peers(outcomes: &[Option<Value>], voters: &[bool]) -> Vec<Option<Ve
         .filter(|(_, v)| **v)
         .filter_map(|(o, _)| o.as_ref())
         .collect();
-    let mut counts: Vec<(&Value, usize)> = Vec::new();
-    for v in &votes {
-        match counts.iter_mut().find(|(k, _)| k == v) {
-            Some((_, n)) => *n += 1,
-            None => counts.push((v, 1)),
+    let distinct = {
+        let mut seen: Vec<&Value> = Vec::new();
+        for v in &votes {
+            if !seen.contains(v) {
+                seen.push(v);
+            }
         }
-    }
-    let top = counts.iter().map(|(_, n)| *n).max().unwrap_or(0);
-    let tied = counts.iter().filter(|(_, n)| *n == top).count() > 1;
-    let done = |result, detail: Option<&str>, v: &Value| Verdict {
-        result,
-        detail: detail.map(String::from),
-        actual: short(v),
-        crashed: false,
+        seen.len()
     };
     outcomes
         .iter()
         .map(|o| {
             o.as_ref().map(|v| {
-                if votes.len() < 2 {
-                    return done(
-                        ResultClass::Unsupported,
-                        Some("implementation-defined and no other sdk answered to compare with"),
-                        v,
-                    );
-                }
-                let agrees = !tied && counts.iter().any(|(k, n)| *k == v && *n == top);
-                if agrees && counts.len() == 1 {
-                    done(ResultClass::Pass, None, v)
-                } else if agrees {
-                    // the majority answer is not wrong, but the entry still has disagreement
-                    done(
-                        ResultClass::Pass,
-                        Some("agrees with the most common answer of the sdks"),
-                        v,
-                    )
+                let same = votes.iter().filter(|x| **x == v).count();
+                let detail = if votes.len() < 2 {
+                    "implementation-defined: no answer is required, so none is judged".to_string()
                 } else {
-                    done(
-                        ResultClass::DivergesFromPeers,
-                        Some("answers differently from the other sdks"),
-                        v,
+                    format!(
+                        "implementation-defined: no answer is required, so none is judged; the {} sdks gave {distinct} different answers, {same} of them this one",
+                        votes.len()
                     )
+                };
+                Verdict {
+                    result: ResultClass::Pass,
+                    detail: Some(detail),
+                    actual: short(v),
+                    crashed: false,
                 }
             })
         })

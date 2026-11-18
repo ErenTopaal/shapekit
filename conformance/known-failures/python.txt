@@ -983,10 +983,3 @@ cap38.liquidity-pools.synth-assets-dotnet257 16.1.1 diverges-from-network candid
 cap38.liquidity-pools.synth-assets-js1766-issuers 16.1.1 diverges-from-network candidate/finding-candidates.toml case 0/asset_order, case 1/asset_order, case 2/pool_id, case 3/pool_id
 cap38.liquidity-pools.synth-assets-py1246-testnet-pool 16.1.1 diverges-from-network candidate/finding-candidates.toml case 0/asset_order, case 1/asset_order, case 2/pool_id, case 3/pool_id
 cap38.liquidity-pools.testnet-5521432 16.1.1 diverges-from-network candidate/finding-candidates.toml testnet/tx_hash 3
-
-# xdrlib3 reads a bool as bool(unpack_int()), so the word 2 decodes as true and re-encodes as 1:
-# core's reading (CORE-1), where go-stellar-sdk and js-stellar-sdk refuse the word and stellar-xdr
-# reads false (RS-3, rs-stellar-xdr#629). implementation-defined, so it shows only next to the
-# other sdks
-soroban.invoke-basics.synth-invoke-arg-bool-2 * diverges-from-peers candidate/finding-candidates.toml any/decode_encode, any/decode_json
-soroban.scval-shapes.synth-bool-value-2 * diverges-from-peers candidate/finding-candidates.toml any/decode_encode, any/decode_json

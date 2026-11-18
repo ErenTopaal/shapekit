@@ -190,6 +190,42 @@ pub fn render(m: &Matrix) -> String {
         }
     }
 
+    // implementation-defined entries pass on any answer that is not a crash, so their answers
+    // are listed here rather than among the failures
+    let mut defined = String::new();
+    for e in &m.entries {
+        let mut lines = Vec::new();
+        for (key, c) in &e.cells {
+            for ch in c.checks.iter().filter(|ch| {
+                ch.result == ResultClass::Pass
+                    && ch
+                        .detail
+                        .as_deref()
+                        .is_some_and(|d| d.starts_with("implementation-defined"))
+            }) {
+                lines.push(format!(
+                    "- {key} `{}`: {}",
+                    ch.check,
+                    cell_text(&ch.actual.to_string())
+                ));
+            }
+        }
+        if !lines.is_empty() {
+            let _ = writeln!(defined, "### `{}`\n", e.id);
+            for l in lines {
+                let _ = writeln!(defined, "{l}");
+            }
+            let _ = writeln!(defined);
+        }
+    }
+    if !defined.is_empty() {
+        let _ = writeln!(
+            out,
+            "\n## Implementation-defined answers\n\nNo answer is required on these entries, so each answer that is not a crash passes; this is what each SDK answered.\n"
+        );
+        out.push_str(&defined);
+    }
+
     if !m.known_failure_problems.is_empty() {
         let _ = writeln!(out, "\n## Known-failures problems (the run fails)\n");
         for p in &m.known_failure_problems {

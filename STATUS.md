@@ -2,6 +2,30 @@
 
 A dated public log of what has landed in shapekit. Newest entry first.
 
+## 2026-11-18: implementation-defined entries are recorded, not voted on
+
+- An implementation-defined entry (the references disagree, so no answer is required) used to
+  be decided by a vote across the SDKs in a run, and a minority answer was
+  `diverges-from-peers`. The vote changed whenever an SDK joined a run: the two bool-word
+  entries (`synth-bool-value-2`, `synth-invoke-arg-bool-2`) failed the all-SDK run once the newer
+  SDKs had joined. Now every answer that is not a crash passes, and the matrix keeps the answer
+  in `actual` and the spread of answers in `detail`. Each SDK's reading of the bool word 2 stays
+  visible: python, dart and kmp read true; rust (stellar-xdr) and dotnet read false; go, js,
+  java and php reject it; core's xdrpp reads true.
+- Count changes: every SDK that decodes `ScVal` and `TransactionEnvelope` now passes the two
+  bool-word corpus entries instead of counting them as unsupported in a single-SDK run or
+  failing them in a multi-SDK run. Python 17.0.1 passes 197 corpus entries (was 195), rust
+  30.0.0 86 (was 84). The `diverges-from-peers` lines for these entries are gone from the rust
+  and python known-failures lists, and the soroban list, which held only such a line, is removed.
+  The all-SDK current-version run over the corpus passes with all eleven SDKs.
+- The committed findings inputs are not regenerated here. RS-3 and CORE-1 take their conformance
+  failures from the rust testee diverging from its peers in
+  `findings/inputs/conformance-peers.json`, so they match nothing on the next import of a new
+  run. Their evidence is then the recorded answers and the fuzz classes in
+  `findings/fuzz/known-classes.txt`, and their matchers need a decision.
+- A question to SEP-51 about three enum names (IPv4, the `tx` result-code prefix, `b8_bit`) is
+  drafted in the candidate lane and not filed.
+
 ## 2026-11-17: expected XDR-JSON follows SEP-51
 
 - The expected XDR-JSON of the corpus and candidate lanes now follows SEP-51 v2.0.1 where
@@ -13,11 +37,13 @@ A dated public log of what has landed in shapekit. Newest entry first.
 - Corpus: no expected file changes, so no corpus count changes.
 - Candidate lane: 50 `format.xdr-grammar` entries change. On them rust 30.0.0 and stellar-cli
   30.0.1, which render with stellar-xdr, now diverge from the network on all 50
-  (`decode_json` and `encode_json`), recorded as the rust SEP-51 candidate. The SDKs that write
-  SEP-51 match the corrected values on these entries instead of diverging: python 17.0.1, java
-  6.0.0 and dart 3.12.0 pass 42 of the 50 and php 1.18.0 passes 38. The 8 PeerAddress entries still diverge on every other SDK:
-  stellar-xdr's `i_pv4` and `i_pv6` against their `ipv4` and `ipv6`, a name SEP-51's rule does
-  not settle, so it stays stellar-xdr's until decided.
+  (`decode_json` and `encode_json`), recorded as the rust SEP-51 candidate. On the same 50:
+  python 17.0.1 and java 6.0.0 pass 42 and diverge on the 8 PeerAddress entries, where they
+  write `ipv4` and `ipv6` against stellar-xdr's `i_pv4` and `i_pv6`, a name SEP-51's rule does
+  not settle, so it stays stellar-xdr's until decided. dart 3.12.0, go v0.9.0, kmp 1.18.0 and
+  php 1.18.0 diverge on the 8 BinaryFuseFilterType entries, where they write `b8_bit` as
+  stellar-xdr does, while js, python and java write `8_bit` as the text gives it; js 17.4.0
+  diverges on the 4 bare Int64 and Uint64 entries, whose types it does not export. A question to SEP-51 about these names is drafted in the candidate lane.
 
 ## 2026-11-17: candidate-lane triage closed, libsodium pinned, coverage for KMP and stellar-cli
 

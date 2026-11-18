@@ -16,9 +16,9 @@
 #
 # recursion-depth vectors (45 entries): every decoder that ran them read the 30 within the
 # limit, except js 16.x everywhere and js 17.x on four ledgers (below). the 15 past the limit
-# are implementation-defined and decided by the sdk vote: stellar-xdr refuses all 15; go and js
-# 17.x read the ones whose nesting they count as shallower, so on 11 of them rust is the
-# minority. that is the depth accounting the entries' notes describe, not a defect.
+# are implementation-defined, so the runner records each sdk's answer and judges none:
+# stellar-xdr refuses all 15; go and js 17.x read the ones whose nesting they count as
+# shallower. that is the depth accounting the entries' notes describe, not a defect.
 
 schema = 1
 
@@ -92,7 +92,7 @@ entries = [
   "format.xdr-grammar.ledgerclosemeta-depth-sorobandelegatesignature-above",
 ]
 checks = "any/decode_encode and any/decode_json"
-observed = "implementation-defined entries the sdk vote decides against go: go reads them under MaxDepth 1012 because it counts one level per named type, where stellar-xdr and js refuse them"
+observed = "implementation-defined entries, so the runner records the answers and no longer fails them by a vote across sdks: go reads them under MaxDepth 1012 because it counts one level per named type, where stellar-xdr and js refuse them"
 
 [[candidate]]
 finding = "JS-DEPTH"
@@ -106,7 +106,7 @@ entries = [
   "format.xdr-grammar.sorobandelegatesignature-depth-sorobandelegatesignature-above",
 ]
 checks = "any/decode_encode and any/decode_json"
-observed = "implementation-defined entries with a tied vote (go has no type for them): js 17.x reads values one level past stellar-xdr's limit because its own limit of 1500 is wider and takes no limit from the caller"
+observed = "implementation-defined entries, recorded and not judged by the runner: js 17.x reads values one level past stellar-xdr's limit because its own limit of 1500 is wider and takes no limit from the caller"
 
 [[candidate]]
 finding = "new"
@@ -122,9 +122,9 @@ entries = [
   "format.xdr-grammar.*surveyrequestmessage-*", "format.xdr-grammar.stellarmessage-*",
 ]
 checks = "any/decode_json and any/encode_json on all 50 entries (rust 30.0.0 and stellar-cli 30.0.1, which renders with the same crate)"
-observed = "the expected XDR-JSON now follows SEP-51 v2.0.1 (crates/shapekit-manifest/src/sep51.rs, `shapekit manifest rerender`), and stellar-xdr departs from it in three ways: a fixed-length opaque field that is not a typedef is written as an array of byte numbers, where SEP-51 requires \"a hexadecimal string\" (ecosystem/sep-0051.md lines 204-207 at stellar-protocol ced008c3); a bare Int64, Uint64, TimePoint or Duration is written as a JSON number, where hyper and unsigned hyper map \"to JSON strings, with the number base10 encoded as a simple integer\" (lines 106-109, 140-143); and the BinaryFuseFilterType values are b8_bit, b16_bit and b32_bit, where the enum string is the identifier \"modified to be snake_case, and truncated removing any shared prefix\" (lines 384-387), so 8_bit, 16_bit and 32_bit. the crate's reader refuses the SEP-51 forms, so encode_json fails too. on these 50 entries the other sdks that render json agree with the corrected values (dart 3.12.0 and php 1.18.0 on every one but the 8 PeerAddress entries below, python 17.0.1 and java 6.0.0 on 42)"
+observed = "the expected XDR-JSON now follows SEP-51 v2.0.1 (crates/shapekit-manifest/src/sep51.rs, `shapekit manifest rerender`), and stellar-xdr departs from it in three ways: a fixed-length opaque field that is not a typedef is written as an array of byte numbers, where SEP-51 requires \"a hexadecimal string\" (ecosystem/sep-0051.md lines 204-207 at stellar-protocol ced008c3); a bare Int64, Uint64, TimePoint or Duration is written as a JSON number, where hyper and unsigned hyper map \"to JSON strings, with the number base10 encoded as a simple integer\" (lines 106-109, 140-143); and the BinaryFuseFilterType values are b8_bit, b16_bit and b32_bit, where the enum string is the identifier \"modified to be snake_case, and truncated removing any shared prefix\" (lines 384-387), so 8_bit, 16_bit and 32_bit. the crate's reader refuses the SEP-51 forms, so encode_json fails too. on these 50 entries python 17.0.1 and java 6.0.0 agree with the corrected values on 42 and differ on the 8 PeerAddress entries below; dart 3.12.0, go v0.9.0, kmp 1.18.0 and php 1.18.0 diverge only on the 8 BinaryFuseFilterType entries, where they write b8_bit as stellar-xdr does, while js 17.4.0, python and java write 8_bit as the text gives it"
 evidence = "stellar-xdr 30.0.0 src/generated/curve25519_public.rs:24-26 (pub key: [u8; 32], no hex serde_as) against account_entry.rs:50-54 (serde_as(as = \"NumberOrString\")); src/generated/int64.rs:10 and uint64.rs:10 (bare i64 and u64); the generator keeps the prefix's first letter before a digit (mirrored in crates/shapekit-schema/src/names.rs strip_prefix)"
-open = "two enum names are left as stellar-xdr writes them because SEP-51's rule does not settle them: IPAddrType's IPv4 and IPv6 (stellar-xdr i_pv4, i_pv6; python, java, dart, php, kmp and go write ipv4, ipv6; the text does not define snake_case for a mixed-case identifier, and the two identifiers share the prefix IPv only below word level), and the transaction and operation result codes such as txSUCCESS (stellar-xdr tx_success; read literally, removing the prefix tx that every member shares would give success, but the text does not say whether a prefix must end at a word boundary). 8 PeerAddress entries diverge on every other sdk because of the first; changing either would rename values in hundreds of corpus files on an interpretation, so it waits for a decision"
+open = "two enum names are left as stellar-xdr writes them because SEP-51's rule does not settle them: IPAddrType's IPv4 and IPv6 (stellar-xdr, js, go, dart and php write i_pv4, i_pv6; python and java write ipv4, ipv6; the text does not define snake_case for a mixed-case identifier, and the two identifiers share the prefix IPv only below word level), and the transaction and operation result codes such as txSUCCESS (stellar-xdr tx_success; read literally, removing the prefix tx that every member shares would give success, but the text does not say whether a prefix must end at a word boundary). 8 PeerAddress entries diverge on python and java because of the first; changing either would rename values in hundreds of corpus files on an interpretation, so it waits for a decision. a question to SEP-51 that asks about both and about 8_bit is drafted at candidate/findings/issues/sep51-enum-name-prefix.md and is not filed"
 
 # python sdk (stellar-sdk, py-stellar-base 16.1.1 and 17.0.1): divergences from
 #   shapekit conformance run --sdk python --all-versions                 (corpus, 716 entries)
@@ -285,7 +285,7 @@ finding = "CORE-1"
 sdk = "python"
 versions = ["16.1.1", "17.0.1"]
 entries = ["soroban.scval-shapes.synth-bool-value-2", "soroban.invoke-basics.synth-invoke-arg-bool-2"]
-checks = "any/decode_encode and any/decode_json, diverges-from-peers in a run with the other sdks"
+checks = "any/decode_encode and any/decode_json; the entries are implementation-defined, so the runner records the answer (in actual and the spread in detail) and does not fail it"
 observed = "the bool word 2 decodes as true and re-encodes as 1, as stellar-core's xdrpp reads it (CORE-1), where go-stellar-sdk and js-stellar-sdk refuse it and stellar-xdr reads false (RS-3, rs-stellar-xdr#629)"
 evidence = "xdrlib3 0.1.1 xdrlib3/__init__.py:187-188 (unpack_bool returns bool(self.unpack_int())); stellar_sdk/xdr/base.py Boolean.unpack calls it"
 

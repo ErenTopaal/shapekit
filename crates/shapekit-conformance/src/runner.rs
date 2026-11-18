@@ -72,7 +72,8 @@ pub struct Cell {
     pub known_issue: Option<String>,
     /// Check counts by result.
     pub counts: BTreeMap<ResultClass, usize>,
-    /// Every check that did not pass, apart from reference checks.
+    /// Every check that did not pass, apart from reference checks, and every check of an
+    /// implementation-defined entry, so the answer each sdk gave stays in the matrix.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub checks: Vec<CheckRecord>,
     /// Checks that agree with `expected_json` on the testee that rendered it (result
@@ -377,7 +378,7 @@ fn record(cell: &mut Cell, check: &Check, v: Verdict, reference: bool) -> Result
         return result;
     }
     cell.result = cell.result.max(result);
-    if result != ResultClass::Pass {
+    if result != ResultClass::Pass || matches!(check.expect, plan::Expect::Peers) {
         cell.checks.push(CheckRecord {
             check: check.name.clone(),
             op: check.op.clone(),
