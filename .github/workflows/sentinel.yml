@@ -40,7 +40,10 @@ jobs:
       group: sentinel-${{ matrix.network }}
       cancel-in-progress: false
     runs-on: ubuntu-24.04
-    timeout-minutes: 10
+    # the binary cache misses after most pushes to main, and a cold build of the cli alone took
+    # 7 to 11 minutes locally; a build cut off by the timeout is never cached, so every later run
+    # would be cut off the same way
+    timeout-minutes: 30
     permissions:
       # only to push the cursor to the sentinel-state branch
       contents: write
