@@ -322,13 +322,16 @@ jobs:
           "$RUNNER_TEMP/bin/shapekit" gen verify-repro --jobs 2 "${args[@]}"
 
   conformance:
-    # current sdk versions only; the full version matrix and the reproductions run nightly
+    # current sdk versions only; the full version matrix and the reproductions run nightly. the
+    # rust testee's clippy and test builds come on top of its conformance build
     needs: build
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@1.99.1
+        with:
+          components: rustfmt, clippy
       # the rust testee builds outside the workspace into its own target directory
       - uses: actions/cache@v6
         with:
@@ -350,6 +353,15 @@ jobs:
         with:
           name: shapekit
           path: ${{ runner.temp }}/bin
+      - name: rustfmt, clippy and unit tests of the rust testee
+        # the testee is outside the workspace, so the workspace's own checks never reach it
+        run: |
+          set -euo pipefail
+          m=testees/rust/versions/30.0.0/Cargo.toml
+          t=target/testees/rust/30.0.0
+          rustfmt --edition 2024 --check testees/rust/src/*.rs
+          cargo clippy --locked --all-targets --manifest-path "$m" --target-dir "$t" -- -D warnings
+          cargo test --locked --manifest-path "$m" --target-dir "$t"
       - name: conformance run on rust 30.0.0, go v0.9.0, js 17.4.0
         # the sdks with their own jobs below are left out, so their toolchains are not needed here
         run: |
