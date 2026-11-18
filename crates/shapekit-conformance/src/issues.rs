@@ -107,20 +107,21 @@ pub fn drafts(
             let Some(cell) = row.cells.get(&t.key) else {
                 continue;
             };
-            if !matches!(
-                cell.result,
-                ResultClass::DivergesFromNetwork | ResultClass::DivergesFromPeers
-            ) {
-                continue;
-            }
-            let list = by_sdk.entry(t.sdk.clone()).or_default();
-            for ch in cell.checks.iter().filter(|c| {
-                matches!(
-                    c.result,
-                    ResultClass::DivergesFromNetwork | ResultClass::DivergesFromPeers
-                )
-            }) {
-                list.push((t.version.clone(), ch));
+            // by each check, not by the cell's result: a cell whose worst check errored can
+            // still hold a divergence of another check
+            let diverging: Vec<(String, &CheckRecord)> = cell
+                .checks
+                .iter()
+                .filter(|c| {
+                    matches!(
+                        c.result,
+                        ResultClass::DivergesFromNetwork | ResultClass::DivergesFromPeers
+                    )
+                })
+                .map(|ch| (t.version.clone(), ch))
+                .collect();
+            if !diverging.is_empty() {
+                by_sdk.entry(t.sdk.clone()).or_default().extend(diverging);
             }
         }
         if by_sdk.is_empty() {
@@ -153,7 +154,7 @@ pub fn drafts(
             );
             let repo = repos.into_iter().next().expect("one repo").to_string();
             let mut vers: Vec<&str> = failing.iter().map(|(v, _)| v.as_str()).collect();
-            vers.sort_unstable();
+            vers.sort_unstable_by(|a, b| version_order(a, b));
             vers.dedup();
             let first = failing[0].1;
             let title = format!(
@@ -384,6 +385,18 @@ pub fn title_versions(title: &str, package: &str) -> Option<BTreeSet<String>> {
     (!set.is_empty() && set.iter().all(|v| !v.is_empty() && !v.contains(' '))).then_some(set)
 }
 
+/// Versions in release order: dotted numeric parts compare as numbers (16.3.0 before 16.10.0),
+/// anything else as text.
+fn version_order(a: &str, b: &str) -> std::cmp::Ordering {
+    let parts = |v: &str| -> Vec<Result<u64, String>> {
+        v.trim_start_matches('v')
+            .split(['.', '-', '+'])
+            .map(|p| p.parse::<u64>().map_err(|_| p.to_string()))
+            .collect()
+    };
+    parts(a).cmp(&parts(b)).then_with(|| a.cmp(b))
+}
+
 /// What to do with an existing file in the drafts directory.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Existing {
@@ -405,12 +418,15 @@ pub fn existing_draft(
     let Ok((_, title, _, vector)) = parse(text) else {
         return Existing::Keep("not written by draft-issues".into());
     };
-    let Some((sdk, _)) = name.split_once('-') else {
+    // sdk names can hold a dash themselves (stellar-cli), so the name is matched whole
+    let Some(sdk) = versions
+        .sdk
+        .keys()
+        .map(String::as_str)
+        .find(|sdk| name == file_name(sdk, &vector))
+    else {
         return Existing::Outside;
     };
-    if name != file_name(sdk, &vector) {
-        return Existing::Outside;
-    }
     let Some(ran) = covered.get(&(sdk.to_string(), vector.clone())) else {
         return Existing::Outside;
     };
@@ -645,7 +661,55 @@ fn create(repo: &str, title: &str, body: &str) -> Result<String> {
 
 #[cfg(test)]
 mod tests {
-    use super::link_source;
+    use std::collections::{BTreeMap, BTreeSet};
+
+    use super::{Draft, Existing, existing_draft, link_source, render, version_order};
+    use crate::versions::VersionsFile;
+
+    fn versions() -> VersionsFile {
+        VersionsFile::load(
+            &std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+                .join("../../conformance/versions.toml"),
+        )
+        .unwrap()
+    }
+
+    fn drafted(sdk: &str, title: &str) -> String {
+        render(&Draft {
+            file: String::new(),
+            sdk: sdk.into(),
+            entry: "t.e".into(),
+            repo: "stellar/stellar-cli".into(),
+            title: title.into(),
+            body: "body\n\nshapekit vector: `t.e`\n".into(),
+        })
+    }
+
+    #[test]
+    fn a_draft_of_an_sdk_with_a_dash_in_its_name_is_recognised() {
+        let v = versions();
+        let covered = BTreeMap::from([(
+            ("stellar-cli".to_string(), "t.e".to_string()),
+            BTreeSet::from(["30.0.1".to_string()]),
+        )]);
+        let wide = drafted("stellar-cli", "stellar-cli 28.1.0, 30.0.1: x (t.e)");
+        assert!(matches!(
+            existing_draft("stellar-cli-t.e.md", &wide, &v, &covered),
+            Existing::Keep(why) if why.contains("28.1.0")
+        ));
+        let narrow = drafted("stellar-cli", "stellar-cli 30.0.1: x (t.e)");
+        assert_eq!(
+            existing_draft("stellar-cli-t.e.md", &narrow, &v, &covered),
+            Existing::Covered
+        );
+    }
+
+    #[test]
+    fn versions_sort_in_release_order() {
+        let mut v = vec!["16.10.0", "16.3.0", "v0.10.1", "v0.9.0", "2.0.0"];
+        v.sort_by(|a, b| version_order(a, b));
+        assert_eq!(v, ["v0.9.0", "v0.10.1", "2.0.0", "16.3.0", "16.10.0"]);
+    }
 
     #[test]
     fn the_link_ends_where_the_corpus_path_ends() {

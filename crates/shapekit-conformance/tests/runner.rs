@@ -756,6 +756,32 @@ fn draft_issues_for_a_divergence() {
 }
 
 #[test]
+fn a_divergence_beside_an_errored_check_is_still_drafted() {
+    rust_testees();
+    let c = corpus();
+    let mut out = runner::run(&options(&c, 1)).unwrap();
+    let (manifest, corpus_dir) = runner::load_manifest(&c.manifest()).unwrap();
+    let file = VersionsFile::load(&versions_file()).unwrap();
+    // the cell's worst check is now an error, which ranks above the divergence
+    let row = out
+        .matrix
+        .entries
+        .iter_mut()
+        .find(|r| r.id == "t.order-wrong")
+        .unwrap();
+    let cell = row.cells.values_mut().next().unwrap();
+    let mut errored = cell.checks[0].clone();
+    errored.check = "case 9/asset_order".into();
+    errored.result = ResultClass::Error;
+    cell.checks.push(errored);
+    cell.result = ResultClass::Error;
+    let drafts =
+        shapekit_conformance::issues::drafts(&out.matrix, &manifest, &corpus_dir, &file).unwrap();
+    assert_eq!(drafts.len(), 1);
+    assert_eq!(drafts[0].file, "rust-t.order-wrong.md");
+}
+
+#[test]
 fn file_issues_refuses_without_confirmation() {
     let dir = tempfile::tempdir().unwrap();
     let err = shapekit_conformance::issues::file(&shapekit_conformance::issues::FileOptions {
