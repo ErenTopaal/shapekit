@@ -5,11 +5,11 @@
 
 On the input below, `stellar-dotnet-sdk` 17.0.0 answers differently from the Stellar network in 1 check.
 
-A check is one call into the SDK with a known right answer. Each check below shows the call as a JSON request of the [shapekit testee protocol](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/docs/testee-protocol.md) (`op` names the SDK operation), the expected answer and the answer the SDK gave.
+A check is one call into the SDK with a known right answer. Each check below shows the call as a JSON request of the [shapekit testee protocol](https://github.com/ErenTopaal/shapekit/blob/v0.2.0/docs/testee-protocol.md) (`op` names the SDK operation), the expected answer and the answer the SDK gave.
 
 ## Input
 
-Corpus entry `cap71.credentials.golden-e25799a2e2e9eea2-17` (family `cap71.credentials`) of the [shapekit](https://github.com/ErenTopaal/shapekit) corpus 0.1.0.
+Corpus entry `cap71.credentials.golden-e25799a2e2e9eea2-17` (family `cap71.credentials`) of the [shapekit](https://github.com/ErenTopaal/shapekit) corpus 0.2.0.
 
 ### `any/tx_hash 0` on 17.0.0
 
@@ -31,7 +31,7 @@ Actual: `{"hash":"d14d233f97b14935d0fed960b1a494d65bbe9800cf62508c0fa5246867a91f
 
 ## Reproduce
 
-From a checkout of https://github.com/ErenTopaal/shapekit at tag `v0.1.0`:
+From a checkout of https://github.com/ErenTopaal/shapekit at tag `v0.2.0`:
 
 ```sh
 shapekit conformance run --sdk dotnet --version 17.0.0 --entry cap71.credentials.golden-e25799a2e2e9eea2-17
@@ -41,7 +41,7 @@ shapekit conformance run --sdk dotnet --version 17.0.0 --entry cap71.credentials
 
 The expected answers are recorded in:
 
-- [`corpus/entries/cap71.credentials/cap71.credentials.golden-e25799a2e2e9eea2-17/any.xdr,`](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/corpus/entries/cap71.credentials/cap71.credentials.golden-e25799a2e2e9eea2-17/any.xdr,) envelope 0 of the transaction set: transactionHash of the envelope's result pair
+- [`corpus/entries/cap71.credentials/cap71.credentials.golden-e25799a2e2e9eea2-17/any.xdr`](https://github.com/ErenTopaal/shapekit/blob/v0.2.0/corpus/entries/cap71.credentials/cap71.credentials.golden-e25799a2e2e9eea2-17/any.xdr), envelope 0 of the transaction set: transactionHash of the envelope's result pair
 
 How the corpus entry was built and checked: core test "Soroban authorization", section "custom account|single call|unused auth entries|failure with malformed function name", ledger 19 (record 18 of 18 in the upstream file). smallest golden ledger matching SorobanCredentials:address_v2
 

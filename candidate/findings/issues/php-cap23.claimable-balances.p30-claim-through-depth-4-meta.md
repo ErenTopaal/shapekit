@@ -5,11 +5,11 @@
 
 On the input below, `soneso/stellar-php-sdk` 1.18.0 answers differently from the Stellar network in 4 checks.
 
-A check is one call into the SDK with a known right answer. Each check below shows the call as a JSON request of the [shapekit testee protocol](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/docs/testee-protocol.md) (`op` names the SDK operation), the expected answer and the answer the SDK gave.
+A check is one call into the SDK with a known right answer. Each check below shows the call as a JSON request of the [shapekit testee protocol](https://github.com/ErenTopaal/shapekit/blob/v0.2.0/docs/testee-protocol.md) (`op` names the SDK operation), the expected answer and the answer the SDK gave.
 
 ## Input
 
-Corpus entry `cap23.claimable-balances.p30-claim-through-depth-4-meta` (family `cap23.claimable-balances`) of the [shapekit](https://github.com/ErenTopaal/shapekit) corpus 0.1.0.
+Corpus entry `cap23.claimable-balances.p30-claim-through-depth-4-meta` (family `cap23.claimable-balances`) of the [shapekit](https://github.com/ErenTopaal/shapekit) corpus 0.2.0.
 
 ### `testnet/decode_json` on 1.18.0
 
@@ -73,7 +73,7 @@ Actual: `{"rejected":"InvalidArgumentException: Expected string for XdrClaimable
 
 ## Reproduce
 
-From a checkout of https://github.com/ErenTopaal/shapekit at tag `v0.1.0`:
+From a checkout of https://github.com/ErenTopaal/shapekit at tag `v0.2.0`:
 
 ```sh
 shapekit conformance run --sdk php --version 1.18.0 --entry cap23.claimable-balances.p30-claim-through-depth-4-meta
@@ -83,10 +83,10 @@ shapekit conformance run --sdk php --version 1.18.0 --entry cap23.claimable-bala
 
 The expected answers are recorded in:
 
-- [`corpus/entries/cap23.claimable-balances/cap23.claimable-balances.p30-claim-through-depth-4-meta/mainnet.expected.json`](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/corpus/entries/cap23.claimable-balances/cap23.claimable-balances.p30-claim-through-depth-4-meta/mainnet.expected.json): SEP-51 rendering by stellar-xdr 30.0.0
-- [`corpus/entries/cap23.claimable-balances/cap23.claimable-balances.p30-claim-through-depth-4-meta/mainnet.expected.json`](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/corpus/entries/cap23.claimable-balances/cap23.claimable-balances.p30-claim-through-depth-4-meta/mainnet.expected.json): SEP-51 rendering by stellar-xdr 30.0.0; must encode back to corpus/entries/cap23.claimable-balances/cap23.claimable-balances.p30-claim-through-depth-4-meta/mainnet.xdr
-- [`corpus/entries/cap23.claimable-balances/cap23.claimable-balances.p30-claim-through-depth-4-meta/testnet.expected.json`](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/corpus/entries/cap23.claimable-balances/cap23.claimable-balances.p30-claim-through-depth-4-meta/testnet.expected.json): SEP-51 rendering by stellar-xdr 30.0.0
-- [`corpus/entries/cap23.claimable-balances/cap23.claimable-balances.p30-claim-through-depth-4-meta/testnet.expected.json`](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/corpus/entries/cap23.claimable-balances/cap23.claimable-balances.p30-claim-through-depth-4-meta/testnet.expected.json): SEP-51 rendering by stellar-xdr 30.0.0; must encode back to corpus/entries/cap23.claimable-balances/cap23.claimable-balances.p30-claim-through-depth-4-meta/testnet.xdr
+- [`corpus/entries/cap23.claimable-balances/cap23.claimable-balances.p30-claim-through-depth-4-meta/mainnet.expected.json`](https://github.com/ErenTopaal/shapekit/blob/v0.2.0/corpus/entries/cap23.claimable-balances/cap23.claimable-balances.p30-claim-through-depth-4-meta/mainnet.expected.json): SEP-51 rendering by stellar-xdr 30.0.0
+- [`corpus/entries/cap23.claimable-balances/cap23.claimable-balances.p30-claim-through-depth-4-meta/mainnet.expected.json`](https://github.com/ErenTopaal/shapekit/blob/v0.2.0/corpus/entries/cap23.claimable-balances/cap23.claimable-balances.p30-claim-through-depth-4-meta/mainnet.expected.json): SEP-51 rendering by stellar-xdr 30.0.0; must encode back to corpus/entries/cap23.claimable-balances/cap23.claimable-balances.p30-claim-through-depth-4-meta/mainnet.xdr
+- [`corpus/entries/cap23.claimable-balances/cap23.claimable-balances.p30-claim-through-depth-4-meta/testnet.expected.json`](https://github.com/ErenTopaal/shapekit/blob/v0.2.0/corpus/entries/cap23.claimable-balances/cap23.claimable-balances.p30-claim-through-depth-4-meta/testnet.expected.json): SEP-51 rendering by stellar-xdr 30.0.0
+- [`corpus/entries/cap23.claimable-balances/cap23.claimable-balances.p30-claim-through-depth-4-meta/testnet.expected.json`](https://github.com/ErenTopaal/shapekit/blob/v0.2.0/corpus/entries/cap23.claimable-balances/cap23.claimable-balances.p30-claim-through-depth-4-meta/testnet.expected.json): SEP-51 rendering by stellar-xdr 30.0.0; must encode back to corpus/entries/cap23.claimable-balances/cap23.claimable-balances.p30-claim-through-depth-4-meta/testnet.xdr
 
 How the corpus entry was built and checked: the claimant whose predicate is a depth 4 and, or, not tree claims the balance, which deletes the entry
 

@@ -5,11 +5,11 @@
 
 On the input below, `stellar-dotnet-sdk` 16.0.0, 17.0.0 answers differently from the Stellar network in 4 checks.
 
-A check is one call into the SDK with a known right answer. Each check below shows the call as a JSON request of the [shapekit testee protocol](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/docs/testee-protocol.md) (`op` names the SDK operation), the expected answer and the answer the SDK gave.
+A check is one call into the SDK with a known right answer. Each check below shows the call as a JSON request of the [shapekit testee protocol](https://github.com/ErenTopaal/shapekit/blob/v0.2.0/docs/testee-protocol.md) (`op` names the SDK operation), the expected answer and the answer the SDK gave.
 
 ## Input
 
-Corpus entry `cap23.claimable-balances.synth-strkey-b-invalid` (family `cap23.claimable-balances`) of the [shapekit](https://github.com/ErenTopaal/shapekit) corpus 0.1.0.
+Corpus entry `cap23.claimable-balances.synth-strkey-b-invalid` (family `cap23.claimable-balances`) of the [shapekit](https://github.com/ErenTopaal/shapekit) corpus 0.2.0.
 
 ### `case 13/strkey_decode` on 16.0.0, 17.0.0
 
@@ -43,7 +43,7 @@ Actual: `{"kind":"claimable_balance","payload":"AT8MNL+TrQ2ZcdBMzJD3BVEcg4qtlzSk
 
 ## Reproduce
 
-From a checkout of https://github.com/ErenTopaal/shapekit at tag `v0.1.0`:
+From a checkout of https://github.com/ErenTopaal/shapekit at tag `v0.2.0`:
 
 ```sh
 shapekit conformance run --sdk dotnet --version 16.0.0 --entry cap23.claimable-balances.synth-strkey-b-invalid
@@ -53,7 +53,7 @@ shapekit conformance run --sdk dotnet --version 16.0.0 --entry cap23.claimable-b
 
 The expected answers are recorded in:
 
-- [`corpus/vectors/strkey/cap23.claimable-balances.synth-strkey-b-invalid.json`](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/corpus/vectors/strkey/cap23.claimable-balances.synth-strkey-b-invalid.json) cases 13, 15
+- [`corpus/vectors/strkey/cap23.claimable-balances.synth-strkey-b-invalid.json`](https://github.com/ErenTopaal/shapekit/blob/v0.2.0/corpus/vectors/strkey/cap23.claimable-balances.synth-strkey-b-invalid.json) cases 13, 15
 
 How the corpus entry was built and checked: invalid claimable balance ids (B, 1 << 3): a version byte (0 for v0) and 32 hash bytes. expectations are stellar-strkey 1.0.0's verdicts; SEP-23 1.4.0 says a strkey is valid only if re-encoding its binary gives back the same string, which rules out wrong lengths, set trailing bits, padding and lowercase. the reject reason is stellar-strkey's error and is informational; a testee passes by rejecting.
 

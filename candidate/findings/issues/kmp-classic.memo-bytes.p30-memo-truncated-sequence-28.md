@@ -5,11 +5,11 @@
 
 On the input below, `com.soneso.stellar:stellar-sdk-jvm` 1.18.0 answers differently from the Stellar network in 8 checks.
 
-A check is one call into the SDK with a known right answer. Each check below shows the call as a JSON request of the [shapekit testee protocol](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/docs/testee-protocol.md) (`op` names the SDK operation), the expected answer and the answer the SDK gave.
+A check is one call into the SDK with a known right answer. Each check below shows the call as a JSON request of the [shapekit testee protocol](https://github.com/ErenTopaal/shapekit/blob/v0.2.0/docs/testee-protocol.md) (`op` names the SDK operation), the expected answer and the answer the SDK gave.
 
 ## Input
 
-Corpus entry `classic.memo-bytes.p30-memo-truncated-sequence-28` (family `classic.memo-bytes`) of the [shapekit](https://github.com/ErenTopaal/shapekit) corpus 0.1.0.
+Corpus entry `classic.memo-bytes.p30-memo-truncated-sequence-28` (family `classic.memo-bytes`) of the [shapekit](https://github.com/ErenTopaal/shapekit) corpus 0.2.0.
 
 ### `testnet/decode_encode` on 1.18.0
 
@@ -99,7 +99,7 @@ Actual: `{"xdr":"AAAAAgAAAADt5uO7xF+DL3g1PfwBtGrBAXKkVgqRnyueJUWMAitagwAAAB5Macp
 
 ## Reproduce
 
-From a checkout of https://github.com/ErenTopaal/shapekit at tag `v0.1.0`:
+From a checkout of https://github.com/ErenTopaal/shapekit at tag `v0.2.0`:
 
 ```sh
 shapekit conformance run --sdk kmp --version 1.18.0 --entry classic.memo-bytes.p30-memo-truncated-sequence-28
@@ -109,14 +109,14 @@ shapekit conformance run --sdk kmp --version 1.18.0 --entry classic.memo-bytes.p
 
 The expected answers are recorded in:
 
-- [`corpus/entries/classic.memo-bytes/classic.memo-bytes.p30-memo-truncated-sequence-28/mainnet.expected.json`](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/corpus/entries/classic.memo-bytes/classic.memo-bytes.p30-memo-truncated-sequence-28/mainnet.expected.json): SEP-51 rendering by stellar-xdr 30.0.0
-- [`corpus/entries/classic.memo-bytes/classic.memo-bytes.p30-memo-truncated-sequence-28/mainnet.expected.json`](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/corpus/entries/classic.memo-bytes/classic.memo-bytes.p30-memo-truncated-sequence-28/mainnet.expected.json): SEP-51 rendering by stellar-xdr 30.0.0; must encode back to corpus/entries/classic.memo-bytes/classic.memo-bytes.p30-memo-truncated-sequence-28/mainnet.xdr
-- [`corpus/entries/classic.memo-bytes/classic.memo-bytes.p30-memo-truncated-sequence-28/mainnet.xdr,`](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/corpus/entries/classic.memo-bytes/classic.memo-bytes.p30-memo-truncated-sequence-28/mainnet.xdr,) envelope 0 of the transaction set: transactionHash of the envelope's result pair
-- [`corpus/entries/classic.memo-bytes/classic.memo-bytes.p30-memo-truncated-sequence-28/mainnet.xdr`](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/corpus/entries/classic.memo-bytes/classic.memo-bytes.p30-memo-truncated-sequence-28/mainnet.xdr): decode = must-accept, roundtrip = true
-- [`corpus/entries/classic.memo-bytes/classic.memo-bytes.p30-memo-truncated-sequence-28/testnet.expected.json`](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/corpus/entries/classic.memo-bytes/classic.memo-bytes.p30-memo-truncated-sequence-28/testnet.expected.json): SEP-51 rendering by stellar-xdr 30.0.0
-- [`corpus/entries/classic.memo-bytes/classic.memo-bytes.p30-memo-truncated-sequence-28/testnet.expected.json`](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/corpus/entries/classic.memo-bytes/classic.memo-bytes.p30-memo-truncated-sequence-28/testnet.expected.json): SEP-51 rendering by stellar-xdr 30.0.0; must encode back to corpus/entries/classic.memo-bytes/classic.memo-bytes.p30-memo-truncated-sequence-28/testnet.xdr
-- [`corpus/entries/classic.memo-bytes/classic.memo-bytes.p30-memo-truncated-sequence-28/testnet.xdr,`](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/corpus/entries/classic.memo-bytes/classic.memo-bytes.p30-memo-truncated-sequence-28/testnet.xdr,) envelope 0 of the transaction set: transactionHash of the envelope's result pair
-- [`corpus/entries/classic.memo-bytes/classic.memo-bytes.p30-memo-truncated-sequence-28/testnet.xdr`](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/corpus/entries/classic.memo-bytes/classic.memo-bytes.p30-memo-truncated-sequence-28/testnet.xdr): decode = must-accept, roundtrip = true
+- [`corpus/entries/classic.memo-bytes/classic.memo-bytes.p30-memo-truncated-sequence-28/mainnet.expected.json`](https://github.com/ErenTopaal/shapekit/blob/v0.2.0/corpus/entries/classic.memo-bytes/classic.memo-bytes.p30-memo-truncated-sequence-28/mainnet.expected.json): SEP-51 rendering by stellar-xdr 30.0.0
+- [`corpus/entries/classic.memo-bytes/classic.memo-bytes.p30-memo-truncated-sequence-28/mainnet.expected.json`](https://github.com/ErenTopaal/shapekit/blob/v0.2.0/corpus/entries/classic.memo-bytes/classic.memo-bytes.p30-memo-truncated-sequence-28/mainnet.expected.json): SEP-51 rendering by stellar-xdr 30.0.0; must encode back to corpus/entries/classic.memo-bytes/classic.memo-bytes.p30-memo-truncated-sequence-28/mainnet.xdr
+- [`corpus/entries/classic.memo-bytes/classic.memo-bytes.p30-memo-truncated-sequence-28/mainnet.xdr`](https://github.com/ErenTopaal/shapekit/blob/v0.2.0/corpus/entries/classic.memo-bytes/classic.memo-bytes.p30-memo-truncated-sequence-28/mainnet.xdr), envelope 0 of the transaction set: transactionHash of the envelope's result pair
+- [`corpus/entries/classic.memo-bytes/classic.memo-bytes.p30-memo-truncated-sequence-28/mainnet.xdr`](https://github.com/ErenTopaal/shapekit/blob/v0.2.0/corpus/entries/classic.memo-bytes/classic.memo-bytes.p30-memo-truncated-sequence-28/mainnet.xdr): decode = must-accept, roundtrip = true
+- [`corpus/entries/classic.memo-bytes/classic.memo-bytes.p30-memo-truncated-sequence-28/testnet.expected.json`](https://github.com/ErenTopaal/shapekit/blob/v0.2.0/corpus/entries/classic.memo-bytes/classic.memo-bytes.p30-memo-truncated-sequence-28/testnet.expected.json): SEP-51 rendering by stellar-xdr 30.0.0
+- [`corpus/entries/classic.memo-bytes/classic.memo-bytes.p30-memo-truncated-sequence-28/testnet.expected.json`](https://github.com/ErenTopaal/shapekit/blob/v0.2.0/corpus/entries/classic.memo-bytes/classic.memo-bytes.p30-memo-truncated-sequence-28/testnet.expected.json): SEP-51 rendering by stellar-xdr 30.0.0; must encode back to corpus/entries/classic.memo-bytes/classic.memo-bytes.p30-memo-truncated-sequence-28/testnet.xdr
+- [`corpus/entries/classic.memo-bytes/classic.memo-bytes.p30-memo-truncated-sequence-28/testnet.xdr`](https://github.com/ErenTopaal/shapekit/blob/v0.2.0/corpus/entries/classic.memo-bytes/classic.memo-bytes.p30-memo-truncated-sequence-28/testnet.xdr), envelope 0 of the transaction set: transactionHash of the envelope's result pair
+- [`corpus/entries/classic.memo-bytes/classic.memo-bytes.p30-memo-truncated-sequence-28/testnet.xdr`](https://github.com/ErenTopaal/shapekit/blob/v0.2.0/corpus/entries/classic.memo-bytes/classic.memo-bytes.p30-memo-truncated-sequence-28/testnet.xdr): decode = must-accept, roundtrip = true
 
 How the corpus entry was built and checked: a payment whose 28 byte text memo is 73686170656b6974206d656d6f20637574206174206279746520e282, not valid UTF-8, accepted by core
 

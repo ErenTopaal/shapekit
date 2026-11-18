@@ -5,11 +5,11 @@
 
 On the input below, `stellar-cli` 28.1.0, 30.0.1 answers differently from the Stellar network in 28 checks.
 
-A check is one call into the SDK with a known right answer. Each check below shows the call as a JSON request of the [shapekit testee protocol](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/docs/testee-protocol.md) (`op` names the SDK operation), the expected answer and the answer the SDK gave.
+A check is one call into the SDK with a known right answer. Each check below shows the call as a JSON request of the [shapekit testee protocol](https://github.com/ErenTopaal/shapekit/blob/v0.2.0/docs/testee-protocol.md) (`op` names the SDK operation), the expected answer and the answer the SDK gave.
 
 ## Input
 
-Corpus entry `cap03.offer-liabilities.mainnet-25000000` (family `cap03.offer-liabilities`) of the [shapekit](https://github.com/ErenTopaal/shapekit) corpus 0.1.0.
+Corpus entry `cap03.offer-liabilities.mainnet-25000000` (family `cap03.offer-liabilities`) of the [shapekit](https://github.com/ErenTopaal/shapekit) corpus 0.2.0.
 
 ### `mainnet/tx_hash 0` on 28.1.0, 30.0.1
 
@@ -105,7 +105,7 @@ Actual: `{"rejected":"❌ error: only transaction v1 is supported"}`
 
 ## Reproduce
 
-From a checkout of https://github.com/ErenTopaal/shapekit at tag `v0.1.0`:
+From a checkout of https://github.com/ErenTopaal/shapekit at tag `v0.2.0`:
 
 ```sh
 shapekit conformance run --sdk stellar-cli --version 28.1.0 --entry cap03.offer-liabilities.mainnet-25000000
@@ -115,20 +115,20 @@ shapekit conformance run --sdk stellar-cli --version 28.1.0 --entry cap03.offer-
 
 The expected answers are recorded in:
 
-- [`corpus/entries/cap03.offer-liabilities/cap03.offer-liabilities.mainnet-25000000/mainnet.xdr,`](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/corpus/entries/cap03.offer-liabilities/cap03.offer-liabilities.mainnet-25000000/mainnet.xdr,) envelope 0 of the transaction set: transactionHash of the envelope's result pair
-- [`corpus/entries/cap03.offer-liabilities/cap03.offer-liabilities.mainnet-25000000/mainnet.xdr,`](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/corpus/entries/cap03.offer-liabilities/cap03.offer-liabilities.mainnet-25000000/mainnet.xdr,) envelope 1 of the transaction set: transactionHash of the envelope's result pair
-- [`corpus/entries/cap03.offer-liabilities/cap03.offer-liabilities.mainnet-25000000/mainnet.xdr,`](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/corpus/entries/cap03.offer-liabilities/cap03.offer-liabilities.mainnet-25000000/mainnet.xdr,) envelope 10 of the transaction set: transactionHash of the envelope's result pair
-- [`corpus/entries/cap03.offer-liabilities/cap03.offer-liabilities.mainnet-25000000/mainnet.xdr,`](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/corpus/entries/cap03.offer-liabilities/cap03.offer-liabilities.mainnet-25000000/mainnet.xdr,) envelope 11 of the transaction set: transactionHash of the envelope's result pair
-- [`corpus/entries/cap03.offer-liabilities/cap03.offer-liabilities.mainnet-25000000/mainnet.xdr,`](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/corpus/entries/cap03.offer-liabilities/cap03.offer-liabilities.mainnet-25000000/mainnet.xdr,) envelope 12 of the transaction set: transactionHash of the envelope's result pair
-- [`corpus/entries/cap03.offer-liabilities/cap03.offer-liabilities.mainnet-25000000/mainnet.xdr,`](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/corpus/entries/cap03.offer-liabilities/cap03.offer-liabilities.mainnet-25000000/mainnet.xdr,) envelope 13 of the transaction set: transactionHash of the envelope's result pair
-- [`corpus/entries/cap03.offer-liabilities/cap03.offer-liabilities.mainnet-25000000/mainnet.xdr,`](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/corpus/entries/cap03.offer-liabilities/cap03.offer-liabilities.mainnet-25000000/mainnet.xdr,) envelope 2 of the transaction set: transactionHash of the envelope's result pair
-- [`corpus/entries/cap03.offer-liabilities/cap03.offer-liabilities.mainnet-25000000/mainnet.xdr,`](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/corpus/entries/cap03.offer-liabilities/cap03.offer-liabilities.mainnet-25000000/mainnet.xdr,) envelope 3 of the transaction set: transactionHash of the envelope's result pair
-- [`corpus/entries/cap03.offer-liabilities/cap03.offer-liabilities.mainnet-25000000/mainnet.xdr,`](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/corpus/entries/cap03.offer-liabilities/cap03.offer-liabilities.mainnet-25000000/mainnet.xdr,) envelope 4 of the transaction set: transactionHash of the envelope's result pair
-- [`corpus/entries/cap03.offer-liabilities/cap03.offer-liabilities.mainnet-25000000/mainnet.xdr,`](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/corpus/entries/cap03.offer-liabilities/cap03.offer-liabilities.mainnet-25000000/mainnet.xdr,) envelope 5 of the transaction set: transactionHash of the envelope's result pair
-- [`corpus/entries/cap03.offer-liabilities/cap03.offer-liabilities.mainnet-25000000/mainnet.xdr,`](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/corpus/entries/cap03.offer-liabilities/cap03.offer-liabilities.mainnet-25000000/mainnet.xdr,) envelope 6 of the transaction set: transactionHash of the envelope's result pair
-- [`corpus/entries/cap03.offer-liabilities/cap03.offer-liabilities.mainnet-25000000/mainnet.xdr,`](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/corpus/entries/cap03.offer-liabilities/cap03.offer-liabilities.mainnet-25000000/mainnet.xdr,) envelope 7 of the transaction set: transactionHash of the envelope's result pair
-- [`corpus/entries/cap03.offer-liabilities/cap03.offer-liabilities.mainnet-25000000/mainnet.xdr,`](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/corpus/entries/cap03.offer-liabilities/cap03.offer-liabilities.mainnet-25000000/mainnet.xdr,) envelope 8 of the transaction set: transactionHash of the envelope's result pair
-- [`corpus/entries/cap03.offer-liabilities/cap03.offer-liabilities.mainnet-25000000/mainnet.xdr,`](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/corpus/entries/cap03.offer-liabilities/cap03.offer-liabilities.mainnet-25000000/mainnet.xdr,) envelope 9 of the transaction set: transactionHash of the envelope's result pair
+- [`corpus/entries/cap03.offer-liabilities/cap03.offer-liabilities.mainnet-25000000/mainnet.xdr`](https://github.com/ErenTopaal/shapekit/blob/v0.2.0/corpus/entries/cap03.offer-liabilities/cap03.offer-liabilities.mainnet-25000000/mainnet.xdr), envelope 0 of the transaction set: transactionHash of the envelope's result pair
+- [`corpus/entries/cap03.offer-liabilities/cap03.offer-liabilities.mainnet-25000000/mainnet.xdr`](https://github.com/ErenTopaal/shapekit/blob/v0.2.0/corpus/entries/cap03.offer-liabilities/cap03.offer-liabilities.mainnet-25000000/mainnet.xdr), envelope 1 of the transaction set: transactionHash of the envelope's result pair
+- [`corpus/entries/cap03.offer-liabilities/cap03.offer-liabilities.mainnet-25000000/mainnet.xdr`](https://github.com/ErenTopaal/shapekit/blob/v0.2.0/corpus/entries/cap03.offer-liabilities/cap03.offer-liabilities.mainnet-25000000/mainnet.xdr), envelope 10 of the transaction set: transactionHash of the envelope's result pair
+- [`corpus/entries/cap03.offer-liabilities/cap03.offer-liabilities.mainnet-25000000/mainnet.xdr`](https://github.com/ErenTopaal/shapekit/blob/v0.2.0/corpus/entries/cap03.offer-liabilities/cap03.offer-liabilities.mainnet-25000000/mainnet.xdr), envelope 11 of the transaction set: transactionHash of the envelope's result pair
+- [`corpus/entries/cap03.offer-liabilities/cap03.offer-liabilities.mainnet-25000000/mainnet.xdr`](https://github.com/ErenTopaal/shapekit/blob/v0.2.0/corpus/entries/cap03.offer-liabilities/cap03.offer-liabilities.mainnet-25000000/mainnet.xdr), envelope 12 of the transaction set: transactionHash of the envelope's result pair
+- [`corpus/entries/cap03.offer-liabilities/cap03.offer-liabilities.mainnet-25000000/mainnet.xdr`](https://github.com/ErenTopaal/shapekit/blob/v0.2.0/corpus/entries/cap03.offer-liabilities/cap03.offer-liabilities.mainnet-25000000/mainnet.xdr), envelope 13 of the transaction set: transactionHash of the envelope's result pair
+- [`corpus/entries/cap03.offer-liabilities/cap03.offer-liabilities.mainnet-25000000/mainnet.xdr`](https://github.com/ErenTopaal/shapekit/blob/v0.2.0/corpus/entries/cap03.offer-liabilities/cap03.offer-liabilities.mainnet-25000000/mainnet.xdr), envelope 2 of the transaction set: transactionHash of the envelope's result pair
+- [`corpus/entries/cap03.offer-liabilities/cap03.offer-liabilities.mainnet-25000000/mainnet.xdr`](https://github.com/ErenTopaal/shapekit/blob/v0.2.0/corpus/entries/cap03.offer-liabilities/cap03.offer-liabilities.mainnet-25000000/mainnet.xdr), envelope 3 of the transaction set: transactionHash of the envelope's result pair
+- [`corpus/entries/cap03.offer-liabilities/cap03.offer-liabilities.mainnet-25000000/mainnet.xdr`](https://github.com/ErenTopaal/shapekit/blob/v0.2.0/corpus/entries/cap03.offer-liabilities/cap03.offer-liabilities.mainnet-25000000/mainnet.xdr), envelope 4 of the transaction set: transactionHash of the envelope's result pair
+- [`corpus/entries/cap03.offer-liabilities/cap03.offer-liabilities.mainnet-25000000/mainnet.xdr`](https://github.com/ErenTopaal/shapekit/blob/v0.2.0/corpus/entries/cap03.offer-liabilities/cap03.offer-liabilities.mainnet-25000000/mainnet.xdr), envelope 5 of the transaction set: transactionHash of the envelope's result pair
+- [`corpus/entries/cap03.offer-liabilities/cap03.offer-liabilities.mainnet-25000000/mainnet.xdr`](https://github.com/ErenTopaal/shapekit/blob/v0.2.0/corpus/entries/cap03.offer-liabilities/cap03.offer-liabilities.mainnet-25000000/mainnet.xdr), envelope 6 of the transaction set: transactionHash of the envelope's result pair
+- [`corpus/entries/cap03.offer-liabilities/cap03.offer-liabilities.mainnet-25000000/mainnet.xdr`](https://github.com/ErenTopaal/shapekit/blob/v0.2.0/corpus/entries/cap03.offer-liabilities/cap03.offer-liabilities.mainnet-25000000/mainnet.xdr), envelope 7 of the transaction set: transactionHash of the envelope's result pair
+- [`corpus/entries/cap03.offer-liabilities/cap03.offer-liabilities.mainnet-25000000/mainnet.xdr`](https://github.com/ErenTopaal/shapekit/blob/v0.2.0/corpus/entries/cap03.offer-liabilities/cap03.offer-liabilities.mainnet-25000000/mainnet.xdr), envelope 8 of the transaction set: transactionHash of the envelope's result pair
+- [`corpus/entries/cap03.offer-liabilities/cap03.offer-liabilities.mainnet-25000000/mainnet.xdr`](https://github.com/ErenTopaal/shapekit/blob/v0.2.0/corpus/entries/cap03.offer-liabilities/cap03.offer-liabilities.mainnet-25000000/mainnet.xdr), envelope 9 of the transaction set: transactionHash of the envelope's result pair
 
 How the corpus entry was built and checked: captured 2026-11-13 through the sep-54 public data lake from https://aws-public-blockchain.s3.us-east-2.amazonaws.com/v1.1/stellar/ledgers/pubnet/FE8323FF--24960000-25023999/FE8287BF--25000000.xdr.zst. ledger 25000000 hash 98c64c37e20ba4bb3c7c225b99f17080c06f625d23f570008efc81cb5107c727, protocol 11, LedgerCloseMeta v0. the public lake holds history as re-emitted by a current core (TransactionMeta v4 for every protocol). the header's scp value is STELLAR_VALUE_BASIC, unsigned: current core's HerderImpl::makeStellarValue writes only signed values, and mainnet headers carry basic values through protocol 11 (sampled at ledgers 19500000 to 25500000)
 

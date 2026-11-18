@@ -5,11 +5,11 @@
 
 On the input below, `com.soneso.stellar:stellar-sdk-jvm` 1.18.0 answers differently from the Stellar network in 1 check.
 
-A check is one call into the SDK with a known right answer. Each check below shows the call as a JSON request of the [shapekit testee protocol](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/docs/testee-protocol.md) (`op` names the SDK operation), the expected answer and the answer the SDK gave.
+A check is one call into the SDK with a known right answer. Each check below shows the call as a JSON request of the [shapekit testee protocol](https://github.com/ErenTopaal/shapekit/blob/v0.2.0/docs/testee-protocol.md) (`op` names the SDK operation), the expected answer and the answer the SDK gave.
 
 ## Input
 
-Corpus entry `cap21.preconditions.synth-extra-signers-3` (family `cap21.preconditions`) of the [shapekit](https://github.com/ErenTopaal/shapekit) corpus 0.1.0.
+Corpus entry `cap21.preconditions.synth-extra-signers-3` (family `cap21.preconditions`) of the [shapekit](https://github.com/ErenTopaal/shapekit) corpus 0.2.0.
 
 ### `any/decode_encode` on 1.18.0
 
@@ -31,7 +31,7 @@ Actual: `{"xdr":"AAAAAgAAAAABAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQAAAGQAAAA
 
 ## Reproduce
 
-From a checkout of https://github.com/ErenTopaal/shapekit at tag `v0.1.0`:
+From a checkout of https://github.com/ErenTopaal/shapekit at tag `v0.2.0`:
 
 ```sh
 shapekit conformance run --sdk kmp --version 1.18.0 --entry cap21.preconditions.synth-extra-signers-3
@@ -41,7 +41,7 @@ shapekit conformance run --sdk kmp --version 1.18.0 --entry cap21.preconditions.
 
 The expected answers are recorded in:
 
-- [`corpus/entries/cap21.preconditions/cap21.preconditions.synth-extra-signers-3/any.xdr`](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/corpus/entries/cap21.preconditions/cap21.preconditions.synth-extra-signers-3/any.xdr): decode = must-reject (validity InvalidByCore)
+- [`corpus/entries/cap21.preconditions/cap21.preconditions.synth-extra-signers-3/any.xdr`](https://github.com/ErenTopaal/shapekit/blob/v0.2.0/corpus/entries/cap21.preconditions/cap21.preconditions.synth-extra-signers-3/any.xdr): decode = must-reject (validity InvalidByCore)
 
 How the corpus entry was built and checked: preconditions v2 with 3 extra signers, one past extraSigners<2>. stellar-xdr 30.0.0 rejects it (TransactionEnvelope::from_xdr) with LengthExceedsMax under Limits { depth: 1000 (xdr.envelope.depth), len: 336 (the input length) }.
 

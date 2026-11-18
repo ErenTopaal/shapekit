@@ -5,11 +5,11 @@
 
 On the input below, `stellar-dotnet-sdk` 17.0.0 answers differently from the Stellar network in 1 check.
 
-A check is one call into the SDK with a known right answer. Each check below shows the call as a JSON request of the [shapekit testee protocol](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/docs/testee-protocol.md) (`op` names the SDK operation), the expected answer and the answer the SDK gave.
+A check is one call into the SDK with a known right answer. Each check below shows the call as a JSON request of the [shapekit testee protocol](https://github.com/ErenTopaal/shapekit/blob/v0.2.0/docs/testee-protocol.md) (`op` names the SDK operation), the expected answer and the answer the SDK gave.
 
 ## Input
 
-Corpus entry `soroban.auth-trees.golden-5f615b0f98ae09f3-11` (family `soroban.auth-trees`) of the [shapekit](https://github.com/ErenTopaal/shapekit) corpus 0.1.0.
+Corpus entry `soroban.auth-trees.golden-5f615b0f98ae09f3-11` (family `soroban.auth-trees`) of the [shapekit](https://github.com/ErenTopaal/shapekit) corpus 0.2.0.
 
 ### `any/tx_hash 0` on 17.0.0
 
@@ -31,7 +31,7 @@ Actual: `{"rejected":"ArgumentException: SCV_VEC with an absent vector body (Par
 
 ## Reproduce
 
-From a checkout of https://github.com/ErenTopaal/shapekit at tag `v0.1.0`:
+From a checkout of https://github.com/ErenTopaal/shapekit at tag `v0.2.0`:
 
 ```sh
 shapekit conformance run --sdk dotnet --version 17.0.0 --entry soroban.auth-trees.golden-5f615b0f98ae09f3-11
@@ -41,7 +41,7 @@ shapekit conformance run --sdk dotnet --version 17.0.0 --entry soroban.auth-tree
 
 The expected answers are recorded in:
 
-- [`corpus/entries/soroban.auth-trees/soroban.auth-trees.golden-5f615b0f98ae09f3-11/any.xdr,`](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/corpus/entries/soroban.auth-trees/soroban.auth-trees.golden-5f615b0f98ae09f3-11/any.xdr,) envelope 0 of the transaction set: transactionHash of the envelope's result pair
+- [`corpus/entries/soroban.auth-trees/soroban.auth-trees.golden-5f615b0f98ae09f3-11/any.xdr`](https://github.com/ErenTopaal/shapekit/blob/v0.2.0/corpus/entries/soroban.auth-trees/soroban.auth-trees.golden-5f615b0f98ae09f3-11/any.xdr), envelope 0 of the transaction set: transactionHash of the envelope's result pair
 
 How the corpus entry was built and checked: core test "Soroban classic account authentication", section "account with weights|uninitialized vector signature", ledger 13 (record 12 of 12 in the upstream file). smallest golden ledger matching SorobanCredentials:address
 

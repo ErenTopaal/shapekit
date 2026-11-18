@@ -5,11 +5,11 @@
 
 On the input below, `com.soneso.stellar:stellar-sdk-jvm` 1.18.0 answers differently from the Stellar network in 2 checks.
 
-A check is one call into the SDK with a known right answer. Each check below shows the call as a JSON request of the [shapekit testee protocol](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/docs/testee-protocol.md) (`op` names the SDK operation), the expected answer and the answer the SDK gave.
+A check is one call into the SDK with a known right answer. Each check below shows the call as a JSON request of the [shapekit testee protocol](https://github.com/ErenTopaal/shapekit/blob/v0.2.0/docs/testee-protocol.md) (`op` names the SDK operation), the expected answer and the answer the SDK gave.
 
 ## Input
 
-Corpus entry `cap27.muxed-accounts.p28-claimable-balance-tx-source-id-1` (family `cap27.muxed-accounts`) of the [shapekit](https://github.com/ErenTopaal/shapekit) corpus 0.1.0.
+Corpus entry `cap27.muxed-accounts.p28-claimable-balance-tx-source-id-1` (family `cap27.muxed-accounts`) of the [shapekit](https://github.com/ErenTopaal/shapekit) corpus 0.2.0.
 
 ### `testnet/tx_hash 0` on 1.18.0
 
@@ -49,7 +49,7 @@ Actual: `{"hash":"00f644f7450bb8bff9d904b889ae2fa8a89818a842aa67b1811f02082b941b
 
 ## Reproduce
 
-From a checkout of https://github.com/ErenTopaal/shapekit at tag `v0.1.0`:
+From a checkout of https://github.com/ErenTopaal/shapekit at tag `v0.2.0`:
 
 ```sh
 shapekit conformance run --sdk kmp --version 1.18.0 --entry cap27.muxed-accounts.p28-claimable-balance-tx-source-id-1
@@ -59,8 +59,8 @@ shapekit conformance run --sdk kmp --version 1.18.0 --entry cap27.muxed-accounts
 
 The expected answers are recorded in:
 
-- [`corpus/entries/cap27.muxed-accounts/cap27.muxed-accounts.p28-claimable-balance-tx-source-id-1/mainnet.xdr,`](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/corpus/entries/cap27.muxed-accounts/cap27.muxed-accounts.p28-claimable-balance-tx-source-id-1/mainnet.xdr,) envelope 0 of the transaction set: transactionHash of the envelope's result pair
-- [`corpus/entries/cap27.muxed-accounts/cap27.muxed-accounts.p28-claimable-balance-tx-source-id-1/testnet.xdr,`](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/corpus/entries/cap27.muxed-accounts/cap27.muxed-accounts.p28-claimable-balance-tx-source-id-1/testnet.xdr,) envelope 0 of the transaction set: transactionHash of the envelope's result pair
+- [`corpus/entries/cap27.muxed-accounts/cap27.muxed-accounts.p28-claimable-balance-tx-source-id-1/mainnet.xdr`](https://github.com/ErenTopaal/shapekit/blob/v0.2.0/corpus/entries/cap27.muxed-accounts/cap27.muxed-accounts.p28-claimable-balance-tx-source-id-1/mainnet.xdr), envelope 0 of the transaction set: transactionHash of the envelope's result pair
+- [`corpus/entries/cap27.muxed-accounts/cap27.muxed-accounts.p28-claimable-balance-tx-source-id-1/testnet.xdr`](https://github.com/ErenTopaal/shapekit/blob/v0.2.0/corpus/entries/cap27.muxed-accounts/cap27.muxed-accounts.p28-claimable-balance-tx-source-id-1/testnet.xdr), envelope 0 of the transaction set: transactionHash of the envelope's result pair
 
 How the corpus entry was built and checked: a claimable balance created by a transaction whose source is a muxed account with id 1
 

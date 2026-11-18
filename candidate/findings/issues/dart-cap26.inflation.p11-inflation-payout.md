@@ -5,11 +5,11 @@
 
 On the input below, `stellar_flutter_sdk` 3.12.0 answers differently from the Stellar network in 2 checks.
 
-A check is one call into the SDK with a known right answer. Each check below shows the call as a JSON request of the [shapekit testee protocol](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/docs/testee-protocol.md) (`op` names the SDK operation), the expected answer and the answer the SDK gave.
+A check is one call into the SDK with a known right answer. Each check below shows the call as a JSON request of the [shapekit testee protocol](https://github.com/ErenTopaal/shapekit/blob/v0.2.0/docs/testee-protocol.md) (`op` names the SDK operation), the expected answer and the answer the SDK gave.
 
 ## Input
 
-Corpus entry `cap26.inflation.p11-inflation-payout` (family `cap26.inflation`) of the [shapekit](https://github.com/ErenTopaal/shapekit) corpus 0.1.0.
+Corpus entry `cap26.inflation.p11-inflation-payout` (family `cap26.inflation`) of the [shapekit](https://github.com/ErenTopaal/shapekit) corpus 0.2.0.
 
 ### `testnet/tx_hash 0` on 3.12.0
 
@@ -49,7 +49,7 @@ Actual: `{"rejected":"_Exception: Exception: Unknown operation body OperationTyp
 
 ## Reproduce
 
-From a checkout of https://github.com/ErenTopaal/shapekit at tag `v0.1.0`:
+From a checkout of https://github.com/ErenTopaal/shapekit at tag `v0.2.0`:
 
 ```sh
 shapekit conformance run --sdk dart --version 3.12.0 --entry cap26.inflation.p11-inflation-payout
@@ -59,8 +59,8 @@ shapekit conformance run --sdk dart --version 3.12.0 --entry cap26.inflation.p11
 
 The expected answers are recorded in:
 
-- [`corpus/entries/cap26.inflation/cap26.inflation.p11-inflation-payout/mainnet.xdr,`](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/corpus/entries/cap26.inflation/cap26.inflation.p11-inflation-payout/mainnet.xdr,) envelope 0 of the transaction set: transactionHash of the envelope's result pair
-- [`corpus/entries/cap26.inflation/cap26.inflation.p11-inflation-payout/testnet.xdr,`](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/corpus/entries/cap26.inflation/cap26.inflation.p11-inflation-payout/testnet.xdr,) envelope 0 of the transaction set: transactionHash of the envelope's result pair
+- [`corpus/entries/cap26.inflation/cap26.inflation.p11-inflation-payout/mainnet.xdr`](https://github.com/ErenTopaal/shapekit/blob/v0.2.0/corpus/entries/cap26.inflation/cap26.inflation.p11-inflation-payout/mainnet.xdr), envelope 0 of the transaction set: transactionHash of the envelope's result pair
+- [`corpus/entries/cap26.inflation/cap26.inflation.p11-inflation-payout/testnet.xdr`](https://github.com/ErenTopaal/shapekit/blob/v0.2.0/corpus/entries/cap26.inflation/cap26.inflation.p11-inflation-payout/testnet.xdr), envelope 0 of the transaction set: transactionHash of the envelope's result pair
 
 How the corpus entry was built and checked: an inflation operation at protocol 11 paying the one account the root voted for; the payout is a balance change on an account the envelope never names
 

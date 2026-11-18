@@ -5,11 +5,11 @@
 
 On the input below, `soneso/stellar-php-sdk` 1.18.0 answers differently from the Stellar network in 2 checks.
 
-A check is one call into the SDK with a known right answer. Each check below shows the call as a JSON request of the [shapekit testee protocol](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/docs/testee-protocol.md) (`op` names the SDK operation), the expected answer and the answer the SDK gave.
+A check is one call into the SDK with a known right answer. Each check below shows the call as a JSON request of the [shapekit testee protocol](https://github.com/ErenTopaal/shapekit/blob/v0.2.0/docs/testee-protocol.md) (`op` names the SDK operation), the expected answer and the answer the SDK gave.
 
 ## Input
 
-Corpus entry `cap27.muxed-accounts.p30-tx-source-and-payment-destination-id-2p64-1` (family `cap27.muxed-accounts`) of the [shapekit](https://github.com/ErenTopaal/shapekit) corpus 0.1.0.
+Corpus entry `cap27.muxed-accounts.p30-tx-source-and-payment-destination-id-2p64-1` (family `cap27.muxed-accounts`) of the [shapekit](https://github.com/ErenTopaal/shapekit) corpus 0.2.0.
 
 ### `testnet/decode_json` on 1.18.0
 
@@ -49,7 +49,7 @@ Actual: `{"rejected":"InvalidArgumentException: uint64ToString accepts only non-
 
 ## Reproduce
 
-From a checkout of https://github.com/ErenTopaal/shapekit at tag `v0.1.0`:
+From a checkout of https://github.com/ErenTopaal/shapekit at tag `v0.2.0`:
 
 ```sh
 shapekit conformance run --sdk php --version 1.18.0 --entry cap27.muxed-accounts.p30-tx-source-and-payment-destination-id-2p64-1
@@ -59,8 +59,8 @@ shapekit conformance run --sdk php --version 1.18.0 --entry cap27.muxed-accounts
 
 The expected answers are recorded in:
 
-- [`corpus/entries/cap27.muxed-accounts/cap27.muxed-accounts.p30-tx-source-and-payment-destination-id-2p64-1/mainnet.expected.json`](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/corpus/entries/cap27.muxed-accounts/cap27.muxed-accounts.p30-tx-source-and-payment-destination-id-2p64-1/mainnet.expected.json): SEP-51 rendering by stellar-xdr 30.0.0
-- [`corpus/entries/cap27.muxed-accounts/cap27.muxed-accounts.p30-tx-source-and-payment-destination-id-2p64-1/testnet.expected.json`](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/corpus/entries/cap27.muxed-accounts/cap27.muxed-accounts.p30-tx-source-and-payment-destination-id-2p64-1/testnet.expected.json): SEP-51 rendering by stellar-xdr 30.0.0
+- [`corpus/entries/cap27.muxed-accounts/cap27.muxed-accounts.p30-tx-source-and-payment-destination-id-2p64-1/mainnet.expected.json`](https://github.com/ErenTopaal/shapekit/blob/v0.2.0/corpus/entries/cap27.muxed-accounts/cap27.muxed-accounts.p30-tx-source-and-payment-destination-id-2p64-1/mainnet.expected.json): SEP-51 rendering by stellar-xdr 30.0.0
+- [`corpus/entries/cap27.muxed-accounts/cap27.muxed-accounts.p30-tx-source-and-payment-destination-id-2p64-1/testnet.expected.json`](https://github.com/ErenTopaal/shapekit/blob/v0.2.0/corpus/entries/cap27.muxed-accounts/cap27.muxed-accounts.p30-tx-source-and-payment-destination-id-2p64-1/testnet.expected.json): SEP-51 rendering by stellar-xdr 30.0.0
 
 How the corpus entry was built and checked: a payment whose transaction source and destination are both muxed accounts with id 2p64-1
 

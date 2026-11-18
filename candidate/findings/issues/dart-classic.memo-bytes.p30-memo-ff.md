@@ -5,11 +5,11 @@
 
 On the input below, `stellar_flutter_sdk` 3.12.0 answers differently from the Stellar network in 8 checks.
 
-A check is one call into the SDK with a known right answer. Each check below shows the call as a JSON request of the [shapekit testee protocol](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/docs/testee-protocol.md) (`op` names the SDK operation), the expected answer and the answer the SDK gave.
+A check is one call into the SDK with a known right answer. Each check below shows the call as a JSON request of the [shapekit testee protocol](https://github.com/ErenTopaal/shapekit/blob/v0.2.0/docs/testee-protocol.md) (`op` names the SDK operation), the expected answer and the answer the SDK gave.
 
 ## Input
 
-Corpus entry `classic.memo-bytes.p30-memo-ff` (family `classic.memo-bytes`) of the [shapekit](https://github.com/ErenTopaal/shapekit) corpus 0.1.0.
+Corpus entry `classic.memo-bytes.p30-memo-ff` (family `classic.memo-bytes`) of the [shapekit](https://github.com/ErenTopaal/shapekit) corpus 0.2.0.
 
 ### `testnet/decode_encode` on 3.12.0
 
@@ -99,7 +99,7 @@ Actual: `{"rejected":"FormatException: FormatException: Invalid UTF-8 byte (at o
 
 ## Reproduce
 
-From a checkout of https://github.com/ErenTopaal/shapekit at tag `v0.1.0`:
+From a checkout of https://github.com/ErenTopaal/shapekit at tag `v0.2.0`:
 
 ```sh
 shapekit conformance run --sdk dart --version 3.12.0 --entry classic.memo-bytes.p30-memo-ff
@@ -109,14 +109,14 @@ shapekit conformance run --sdk dart --version 3.12.0 --entry classic.memo-bytes.
 
 The expected answers are recorded in:
 
-- [`corpus/entries/classic.memo-bytes/classic.memo-bytes.p30-memo-ff/mainnet.expected.json`](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/corpus/entries/classic.memo-bytes/classic.memo-bytes.p30-memo-ff/mainnet.expected.json): SEP-51 rendering by stellar-xdr 30.0.0
-- [`corpus/entries/classic.memo-bytes/classic.memo-bytes.p30-memo-ff/mainnet.expected.json`](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/corpus/entries/classic.memo-bytes/classic.memo-bytes.p30-memo-ff/mainnet.expected.json): SEP-51 rendering by stellar-xdr 30.0.0; must encode back to corpus/entries/classic.memo-bytes/classic.memo-bytes.p30-memo-ff/mainnet.xdr
-- [`corpus/entries/classic.memo-bytes/classic.memo-bytes.p30-memo-ff/mainnet.xdr,`](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/corpus/entries/classic.memo-bytes/classic.memo-bytes.p30-memo-ff/mainnet.xdr,) envelope 0 of the transaction set: transactionHash of the envelope's result pair
-- [`corpus/entries/classic.memo-bytes/classic.memo-bytes.p30-memo-ff/mainnet.xdr`](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/corpus/entries/classic.memo-bytes/classic.memo-bytes.p30-memo-ff/mainnet.xdr): decode = must-accept, roundtrip = true
-- [`corpus/entries/classic.memo-bytes/classic.memo-bytes.p30-memo-ff/testnet.expected.json`](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/corpus/entries/classic.memo-bytes/classic.memo-bytes.p30-memo-ff/testnet.expected.json): SEP-51 rendering by stellar-xdr 30.0.0
-- [`corpus/entries/classic.memo-bytes/classic.memo-bytes.p30-memo-ff/testnet.expected.json`](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/corpus/entries/classic.memo-bytes/classic.memo-bytes.p30-memo-ff/testnet.expected.json): SEP-51 rendering by stellar-xdr 30.0.0; must encode back to corpus/entries/classic.memo-bytes/classic.memo-bytes.p30-memo-ff/testnet.xdr
-- [`corpus/entries/classic.memo-bytes/classic.memo-bytes.p30-memo-ff/testnet.xdr,`](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/corpus/entries/classic.memo-bytes/classic.memo-bytes.p30-memo-ff/testnet.xdr,) envelope 0 of the transaction set: transactionHash of the envelope's result pair
-- [`corpus/entries/classic.memo-bytes/classic.memo-bytes.p30-memo-ff/testnet.xdr`](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/corpus/entries/classic.memo-bytes/classic.memo-bytes.p30-memo-ff/testnet.xdr): decode = must-accept, roundtrip = true
+- [`corpus/entries/classic.memo-bytes/classic.memo-bytes.p30-memo-ff/mainnet.expected.json`](https://github.com/ErenTopaal/shapekit/blob/v0.2.0/corpus/entries/classic.memo-bytes/classic.memo-bytes.p30-memo-ff/mainnet.expected.json): SEP-51 rendering by stellar-xdr 30.0.0
+- [`corpus/entries/classic.memo-bytes/classic.memo-bytes.p30-memo-ff/mainnet.expected.json`](https://github.com/ErenTopaal/shapekit/blob/v0.2.0/corpus/entries/classic.memo-bytes/classic.memo-bytes.p30-memo-ff/mainnet.expected.json): SEP-51 rendering by stellar-xdr 30.0.0; must encode back to corpus/entries/classic.memo-bytes/classic.memo-bytes.p30-memo-ff/mainnet.xdr
+- [`corpus/entries/classic.memo-bytes/classic.memo-bytes.p30-memo-ff/mainnet.xdr`](https://github.com/ErenTopaal/shapekit/blob/v0.2.0/corpus/entries/classic.memo-bytes/classic.memo-bytes.p30-memo-ff/mainnet.xdr), envelope 0 of the transaction set: transactionHash of the envelope's result pair
+- [`corpus/entries/classic.memo-bytes/classic.memo-bytes.p30-memo-ff/mainnet.xdr`](https://github.com/ErenTopaal/shapekit/blob/v0.2.0/corpus/entries/classic.memo-bytes/classic.memo-bytes.p30-memo-ff/mainnet.xdr): decode = must-accept, roundtrip = true
+- [`corpus/entries/classic.memo-bytes/classic.memo-bytes.p30-memo-ff/testnet.expected.json`](https://github.com/ErenTopaal/shapekit/blob/v0.2.0/corpus/entries/classic.memo-bytes/classic.memo-bytes.p30-memo-ff/testnet.expected.json): SEP-51 rendering by stellar-xdr 30.0.0
+- [`corpus/entries/classic.memo-bytes/classic.memo-bytes.p30-memo-ff/testnet.expected.json`](https://github.com/ErenTopaal/shapekit/blob/v0.2.0/corpus/entries/classic.memo-bytes/classic.memo-bytes.p30-memo-ff/testnet.expected.json): SEP-51 rendering by stellar-xdr 30.0.0; must encode back to corpus/entries/classic.memo-bytes/classic.memo-bytes.p30-memo-ff/testnet.xdr
+- [`corpus/entries/classic.memo-bytes/classic.memo-bytes.p30-memo-ff/testnet.xdr`](https://github.com/ErenTopaal/shapekit/blob/v0.2.0/corpus/entries/classic.memo-bytes/classic.memo-bytes.p30-memo-ff/testnet.xdr), envelope 0 of the transaction set: transactionHash of the envelope's result pair
+- [`corpus/entries/classic.memo-bytes/classic.memo-bytes.p30-memo-ff/testnet.xdr`](https://github.com/ErenTopaal/shapekit/blob/v0.2.0/corpus/entries/classic.memo-bytes/classic.memo-bytes.p30-memo-ff/testnet.xdr): decode = must-accept, roundtrip = true
 
 How the corpus entry was built and checked: a payment whose 1 byte text memo is ff, not valid UTF-8, accepted by core
 

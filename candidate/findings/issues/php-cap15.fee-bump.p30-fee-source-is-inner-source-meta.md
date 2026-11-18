@@ -5,11 +5,11 @@
 
 On the input below, `soneso/stellar-php-sdk` 1.18.0 answers differently from the Stellar network in 4 checks.
 
-A check is one call into the SDK with a known right answer. Each check below shows the call as a JSON request of the [shapekit testee protocol](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/docs/testee-protocol.md) (`op` names the SDK operation), the expected answer and the answer the SDK gave.
+A check is one call into the SDK with a known right answer. Each check below shows the call as a JSON request of the [shapekit testee protocol](https://github.com/ErenTopaal/shapekit/blob/v0.2.0/docs/testee-protocol.md) (`op` names the SDK operation), the expected answer and the answer the SDK gave.
 
 ## Input
 
-Corpus entry `cap15.fee-bump.p30-fee-source-is-inner-source-meta` (family `cap15.fee-bump`) of the [shapekit](https://github.com/ErenTopaal/shapekit) corpus 0.1.0.
+Corpus entry `cap15.fee-bump.p30-fee-source-is-inner-source-meta` (family `cap15.fee-bump`) of the [shapekit](https://github.com/ErenTopaal/shapekit) corpus 0.2.0.
 
 ### `testnet/decode_json` on 1.18.0
 
@@ -73,7 +73,7 @@ Actual: `{"rejected":"InvalidArgumentException: Unexpected length for value. Has
 
 ## Reproduce
 
-From a checkout of https://github.com/ErenTopaal/shapekit at tag `v0.1.0`:
+From a checkout of https://github.com/ErenTopaal/shapekit at tag `v0.2.0`:
 
 ```sh
 shapekit conformance run --sdk php --version 1.18.0 --entry cap15.fee-bump.p30-fee-source-is-inner-source-meta
@@ -83,10 +83,10 @@ shapekit conformance run --sdk php --version 1.18.0 --entry cap15.fee-bump.p30-f
 
 The expected answers are recorded in:
 
-- [`corpus/entries/cap15.fee-bump/cap15.fee-bump.p30-fee-source-is-inner-source-meta/mainnet.expected.json`](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/corpus/entries/cap15.fee-bump/cap15.fee-bump.p30-fee-source-is-inner-source-meta/mainnet.expected.json): SEP-51 rendering by stellar-xdr 30.0.0
-- [`corpus/entries/cap15.fee-bump/cap15.fee-bump.p30-fee-source-is-inner-source-meta/mainnet.expected.json`](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/corpus/entries/cap15.fee-bump/cap15.fee-bump.p30-fee-source-is-inner-source-meta/mainnet.expected.json): SEP-51 rendering by stellar-xdr 30.0.0; must encode back to corpus/entries/cap15.fee-bump/cap15.fee-bump.p30-fee-source-is-inner-source-meta/mainnet.xdr
-- [`corpus/entries/cap15.fee-bump/cap15.fee-bump.p30-fee-source-is-inner-source-meta/testnet.expected.json`](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/corpus/entries/cap15.fee-bump/cap15.fee-bump.p30-fee-source-is-inner-source-meta/testnet.expected.json): SEP-51 rendering by stellar-xdr 30.0.0
-- [`corpus/entries/cap15.fee-bump/cap15.fee-bump.p30-fee-source-is-inner-source-meta/testnet.expected.json`](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/corpus/entries/cap15.fee-bump/cap15.fee-bump.p30-fee-source-is-inner-source-meta/testnet.expected.json): SEP-51 rendering by stellar-xdr 30.0.0; must encode back to corpus/entries/cap15.fee-bump/cap15.fee-bump.p30-fee-source-is-inner-source-meta/testnet.xdr
+- [`corpus/entries/cap15.fee-bump/cap15.fee-bump.p30-fee-source-is-inner-source-meta/mainnet.expected.json`](https://github.com/ErenTopaal/shapekit/blob/v0.2.0/corpus/entries/cap15.fee-bump/cap15.fee-bump.p30-fee-source-is-inner-source-meta/mainnet.expected.json): SEP-51 rendering by stellar-xdr 30.0.0
+- [`corpus/entries/cap15.fee-bump/cap15.fee-bump.p30-fee-source-is-inner-source-meta/mainnet.expected.json`](https://github.com/ErenTopaal/shapekit/blob/v0.2.0/corpus/entries/cap15.fee-bump/cap15.fee-bump.p30-fee-source-is-inner-source-meta/mainnet.expected.json): SEP-51 rendering by stellar-xdr 30.0.0; must encode back to corpus/entries/cap15.fee-bump/cap15.fee-bump.p30-fee-source-is-inner-source-meta/mainnet.xdr
+- [`corpus/entries/cap15.fee-bump/cap15.fee-bump.p30-fee-source-is-inner-source-meta/testnet.expected.json`](https://github.com/ErenTopaal/shapekit/blob/v0.2.0/corpus/entries/cap15.fee-bump/cap15.fee-bump.p30-fee-source-is-inner-source-meta/testnet.expected.json): SEP-51 rendering by stellar-xdr 30.0.0
+- [`corpus/entries/cap15.fee-bump/cap15.fee-bump.p30-fee-source-is-inner-source-meta/testnet.expected.json`](https://github.com/ErenTopaal/shapekit/blob/v0.2.0/corpus/entries/cap15.fee-bump/cap15.fee-bump.p30-fee-source-is-inner-source-meta/testnet.expected.json): SEP-51 rendering by stellar-xdr 30.0.0; must encode back to corpus/entries/cap15.fee-bump/cap15.fee-bump.p30-fee-source-is-inner-source-meta/testnet.xdr
 
 How the corpus entry was built and checked: a fee bump whose fee source is the inner transaction's own source account
 

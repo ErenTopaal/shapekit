@@ -5,11 +5,11 @@
 
 On the input below, `soneso/stellar-php-sdk` 1.18.0 answers differently from the Stellar network in 1 check.
 
-A check is one call into the SDK with a known right answer. Each check below shows the call as a JSON request of the [shapekit testee protocol](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/docs/testee-protocol.md) (`op` names the SDK operation), the expected answer and the answer the SDK gave.
+A check is one call into the SDK with a known right answer. Each check below shows the call as a JSON request of the [shapekit testee protocol](https://github.com/ErenTopaal/shapekit/blob/v0.2.0/docs/testee-protocol.md) (`op` names the SDK operation), the expected answer and the answer the SDK gave.
 
 ## Input
 
-Corpus entry `classic.max-length.synth-tx-101-operations` (family `classic.max-length`) of the [shapekit](https://github.com/ErenTopaal/shapekit) corpus 0.1.0.
+Corpus entry `classic.max-length.synth-tx-101-operations` (family `classic.max-length`) of the [shapekit](https://github.com/ErenTopaal/shapekit) corpus 0.2.0.
 
 ### `any/decode_encode` on 1.18.0
 
@@ -31,7 +31,7 @@ Actual: `{"xdr":"AAAAAgAAAAABAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQAAAGQAAAA
 
 ## Reproduce
 
-From a checkout of https://github.com/ErenTopaal/shapekit at tag `v0.1.0`:
+From a checkout of https://github.com/ErenTopaal/shapekit at tag `v0.2.0`:
 
 ```sh
 shapekit conformance run --sdk php --version 1.18.0 --entry classic.max-length.synth-tx-101-operations
@@ -41,7 +41,7 @@ shapekit conformance run --sdk php --version 1.18.0 --entry classic.max-length.s
 
 The expected answers are recorded in:
 
-- [`corpus/entries/classic.max-length/classic.max-length.synth-tx-101-operations/any.xdr`](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/corpus/entries/classic.max-length/classic.max-length.synth-tx-101-operations/any.xdr): decode = must-reject (validity InvalidByCore)
+- [`corpus/entries/classic.max-length/classic.max-length.synth-tx-101-operations/any.xdr`](https://github.com/ErenTopaal/shapekit/blob/v0.2.0/corpus/entries/classic.max-length/classic.max-length.synth-tx-101-operations/any.xdr): decode = must-reject (validity InvalidByCore)
 
 How the corpus entry was built and checked: a v1 transaction envelope with 101 operations, one past MAX_OPS_PER_TX = 100 (operations<MAX_OPS_PER_TX> in Stellar-transaction.x). stellar-xdr 30.0.0 rejects it (TransactionEnvelope::from_xdr) with LengthExceedsMax under Limits { depth: 1000 (xdr.envelope.depth), len: 5800 (the input length) }.
 

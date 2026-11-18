@@ -5,11 +5,11 @@
 
 On the input below, `com.soneso.stellar:stellar-sdk-jvm` 1.18.0 answers differently from the Stellar network in 2 checks.
 
-A check is one call into the SDK with a known right answer. Each check below shows the call as a JSON request of the [shapekit testee protocol](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/docs/testee-protocol.md) (`op` names the SDK operation), the expected answer and the answer the SDK gave.
+A check is one call into the SDK with a known right answer. Each check below shows the call as a JSON request of the [shapekit testee protocol](https://github.com/ErenTopaal/shapekit/blob/v0.2.0/docs/testee-protocol.md) (`op` names the SDK operation), the expected answer and the answer the SDK gave.
 
 ## Input
 
-Corpus entry `cap40.signed-payload-signer.p28-extra-signer-empty-payload` (family `cap40.signed-payload-signer`) of the [shapekit](https://github.com/ErenTopaal/shapekit) corpus 0.1.0.
+Corpus entry `cap40.signed-payload-signer.p28-extra-signer-empty-payload` (family `cap40.signed-payload-signer`) of the [shapekit](https://github.com/ErenTopaal/shapekit) corpus 0.2.0.
 
 ### `testnet/decode_json` on 1.18.0
 
@@ -49,7 +49,7 @@ Actual: `{"rejected":"IllegalArgumentException: SignerKeyEd25519SignedPayloadXdr
 
 ## Reproduce
 
-From a checkout of https://github.com/ErenTopaal/shapekit at tag `v0.1.0`:
+From a checkout of https://github.com/ErenTopaal/shapekit at tag `v0.2.0`:
 
 ```sh
 shapekit conformance run --sdk kmp --version 1.18.0 --entry cap40.signed-payload-signer.p28-extra-signer-empty-payload
@@ -59,8 +59,8 @@ shapekit conformance run --sdk kmp --version 1.18.0 --entry cap40.signed-payload
 
 The expected answers are recorded in:
 
-- [`corpus/entries/cap40.signed-payload-signer/cap40.signed-payload-signer.p28-extra-signer-empty-payload/mainnet.expected.json`](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/corpus/entries/cap40.signed-payload-signer/cap40.signed-payload-signer.p28-extra-signer-empty-payload/mainnet.expected.json): SEP-51 rendering by stellar-xdr 30.0.0; holds <INVALID:, which has no canonical SEP-51 form, so any rendering is accepted
-- [`corpus/entries/cap40.signed-payload-signer/cap40.signed-payload-signer.p28-extra-signer-empty-payload/testnet.expected.json`](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/corpus/entries/cap40.signed-payload-signer/cap40.signed-payload-signer.p28-extra-signer-empty-payload/testnet.expected.json): SEP-51 rendering by stellar-xdr 30.0.0; holds <INVALID:, which has no canonical SEP-51 form, so any rendering is accepted
+- [`corpus/entries/cap40.signed-payload-signer/cap40.signed-payload-signer.p28-extra-signer-empty-payload/mainnet.expected.json`](https://github.com/ErenTopaal/shapekit/blob/v0.2.0/corpus/entries/cap40.signed-payload-signer/cap40.signed-payload-signer.p28-extra-signer-empty-payload/mainnet.expected.json): SEP-51 rendering by stellar-xdr 30.0.0; holds <INVALID:, which has no canonical SEP-51 form, so any rendering is accepted
+- [`corpus/entries/cap40.signed-payload-signer/cap40.signed-payload-signer.p28-extra-signer-empty-payload/testnet.expected.json`](https://github.com/ErenTopaal/shapekit/blob/v0.2.0/corpus/entries/cap40.signed-payload-signer/cap40.signed-payload-signer.p28-extra-signer-empty-payload/testnet.expected.json): SEP-51 rendering by stellar-xdr 30.0.0; holds <INVALID:, which has no canonical SEP-51 form, so any rendering is accepted
 
 How the corpus entry was built and checked: an extra signer with an empty signed payload, which core refuses as malformed before the transaction reaches a ledger. submitted with ledger 72 as the last closed ledger
 

@@ -5,11 +5,11 @@
 
 On the input below, `stellar-dotnet-sdk` 16.0.0, 17.0.0 answers differently from the Stellar network in 2 checks.
 
-A check is one call into the SDK with a known right answer. Each check below shows the call as a JSON request of the [shapekit testee protocol](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/docs/testee-protocol.md) (`op` names the SDK operation), the expected answer and the answer the SDK gave.
+A check is one call into the SDK with a known right answer. Each check below shows the call as a JSON request of the [shapekit testee protocol](https://github.com/ErenTopaal/shapekit/blob/v0.2.0/docs/testee-protocol.md) (`op` names the SDK operation), the expected answer and the answer the SDK gave.
 
 ## Input
 
-Corpus entry `cap73.sac-trust.golden-504393015a71bc7a-8` (family `cap73.sac-trust`) of the [shapekit](https://github.com/ErenTopaal/shapekit) corpus 0.1.0.
+Corpus entry `cap73.sac-trust.golden-504393015a71bc7a-8` (family `cap73.sac-trust`) of the [shapekit](https://github.com/ErenTopaal/shapekit) corpus 0.2.0.
 
 ### `any/tx_hash 0` on 16.0.0, 17.0.0
 
@@ -31,7 +31,7 @@ Actual: `{"error":"panic","message":"NullReferenceException: Object reference no
 
 ## Reproduce
 
-From a checkout of https://github.com/ErenTopaal/shapekit at tag `v0.1.0`:
+From a checkout of https://github.com/ErenTopaal/shapekit at tag `v0.2.0`:
 
 ```sh
 shapekit conformance run --sdk dotnet --version 16.0.0 --entry cap73.sac-trust.golden-504393015a71bc7a-8
@@ -41,7 +41,7 @@ shapekit conformance run --sdk dotnet --version 16.0.0 --entry cap73.sac-trust.g
 
 The expected answers are recorded in:
 
-- [`corpus/entries/cap73.sac-trust/cap73.sac-trust.golden-504393015a71bc7a-8/any.xdr,`](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/corpus/entries/cap73.sac-trust/cap73.sac-trust.golden-504393015a71bc7a-8/any.xdr,) envelope 0 of the transaction set: transactionHash of the envelope's result pair
+- [`corpus/entries/cap73.sac-trust/cap73.sac-trust.golden-504393015a71bc7a-8/any.xdr`](https://github.com/ErenTopaal/shapekit/blob/v0.2.0/corpus/entries/cap73.sac-trust/cap73.sac-trust.golden-504393015a71bc7a-8/any.xdr), envelope 0 of the transaction set: transactionHash of the envelope's result pair
 
 How the corpus entry was built and checked: core test "merge account then SAC payment scenarios", section "protocol version 30|SAC payment from the merged account", ledger 10 (record 9 of 13 in the upstream file). smallest golden ledger matching ContractIdPreimage:asset, ContractExecutable:stellar_asset
 
