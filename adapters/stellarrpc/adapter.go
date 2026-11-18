@@ -52,11 +52,24 @@ const (
 type Config struct {
 	// CPUs is docker's --cpus for the container; no limit when empty.
 	CPUs string
+	// Release is the stellar-rpc build the adapter runs; Pinned when zero.
+	Release Release
 	// EventsFrom is the method the export reads events from: FromEvents
 	// (getEvents), FromTransactions (getTransactions) or FromLedgers
 	// (getLedgers).
 	EventsFrom string
 }
+
+// Release is one stellar-rpc build: its image and what its getVersionInfo
+// answers, which the adapter checks before it serves a chain.
+type Release struct {
+	Image   string
+	Version string
+	Commit  string
+}
+
+// Pinned is the release pins.toml pins.
+var Pinned = Release{Image: Image, Version: Version30, Commit: Commit}
 
 // Adapter implements wire.Handler and wire.Dumper.
 type Adapter struct {
@@ -70,6 +83,12 @@ type Adapter struct {
 func New(ctx context.Context, cfg Config) (*Adapter, error) {
 	if !slices.Contains([]string{FromEvents, FromTransactions, FromLedgers}, cfg.EventsFrom) {
 		return nil, fmt.Errorf("--events-from must be events, transactions or ledgers, not %q", cfg.EventsFrom)
+	}
+	if cfg.Release == (Release{}) {
+		cfg.Release = Pinned
+	}
+	if cfg.Release.Image == "" || cfg.Release.Version == "" || cfg.Release.Commit == "" {
+		return nil, fmt.Errorf("a stellar-rpc release needs its image, version and commit")
 	}
 	return &Adapter{cfg: cfg, ctx: ctx}, nil
 }
@@ -105,7 +124,7 @@ func (a *Adapter) Describe(protocol int) (wire.DescribeResult, error) {
 		Adapter:         "shapekit-stellar-rpc-adapter",
 		AdapterVersion:  Version,
 		Target:          "stellar-rpc",
-		TargetVersion:   Version30,
+		TargetVersion:   a.cfg.Release.Version,
 		DeliveryModes:   []string{wire.DeliverySep54Filesystem},
 		DefaultDelivery: wire.DeliverySep54Filesystem,
 		// on an empty database stellar-rpc's live ingestion starts at the
@@ -126,10 +145,10 @@ func (a *Adapter) Start(p wire.StartParams) (wire.StartResult, error) {
 	if a.target != nil {
 		return wire.StartResult{}, wire.Errorf(wire.ClassBadRequest, "start sent twice")
 	}
-	if err := ensureImage(a.ctx); err != nil {
+	if err := ensureImage(a.ctx, a.cfg.Release.Image); err != nil {
 		return wire.StartResult{}, wire.Errorf(wire.ClassTarget, "%v", err)
 	}
-	t, err := startTarget(a.ctx, a.cfg.CPUs, p)
+	t, err := startTarget(a.ctx, a.cfg.CPUs, a.cfg.Release, p)
 	a.target = t
 	if err != nil {
 		return wire.StartResult{}, err
@@ -137,13 +156,13 @@ func (a *Adapter) Start(p wire.StartParams) (wire.StartResult, error) {
 	if err := t.waitReady(a.ctx); err != nil {
 		return wire.StartResult{}, err
 	}
-	imageID, err := docker(a.ctx, "image", "inspect", "--format", "{{.Id}}", Image)
+	imageID, err := docker(a.ctx, "image", "inspect", "--format", "{{.Id}}", a.cfg.Release.Image)
 	if err != nil {
 		return wire.StartResult{}, wire.Errorf(wire.ClassTarget, "%v", err)
 	}
 	return wire.StartResult{Components: map[string]string{
-		"stellar-rpc.version": Version30,
-		"stellar-rpc.image":   Image,
+		"stellar-rpc.version": a.cfg.Release.Version,
+		"stellar-rpc.image":   a.cfg.Release.Image,
 		"stellar-rpc.imageid": imageID,
 		"events-from":         a.cfg.EventsFrom,
 	}}, nil

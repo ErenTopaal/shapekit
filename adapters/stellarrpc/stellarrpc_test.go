@@ -2,6 +2,7 @@ package stellarrpc
 
 import (
 	"bytes"
+	"context"
 	"encoding/binary"
 	"encoding/hex"
 	"encoding/json"
@@ -338,4 +339,14 @@ func TestClaimsAreVocabularyKinds(t *testing.T) {
 		}
 	}
 	var _ wire.Dumper = (*Adapter)(nil)
+}
+
+func TestReleaseDefaultsToThePinAndMustBeWhole(t *testing.T) {
+	a, err := New(context.Background(), Config{EventsFrom: FromEvents})
+	if err != nil || a.cfg.Release != Pinned {
+		t.Fatalf("default release: %v, %+v", err, a)
+	}
+	if _, err := New(context.Background(), Config{EventsFrom: FromEvents, Release: Release{Image: "stellar/stellar-rpc:30.0.2"}}); err == nil {
+		t.Fatal("an image without its version and commit was taken")
+	}
 }

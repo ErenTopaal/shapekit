@@ -26,6 +26,9 @@ func run() error {
 	cpus := flag.String("cpus", "", "docker --cpus limit of the stellar-rpc container (default: none)")
 	from := flag.String("events-from", stellarrpc.FromEvents,
 		"method the export reads events from: events (getEvents), transactions (getTransactions) or ledgers (getLedgers)")
+	image := flag.String("image", "", "stellar-rpc image to run instead of the pinned one, with --version and --commit (upstream drift runs a newer release this way)")
+	version := flag.String("version", "", "the version getVersionInfo must answer for --image, <release>-<commit>")
+	commit := flag.String("commit", "", "the commit getVersionInfo must answer for --image")
 	flag.Usage = func() {
 		_, _ = fmt.Fprintf(flag.CommandLine.Output(), "usage: rpc-adapter [flags]\n\n"+
 			"rpc-adapter puts stellar-rpc behind the shapekit replay harness. It speaks the adapter\n"+
@@ -37,7 +40,8 @@ func run() error {
 	flag.Parse()
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
-	a, err := stellarrpc.New(ctx, stellarrpc.Config{CPUs: *cpus, EventsFrom: *from})
+	release := stellarrpc.Release{Image: *image, Version: *version, Commit: *commit}
+	a, err := stellarrpc.New(ctx, stellarrpc.Config{CPUs: *cpus, EventsFrom: *from, Release: release})
 	if err != nil {
 		return err
 	}

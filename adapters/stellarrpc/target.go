@@ -48,6 +48,7 @@ const (
 // database from another (see relaunch and serve).
 type target struct {
 	params  wire.StartParams
+	build   Release
 	cpus    string
 	prefix  string
 	lake    string // the datastore directory stellar-rpc reads
@@ -76,7 +77,7 @@ func randomSuffix() (string, error) {
 	return hex.EncodeToString(b), nil
 }
 
-func startTarget(ctx context.Context, cpus string, p wire.StartParams) (*target, error) {
+func startTarget(ctx context.Context, cpus string, build Release, p wire.StartParams) (*target, error) {
 	if p.DockerNetwork == "" {
 		return nil, wire.Errorf(wire.ClassUnsupported, "stellar-rpc runs in a container; the harness must pass docker_network")
 	}
@@ -91,7 +92,7 @@ func startTarget(ctx context.Context, cpus string, p wire.StartParams) (*target,
 		return nil, err
 	}
 	t := &target{
-		params: p, cpus: cpus, prefix: "skrpc-" + suffix, copied: map[string]bool{},
+		params: p, build: build, cpus: cpus, prefix: "skrpc-" + suffix, copied: map[string]bool{},
 		lake: filepath.Join(p.Workdir, "lake"), data: filepath.Join(p.Workdir, "data"), etc: filepath.Join(p.Workdir, "etc"),
 	}
 	for _, d := range []string{t.lake, t.etc} {
@@ -317,7 +318,7 @@ func (t *target) run(ctx context.Context, phase string) error {
 	if t.cpus != "" {
 		args = append(args, "--cpus", t.cpus)
 	}
-	args = append(args, Image, "--config-path", "/etc/stellar-rpc/"+phase+".toml")
+	args = append(args, t.build.Image, "--config-path", "/etc/stellar-rpc/"+phase+".toml")
 	if _, err := docker(ctx, args...); err != nil {
 		return wire.Errorf(wire.ClassTarget, "starting stellar-rpc: %v", err)
 	}
@@ -356,8 +357,8 @@ func (t *target) waitReady(ctx context.Context) error {
 			err = newClient(t.url).call(cctx, "getVersionInfo", nil, &v)
 			cancel()
 			if err == nil {
-				if v.CommitHash != Commit || v.Version != Version30 {
-					return wire.Errorf(wire.ClassTarget, "the image runs stellar-rpc %s at %s, not %s at %s", v.Version, v.CommitHash, Version30, Commit)
+				if v.CommitHash != t.build.Commit || v.Version != t.build.Version {
+					return wire.Errorf(wire.ClassTarget, "the image runs stellar-rpc %s at %s, not %s at %s", v.Version, v.CommitHash, t.build.Version, t.build.Commit)
 				}
 				return nil
 			}
@@ -609,13 +610,13 @@ func containerIP(ctx context.Context, name, network string) (string, error) {
 	return n.IPAddress, nil
 }
 
-// ensureImage pulls the pinned image unless it is present.
-func ensureImage(ctx context.Context) error {
-	if _, err := docker(ctx, "image", "inspect", Image); err == nil {
+// ensureImage pulls the image unless it is present.
+func ensureImage(ctx context.Context, image string) error {
+	if _, err := docker(ctx, "image", "inspect", image); err == nil {
 		return nil
 	}
-	if err := dockerStream(ctx, "pull", "--quiet", Image); err != nil {
-		return fmt.Errorf("pulling %s: %w", Image, err)
+	if err := dockerStream(ctx, "pull", "--quiet", image); err != nil {
+		return fmt.Errorf("pulling %s: %w", image, err)
 	}
 	return nil
 }
