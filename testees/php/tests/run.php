@@ -34,4 +34,10 @@ check('an account strkey decodes', ['id' => '6', 'op' => 'strkey_decode', 'text'
     fn($r) => ($r['result']['kind'] ?? null) === 'account');
 check('a type the sdk lacks is unsupported', ['id' => '7', 'op' => 'decode_encode', 'type' => 'ScSymbol', 'xdr' => 'AAAAAA==', 'depth_limit' => 1000, 'len_limit' => 4],
     fn($r) => $r['status'] === 'unsupported');
+check('base64 without its padding is a bad request', ['id' => '8', 'op' => 'decode_encode', 'type' => 'ScVal', 'xdr' => 'AAAAAwAAAAc', 'depth_limit' => 1000, 'len_limit' => 8],
+    fn($r) => ($r['error']['class'] ?? null) === 'bad-request');
+$crash = Ops::isCrash(new \Error('Typed property X::$y must not be accessed before initialization'))
+    && Ops::isCrash(new \ValueError('x')) && !Ops::isCrash(new \InvalidArgumentException('x'));
+echo ($crash ? 'ok  ' : 'FAIL') . " an engine error is a crash, an exception a refusal\n";
+$failed += $crash ? 0 : 1;
 exit($failed === 0 ? 0 : 1);

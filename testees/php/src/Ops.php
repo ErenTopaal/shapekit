@@ -63,16 +63,19 @@ final class Ops
     // requests carry sdk json (encode_json) nested as deep as the xdr allows
     private const JSON_DEPTH = 1 << 20;
 
+    /** The id of the request being answered, for the fatal error handler of bin/testee.php. */
+    public static ?string $inFlight = null;
+
     /**
-     * Running out of stack or memory, a type error (a typed property or argument the sdk
-     * assumed non-null among them) and calling an undefined method are the sdk crashing. Every
-     * other throwable is the sdk's refusal: it throws InvalidArgumentException,
-     * RuntimeException and plain exceptions on purpose for bad input.
+     * An engine \Error (a type error, a typed property read before it was set, an undefined
+     * method, a ValueError from a php function the sdk handed a bad argument, a division by
+     * zero) is the sdk crashing. Every \Exception is the sdk's refusal: it throws
+     * InvalidArgumentException, RuntimeException and plain exceptions on purpose for bad input.
+     * Running out of memory is a php fatal error that no catch sees; bin/testee.php answers it.
      */
     public static function isCrash(Throwable $e): bool
     {
-        return $e instanceof \TypeError || $e instanceof \ArgumentCountError
-            || ($e instanceof \Error && preg_match('/^(Maximum function nesting level|Allowed memory size|Call to undefined method|Call to a member function)/', $e->getMessage()) === 1);
+        return $e instanceof \Error;
     }
 
     public static function handleLine(string $line): array
@@ -86,6 +89,7 @@ final class Ops
             return self::error('', 'bad-request', 'request is not an object with a string id');
         }
         $id = $req['id'];
+        self::$inFlight = $id;
         try {
             $op = $req['op'] ?? null;
             if (!is_string($op)) {
@@ -103,6 +107,8 @@ final class Ops
             // machine's, so it is cut to the path inside the testee
             $message = str_replace(dirname(__DIR__) . '/', '', get_class($e) . ': ' . $e->getMessage());
             return self::error($id, self::isCrash($e) ? 'panic' : 'rejected', $message);
+        } finally {
+            self::$inFlight = null;
         }
     }
 
@@ -187,7 +193,9 @@ final class Ops
 
     private static function bytes(array $req, string $name): string
     {
-        $b = base64_decode(self::string($req, $name), true);
+        $text = self::string($req, $name);
+        // strict base64_decode still takes input without its padding, which the protocol refuses
+        $b = strlen($text) % 4 === 0 ? base64_decode($text, true) : false;
         if ($b === false) {
             throw new BadRequest("$name is not base64");
         }
@@ -277,6 +285,11 @@ final class Ops
                 $n = unpack('N', substr($p, 32, 4))[1];
                 if (36 + $n > strlen($p)) {
                     throw new Refused('the payload length runs past the input');
+                }
+                $padded = 36 + $n + (4 - $n % 4) % 4;
+                if (strlen($p) !== $padded || substr($p, 36 + $n) !== str_repeat("\0", $padded - 36 - $n)) {
+                    throw new Unsupported('StrKey::encodeXdrSignedPayload takes the key and the payload; a raw payload '
+                        . 'with padding that is not zero or bytes after it has no such form');
                 }
                 $t = StrKey::encodeXdrSignedPayload(new XdrSignedPayload(substr($p, 0, 32), substr($p, 36, $n)));
                 break;
