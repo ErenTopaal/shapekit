@@ -31,6 +31,12 @@ public sealed class Unsupported(string m) : Exception(m);
 /// a refusal the testee reports for the sdk, with the sdk's own words where there are some
 public sealed class Refused(string m) : Exception(m);
 
+/// what an sdk call threw, already sorted into rejected or panic by Ops.Sdk
+public sealed class SdkFailure(string cls, string m) : Exception(m)
+{
+    public string Class { get; } = cls;
+}
+
 public static class Program
 {
     // deep values recurse through the sdk's decoder and the request parser, so requests run
@@ -88,15 +94,17 @@ public static class Ops
 
     public static JsonObject HandleLine(string line)
     {
-        JsonElement req;
+        JsonDocument doc;
         try
         {
-            req = JsonDocument.Parse(line, Parse).RootElement;
+            doc = JsonDocument.Parse(line, Parse);
         }
         catch (JsonException e)
         {
             return Error("", "bad-request", "request is not json: " + e.Message);
         }
+        using var owned = doc;
+        var req = doc.RootElement;
         if (req.ValueKind != JsonValueKind.Object || !req.TryGetProperty("id", out var idEl) ||
             idEl.ValueKind != JsonValueKind.String)
         {
@@ -121,16 +129,43 @@ public static class Ops
         {
             return Error(id, "rejected", e.Message);
         }
+        catch (SdkFailure e)
+        {
+            return Error(id, e.Class, e.Message);
+        }
         catch (Exception e)
         {
-            var root = e is TargetInvocationException { InnerException: { } inner } ? inner : e;
+            // not thrown inside an sdk call: the testee failed, the input says nothing about the sdk
+            return Error(id, "internal", e.GetType().Name + ": " + e.Message);
+        }
+    }
+
+    /// runs one call into the sdk and sorts what it throws: a crash (IsCrash) is panic, any other
+    /// exception the sdk's refusal. only what escapes an sdk call is laid at the sdk's door; an
+    /// exception from the testee's own code is internal (HandleLine)
+    public static T Sdk<T>(Func<T> call)
+    {
+        try
+        {
+            return call();
+        }
+        catch (Exception e) when (e is not (BadRequest or Unsupported or Refused or SdkFailure))
+        {
+            var root = e;
+            while (root is TargetInvocationException { InnerException: { } inner }) root = inner;
             var crash = IsCrash(root);
             // a crash names where it happened, the frame in the sdk the exception left
             var where = crash ? " " + (root.StackTrace ?? "").Split('\n').Select(l => l.Trim())
                 .FirstOrDefault(l => l.Contains("StellarDotnetSdk"), "") : "";
-            return Error(id, crash ? "panic" : "rejected", root.GetType().Name + ": " + root.Message + where);
+            throw new SdkFailure(crash ? "panic" : "rejected", root.GetType().Name + ": " + root.Message + where);
         }
     }
+
+    public static void Sdk(Action call) => Sdk<object?>(() =>
+    {
+        call();
+        return null;
+    });
 
     private static string SdkVersion =>
         typeof(StrKey).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()!
@@ -158,7 +193,8 @@ public static class Ops
             case "decode_encode":
             {
                 var t = Tables.Of(Str(req, "type"));
-                return new JsonObject { ["xdr"] = Convert.ToBase64String(t.Encode(Decode(t, Bytes(req, "xdr")))) };
+                var value = Decode(t, Bytes(req, "xdr"));
+                return new JsonObject { ["xdr"] = Convert.ToBase64String(Sdk(() => t.Encode(value))) };
             }
             case "decode_json":
             case "encode_json":
@@ -167,20 +203,24 @@ public static class Ops
             case "strkey_encode": return StrkeyEncode(req);
             case "asset_order":
             {
-                var c = AssetOf(req, "a").CompareTo(AssetOf(req, "b"));
+                var a = AssetOf(req, "a");
+                var b = AssetOf(req, "b");
+                var c = Sdk(() => a.CompareTo(b));
                 return new JsonObject { ["order"] = Math.Sign(c) };
             }
             case "pool_id": return PoolId(req);
             case "id_parse": return IdParse(req);
             case "to_native":
             {
-                var val = SCVal.FromXdr((XdrScVal)Decode(Tables.Of("ScVal"), Bytes(req, "xdr")));
-                return new JsonObject { ["native"] = Describe(val) };
+                var x = (XdrScVal)Decode(Tables.Of("ScVal"), Bytes(req, "xdr"));
+                var val = Sdk(() => SCVal.FromXdr(x));
+                return new JsonObject { ["native"] = Sdk(() => Describe(val)) };
             }
             case "address_from_scval":
             {
-                var addr = ScAddress.FromSCValXdr((XdrScVal)Decode(Tables.Of("ScVal"), Bytes(req, "xdr")));
-                return new JsonObject { ["text"] = AddressText(addr) };
+                var x = (XdrScVal)Decode(Tables.Of("ScVal"), Bytes(req, "xdr"));
+                var addr = Sdk(() => ScAddress.FromSCValXdr(x));
+                return new JsonObject { ["text"] = Sdk(() => AddressText(addr)) };
             }
             case "tx_hash": return TxHash(req);
             case "balance_id": return BalanceId(req);
@@ -204,9 +244,13 @@ public static class Ops
 
     private static byte[] Bytes(JsonElement req, string name)
     {
+        var text = Str(req, name);
+        // Convert.FromBase64String also skips white space, which the protocol refuses
+        if (text.Length % 4 != 0 || text.Any(char.IsWhiteSpace))
+            throw new BadRequest(name + " is not standard padded base64");
         try
         {
-            return Convert.FromBase64String(Str(req, name));
+            return Convert.FromBase64String(text);
         }
         catch (FormatException e)
         {
@@ -218,8 +262,8 @@ public static class Ops
     private static object Decode(Tables.XdrType t, byte[] bytes)
     {
         var stream = new XdrDataInputStream(bytes);
-        var value = t.Decode(stream);
-        var left = stream.GetRemainingInputLen();
+        var value = Sdk(() => t.Decode(stream));
+        var left = Sdk(() => stream.GetRemainingInputLen());
         if (left != 0) throw new Refused(left + " trailing bytes after the value");
         return value;
     }
@@ -249,31 +293,38 @@ public static class Ops
         if (text.Length == 0) throw new Refused("empty strkey");
         switch (text[0])
         {
-            case 'G': return Kind("account", StrKey.DecodeEd25519PublicKey(text));
+            case 'G': return Kind("account", Sdk(() => StrKey.DecodeEd25519PublicKey(text)));
             case 'M':
             {
-                var m = MuxedAccountMed25519.FromMuxedAccountId(text);
+                var m = Sdk(() => MuxedAccountMed25519.FromMuxedAccountId(text));
                 var raw = new byte[40];
-                Array.Copy(m.PublicKey, raw, 32);
-                var id = m.Id;
+                Array.Copy(Sdk(() => m.PublicKey), raw, 32);
+                var id = Sdk(() => m.Id);
                 for (var i = 0; i < 8; i++) raw[32 + i] = (byte)(id >> (56 - 8 * i));
                 return Kind("muxed_account", raw);
             }
-            case 'S': return Kind("seed", StrKey.DecodeEd25519SecretSeed(text));
-            case 'T': return Kind("pre_auth_tx", StrKey.DecodePreAuthTx(text));
-            case 'X': return Kind("hash_x", StrKey.DecodeSha256Hash(text));
-            case 'C': return Kind("contract", StrKey.DecodeContractId(text));
-            case 'L': return Kind("liquidity_pool", StrKey.DecodeLiquidityPoolId(text));
-            case 'B': return Kind("claimable_balance", StrKey.DecodeClaimableBalanceId(text));
-            case 'W': return Kind("muxed_contract", (byte[])Optional("DecodeMuxedContractId", text));
+            case 'S': return Kind("seed", Sdk(() => StrKey.DecodeEd25519SecretSeed(text)));
+            case 'T': return Kind("pre_auth_tx", Sdk(() => StrKey.DecodePreAuthTx(text)));
+            case 'X': return Kind("hash_x", Sdk(() => StrKey.DecodeSha256Hash(text)));
+            case 'C': return Kind("contract", Sdk(() => StrKey.DecodeContractId(text)));
+            case 'L': return Kind("liquidity_pool", Sdk(() => StrKey.DecodeLiquidityPoolId(text)));
+            case 'B': return Kind("claimable_balance", Sdk(() => StrKey.DecodeClaimableBalanceId(text)));
+            case 'W':
+            {
+                // the protocol: a first character with no decoder of the sdk's is a rejection
+                var decode = typeof(StrKey).GetMethod("DecodeMuxedContractId", BindingFlags.Public | BindingFlags.Static, [typeof(string)]);
+                if (decode == null) throw new Refused(SdkVersion + " has no strkey decoder for a string starting with W");
+                return Kind("muxed_contract", (byte[])Sdk(() => decode.Invoke(null, [text]))!);
+            }
             case 'P':
             {
-                var p = StrKey.DecodeSignedPayload(text);
-                var n = p.Payload.Length;
+                var p = Sdk(() => StrKey.DecodeSignedPayload(text));
+                var payload = Sdk(() => p.Payload);
+                var n = payload.Length;
                 var raw = new List<byte>();
-                raw.AddRange(p.SignerAccountId.InnerValue.Ed25519.InnerValue);
+                raw.AddRange(Sdk(() => p.SignerAccountId.InnerValue.Ed25519.InnerValue));
                 raw.AddRange([(byte)(n >> 24), (byte)(n >> 16), (byte)(n >> 8), (byte)n]);
-                raw.AddRange(p.Payload);
+                raw.AddRange(payload);
                 raw.AddRange(new byte[(4 - n % 4) % 4]);
                 return Kind("signed_payload", raw.ToArray());
             }
@@ -287,14 +338,14 @@ public static class Ops
         var p = Bytes(req, "payload");
         string text = kind switch
         {
-            "account" => StrKey.EncodeEd25519PublicKey(p),
-            "muxed_account" => StrKey.EncodeMed25519PublicKey(p),
-            "seed" => StrKey.EncodeEd25519SecretSeed(p),
-            "pre_auth_tx" => StrKey.EncodePreAuthTx(p),
-            "hash_x" => StrKey.EncodeSha256Hash(p),
-            "contract" => StrKey.EncodeContractId(p),
-            "liquidity_pool" => StrKey.EncodeLiquidityPoolId(p),
-            "claimable_balance" => StrKey.EncodeClaimableBalanceId(p),
+            "account" => Sdk(() => StrKey.EncodeEd25519PublicKey(p)),
+            "muxed_account" => Sdk(() => StrKey.EncodeMed25519PublicKey(p)),
+            "seed" => Sdk(() => StrKey.EncodeEd25519SecretSeed(p)),
+            "pre_auth_tx" => Sdk(() => StrKey.EncodePreAuthTx(p)),
+            "hash_x" => Sdk(() => StrKey.EncodeSha256Hash(p)),
+            "contract" => Sdk(() => StrKey.EncodeContractId(p)),
+            "liquidity_pool" => Sdk(() => StrKey.EncodeLiquidityPoolId(p)),
+            "claimable_balance" => Sdk(() => StrKey.EncodeClaimableBalanceId(p)),
             "muxed_contract" => (string)Optional("EncodeMuxedContractId", p),
             "signed_payload" => EncodeSignedPayload(p),
             _ => throw new BadRequest("unknown strkey kind " + kind),
@@ -308,7 +359,7 @@ public static class Ops
     {
         var m = typeof(StrKey).GetMethod(name, BindingFlags.Public | BindingFlags.Static, [arg.GetType()]);
         if (m == null) throw new Unsupported(SdkVersion + " has no StrKey." + name);
-        return m.Invoke(null, [arg])!;
+        return Sdk(() => m.Invoke(null, [arg])!);
     }
 
     // the encoder takes a SignedPayloadSigner: the key, then the payload its length names
@@ -317,20 +368,27 @@ public static class Ops
         if (p.Length < 36) throw new Refused("a signed payload needs a key and a length");
         var n = (p[32] << 24) | (p[33] << 16) | (p[34] << 8) | p[35];
         if (n < 0 || 36 + n > p.Length) throw new Refused("the payload length runs past the input");
-        return StrKey.EncodeSignedPayload(new SignedPayloadSigner(p[..32], p[36..(36 + n)]));
+        var padded = 36 + n + (4 - n % 4) % 4;
+        if (p.Length != padded || p[(36 + n)..].Any(b => b != 0))
+            throw new Unsupported("StrKey.EncodeSignedPayload takes the key and the payload; a raw payload with "
+                + "padding that is not zero or bytes after it has no such form");
+        return Sdk(() => StrKey.EncodeSignedPayload(new SignedPayloadSigner(p[..32], p[36..(36 + n)])));
     }
 
-    private static Asset AssetOf(JsonElement req, string name) =>
-        Asset.FromXdr((StellarDotnetSdk.Xdr.Asset)Decode(Tables.Of("Asset"), Bytes(req, name)));
+    private static Asset AssetOf(JsonElement req, string name)
+    {
+        var x = (StellarDotnetSdk.Xdr.Asset)Decode(Tables.Of("Asset"), Bytes(req, name));
+        return Sdk(() => Asset.FromXdr(x));
+    }
 
     private static JsonObject PoolId(JsonElement req)
     {
         var a = AssetOf(req, "a");
         var b = AssetOf(req, "b");
-        if (!req.TryGetProperty("fee", out var f) || !f.TryGetInt32(out var fee))
-            throw new BadRequest("fee must be an integer");
-        var id = new LiquidityPoolId(LiquidityPoolType.LiquidityPoolTypeEnum.LIQUIDITY_POOL_CONSTANT_PRODUCT, a, b, fee);
-        return new JsonObject { ["pool_id"] = Convert.ToHexString(id.Hash).ToLowerInvariant() };
+        if (!req.TryGetProperty("fee", out var f) || f.ValueKind != JsonValueKind.Number || !f.TryGetInt32(out var fee))
+            throw new BadRequest("fee must be a 32-bit integer");
+        var hash = Sdk(() => new LiquidityPoolId(LiquidityPoolType.LiquidityPoolTypeEnum.LIQUIDITY_POOL_CONSTANT_PRODUCT, a, b, fee).Hash);
+        return new JsonObject { ["pool_id"] = Convert.ToHexString(hash).ToLowerInvariant() };
     }
 
     /// ManageSellOfferOperation takes the offer id as a long and MuxedAccountMed25519 the muxed
@@ -345,11 +403,14 @@ public static class Ops
         {
             if (input.ValueKind != JsonValueKind.Number || !input.TryGetInt64(out var n))
                 throw new Unsupported("ManageSellOfferOperation takes the offer id as a long only");
-            var op = new ManageSellOfferOperation(new AssetTypeNative(),
-                new AssetTypeCreditAlphaNum4("ABC", issuer), "1", "1", n);
-            var o = new XdrDataOutputStream();
-            ManageSellOfferOp.Encode(o, op.ToOperationBody().ManageSellOfferOp);
-            var bytes = o.ToArray();
+            var bytes = Sdk(() =>
+            {
+                var op = new ManageSellOfferOperation(new AssetTypeNative(),
+                    new AssetTypeCreditAlphaNum4("ABC", issuer), "1", "1", n);
+                var o = new XdrDataOutputStream();
+                ManageSellOfferOp.Encode(o, op.ToOperationBody().ManageSellOfferOp);
+                return o.ToArray();
+            });
             // offerID is the op's last field (ManageSellOfferOp in Stellar-transaction.x)
             return new JsonObject { ["id"] = BigEndian(bytes, bytes.Length - 8, true) };
         }
@@ -357,11 +418,15 @@ public static class Ops
         {
             if (input.ValueKind != JsonValueKind.Number || !input.TryGetUInt64(out var n))
                 throw new Unsupported("MuxedAccountMed25519 takes the muxed id as a ulong only");
-            var m = new MuxedAccountMed25519(KeyPair.FromAccountId(issuer), n);
-            var o = new XdrDataOutputStream();
-            StellarDotnetSdk.Xdr.MuxedAccount.Encode(o, m.MuxedAccount);
+            var bytes = Sdk(() =>
+            {
+                var m = new MuxedAccountMed25519(KeyPair.FromAccountId(issuer), n);
+                var o = new XdrDataOutputStream();
+                StellarDotnetSdk.Xdr.MuxedAccount.Encode(o, m.MuxedAccount);
+                return o.ToArray();
+            });
             // KEY_TYPE_MUXED_ED25519: the type, then the uint64 id, then the key
-            return new JsonObject { ["id"] = BigEndian(o.ToArray(), 4, false) };
+            return new JsonObject { ["id"] = BigEndian(bytes, 4, false) };
         }
         throw new BadRequest("unknown id kind " + kind);
     }
@@ -446,7 +511,11 @@ public static class Ops
         return StrKey.EncodeMed25519PublicKey(raw);
     }
 
-    private static Network NetworkOf(JsonElement req) => new(Str(req, "network_passphrase"));
+    private static Network NetworkOf(JsonElement req)
+    {
+        var passphrase = Str(req, "network_passphrase");
+        return Sdk(() => new Network(passphrase));
+    }
 
     private static TransactionEnvelope Envelope(JsonElement req) =>
         (TransactionEnvelope)Decode(Tables.Of("TransactionEnvelope"), Bytes(req, "xdr"));
@@ -464,13 +533,16 @@ public static class Ops
         byte[] hash;
         if (IsFeeBump(env))
         {
-            var fb = FeeBumpTransaction.FromEnvelopeXdr(env);
-            hash = inner ? fb.InnerTransaction.Hash(network) : fb.Hash(network);
+            hash = Sdk(() =>
+            {
+                var fb = FeeBumpTransaction.FromEnvelopeXdr(env);
+                return inner ? fb.InnerTransaction.Hash(network) : fb.Hash(network);
+            });
         }
         else
         {
             if (inner) throw new BadRequest("inner on an envelope that is no fee bump");
-            hash = Transaction.FromEnvelopeXdr(env).Hash(network);
+            hash = Sdk(() => Transaction.FromEnvelopeXdr(env).Hash(network));
         }
         return new JsonObject { ["hash"] = Convert.ToHexString(hash).ToLowerInvariant() };
     }
@@ -479,26 +551,32 @@ public static class Ops
     /// operation (ENVELOPE_TYPE_OP_ID) the sdk's own encoder writes, from the sdk's transaction
     private static JsonObject BalanceId(JsonElement req)
     {
-        var env = Envelope(req);
-        var tx = IsFeeBump(env) ? FeeBumpTransaction.FromEnvelopeXdr(env).InnerTransaction : Transaction.FromEnvelopeXdr(env);
-        if (!req.TryGetProperty("op_index", out var ix) || !ix.TryGetInt32(out var index) || index < 0)
+        if (!req.TryGetProperty("op_index", out var ix) || ix.ValueKind != JsonValueKind.Number ||
+            !ix.TryGetInt32(out var index) || index < 0)
             throw new BadRequest("op_index must be a non-negative integer");
-        if (index >= tx.Operations.Length) throw new Refused("no operation at index " + index);
-        if (tx.Operations[index] is not CreateClaimableBalanceOperation)
+        var env = Envelope(req);
+        var tx = Sdk(() => IsFeeBump(env) ? FeeBumpTransaction.FromEnvelopeXdr(env).InnerTransaction : Transaction.FromEnvelopeXdr(env));
+        var operations = Sdk(() => tx.Operations);
+        if (index >= operations.Length) throw new Refused("no operation at index " + index);
+        if (operations[index] is not CreateClaimableBalanceOperation)
             throw new Refused("the operation at index " + index + " does not create a claimable balance");
-        var preimage = new HashIDPreimage
+        var hash = Sdk(() =>
         {
-            Discriminant = EnvelopeType.Create(EnvelopeType.EnvelopeTypeEnum.ENVELOPE_TYPE_OP_ID),
-            OperationID = new HashIDPreimage.HashIDPreimageOperationID
+            var preimage = new HashIDPreimage
             {
-                SourceAccount = new AccountID(KeyPair.FromPublicKey(tx.SourceAccount.PublicKey).XdrPublicKey),
-                SeqNum = new SequenceNumber(new StellarDotnetSdk.Xdr.Int64(tx.SequenceNumber)),
-                OpNum = new Uint32((uint)index),
-            },
-        };
-        var o = new XdrDataOutputStream();
-        HashIDPreimage.Encode(o, preimage);
-        return new JsonObject { ["balance_id"] = "00000000" + Convert.ToHexString(Util.Hash(o.ToArray())).ToLowerInvariant() };
+                Discriminant = EnvelopeType.Create(EnvelopeType.EnvelopeTypeEnum.ENVELOPE_TYPE_OP_ID),
+                OperationID = new HashIDPreimage.HashIDPreimageOperationID
+                {
+                    SourceAccount = new AccountID(KeyPair.FromPublicKey(tx.SourceAccount.PublicKey).XdrPublicKey),
+                    SeqNum = new SequenceNumber(new StellarDotnetSdk.Xdr.Int64(tx.SequenceNumber)),
+                    OpNum = new Uint32((uint)index),
+                },
+            };
+            var o = new XdrDataOutputStream();
+            HashIDPreimage.Encode(o, preimage);
+            return Util.Hash(o.ToArray());
+        });
+        return new JsonObject { ["balance_id"] = "00000000" + Convert.ToHexString(hash).ToLowerInvariant() };
     }
 
     /// the sdk has no contract id function, so the testee hashes the HashIDPreimage
@@ -506,18 +584,23 @@ public static class Ops
     private static JsonObject ContractId(JsonElement req)
     {
         var preimage = (ContractIDPreimage)Decode(Tables.Of("ContractIdPreimage"), Bytes(req, "preimage"));
-        var hp = new HashIDPreimage
+        var network = NetworkOf(req);
+        var hash = Sdk(() =>
         {
-            Discriminant = EnvelopeType.Create(EnvelopeType.EnvelopeTypeEnum.ENVELOPE_TYPE_CONTRACT_ID),
-            ContractID = new HashIDPreimage.HashIDPreimageContractID
+            var hp = new HashIDPreimage
             {
-                NetworkID = new Hash(NetworkOf(req).NetworkId),
-                ContractIDPreimage = preimage,
-            },
-        };
-        var o = new XdrDataOutputStream();
-        HashIDPreimage.Encode(o, hp);
-        return new JsonObject { ["contract_id"] = Convert.ToHexString(Util.Hash(o.ToArray())).ToLowerInvariant() };
+                Discriminant = EnvelopeType.Create(EnvelopeType.EnvelopeTypeEnum.ENVELOPE_TYPE_CONTRACT_ID),
+                ContractID = new HashIDPreimage.HashIDPreimageContractID
+                {
+                    NetworkID = new Hash(network.NetworkId),
+                    ContractIDPreimage = preimage,
+                },
+            };
+            var o = new XdrDataOutputStream();
+            HashIDPreimage.Encode(o, hp);
+            return Util.Hash(o.ToArray());
+        });
+        return new JsonObject { ["contract_id"] = Convert.ToHexString(hash).ToLowerInvariant() };
     }
 }
 
@@ -532,9 +615,18 @@ public static class Tables
     // where stellar-xdr's name is not the .x name: the overlay's Error is SError in stellar-xdr
     private static readonly Dictionary<string, string> Aliases = new() { ["serror"] = "error" };
 
-    private static readonly Dictionary<string, Type> ByLowerName = typeof(XdrScVal).Assembly.GetTypes()
-        .Where(t => t.Namespace == "StellarDotnetSdk.Xdr" && t.IsPublic && !t.IsNested)
-        .ToDictionary(t => t.Name.ToLowerInvariant());
+    // the generator nests the anonymous unions and structs of a type inside its class
+    // (TransactionResult+TransactionResultResult), under the name stellar-xdr gives them; a name
+    // two classes share has no one class and stays out of the table
+    private static readonly IEnumerable<IGrouping<string, Type>> Classes = typeof(XdrScVal).Assembly.GetTypes()
+        .Where(t => t.Namespace == "StellarDotnetSdk.Xdr" && (t.IsPublic || t.IsNestedPublic))
+        .GroupBy(t => t.Name.ToLowerInvariant());
+
+    private static readonly Dictionary<string, Type> ByLowerName =
+        Classes.Where(g => g.Count() == 1).ToDictionary(g => g.Key, g => g.Single());
+
+    private static readonly Dictionary<string, string> Ambiguous =
+        Classes.Where(g => g.Count() > 1).ToDictionary(g => g.Key, g => string.Join(", ", g.Select(t => t.FullName)));
 
     private static readonly Dictionary<string, XdrType> Cache = new();
 
@@ -543,6 +635,8 @@ public static class Tables
         var key = name.ToLowerInvariant();
         if (Aliases.TryGetValue(key, out var alias)) key = alias;
         if (Cache.TryGetValue(key, out var hit)) return hit;
+        if (Ambiguous.TryGetValue(key, out var which))
+            throw new Unsupported("stellar-dotnet-sdk has more than one class named " + name + ": " + which);
         if (!ByLowerName.TryGetValue(key, out var type))
             throw new Unsupported("stellar-dotnet-sdk has no class for the xdr type " + name);
         var decode = type.GetMethod("Decode", BindingFlags.Public | BindingFlags.Static, [typeof(XdrDataInputStream)]);
