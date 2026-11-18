@@ -348,7 +348,9 @@ impl ArchiveIndex {
 /// Materialises in `out` (which must not exist) the archive as it stood when `checkpoint`
 /// was its newest: every file of that checkpoint and the ones before it, every bucket their
 /// states reference, and `.well-known/stellar-history.json` equal to that checkpoint's
-/// state. Returns the files written, relative to `out`.
+/// state. Returns the files written, relative to `out`. The files are written to a
+/// directory beside `out` and moved to `out` only once all of them are there, so a failure
+/// part way (a bucket the archive lacks, a bad member) leaves no `out` behind.
 pub fn archive_at(tar_path: &Path, checkpoint: u32, out: &Path) -> Result<Vec<String>, PackError> {
     if out.exists() {
         return Err(PackError::Format(format!(
@@ -356,6 +358,27 @@ pub fn archive_at(tar_path: &Path, checkpoint: u32, out: &Path) -> Result<Vec<St
             out.display()
         )));
     }
+    let parent = match out.parent() {
+        Some(p) if !p.as_os_str().is_empty() => p,
+        _ => Path::new("."),
+    };
+    std::fs::create_dir_all(parent).map_err(io_err(parent))?;
+    let stage = tempfile::Builder::new()
+        .prefix(".archive-at-")
+        .tempdir_in(parent)
+        .map_err(io_err(parent))?;
+    let written = write_archive_at(tar_path, checkpoint, stage.path())?;
+    std::fs::rename(stage.path(), out).map_err(io_err(out))?;
+    // the directory now lives at `out`; there is nothing left for the guard to remove
+    let _ = stage.keep();
+    Ok(written)
+}
+
+fn write_archive_at(
+    tar_path: &Path,
+    checkpoint: u32,
+    out: &Path,
+) -> Result<Vec<String>, PackError> {
     let idx = ArchiveIndex::read(tar_path)?;
     let state = idx.states.get(&checkpoint).ok_or_else(|| {
         PackError::Format(format!(

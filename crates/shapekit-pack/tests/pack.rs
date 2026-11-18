@@ -352,6 +352,43 @@ fn archive_at_a_checkpoint() {
     );
 }
 
+/// An archive lacking a bucket its state references fails, and leaves neither the output
+/// directory nor a staging directory behind.
+#[test]
+fn archive_at_missing_a_bucket_writes_nothing() {
+    let tar_path = fixture().join("archive.tar");
+    let tmp = tempfile::tempdir().unwrap();
+    let lacking = tmp.path().join("lacking.tar");
+    let mut dropped = None;
+    {
+        let mut b = tar::Builder::new(std::fs::File::create(&lacking).unwrap());
+        shapekit_pack::archive::for_each_member(&tar_path, |path, bytes| {
+            if dropped.is_none() && path.starts_with("bucket/") {
+                dropped = Some(path.to_string());
+                return Ok(());
+            }
+            let mut h = tar::Header::new_gnu();
+            h.set_size(bytes.len() as u64);
+            h.set_mode(0o644);
+            h.set_cksum();
+            b.append_data(&mut h, path, bytes.as_slice()).unwrap();
+            Ok(())
+        })
+        .unwrap();
+        b.finish().unwrap();
+    }
+    assert!(dropped.is_some(), "the fixture archive holds a bucket");
+    let out = tmp.path().join("out").join("127");
+    let err = archive_at(&lacking, 127, &out).unwrap_err();
+    assert!(err.to_string().contains("does not hold"), "{err}");
+    assert!(!out.exists());
+    let left: Vec<_> = std::fs::read_dir(tmp.path().join("out"))
+        .unwrap()
+        .map(|e| e.unwrap().file_name())
+        .collect();
+    assert!(left.is_empty(), "{left:?}");
+}
+
 // readers join chain.json's file names to the chain directory, so one that leaves it is
 // refused when the file is read
 #[test]
