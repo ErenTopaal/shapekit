@@ -132,8 +132,8 @@ pub fn render(r: &Report) -> String {
                 esc(&g.id),
                 esc(&g.id),
                 ticks(&g.title),
-                g.occurrences.len(),
-                if g.occurrences.len() == 1 { "" } else { "s" }
+                g.failures(),
+                if g.failures() == 1 { "" } else { "s" }
             );
         }
         let _ = writeln!(s, "</ul></nav>");
@@ -378,9 +378,10 @@ fn group(s: &mut String, g: &Group, site: &str) {
     }
     let _ = writeln!(
         s,
-        "<details><summary>{} failure(s)</summary><table><tr><th>entry</th><th>on</th>\
-         <th>at</th><th>what</th></tr>",
-        g.occurrences.len()
+        "<details><summary>{} occurrence(s), {} of them failures</summary><table>\
+         <tr><th>entry</th><th>on</th><th>at</th><th>what</th></tr>",
+        g.occurrences.len(),
+        g.failures()
     );
     for o in g.occurrences.iter().take(OCCURRENCE_ROWS) {
         let _ = writeln!(

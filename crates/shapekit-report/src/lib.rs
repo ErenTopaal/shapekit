@@ -157,6 +157,72 @@ pub struct Group {
     pub occurrences: Vec<Occurrence>,
 }
 
+impl Group {
+    /// The occurrences that are failures. An `answer` occurrence cites an answer to an
+    /// implementation-defined check, which passed; it is evidence for the group, not a
+    /// failure of it.
+    pub fn failures(&self) -> usize {
+        self.occurrences
+            .iter()
+            .filter(|o| o.source != ANSWER_SOURCE)
+            .count()
+    }
+}
+
+/// The `source` of an occurrence that cites an implementation-defined answer.
+const ANSWER_SOURCE: &str = "answer";
+
+/// Orders two versions as releases are ordered: numeric parts by value (`v0.10.0` after
+/// `v0.9.0`), a prerelease before its release, and a leading `v` ignored.
+fn version_order(a: &str, b: &str) -> std::cmp::Ordering {
+    fn split(v: &str) -> (Vec<&str>, Option<&str>) {
+        let v = v.strip_prefix('v').unwrap_or(v);
+        let (core, pre) = match v.split_once('-') {
+            Some((c, p)) => (c, Some(p)),
+            None => (v, None),
+        };
+        (core.split('.').collect(), pre)
+    }
+    fn part(a: &str, b: &str) -> std::cmp::Ordering {
+        match (a.parse::<u64>(), b.parse::<u64>()) {
+            (Ok(x), Ok(y)) => x.cmp(&y),
+            // a numeric part sorts before a named one, as semver orders identifiers
+            (Ok(_), Err(_)) => std::cmp::Ordering::Less,
+            (Err(_), Ok(_)) => std::cmp::Ordering::Greater,
+            (Err(_), Err(_)) => a.cmp(b),
+        }
+    }
+    let ((ca, pa), (cb, pb)) = (split(a), split(b));
+    let core = ca
+        .iter()
+        .zip(&cb)
+        .map(|(x, y)| part(x, y))
+        .find(|o| o.is_ne())
+        .unwrap_or_else(|| ca.len().cmp(&cb.len()));
+    core.then_with(|| match (pa, pb) {
+        (None, None) => std::cmp::Ordering::Equal,
+        (None, Some(_)) => std::cmp::Ordering::Greater,
+        (Some(_), None) => std::cmp::Ordering::Less,
+        (Some(x), Some(y)) => {
+            let (xs, ys): (Vec<&str>, Vec<&str>) = (x.split('.').collect(), y.split('.').collect());
+            xs.iter()
+                .zip(&ys)
+                .map(|(p, q)| part(p, q))
+                .find(|o| o.is_ne())
+                .unwrap_or_else(|| xs.len().cmp(&ys.len()))
+        }
+    })
+}
+
+/// The sdk and version of the newest failing testee of `entry`.
+fn newest_failing<'o>(occurrences: &'o [Occurrence], entry: &str) -> Option<(&'o str, &'o str)> {
+    occurrences
+        .iter()
+        .filter(|o| o.entry.as_deref() == Some(entry) && o.source != ANSWER_SOURCE)
+        .filter_map(|o| o.on.split_once('@'))
+        .max_by(|a, b| version_order(a.1, b.1))
+}
+
 /// One failure, or one baseline failure, compared across the two runs.
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
 pub struct Change {
@@ -392,13 +458,9 @@ impl Ctx<'_> {
                 ))
             }
             RunKind::Conformance => {
-                // the newest failing version, the last in the matrix's order
-                let on = occurrences
-                    .iter()
-                    .rfind(|o| o.entry.as_deref() == Some(entry))?
-                    .on
-                    .clone();
-                let (sdk, version) = on.split_once('@')?;
+                // the newest failing version, by release order rather than by name, where
+                // v0.9.0 would sort after v0.10.0
+                let (sdk, version) = newest_failing(occurrences, entry)?;
                 Some(format!(
                     "shapekit check sdk --sdk {sdk} --version {} --entry {}",
                     shell_quote(version),
@@ -783,6 +845,63 @@ pub fn write_summary(r: &Report, path: &Path, html_name: Option<&str>) -> Result
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn versions_order_as_releases() {
+        use std::cmp::Ordering::*;
+        assert_eq!(version_order("v0.10.0", "v0.9.0"), Greater);
+        assert_eq!(version_order("0.9.0", "v0.9.0"), Equal);
+        assert_eq!(version_order("1.0.0-rc.1", "1.0.0"), Less);
+        assert_eq!(version_order("1.0.0-rc.10", "1.0.0-rc.9"), Greater);
+        assert_eq!(version_order("17.4.0", "17.10.0"), Less);
+        assert_eq!(version_order("1.2", "1.2.1"), Less);
+    }
+
+    fn occ(source: &str, on: &str) -> Occurrence {
+        Occurrence {
+            source: source.into(),
+            on: on.into(),
+            entry: Some("e".into()),
+            at: "x".into(),
+            what: "y".into(),
+        }
+    }
+
+    #[test]
+    fn the_newest_failing_version_is_rerun() {
+        let occs = [
+            occ("conformance", "go@v0.10.0"),
+            occ("conformance", "go@v0.9.0"),
+            occ("answer", "go@v0.11.0"),
+        ];
+        assert_eq!(newest_failing(&occs, "e"), Some(("go", "v0.10.0")));
+        assert_eq!(newest_failing(&occs, "other"), None);
+    }
+
+    #[test]
+    fn failures_leave_out_answers() {
+        let occ = |source: &str| occ(source, "go@v1");
+        let g = Group {
+            kind: GroupKind::Finding,
+            id: "F".into(),
+            title: "t".into(),
+            severity: None,
+            status: None,
+            decision: None,
+            link: None,
+            page: None,
+            cause: None,
+            caps: vec![],
+            entries: vec![],
+            minimal_entry: None,
+            reproduce: None,
+            recipe: None,
+            fields: vec![],
+            guide: vec![],
+            occurrences: vec![occ("conformance"), occ("answer"), occ("conformance")],
+        };
+        assert_eq!(g.failures(), 2);
+    }
 
     #[test]
     fn quoting() {

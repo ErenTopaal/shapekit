@@ -71,7 +71,7 @@ pub fn render(r: &Report, html_name: Option<&str>) -> String {
                 "| **{}** {} | {} | {finding} | {} |",
                 cell(&g.id),
                 cell(&g.title),
-                g.occurrences.len(),
+                g.failures(),
                 g.minimal_entry
                     .as_deref()
                     .map(|e| format!("[`{}`]({})", cell(e), crate::entry_page(&r.site, e)))
