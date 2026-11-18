@@ -63,6 +63,38 @@ class Unsupported(message: String) : Exception(message)
 /** A refusal the testee reports for the sdk, with the sdk's own words where there are some. */
 class Refused(message: String) : Exception(message)
 
+/** What an sdk call threw, already sorted into `rejected` or `panic` by [sdk]. */
+class SdkFailure(val cls: String, message: String) : Exception(message)
+
+/**
+ * Runs one call into the sdk and sorts what it throws: a crash ([isCrash]) is `panic`, any
+ * other throwable the sdk's refusal. Only what escapes an sdk call is the sdk's; a throwable
+ * from the testee's own code is `internal` (see [handleLine]).
+ */
+fun <T> sdk(call: () -> T): T = try {
+    call()
+} catch (e: BadRequest) {
+    throw e
+} catch (e: Unsupported) {
+    throw e
+} catch (e: Refused) {
+    throw e
+} catch (e: SdkFailure) {
+    throw e
+} catch (t: Throwable) {
+    // the type table calls the generated decode, encode and json functions through reflection
+    var root = t
+    while (root is InvocationTargetException && root.cause != null) root = root.cause!!
+    val crash = isCrash(root)
+    // a crash names where it happened, the frame in the sdk the exception left
+    val where = if (crash) {
+        root.stackTrace.firstOrNull { it.className.startsWith("com.soneso") }?.let { " at $it" } ?: ""
+    } else {
+        ""
+    }
+    throw SdkFailure(if (crash) "panic" else "rejected", "${root.javaClass.simpleName}: ${root.message}$where")
+}
+
 const val PROTOCOL = 2
 
 val OPS = listOf(
@@ -140,16 +172,11 @@ fun handleLine(line: String): JsonObject {
         }
     } catch (e: Refused) {
         error(id, "rejected", e.message ?: "")
+    } catch (e: SdkFailure) {
+        error(id, e.cls, e.message ?: "")
     } catch (t: Throwable) {
-        val root = if (t is InvocationTargetException && t.cause != null) t.cause!! else t
-        val crash = isCrash(root)
-        // a crash names where it happened, the frame in the sdk the exception left
-        val where = if (crash) {
-            root.stackTrace.firstOrNull { it.className.startsWith("com.soneso") }?.let { " at $it" } ?: ""
-        } else {
-            ""
-        }
-        error(id, if (crash) "panic" else "rejected", "${root.javaClass.simpleName}: ${root.message}$where")
+        // not thrown inside an sdk call: the testee failed, the input says nothing about the sdk
+        error(id, "internal", "${t.javaClass.simpleName}: ${t.message}")
     }
 }
 
@@ -157,7 +184,7 @@ fun run(op: String, req: JsonObject): JsonElement = when (op) {
     "hello" -> buildJsonObject {
         put("protocol", PROTOCOL)
         put("sdk", "com.soneso.stellar:stellar-sdk-jvm")
-        put("sdk_version", sdkVersion())
+        put("sdk_version", sdk { sdkVersion() })
         put("components", buildJsonObject {
             if (coverage != null) put("org.jacoco:org.jacoco.core", Coverage.version)
         })
@@ -169,36 +196,38 @@ fun run(op: String, req: JsonObject): JsonElement = when (op) {
     "decode_encode" -> {
         val t = Types.of(str(req, "type"))
         val v = decode(t, bytes(req, "xdr"))
-        buildJsonObject { put("xdr", b64(t.encode(v))) }
+        buildJsonObject { put("xdr", b64(sdk { t.encode(v) })) }
     }
     "decode_json" -> {
         val t = Types.of(str(req, "type"))
         val v = decode(t, bytes(req, "xdr"))
-        buildJsonObject { put("json", t.toJson(v)) }
+        buildJsonObject { put("json", sdk { t.toJson(v) }) }
     }
     "encode_json" -> {
         val t = Types.of(str(req, "type"))
         val json = req["json"] ?: throw BadRequest("encode_json needs member json")
-        buildJsonObject { put("xdr", b64(t.encode(t.fromJson(json)))) }
+        buildJsonObject { put("xdr", b64(sdk { t.encode(t.fromJson(json)) })) }
     }
     "strkey_decode" -> strkeyDecode(req)
     "strkey_encode" -> strkeyEncode(req)
-    "asset_order" -> buildJsonObject {
-        put("order", Integer.signum(asset(req, "a").compareTo(asset(req, "b"))))
+    "asset_order" -> {
+        val a = asset(req, "a")
+        val b = asset(req, "b")
+        buildJsonObject { put("order", Integer.signum(sdk { a.compareTo(b) })) }
     }
     "pool_id" -> poolId(req)
     "map_sort" -> mapSort(req)
     "id_parse" -> idParse(req)
     "to_native" -> {
         val v = decode(Types.of("ScVal"), bytes(req, "xdr")) as SCValXdr
-        val native = v.toNative()
+        val native = sdk { v.toNative() }
         // the documented refusal: a value with no native form comes back as the SCValXdr itself
         if (native is SCValXdr) throw Refused("toNative returned the SCValXdr itself: no native form")
         buildJsonObject { put("native", describe(native)) }
     }
     "address_from_scval" -> {
         val v = decode(Types.of("ScVal"), bytes(req, "xdr")) as SCValXdr
-        buildJsonObject { put("text", Address.fromSCVal(v).toString()) }
+        buildJsonObject { put("text", sdk { Address.fromSCVal(v).toString() }) }
     }
     "tx_hash" -> txHash(req)
     "balance_id" -> balanceId(req)
@@ -218,10 +247,22 @@ fun sdkVersion(): String = Util.getSdkVersion()
 fun str(req: JsonObject, name: String): String =
     (req[name] as? JsonPrimitive)?.takeIf { it.isString }?.content ?: throw BadRequest("$name must be a string")
 
-fun bytes(req: JsonObject, name: String): ByteArray = try {
-    Base64.getDecoder().decode(str(req, name))
-} catch (e: IllegalArgumentException) {
-    throw BadRequest("$name is not base64: ${e.message}")
+fun bytes(req: JsonObject, name: String): ByteArray {
+    val text = str(req, name)
+    // the decoder also takes input without its padding, which the protocol refuses
+    if (text.length % 4 != 0) throw BadRequest("$name is not padded base64")
+    return try {
+        Base64.getDecoder().decode(text)
+    } catch (e: IllegalArgumentException) {
+        throw BadRequest("$name is not base64: ${e.message}")
+    }
+}
+
+/** A member that must be a json integer, not text and not null. */
+fun integer(req: JsonObject, name: String): Long {
+    val p = req[name] as? JsonPrimitive
+    if (p == null || p is kotlinx.serialization.json.JsonNull || p.isString) throw BadRequest("$name must be an integer")
+    return p.content.toLongOrNull() ?: throw BadRequest("$name must be an integer, got ${p.content}")
 }
 
 fun b64(b: ByteArray): String = Base64.getEncoder().encodeToString(b)
@@ -233,7 +274,7 @@ fun b64(b: ByteArray): String = Base64.getEncoder().encodeToString(b)
  */
 fun decode(t: Types.XdrType, input: ByteArray): Any {
     val reader = XdrReader(input)
-    val v = t.decodeFrom(reader)
+    val v = sdk { t.decodeFrom(reader) }
     val left = input.size - readerOffset.getInt(reader)
     if (left != 0) throw Refused("$left trailing bytes after the value")
     return v
@@ -311,46 +352,48 @@ fun strkeyDecode(req: JsonObject): JsonObject {
     }
     if (text.isEmpty()) throw Refused("empty strkey")
     return when (text[0]) {
-        'G' -> kind("account", StrKey.decodeEd25519PublicKey(text))
-        'M' -> kind("muxed_account", StrKey.decodeMed25519PublicKey(text))
-        'S' -> kind("seed", StrKey.decodeEd25519SecretSeed(text.toCharArray()))
-        'T' -> kind("pre_auth_tx", StrKey.decodePreAuthTx(text))
-        'X' -> kind("hash_x", StrKey.decodeSha256Hash(text))
-        'P' -> kind("signed_payload", StrKey.decodeSignedPayload(text))
-        'C' -> kind("contract", StrKey.decodeContract(text))
-        'L' -> kind("liquidity_pool", StrKey.decodeLiquidityPool(text))
-        'B' -> kind("claimable_balance", StrKey.decodeClaimableBalance(text))
-        'W' -> kind("muxed_contract", StrKey.decodeMuxedContract(text))
+        'G' -> kind("account", sdk { StrKey.decodeEd25519PublicKey(text) })
+        'M' -> kind("muxed_account", sdk { StrKey.decodeMed25519PublicKey(text) })
+        'S' -> kind("seed", sdk { StrKey.decodeEd25519SecretSeed(text.toCharArray()) })
+        'T' -> kind("pre_auth_tx", sdk { StrKey.decodePreAuthTx(text) })
+        'X' -> kind("hash_x", sdk { StrKey.decodeSha256Hash(text) })
+        'P' -> kind("signed_payload", sdk { StrKey.decodeSignedPayload(text) })
+        'C' -> kind("contract", sdk { StrKey.decodeContract(text) })
+        'L' -> kind("liquidity_pool", sdk { StrKey.decodeLiquidityPool(text) })
+        'B' -> kind("claimable_balance", sdk { StrKey.decodeClaimableBalance(text) })
+        'W' -> kind("muxed_contract", sdk { StrKey.decodeMuxedContract(text) })
         else -> throw Refused("no strkey decoder for a string starting with ${text[0]}")
     }
 }
 
 fun strkeyEncode(req: JsonObject): JsonObject {
     val p = bytes(req, "payload")
-    val text = when (val k = str(req, "kind")) {
-        "account" -> StrKey.encodeEd25519PublicKey(p)
-        "muxed_account" -> StrKey.encodeMed25519PublicKey(p)
-        "seed" -> String(StrKey.encodeEd25519SecretSeed(p))
-        "pre_auth_tx" -> StrKey.encodePreAuthTx(p)
-        "hash_x" -> StrKey.encodeSha256Hash(p)
-        "signed_payload" -> StrKey.encodeSignedPayload(p)
-        "contract" -> StrKey.encodeContract(p)
-        "liquidity_pool" -> StrKey.encodeLiquidityPool(p)
-        "claimable_balance" -> StrKey.encodeClaimableBalance(p)
-        "muxed_contract" -> StrKey.encodeMuxedContract(p)
+    val k = str(req, "kind")
+    val encode: () -> String = when (k) {
+        "account" -> { -> StrKey.encodeEd25519PublicKey(p) }
+        "muxed_account" -> { -> StrKey.encodeMed25519PublicKey(p) }
+        "seed" -> { -> String(StrKey.encodeEd25519SecretSeed(p)) }
+        "pre_auth_tx" -> { -> StrKey.encodePreAuthTx(p) }
+        "hash_x" -> { -> StrKey.encodeSha256Hash(p) }
+        "signed_payload" -> { -> StrKey.encodeSignedPayload(p) }
+        "contract" -> { -> StrKey.encodeContract(p) }
+        "liquidity_pool" -> { -> StrKey.encodeLiquidityPool(p) }
+        "claimable_balance" -> { -> StrKey.encodeClaimableBalance(p) }
+        "muxed_contract" -> { -> StrKey.encodeMuxedContract(p) }
         else -> throw BadRequest("unknown strkey kind $k")
     }
-    return buildJsonObject { put("text", text) }
+    return buildJsonObject { put("text", sdk(encode)) }
 }
 
 fun asset(req: JsonObject, name: String): Asset =
-    Asset.fromXdr(decode(Types.of("Asset"), bytes(req, name)) as AssetXdr)
+    (decode(Types.of("Asset"), bytes(req, name)) as AssetXdr).let { sdk { Asset.fromXdr(it) } }
 
 /** LiquidityPool refuses pairs its own order does not put first (LiquidityPool.kt init). */
 fun poolId(req: JsonObject): JsonObject {
-    val fee = (req["fee"] as? JsonPrimitive)?.content?.toIntOrNull() ?: throw BadRequest("fee must be an integer")
-    val pool = LiquidityPool(asset(req, "a"), asset(req, "b"), fee)
-    val id = runBlocking { pool.getLiquidityPoolId() }
+    val fee = integer(req, "fee").let { it.toInt().takeIf { f -> f.toLong() == it } ?: throw BadRequest("fee must be a 32-bit integer") }
+    val a = asset(req, "a")
+    val b = asset(req, "b")
+    val id = sdk { runBlocking { LiquidityPool(a, b, fee).getLiquidityPoolId() } }
     return buildJsonObject { put("pool_id", id.lowercase()) }
 }
 
@@ -361,7 +404,7 @@ fun mapSort(req: JsonObject): JsonObject {
         val o = e as? JsonObject ?: throw BadRequest("an entry is not an object")
         SCMapEntryXdr(decode(sc, bytes(o, "key")) as SCValXdr, decode(sc, bytes(o, "val")) as SCValXdr)
     }
-    return buildJsonObject { put("xdr", b64(sc.encode(Scv.toMap(list)))) }
+    return buildJsonObject { put("xdr", b64(sdk { sc.encode(Scv.toMap(list)) })) }
 }
 
 /**
@@ -372,25 +415,30 @@ fun mapSort(req: JsonObject): JsonObject {
 fun idParse(req: JsonObject): JsonObject {
     val kind = str(req, "kind")
     val input = req["input"] as? JsonPrimitive ?: throw BadRequest("id_parse needs member input")
+    if (input is kotlinx.serialization.json.JsonNull) throw BadRequest("input must be a string or a number")
     if (input.isString) throw Unsupported("the kmp sdk takes $kind ids as numbers only")
     val issuer = "GD7777777777777777777777777777777777777777777777777773DB"
     return when (kind) {
         "offer" -> {
             val n = input.content.toLongOrNull()
                 ?: throw Unsupported("ManageSellOfferOperation takes the offer id as a Long; ${input.content} has no Long form")
-            val op = ManageSellOfferOperation(AssetTypeNative, Asset.createNonNativeAsset("ABC", issuer), "1", Price(1, 1), n)
-            val w = XdrWriter()
-            op.toXdr().encode(w)
-            val b = w.toByteArray()
+            val b = sdk {
+                val op = ManageSellOfferOperation(AssetTypeNative, Asset.createNonNativeAsset("ABC", issuer), "1", Price(1, 1), n)
+                val w = XdrWriter()
+                op.toXdr().encode(w)
+                w.toByteArray()
+            }
             // offerID is the op's last field (ManageSellOfferOp in Stellar-transaction.x)
             buildJsonObject { put("id", java.nio.ByteBuffer.wrap(b, b.size - 8, 8).long.toString()) }
         }
         "muxed" -> {
             val n = input.content.toULongOrNull()
                 ?: throw Unsupported("MuxedAccount takes the muxed id as a ULong; ${input.content} has no ULong form")
-            val w = XdrWriter()
-            MuxedAccount(issuer, n).toXdr().encode(w)
-            val b = w.toByteArray()
+            val b = sdk {
+                val w = XdrWriter()
+                MuxedAccount(issuer, n).toXdr().encode(w)
+                w.toByteArray()
+            }
             // KEY_TYPE_MUXED_ED25519: the type, then the uint64 id, then the key
             buildJsonObject { put("id", java.nio.ByteBuffer.wrap(b, 4, 8).long.toULong().toString()) }
         }
@@ -418,16 +466,17 @@ fun describe(v: Any?): JsonElement = when (v) {
         })
     }
     is List<*> -> buildJsonObject { put("type", "array"); put("items", JsonArray(v.map { describe(it) })) }
-    is Address -> obj("Address", v.toString())
-    is SCValXdr -> obj("SCValXdr", b64(Types.of("ScVal").encode(v)))
-    else -> obj(v.javaClass.simpleName, v.toString())
+    is Address -> obj("Address", sdk { v.toString() })
+    is SCValXdr -> obj("SCValXdr", b64(sdk { Types.of("ScVal").encode(v) }))
+    else -> obj(v.javaClass.simpleName, sdk { v.toString() })
 }
 
-fun network(req: JsonObject) = Network(str(req, "network_passphrase"))
+fun network(req: JsonObject): Network = str(req, "network_passphrase").let { sdk { Network(it) } }
 
 fun transaction(req: JsonObject): AbstractTransaction {
     val env = decode(Types.of("TransactionEnvelope"), bytes(req, "xdr")) as TransactionEnvelopeXdr
-    return AbstractTransaction.fromEnvelopeXdr(env, network(req))
+    val net = network(req)
+    return sdk { AbstractTransaction.fromEnvelopeXdr(env, net) }
 }
 
 fun hex(b: ByteArray): String = b.joinToString("") { "%02x".format(it) }
@@ -440,9 +489,9 @@ fun txHash(req: JsonObject): JsonObject {
     }
     val hash = if (inner?.jsonPrimitive?.booleanOrNull == true) {
         val fb = tx as? FeeBumpTransaction ?: throw BadRequest("inner on an envelope that is no fee bump")
-        runBlocking { fb.innerTransaction.hash() }
+        sdk { runBlocking { fb.innerTransaction.hash() } }
     } else {
-        runBlocking { tx.hash() }
+        sdk { runBlocking { tx.hash() } }
     }
     return buildJsonObject { put("hash", hex(hash)) }
 }
@@ -452,33 +501,35 @@ fun txHash(req: JsonObject): JsonObject {
  * (ENVELOPE_TYPE_OP_ID) the sdk's own encoder writes, from the sdk's transaction object.
  */
 fun balanceId(req: JsonObject): JsonObject {
-    var tx = transaction(req)
-    if (tx is FeeBumpTransaction) tx = tx.innerTransaction
-    val t = tx as Transaction
-    val index = (req["op_index"] as? JsonPrimitive)?.content?.toIntOrNull()?.takeIf { it >= 0 }
-        ?: throw BadRequest("op_index must be a non-negative integer")
-    if (index >= t.operations.size) throw Refused("no operation at index $index")
-    if (t.operations[index] !is CreateClaimableBalanceOperation) {
+    val index = integer(req, "op_index").takeIf { it in 0..Int.MAX_VALUE.toLong() }?.toInt()
+        ?: throw BadRequest("op_index must be a non-negative 32-bit integer")
+    val tx = transaction(req)
+    val t = if (tx is FeeBumpTransaction) sdk { tx.innerTransaction } else tx as Transaction
+    val ops = sdk { t.operations }
+    if (index >= ops.size) throw Refused("no operation at index $index")
+    if (ops[index] !is CreateClaimableBalanceOperation) {
         throw Refused("the operation at index $index does not create a claimable balance")
     }
-    val source = StrKey.decodeEd25519PublicKey(MuxedAccount(t.sourceAccount).ed25519AccountId)
-    val preimage = HashIDPreimageXdr.OperationID(
-        HashIDPreimageOperationIDXdr(
-            AccountIDXdr(PublicKeyXdr.Ed25519(Uint256Xdr(source))),
-            SequenceNumberXdr(Int64Xdr(t.sequenceNumber)),
-            Uint32Xdr(index.toUInt()),
-        ),
-    )
-    val w = XdrWriter()
-    preimage.encode(w)
-    return buildJsonObject { put("balance_id", "00000000" + hex(java.security.MessageDigest.getInstance("SHA-256").digest(w.toByteArray()))) }
+    val preimage = sdk {
+        val source = StrKey.decodeEd25519PublicKey(MuxedAccount(t.sourceAccount).ed25519AccountId)
+        val w = XdrWriter()
+        HashIDPreimageXdr.OperationID(
+            HashIDPreimageOperationIDXdr(
+                AccountIDXdr(PublicKeyXdr.Ed25519(Uint256Xdr(source))),
+                SequenceNumberXdr(Int64Xdr(t.sequenceNumber)),
+                Uint32Xdr(index.toUInt()),
+            ),
+        ).encode(w)
+        w.toByteArray()
+    }
+    return buildJsonObject { put("balance_id", "00000000" + hex(java.security.MessageDigest.getInstance("SHA-256").digest(preimage))) }
 }
 
 /** Address.deriveContractId and Asset.getContractId, the sdk's two contract id functions. */
 fun contractId(req: JsonObject): JsonObject {
     val preimage = decode(Types.of("ContractIdPreimage"), bytes(req, "preimage")) as ContractIDPreimageXdr
     val net = network(req)
-    val id = runBlocking {
+    val id = sdk { runBlocking {
         when (preimage) {
             is ContractIDPreimageXdr.FromAddress -> Address.deriveContractId(
                 Address.fromSCAddress(preimage.value.address),
@@ -487,7 +538,7 @@ fun contractId(req: JsonObject): JsonObject {
             )
             is ContractIDPreimageXdr.FromAsset -> Asset.fromXdr(preimage.value).getContractId(net)
         }
-    }
-    return buildJsonObject { put("contract_id", hex(StrKey.decodeContract(id))) }
+    } }
+    return buildJsonObject { put("contract_id", hex(sdk { StrKey.decodeContract(id) })) }
 }
 
