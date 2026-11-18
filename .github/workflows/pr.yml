@@ -553,8 +553,8 @@ jobs:
 
   kmp:
     # the kmp testee (the jvm target of kmp-stellar-sdk) at its current version: the maven build
-    # with warnings as errors and the resolved jars checked against lib.sha256, then the corpus
-    # and the generated type table against what gentypes.py writes from the jar
+    # with warnings as errors and the resolved jars checked against lib.sha256, then the corpus,
+    # its unit tests and the generated type table against what gentypes.py writes from the jar
     needs: build
     runs-on: ubuntu-24.04
     timeout-minutes: 15
@@ -575,6 +575,11 @@ jobs:
           set -euo pipefail
           chmod +x "$RUNNER_TEMP/bin/shapekit"
           "$RUNNER_TEMP/bin/shapekit" conformance run --sdk kmp --out target/conformance-kmp
+      - name: unit tests
+        run: |
+          set -euo pipefail
+          v=$(python3 -I -c 'import sys, tomllib; print(tomllib.load(open(sys.argv[1], "rb"))["sdk"]["kmp"]["current"])' conformance/versions.toml)
+          mvn -B -q -f "testees/kmp/versions/$v/pom.xml" test
       - name: type table
         run: |
           set -euo pipefail
