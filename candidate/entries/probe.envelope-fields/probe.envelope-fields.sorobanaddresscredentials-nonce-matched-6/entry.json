@@ -1,0 +1,44 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "invalid-by-core"
+  },
+  "family": "probe.envelope-fields",
+  "fields_exercised": [],
+  "flags": [],
+  "id": "probe.envelope-fields.sorobanaddresscredentials-nonce-matched-6",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "probe of SorobanAddressCredentials.nonce in carrier matched, attempt \"the same nonce, consumed by the same address in an earlier ledger and still live: \\\"4598685041475779676\\\"; own footprint and auth, the host fails it with Error(Auth, ExistingValue)\": applied and failed, tx_failed",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 0,
+    "valid_min": 30
+  },
+  "source": {
+    "chain": "probe.envelope-fields.p30",
+    "class": "local-core",
+    "core_rejection": {
+      "result_code": "tx_failed",
+      "result_xdr": "AAAAAAAANDP/////AAAAAQAAAAAAAAAY/////gAAAAA=",
+      "stage": "apply"
+    },
+    "ledger_seq": 1628,
+    "recipe": "probe.envelope-fields",
+    "tx_hash": "c6e804c5608b9009c9f651beb3682cd11ffa4bb3a4f35856f54f1e6a71e9a11d"
+  },
+  "synthetic": false,
+  "variants": {
+    "testnet": {
+      "expected_json_file": "entries/probe.envelope-fields/probe.envelope-fields.sorobanaddresscredentials-nonce-matched-6/testnet.expected.json",
+      "expected_json_sha256": "dfd5a0ac0f68c16b4bdf252c042fa24a6e97ab1ed636ec48d3293c15b0144441",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/probe.envelope-fields/probe.envelope-fields.sorobanaddresscredentials-nonce-matched-6/testnet.xdr",
+      "xdr_sha256": "4df504d82e537f477dbc16dccca388349c3d33846af7c32db7036ef7f7217e3a"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

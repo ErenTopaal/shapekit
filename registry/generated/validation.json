@@ -11151,7 +11151,7 @@
     },
     {
       "path": "SorobanAddressCredentials.nonce",
-      "verdict": "not-validated",
+      "verdict": "validated",
       "attempts": [
         {
           "variant": "base, a peer's address credentials for one require_auth: \"4598685041475779676\"",
@@ -11226,6 +11226,18 @@
           "carrier": "matched"
         },
         {
+          "variant": "the same nonce, consumed by the same address in an earlier ledger and still live: \"4598685041475779676\"; own footprint and auth, the host fails it with Error(Auth, ExistingValue)",
+          "submission": "pending",
+          "result_code": "tx_failed",
+          "result_xdr": "AAAAAAAANDP/////AAAAAQAAAAAAAAAY/////gAAAAA=",
+          "applied": "failed",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-nonce-matched-6",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-nonce-matched-6-ledger"
+          ],
+          "carrier": "matched"
+        },
+        {
           "variant": "base, a peer's address credentials for a call that never requires them: \"1662722582437082215\"",
           "submission": "pending",
           "result_code": "tx_success",
@@ -11294,6 +11306,18 @@
           "witnesses": [
             "candidate:probe.envelope-fields.sorobanaddresscredentials-nonce-unmatched-5",
             "candidate:probe.envelope-fields.sorobanaddresscredentials-nonce-unmatched-5-ledger"
+          ],
+          "carrier": "unmatched"
+        },
+        {
+          "variant": "the same nonce, consumed by the same address in an earlier ledger and still live: \"3398032360785079642\"; own footprint and auth, the host runs it",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAALlAAAAAAAAAAAQAAAAAAAAAYAAAAABXse/C1BzK0n4Io4H0kNlM4+eOrmUsArwjlo7/+Vf2LAAAAAA==",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-nonce-unmatched-6",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-nonce-unmatched-6-ledger"
           ],
           "carrier": "unmatched"
         }
@@ -11934,7 +11958,7 @@
       "verdict": "validated",
       "attempts": [
         {
-          "variant": "base, a peer's address credentials for one require_auth: 1791",
+          "variant": "base, a peer's address credentials for one require_auth: 1795",
           "submission": "pending",
           "result_code": "tx_success",
           "result_xdr": "AAAAAAAAPnwAAAAAAAAAAQAAAAAAAAAYAAAAAN8HGiSdA/wvIjE/dcc0olS76gMSTOp3ABcE2wZwsvwCAAAAAA==",
@@ -11970,7 +11994,7 @@
           "carrier": "matched"
         },
         {
-          "variant": "one more, 1796: 1796; own footprint and auth, the host runs it",
+          "variant": "one more, 1800: 1800; own footprint and auth, the host runs it",
           "submission": "pending",
           "result_code": "tx_success",
           "result_xdr": "AAAAAAAAPnwAAAAAAAAAAQAAAAAAAAAYAAAAAN8HGiSdA/wvIjE/dcc0olS76gMSTOp3ABcE2wZwsvwCAAAAAA==",
@@ -11982,7 +12006,7 @@
           "carrier": "matched"
         },
         {
-          "variant": "one less, 1795: 1795; own footprint and auth, the host runs it",
+          "variant": "one less, 1799: 1799; own footprint and auth, the host runs it",
           "submission": "pending",
           "result_code": "tx_success",
           "result_xdr": "AAAAAAAAPnwAAAAAAAAAAQAAAAAAAAAYAAAAAN8HGiSdA/wvIjE/dcc0olS76gMSTOp3ABcE2wZwsvwCAAAAAA==",
@@ -11994,7 +12018,7 @@
           "carrier": "matched"
         },
         {
-          "variant": "base, a peer's address credentials for a call that never requires them: 1798",
+          "variant": "base, a peer's address credentials for a call that never requires them: 1802",
           "submission": "pending",
           "result_code": "tx_success",
           "result_xdr": "AAAAAAAALkoAAAAAAAAAAQAAAAAAAAAYAAAAABXse/C1BzK0n4Io4H0kNlM4+eOrmUsArwjlo7/+Vf2LAAAAAA==",
@@ -12030,7 +12054,7 @@
           "carrier": "unmatched"
         },
         {
-          "variant": "one more, 1803: 1803; own footprint and auth, the host runs it",
+          "variant": "one more, 1807: 1807; own footprint and auth, the host runs it",
           "submission": "pending",
           "result_code": "tx_success",
           "result_xdr": "AAAAAAAALlAAAAAAAAAAAQAAAAAAAAAYAAAAABXse/C1BzK0n4Io4H0kNlM4+eOrmUsArwjlo7/+Vf2LAAAAAA==",
@@ -12042,7 +12066,7 @@
           "carrier": "unmatched"
         },
         {
-          "variant": "one less, 1802: 1802; own footprint and auth, the host runs it",
+          "variant": "one less, 1806: 1806; own footprint and auth, the host runs it",
           "submission": "pending",
           "result_code": "tx_success",
           "result_xdr": "AAAAAAAALlAAAAAAAAAAAQAAAAAAAAAYAAAAABXse/C1BzK0n4Io4H0kNlM4+eOrmUsArwjlo7/+Vf2LAAAAAA==",
@@ -13846,7 +13870,7 @@
       "verdict": "validated",
       "attempts": [
         {
-          "variant": "base, a payment's time bounds: \"1931867200\"",
+          "variant": "base, a payment's time bounds: \"1932212800\"",
           "submission": "pending",
           "result_code": "tx_success",
           "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAABAAAAAAAAAAA=",
@@ -13879,7 +13903,7 @@
           ]
         },
         {
-          "variant": "one more, 1932212801: \"1932212801\"",
+          "variant": "one more, 1932558401: \"1932558401\"",
           "submission": "pending",
           "result_code": "tx_success",
           "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAABAAAAAAAAAAA=",
@@ -13890,7 +13914,7 @@
           ]
         },
         {
-          "variant": "one less, 1932299199: \"1932299199\"",
+          "variant": "one less, 1932644799: \"1932644799\"",
           "submission": "pending",
           "result_code": "tx_success",
           "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAABAAAAAAAAAAA=",
@@ -14414,7 +14438,7 @@
       "verdict": "validated",
       "attempts": [
         {
-          "variant": "base, a payment: \"8358006358017\"",
+          "variant": "base, a payment: \"8375186227201\"",
           "submission": "pending",
           "result_code": "tx_success",
           "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAABAAAAAAAAAAA=",
@@ -14459,7 +14483,7 @@
           "carrier": "payment"
         },
         {
-          "variant": "one more, 8362301325314: \"8362301325314\"",
+          "variant": "one more, 8379481194498: \"8379481194498\"",
           "submission": "error",
           "result_code": "tx_bad_seq",
           "result_xdr": "AAAAAAAAAGT////7AAAAAA==",
@@ -14470,7 +14494,7 @@
           "carrier": "payment"
         },
         {
-          "variant": "one less, 8362301325312: \"8362301325312\"",
+          "variant": "one less, 8379481194496: \"8379481194496\"",
           "submission": "error",
           "result_code": "tx_bad_seq",
           "result_xdr": "AAAAAAAAAGT////7AAAAAA==",
@@ -14481,7 +14505,7 @@
           "carrier": "payment"
         },
         {
-          "variant": "base, a call of echo(7): \"8370891259905\"",
+          "variant": "base, a call of echo(7): \"8388071129089\"",
           "submission": "pending",
           "result_code": "tx_success",
           "result_xdr": "AAAAAAAAMSMAAAAAAAAAAQAAAAAAAAAYAAAAACPSPIvT/+rRqsG5B6pvMsuQzLV5fD7qY4m6kHdjzkY7AAAAAA==",
@@ -14526,7 +14550,7 @@
           "carrier": "invoke"
         },
         {
-          "variant": "one more, 8375186227202: \"8375186227202\"",
+          "variant": "one more, 8392366096386: \"8392366096386\"",
           "submission": "error",
           "result_code": "tx_bad_seq",
           "result_xdr": "AAAAAAL7LqD////7AAAAAA==",
@@ -14537,7 +14561,7 @@
           "carrier": "invoke"
         },
         {
-          "variant": "one less, 8375186227200: \"8375186227200\"",
+          "variant": "one less, 8392366096384: \"8392366096384\"",
           "submission": "error",
           "result_code": "tx_bad_seq",
           "result_xdr": "AAAAAAL7LqD////7AAAAAA==",
@@ -15087,7 +15111,7 @@
           "carrier": "p12"
         },
         {
-          "variant": "base, a payment in a v0 envelope at protocol 30, which core's tx endpoint turns into a v1 envelope before it validates it (stellar-core v30.0.0 src/main/CommandHandler.cpp 1074-1081): \"8486855376897\"",
+          "variant": "base, a payment in a v0 envelope at protocol 30, which core's tx endpoint turns into a v1 envelope before it validates it (stellar-core v30.0.0 src/main/CommandHandler.cpp 1074-1081): \"8504035246081\"",
           "submission": "pending",
           "result_code": "tx_success",
           "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAABAAAAAAAAAAA=",
@@ -15132,7 +15156,7 @@
           "carrier": "p30"
         },
         {
-          "variant": "one more, 8491150344194: \"8491150344194\"",
+          "variant": "one more, 8508330213378: \"8508330213378\"",
           "submission": "error",
           "result_code": "tx_bad_seq",
           "result_xdr": "AAAAAAAAAGT////7AAAAAA==",
@@ -15143,7 +15167,7 @@
           "carrier": "p30"
         },
         {
-          "variant": "one less, 8491150344192: \"8491150344192\"",
+          "variant": "one less, 8508330213376: \"8508330213376\"",
           "submission": "error",
           "result_code": "tx_bad_seq",
           "result_xdr": "AAAAAAAAAGT////7AAAAAA==",
@@ -15322,7 +15346,7 @@
           "carrier": "p12"
         },
         {
-          "variant": "base, a payment's v0 envelope at protocol 30, which core's tx endpoint turns into a v1 envelope before it validates it (stellar-core v30.0.0 src/main/CommandHandler.cpp 1074-1081): [{\"hint\":\"ee482c66\",\"signature\":\"67b81fdbba93725e0838d98717b9ca65b425...",
+          "variant": "base, a payment's v0 envelope at protocol 30, which core's tx endpoint turns into a v1 envelope before it validates it (stellar-core v30.0.0 src/main/CommandHandler.cpp 1074-1081): [{\"hint\":\"ee482c66\",\"signature\":\"2bb2cd3e8cce14e9b2bff96693d58ca7467f...",
           "submission": "pending",
           "result_code": "tx_success",
           "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAABAAAAAAAAAAA=",
@@ -15345,7 +15369,7 @@
           "carrier": "p30"
         },
         {
-          "variant": "first element repeated: [{\"hint\":\"6895ae45\",\"signature\":\"99ec3803bf29e316df1d28bdaaf226b886fe...",
+          "variant": "first element repeated: [{\"hint\":\"6895ae45\",\"signature\":\"8d519a171c6f9c851a7b735c76f914cd85f7...",
           "submission": "error",
           "result_code": "tx_bad_auth_extra",
           "result_xdr": "AAAAAAAAAGT////2AAAAAA==",
@@ -15414,7 +15438,7 @@
       "verdict": "validated",
       "attempts": [
         {
-          "variant": "base, a payment's v1 envelope: [{\"hint\":\"36174778\",\"signature\":\"132c48c4daa4c2cd1b05ee09c0ca080f02b3...",
+          "variant": "base, a payment's v1 envelope: [{\"hint\":\"36174778\",\"signature\":\"e20ed270bdbd06290c986734aa93a9acb064...",
           "submission": "pending",
           "result_code": "tx_success",
           "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAABAAAAAAAAAAA=",
@@ -15435,7 +15459,7 @@
           ]
         },
         {
-          "variant": "first element repeated: [{\"hint\":\"53558aa7\",\"signature\":\"88e9272f86b688d088cf4cedf1bf0ad0aee2...",
+          "variant": "first element repeated: [{\"hint\":\"53558aa7\",\"signature\":\"e0b9c47d169924cfc2291d2179ab150b97a7...",
           "submission": "error",
           "result_code": "tx_bad_auth_extra",
           "result_xdr": "AAAAAAAAAGT////2AAAAAA==",
