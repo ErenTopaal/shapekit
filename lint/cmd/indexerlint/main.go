@@ -19,9 +19,11 @@
 package main
 
 import (
+	"crypto/sha256"
 	"fmt"
 	"io"
 	"os"
+	"slices"
 	"strings"
 
 	"golang.org/x/tools/go/analysis"
@@ -42,6 +44,15 @@ func analyzers() []*analysis.Analyzer {
 }
 
 func main() {
+	if slices.Contains(os.Args[1:], "-V=full") {
+		if err := printVersion(os.Stdout); err != nil {
+			_, _ = fmt.Fprintf(os.Stderr, "indexerlint: %v\n", err)
+			os.Exit(2)
+		}
+
+		os.Exit(0)
+	}
+
 	if vetMode(os.Args[1:]) {
 		unitchecker.Main(analyzers()...)
 	}
@@ -59,6 +70,57 @@ func vetMode(args []string) bool {
 	}
 
 	return false
+}
+
+// printVersion answers go vet's -V=full the way unitchecker does, except that
+// the build ID also covers the INDEXERLINT_BASELINE path and the file's
+// contents: go caches vet results by this ID, and an ID of the executable
+// alone would replay a result after the baseline was set, changed or unset.
+func printVersion(w io.Writer) error {
+	progname, err := os.Executable()
+	if err != nil {
+		return err
+	}
+
+	h := sha256.New()
+
+	f, err := os.Open(progname) //nolint:gosec // the running executable
+	if err != nil {
+		return err
+	}
+
+	_, err = io.Copy(h, f)
+	_ = f.Close()
+
+	if err != nil {
+		return err
+	}
+
+	if err := hashBaseline(h, os.Getenv(suppress.BaselineEnv)); err != nil {
+		return err
+	}
+
+	_, err = fmt.Fprintf(w, "%s version devel comments-go-here buildID=%02x\n", progname, h.Sum(nil))
+
+	return err
+}
+
+// hashBaseline adds the baseline in effect to h; nothing when there is none.
+// a baseline that cannot be read is an error here as it is in the analysis.
+func hashBaseline(h io.Writer, path string) error {
+	if path == "" {
+		return nil
+	}
+
+	data, err := os.ReadFile(path) //nolint:gosec // the operator's baseline file
+	if err != nil {
+		return fmt.Errorf("reading %s %s: %w", suppress.BaselineEnv, path, err)
+	}
+
+	_, _ = fmt.Fprintf(h, "\x00baseline %d %s\x00", len(path), path)
+	_, _ = h.Write(data)
+
+	return nil
 }
 
 func run(args []string, stdout, stderr io.Writer) int {
