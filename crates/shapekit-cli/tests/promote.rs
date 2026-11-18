@@ -457,29 +457,87 @@ fn pair_layout() -> tempfile::TempDir {
         fs::write(&file, serde_json::to_string_pretty(&entry).unwrap()).unwrap();
     }
     fs::create_dir_all(d.join("registry/generated")).unwrap();
-    fs::write(
-        d.join("registry/generated/gates.json"),
-        r#"{
+    fs::write(d.join("registry/generated/gates.json"), GATES_BEFORE).unwrap();
+    let out = shapekit(d, &["manifest", "build", "--corpus", "candidate"]);
+    assert!(out.status.success(), "{}", text(&out));
+    dir
+}
+
+/// A gate list in the order `twin gate-witnesses` writes it, whose met side names both pair
+/// recipes while they are candidates.
+const GATES_BEFORE: &str = r#"{
+  "schema_version": 1,
+  "core": {
+    "version": "v30.0.0",
+    "commit": "0e49751aa9ddf892302cca02cea7f3f5d97df9f1"
+  },
   "gates": [
     {
+      "file": "src/transactions/PaymentOpFrame.cpp",
+      "line": 10,
+      "column": 5,
+      "function": "PaymentOpFrame::doApply",
+      "comparison": "starts-from",
+      "version": 13,
       "sides": [
         {
+          "branch": "true",
+          "status": "met",
           "witnesses": [
             "recipe:candidate/recipes/explore.pairs/muxed-payment/a.json@p30",
             "recipe:candidate/recipes/explore.pairs/muxed-payment/b.json@p30"
-          ]
+          ],
+          "evidence": "2 recipe rerun(s) ran the call"
+        },
+        {
+          "branch": "false",
+          "status": "open",
+          "witnesses": [],
+          "evidence": "no chain evaluates this condition"
         }
       ]
     }
   ]
 }
-"#,
-    )
-    .unwrap();
-    let out = shapekit(d, &["manifest", "build", "--corpus", "candidate"]);
-    assert!(out.status.success(), "{}", text(&out));
-    dir
+"#;
+
+/// The same list after recipe a moved to the corpus: only that witness changes, and the side's
+/// witnesses stay sorted.
+const GATES_AFTER: &str = r#"{
+  "schema_version": 1,
+  "core": {
+    "version": "v30.0.0",
+    "commit": "0e49751aa9ddf892302cca02cea7f3f5d97df9f1"
+  },
+  "gates": [
+    {
+      "file": "src/transactions/PaymentOpFrame.cpp",
+      "line": 10,
+      "column": 5,
+      "function": "PaymentOpFrame::doApply",
+      "comparison": "starts-from",
+      "version": 13,
+      "sides": [
+        {
+          "branch": "true",
+          "status": "met",
+          "witnesses": [
+            "recipe:candidate/recipes/explore.pairs/muxed-payment/b.json@p30",
+            "recipe:corpus/recipes/explore.pairs/muxed-payment/a.json@p30"
+          ],
+          "evidence": "2 recipe rerun(s) ran the call"
+        },
+        {
+          "branch": "false",
+          "status": "open",
+          "witnesses": [],
+          "evidence": "no chain evaluates this condition"
+        }
+      ]
+    }
+  ]
 }
+"#;
 
 /// A matrix in which the current version of every sdk passes each of `ids`.
 fn passing_matrix(d: &Path, ids: &[&str]) -> String {
@@ -535,6 +593,32 @@ fn an_entry_whose_chain_is_not_listed_stays_a_candidate() {
         text(&out)
     );
     assert_eq!(entries(d, "corpus"), 0);
+}
+
+#[test]
+fn a_broken_gate_list_stops_the_promotion_before_anything_moves() {
+    let dir = pair_layout();
+    let d = dir.path();
+    let gates = d.join("registry/generated/gates.json");
+    fs::write(
+        &gates,
+        GATES_BEFORE.replace("\"schema_version\": 1", "\"schema_version\": 9"),
+    )
+    .unwrap();
+    let matrix = passing_matrix(d, &[PAIR_ENTRIES[0]]);
+    let out = shapekit(
+        d,
+        &["corpus", "promote", PAIR_ENTRIES[0], "--matrix", &matrix],
+    );
+    assert_eq!(out.status.code(), Some(2), "{}", text(&out));
+    assert!(
+        text(&out).contains("gates.json: schema_version 9"),
+        "{}",
+        text(&out)
+    );
+    assert_eq!(entries(d, "corpus"), 0);
+    assert!(!d.join("corpus/chains/pairs.muxed-payment.a").exists());
+    assert!(d.join("candidate/chains/pairs.muxed-payment.a").exists());
 }
 
 #[test]
@@ -639,11 +723,9 @@ fn a_listed_chain_moves_with_its_first_promoted_entry() {
             "{e}: {notes}"
         );
     }
+    // byte for byte: the generator's field order survives and only the moved witness changes
     let gates = fs::read_to_string(d.join("registry/generated/gates.json")).unwrap();
-    assert!(
-        gates.contains("\"recipe:candidate/recipes/explore.pairs/muxed-payment/b.json@p30\",\n            \"recipe:corpus/recipes/explore.pairs/muxed-payment/a.json@p30\""),
-        "{gates}"
-    );
+    assert_eq!(gates, GATES_AFTER);
     for lane in ["corpus", "candidate"] {
         let file = format!("{lane}/manifest.json");
         let out = shapekit(d, &["manifest", "validate", "--file", &file]);

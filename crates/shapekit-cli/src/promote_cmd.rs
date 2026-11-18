@@ -30,6 +30,7 @@ use anyhow::{Context, Result, bail, ensure};
 use clap::Args;
 use serde::Deserialize;
 use shapekit_conformance::versions::VersionsFile;
+use shapekit_contracts::GateList;
 use shapekit_findings::collect::conformance_matches;
 use shapekit_findings::inputs::{CellView, MatrixView};
 use shapekit_findings::triage::{ConformanceMatch, FindingDef, Status, Triage};
@@ -693,58 +694,43 @@ fn entry_jsons(lane: &Path) -> Result<Vec<PathBuf>> {
 
 /// Rewrites the recipe witnesses of the gate list that name a moved recipe; each side's
 /// witnesses stay sorted. Returns how many changed.
-fn rewrite_gates(path: &Path, renames: &[(String, String)]) -> Result<usize> {
-    if !path.is_file() {
-        return Ok(0);
-    }
-    let text =
-        std::fs::read_to_string(path).with_context(|| format!("reading {}", path.display()))?;
-    let mut doc: serde_json::Value =
-        serde_json::from_str(&text).with_context(|| format!("parsing {}", path.display()))?;
+fn rewrite_gates(list: &mut GateList, renames: &[(String, String)]) -> usize {
     let mut changed = 0;
-    let gates = doc
-        .get_mut("gates")
-        .and_then(serde_json::Value::as_array_mut)
-        .with_context(|| format!("{} has no gates list", path.display()))?;
-    for g in gates {
-        let Some(sides) = g.get_mut("sides").and_then(serde_json::Value::as_array_mut) else {
-            continue;
-        };
-        for s in sides {
-            let Some(ws) = s
-                .get_mut("witnesses")
-                .and_then(serde_json::Value::as_array_mut)
-            else {
+    for side in list.gates.iter_mut().flat_map(|g| g.sides.iter_mut()) {
+        let mut touched = false;
+        for w in &mut side.witnesses {
+            let Some(rest) = w.strip_prefix("recipe:") else {
                 continue;
             };
-            let mut touched = false;
-            for w in ws.iter_mut() {
-                let Some(rest) = w.as_str().and_then(|t| t.strip_prefix("recipe:")) else {
-                    continue;
+            let (file, at) = rest.split_once('@').map_or((rest, ""), |(f, a)| (f, a));
+            if let Some((_, to)) = renames.iter().find(|(from, _)| from == file) {
+                *w = if at.is_empty() {
+                    format!("recipe:{to}")
+                } else {
+                    format!("recipe:{to}@{at}")
                 };
-                let (file, at) = rest.split_once('@').unwrap_or((rest, ""));
-                if let Some((_, to)) = renames.iter().find(|(from, _)| from == file) {
-                    let at = if at.is_empty() {
-                        String::new()
-                    } else {
-                        format!("@{at}")
-                    };
-                    *w = serde_json::Value::String(format!("recipe:{to}{at}"));
-                    touched = true;
-                    changed += 1;
-                }
-            }
-            if touched {
-                ws.sort_by(|a, b| a.as_str().cmp(&b.as_str()));
+                touched = true;
+                changed += 1;
             }
         }
+        if touched {
+            side.witnesses.sort();
+            side.witnesses.dedup();
+        }
     }
-    if changed > 0 {
-        let mut out = serde_json::to_string_pretty(&doc)?;
-        out.push('\n');
-        std::fs::write(path, out).with_context(|| format!("writing {}", path.display()))?;
+    changed
+}
+
+/// The gate list at `path`, if there is one. It is loaded as the contract type, before
+/// anything moves, so a broken list stops the promotion early and a rewritten one keeps the
+/// field order `twin gate-witnesses` writes.
+fn load_gates(path: &Path) -> Result<Option<GateList>> {
+    if !path.is_file() {
+        return Ok(None);
     }
-    Ok(changed)
+    shapekit_contracts::load(path)
+        .map(Some)
+        .map_err(|e| anyhow::anyhow!("{e}"))
 }
 
 /// Copies the entries and the chains moving with them into the corpus, rewrites recipe
@@ -771,6 +757,11 @@ fn promote(
         let to = args.corpus.join("chains").join(&c.id);
         ensure!(!to.exists(), "{} already exists", to.display());
     }
+    let mut gates = if moves.chains.is_empty() {
+        None
+    } else {
+        load_gates(&args.gates)?
+    };
     let renames = renames(args, moves);
     // everything this run creates in the corpus, to undo on failure
     let mut created: Vec<PathBuf> = Vec::new();
@@ -868,8 +859,11 @@ fn promote(
         for file in entry_jsons(&args.candidate)? {
             rewrite_entry(&file, &renames)?;
         }
-        let n = rewrite_gates(&args.gates, &renames)?;
-        if n > 0 {
+        let n = gates
+            .as_mut()
+            .map_or(0, |list| rewrite_gates(list, &renames));
+        if let Some(list) = gates.as_ref().filter(|_| n > 0) {
+            shapekit_contracts::write(&args.gates, list).map_err(|e| anyhow::anyhow!("{e}"))?;
             println!(
                 "{n} recipe witnesses of {} follow their recipe",
                 args.gates.display()

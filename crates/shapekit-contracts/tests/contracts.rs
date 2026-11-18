@@ -710,6 +710,28 @@ fn committed_schemas_are_current() {
     assert_eq!(shapekit_contracts::all().len(), 7);
 }
 
+/// Loads a committed generated file and renders it again: the bytes match only when the file is
+/// in the form its generator writes, so an edit that reorders or reformats it fails here.
+fn renders_unchanged<T: Contract>(rel: &str) {
+    let path = root().join(rel);
+    let text = std::fs::read_to_string(&path).unwrap();
+    let value: T = load(&path).unwrap();
+    assert!(
+        render(&value) == text,
+        "{rel} is not in its generator's form (field order or formatting differ)"
+    );
+}
+
+// obligations.json has a one-line-per-obligation form of its own, which `shapekit coverage
+// --check` compares
+#[test]
+fn committed_generated_files_are_in_their_generators_form() {
+    renders_unchanged::<GateList>("registry/generated/gates.json");
+    renders_unchanged::<ValidationTable>("registry/generated/validation.json");
+    renders_unchanged::<LimitsTable>("registry/generated/limits.json");
+    renders_unchanged::<CoreCoverage>("corpus/coverage/core-coverage.json");
+}
+
 #[test]
 fn a_fee_bump_names_funded_roles() {
     use shapekit_contracts::recipe_ir::FeeBump;
