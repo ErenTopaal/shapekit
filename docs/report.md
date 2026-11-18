@@ -97,9 +97,8 @@ before it although the two report different version strings.
 
 With `--known-failures`, a conformance run is compared the way `shapekit conformance run`
 checks it: a failing check without a line is new, a check listed with another result is
-changed, and a listed check that no longer fails is fixed. A line that names a
-`diverges-from-peers` check is not counted as fixed in a run of one SDK, since that run had
-no peers to diverge from. See [testee-protocol.md](testee-protocol.md#known-failures) for the
+changed, and a listed check that no longer fails is fixed. A result is compared with its kind
+of failure, so a crash on a check listed as a wrong answer is changed. See [testee-protocol.md](testee-protocol.md#known-failures) for the
 format of the lists.
 
 ## The pull request summary

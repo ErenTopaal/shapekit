@@ -4,9 +4,11 @@
 //! current versions, to render the same bytes, and reports every entry where one of them
 //! renders something else, classified by who disagrees with whom.
 //!
-//! The command succeeds only when every disagreement is one decoder differing while the others
-//! agree with `expected_json`, and that decoder's known-failures list already holds the check.
-//! Two decoders that differ the same way point at stellar-xdr's rendering instead, and fail it.
+//! The command succeeds only when it ran at least one check, every check was confirmed by at
+//! least one decoder agreeing with `expected_json`, and every disagreement is one decoder
+//! differing while another agrees, with that decoder's known-failures list already holding the
+//! check. Two decoders that differ the same way point at stellar-xdr's rendering instead, and
+//! fail it; a check no decoder rendered as expected is not cross-checked at all, and fails it.
 
 use std::collections::BTreeMap;
 use std::fmt::Write as _;
@@ -16,7 +18,7 @@ use anyhow::{Context, Result, ensure};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
-use crate::compare::ResultClass;
+use crate::compare::{Outcome, ResultClass};
 use crate::known;
 use crate::plan::{self, Expect};
 use crate::runner::{self, Selection};
@@ -131,7 +133,27 @@ pub struct Report {
 
 impl Report {
     pub fn ok(&self) -> bool {
-        self.disagreements.iter().all(|d| !d.class.fails())
+        self.problems().is_empty()
+    }
+
+    /// Why the command fails, one line each; empty when it passes.
+    pub fn problems(&self) -> Vec<String> {
+        let mut out = Vec::new();
+        if self.checks == 0 {
+            out.push(
+                "no decode_json check with a canonical expected_json was run, so nothing was cross-checked"
+                    .to_string(),
+            );
+        }
+        if let Some(n) = self.confirmed_by.get(&0).filter(|n| **n > 0) {
+            out.push(format!(
+                "{n} checks were confirmed by no decoder: none rendered expected_json"
+            ));
+        }
+        for d in self.disagreements.iter().filter(|d| d.class.fails()) {
+            out.push(format!("{} `{}`: {}", d.entry, d.check, d.class.as_str()));
+        }
+        out
     }
 }
 
@@ -311,7 +333,8 @@ pub fn run(opts: &CrosscheckOptions) -> Result<Report> {
             let mut known_issues = BTreeMap::new();
             for t in &targets {
                 if let Some(l) = lines[&t.key()].iter().find(|l| {
-                    l.result == ResultClass::DivergesFromNetwork
+                    // a decoder rendering other json answered wrong, it did not crash
+                    l.result == Outcome::of(ResultClass::DivergesFromNetwork)
                         && l.covers_check(&entry.id, &t.version, &check.name)
                 }) {
                     known_issues.insert(t.key(), l.issue.clone());

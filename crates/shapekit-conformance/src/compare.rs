@@ -62,6 +62,152 @@ impl std::fmt::Display for ResultClass {
     }
 }
 
+/// How a failing check failed, beyond its result. A known-failures line names it after the
+/// result (`diverges-from-network:panic`, `error:timeout`), so a line written for one kind of
+/// failure cannot hide another kind on the same check: a wrong answer listed as known does not
+/// cover a later crash, and a known `bad-request` does not cover a timeout.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case")]
+pub enum FailureKind {
+    /// The sdk panicked or threw instead of answering: a `diverges-from-network`.
+    Panic,
+    /// The testee answered `bad-request`.
+    BadRequest,
+    /// The testee answered `internal`.
+    Internal,
+    /// No answer within the version's timeout.
+    Timeout,
+    /// The testee process died.
+    Exited,
+    /// The answer broke the testee protocol.
+    Protocol,
+    /// The runner could not turn the corpus entry into a request.
+    Unmappable,
+}
+
+impl FailureKind {
+    pub const ALL: [FailureKind; 7] = [
+        FailureKind::Panic,
+        FailureKind::BadRequest,
+        FailureKind::Internal,
+        FailureKind::Timeout,
+        FailureKind::Exited,
+        FailureKind::Protocol,
+        FailureKind::Unmappable,
+    ];
+
+    pub fn as_str(self) -> &'static str {
+        match self {
+            FailureKind::Panic => "panic",
+            FailureKind::BadRequest => "bad-request",
+            FailureKind::Internal => "internal",
+            FailureKind::Timeout => "timeout",
+            FailureKind::Exited => "exited",
+            FailureKind::Protocol => "protocol",
+            FailureKind::Unmappable => "unmappable",
+        }
+    }
+
+    pub fn parse(s: &str) -> Option<FailureKind> {
+        FailureKind::ALL.into_iter().find(|k| k.as_str() == s)
+    }
+
+    /// The result every failure of this kind has.
+    pub fn result(self) -> ResultClass {
+        match self {
+            FailureKind::Panic => ResultClass::DivergesFromNetwork,
+            _ => ResultClass::Error,
+        }
+    }
+
+    /// A panic or a dead process: a robustness defect whatever protocol the input is from.
+    pub fn crashed(self) -> bool {
+        matches!(self, FailureKind::Panic | FailureKind::Exited)
+    }
+}
+
+impl std::fmt::Display for FailureKind {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(self.as_str())
+    }
+}
+
+/// A check's result with the kind of failure, written `<result>` or `<result>:<kind>`. An
+/// `error` always has a kind; a `diverges-from-network` has none when the sdk answered and the
+/// answer is wrong, and `panic` when it crashed instead; no other result has one.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct Outcome {
+    pub result: ResultClass,
+    pub failure: Option<FailureKind>,
+}
+
+impl Outcome {
+    /// A result without a kind of failure.
+    pub fn of(result: ResultClass) -> Outcome {
+        Outcome {
+            result,
+            failure: None,
+        }
+    }
+
+    /// The outcome when the pair is one a check can have.
+    pub fn new(result: ResultClass, failure: Option<FailureKind>) -> Option<Outcome> {
+        let fits = match (result, failure) {
+            (ResultClass::Error, kind) => kind.is_some_and(|k| k.result() == ResultClass::Error),
+            (ResultClass::DivergesFromNetwork, kind) => {
+                kind.is_none_or(|k| k.result() == ResultClass::DivergesFromNetwork)
+            }
+            (_, kind) => kind.is_none(),
+        };
+        fits.then_some(Outcome { result, failure })
+    }
+
+    pub fn is_failure(self) -> bool {
+        self.result.is_failure()
+    }
+
+    /// Reads `<result>` or `<result>:<kind>`, refusing a pair no check can have.
+    pub fn parse(s: &str) -> Result<Outcome, String> {
+        let (result, kind) = match s.split_once(':') {
+            Some((r, k)) => (r, Some(k)),
+            None => (s, None),
+        };
+        let result =
+            ResultClass::parse(result).ok_or_else(|| format!("unknown result {result:?}"))?;
+        let failure = match kind {
+            None => None,
+            Some(k) => Some(FailureKind::parse(k).ok_or_else(|| {
+                format!(
+                    "unknown kind of failure {k:?}; one of {}",
+                    FailureKind::ALL.map(FailureKind::as_str).join(", ")
+                )
+            })?),
+        };
+        Outcome::new(result, failure).ok_or_else(|| match (result, failure) {
+            (ResultClass::Error, None) => format!(
+                "an error needs its kind, `error:<kind>` with the kind one of {}",
+                FailureKind::ALL
+                    .into_iter()
+                    .filter(|k| k.result() == ResultClass::Error)
+                    .map(FailureKind::as_str)
+                    .collect::<Vec<_>>()
+                    .join(", ")
+            ),
+            (r, Some(k)) => format!("{r} cannot fail as {k}"),
+            (r, None) => format!("{r} is not a check result"),
+        })
+    }
+}
+
+impl std::fmt::Display for Outcome {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self.failure {
+            None => write!(f, "{}", self.result),
+            Some(k) => write!(f, "{}:{k}", self.result),
+        }
+    }
+}
+
 /// One check's verdict.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Verdict {
@@ -69,9 +215,24 @@ pub struct Verdict {
     pub detail: Option<String>,
     /// A short form of what the testee answered, for the matrix and issue bodies.
     pub actual: Value,
+    /// How the check failed: set on every `error`, and on a `diverges-from-network` where the
+    /// sdk crashed instead of answering.
+    pub failure: Option<FailureKind>,
+}
+
+impl Verdict {
     /// The sdk panicked or the testee process died on this input. A crash is a robustness
     /// defect whatever protocol the input is from, so it is never downgraded to unsupported.
-    pub crashed: bool,
+    pub fn crashed(&self) -> bool {
+        self.failure.is_some_and(FailureKind::crashed)
+    }
+
+    pub fn outcome(&self) -> Outcome {
+        Outcome {
+            result: self.result,
+            failure: self.failure,
+        }
+    }
 }
 
 /// The comparable outcome of an implementation-defined check, decided across testees later.
@@ -152,17 +313,27 @@ fn verdict(result: ResultClass, detail: impl Into<Option<String>>, actual: Value
         result,
         detail: detail.into(),
         actual: short(&actual),
-        crashed: false,
+        failure: None,
     })
 }
 
-fn crash(result: ResultClass, detail: String, actual: Value) -> Judged {
+// a failure whose kind says more than its result, with the result the kind gives
+fn failed(kind: FailureKind, detail: String, actual: Value) -> Judged {
     Judged::Done(Verdict {
-        result,
+        result: kind.result(),
         detail: Some(detail),
         actual: short(&actual),
-        crashed: true,
+        failure: Some(kind),
     })
+}
+
+/// The kind of failure of a request that produced no reply.
+pub fn failure_kind(failure: &Failure) -> FailureKind {
+    match failure {
+        Failure::Timeout { .. } => FailureKind::Timeout,
+        Failure::Exited { .. } => FailureKind::Exited,
+        Failure::Protocol { .. } => FailureKind::Protocol,
+    }
 }
 
 /// The expected answer in the same short form as `actual`.
@@ -192,17 +363,14 @@ pub fn expected_view(expect: &Expect) -> Value {
 
 pub fn judge(expect: &Expect, answer: &Result<Reply, Failure>) -> Judged {
     if let Expect::Unmappable(why) = expect {
-        return verdict(
-            ResultClass::Error,
+        return failed(
+            FailureKind::Unmappable,
             format!("runner cannot map this corpus case: {why}"),
             Value::Null,
         );
     }
     let reply = match answer {
-        Err(failure @ Failure::Exited { .. }) => {
-            return crash(ResultClass::Error, failure.to_string(), Value::Null);
-        }
-        Err(failure) => return verdict(ResultClass::Error, failure.to_string(), Value::Null),
+        Err(failure) => return failed(failure_kind(failure), failure.to_string(), Value::Null),
         Ok(r) => r,
     };
     match reply {
@@ -215,15 +383,20 @@ pub fn judge(expect: &Expect, answer: &Result<Reply, Failure>) -> Judged {
         }
         Reply::Error { class, message } => match class {
             ErrorClass::BadRequest | ErrorClass::Internal => {
-                return verdict(
-                    ResultClass::Error,
+                let kind = if *class == ErrorClass::BadRequest {
+                    FailureKind::BadRequest
+                } else {
+                    FailureKind::Internal
+                };
+                return failed(
+                    kind,
                     format!("testee answered {}: {message}", class.as_str()),
                     json!({"error": class.as_str()}),
                 );
             }
             ErrorClass::Panic => {
-                return crash(
-                    ResultClass::DivergesFromNetwork,
+                return failed(
+                    FailureKind::Panic,
                     format!("the sdk crashed instead of answering: {message}"),
                     json!({"error": "panic", "message": message}),
                 );
@@ -269,8 +442,8 @@ pub fn judge(expect: &Expect, answer: &Result<Reply, Failure>) -> Judged {
 
     let member = |name: &str| result.get(name);
     let missing = |name: &str| {
-        verdict(
-            ResultClass::Error,
+        failed(
+            FailureKind::Protocol,
             format!("protocol violation: result has no valid {name}"),
             result.clone(),
         )
@@ -443,7 +616,7 @@ pub fn judge_peers(outcomes: &[Option<Value>], voters: &[bool]) -> Vec<Option<Ve
                     result: ResultClass::Pass,
                     detail: Some(detail),
                     actual: short(v),
-                    crashed: false,
+                    failure: None,
                 }
             })
         })

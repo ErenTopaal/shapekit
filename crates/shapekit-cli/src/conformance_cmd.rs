@@ -40,8 +40,10 @@ pub enum ConformanceCommand {
         #[arg(long)]
         no_build: bool,
         /// Run every distinct TransactionMeta of a dataset directory (index.jsonl and meta/,
-        /// as `shapekit coretest convert` writes them) instead of the corpus manifest.
-        #[arg(long, conflicts_with_all = ["entries", "kinds", "flags", "linked_issues", "coverage"])]
+        /// as `shapekit coretest convert` writes them) instead of the corpus manifest. The
+        /// dataset run reads no manifest or known-failures list, runs once and writes its own
+        /// obligations, so those options cannot be given with it.
+        #[arg(long, conflicts_with_all = ["entries", "kinds", "flags", "linked_issues", "coverage", "obligations", "passes", "manifest", "known_failures"])]
         dataset: Option<PathBuf>,
         /// With --dataset: the candidate lane failing metas are written to.
         #[arg(long, default_value = "candidate")]
@@ -459,7 +461,11 @@ fn dispatch(cmd: ConformanceCommand) -> Result<bool> {
                 out.join("crosscheck.json").display(),
                 out.join("CROSSCHECK.md").display()
             );
-            Ok(report.ok())
+            let problems = report.problems();
+            for p in &problems {
+                eprintln!("crosscheck fails: {p}");
+            }
+            Ok(problems.is_empty())
         }
         ConformanceCommand::Reproduce {
             sdks,

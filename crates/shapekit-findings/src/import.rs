@@ -272,6 +272,7 @@ mod tests {
                     check: (*c).into(),
                     op: "decode".into(),
                     result: (*r).into(),
+                    failure: None,
                     detail: Some("x".repeat(DETAIL_CHARS + 10)),
                     actual: Some(serde_json::json!({"xdr": "AAAA"})),
                 })

@@ -177,7 +177,7 @@ pub fn render(m: &Matrix) -> String {
                         out,
                         "- {key} `{}`: {}{}",
                         ch.check,
-                        ch.result,
+                        ch.outcome(),
                         ch.detail
                             .as_deref()
                             .map(|d| format!(", {}", cell_text(d)))

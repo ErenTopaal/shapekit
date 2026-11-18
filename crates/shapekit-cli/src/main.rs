@@ -908,4 +908,28 @@ mod tests {
             Cli::try_parse_from(argv).unwrap_or_else(|e| panic!("{argv:?}: {e}"));
         }
     }
+
+    // a dataset run ignores these options, so giving them with --dataset is refused rather
+    // than silently dropped
+    #[test]
+    fn dataset_runs_refuse_the_options_they_ignore() {
+        let base = ["shapekit", "conformance", "run", "--dataset", "d"];
+        Cli::try_parse_from(base).unwrap_or_else(|e| panic!("{e}"));
+        for extra in [
+            &["--obligations", "--all-versions"][..],
+            &["--passes", "2"],
+            &["--manifest", "m.json"],
+            &["--known-failures", "k"],
+        ] {
+            let argv: Vec<&str> = base.iter().chain(extra).copied().collect();
+            let err = Cli::try_parse_from(&argv).err().unwrap_or_else(|| {
+                panic!("{argv:?} parses");
+            });
+            assert_eq!(
+                err.kind(),
+                clap::error::ErrorKind::ArgumentConflict,
+                "{argv:?}: {err}"
+            );
+        }
+    }
 }

@@ -57,6 +57,10 @@ pub struct CheckView {
     pub check: String,
     pub op: String,
     pub result: String,
+    /// The kind of failure beyond the result (`panic`, `timeout`, ...), where the matrix
+    /// records one; see `CheckView::outcome`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub failure: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub detail: Option<String>,
     /// What the SDK answered. Kept only for the checks of an implementation-defined entry,
@@ -72,6 +76,15 @@ pub struct CheckView {
 pub const IMPLEMENTATION_DEFINED: &str = "implementation-defined";
 
 impl CheckView {
+    /// The result with its kind of failure, as a known-failures line writes it: `<result>` or
+    /// `<result>:<kind>`.
+    pub fn outcome(&self) -> String {
+        match &self.failure {
+            None => self.result.clone(),
+            Some(k) => format!("{}:{k}", self.result),
+        }
+    }
+
     /// A check of an implementation-defined entry that recorded an answer.
     pub fn is_implementation_defined(&self) -> bool {
         self.result == "pass"

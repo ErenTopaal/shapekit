@@ -8,7 +8,7 @@ use std::sync::OnceLock;
 use base64::Engine as _;
 use base64::engine::general_purpose::STANDARD as B64;
 use serde_json::{Value, json};
-use shapekit_conformance::compare::ResultClass;
+use shapekit_conformance::compare::{FailureKind, Outcome, ResultClass};
 use shapekit_conformance::known;
 use shapekit_conformance::plan::{self, Expect};
 use shapekit_conformance::reproduce::{self, Observed};
@@ -571,7 +571,7 @@ fn known_failures_semantics() {
     // listing the wrong result makes it fail
     write(
         &list,
-        b"t.order-wrong * error x case 0/asset_order, case 1/asset_order\n",
+        b"t.order-wrong * error:bad-request x case 0/asset_order, case 1/asset_order\n",
     );
     assert!(!runner::run(&options(&c, 1)).unwrap().ok);
 
@@ -590,13 +590,20 @@ fn known_failures_semantics() {
     // a line for an entry that does not exist makes it fail
     write(
         &list,
-        b"t.order-wrong * diverges-from-network x case 0/asset_order, case 1/asset_order\nt.gone * error x a/b\n",
+        b"t.order-wrong * diverges-from-network x case 0/asset_order, case 1/asset_order\nt.gone * error:timeout x a/b\n",
     );
     assert!(!runner::run(&options(&c, 1)).unwrap().ok);
 }
 
-fn cell_checks(pairs: &[(&str, ResultClass)]) -> known::CellChecks {
-    pairs.iter().map(|(c, r)| (c.to_string(), *r)).collect()
+fn outcome(s: &str) -> Outcome {
+    Outcome::parse(s).unwrap()
+}
+
+fn cell_checks(pairs: &[(&str, &str)]) -> known::CellChecks {
+    pairs
+        .iter()
+        .map(|(c, r)| (c.to_string(), outcome(r)))
+        .collect()
 }
 
 #[test]
@@ -604,7 +611,7 @@ fn known_failures_are_judged_per_check() {
     let entries = BTreeSet::from(["a".to_string()]);
     let versions = BTreeSet::from(["1.0".to_string(), "2.0".to_string()]);
     let lines = known::parse(
-        "a * diverges-from-network x case 0/id_parse\na 2.0 error y case 1/id_parse\n",
+        "a * diverges-from-network x case 0/id_parse\na 2.0 error:bad-request y case 1/id_parse\n",
     )
     .unwrap();
     let results = |c0, c1| {
@@ -613,24 +620,35 @@ fn known_failures_are_judged_per_check() {
             cell_checks(&[("case 0/id_parse", c0), ("case 1/id_parse", c1)]),
         )])
     };
-    let eval = |r| known::evaluate(&lines, &r, &entries, &versions, false);
-    assert!(
-        eval(results(
-            ResultClass::DivergesFromNetwork,
-            ResultClass::Error
-        ))
-        .is_empty()
-    );
+    let eval = |r| known::evaluate(&lines, &r, &entries, &versions);
+    assert!(eval(results("diverges-from-network", "error:bad-request")).is_empty());
     // a regression in a listed entry: case 1 now diverges where only an error was known
-    let p = eval(results(
-        ResultClass::DivergesFromNetwork,
-        ResultClass::DivergesFromNetwork,
-    ));
+    let p = eval(results("diverges-from-network", "diverges-from-network"));
     assert!(
         matches!(&p[..], [known::Problem::WrongResult { check, .. }] if check == "case 1/id_parse")
     );
+    // a crash where a wrong answer is known is a new failure, not the listed one
+    let p = eval(results("diverges-from-network:panic", "error:bad-request"));
+    assert!(
+        matches!(&p[..], [known::Problem::WrongResult { check, actual, .. }]
+            if check == "case 0/id_parse" && actual.failure == Some(FailureKind::Panic)),
+        "{p:?}"
+    );
+    assert!(
+        p[0].to_string().contains(
+            "listed as diverges-from-network (line 1) but is diverges-from-network:panic"
+        )
+    );
+    // so is a timeout or a dead testee where a bad request is known
+    for other in ["error:timeout", "error:exited", "error:protocol"] {
+        let p = eval(results("diverges-from-network", other));
+        assert!(
+            matches!(&p[..], [known::Problem::WrongResult { check, .. }] if check == "case 1/id_parse"),
+            "{other}: {p:?}"
+        );
+    }
     // a fixed check must leave the list
-    let p = eval(results(ResultClass::Pass, ResultClass::Error));
+    let p = eval(results("pass", "error:bad-request"));
     assert!(
         matches!(&p[..], [known::Problem::NoLongerFails { check, .. }] if check == "case 0/id_parse")
     );
@@ -638,8 +656,8 @@ fn known_failures_are_judged_per_check() {
     let on_1 = BTreeMap::from([(
         ("a".to_string(), "1.0".to_string()),
         cell_checks(&[
-            ("case 0/id_parse", ResultClass::DivergesFromNetwork),
-            ("case 1/id_parse", ResultClass::Error),
+            ("case 0/id_parse", "diverges-from-network"),
+            ("case 1/id_parse", "error:bad-request"),
         ]),
     )]);
     let p = eval(on_1);
@@ -656,35 +674,47 @@ fn known_failures_are_judged_per_check() {
     );
 }
 
-// a peers line can only be reproduced when other sdks ran, so a one-sdk run that passes the
-// entry must not ask for the line to be removed, while a run with other sdks must
+// a crash is listed as its own kind, and only matches a crash
 #[test]
-fn peers_lines_need_other_sdks() {
-    let lines = known::parse("a * diverges-from-peers x any/decode_json\n").unwrap();
-    let results = BTreeMap::from([(
-        ("a".to_string(), "1.0".to_string()),
-        cell_checks(&[("any/decode_json", ResultClass::Pass)]),
-    )]);
+fn a_crash_line_covers_only_a_crash() {
     let entries = BTreeSet::from(["a".to_string()]);
     let versions = BTreeSet::from(["1.0".to_string()]);
-    assert!(known::evaluate(&lines, &results, &entries, &versions, false).is_empty());
-    assert_eq!(
-        known::evaluate(&lines, &results, &entries, &versions, true).len(),
-        1
+    let lines = known::parse("a * diverges-from-network:panic x any/decode_json\n").unwrap();
+    let eval = |r: &str| {
+        known::evaluate(
+            &lines,
+            &BTreeMap::from([(
+                ("a".to_string(), "1.0".to_string()),
+                cell_checks(&[("any/decode_json", r)]),
+            )]),
+            &entries,
+            &versions,
+        )
+    };
+    assert!(eval("diverges-from-network:panic").is_empty());
+    assert!(matches!(
+        &eval("diverges-from-network")[..],
+        [known::Problem::WrongResult { .. }]
+    ));
+}
+
+// nothing gives diverges-from-peers: implementation-defined checks are recorded as passes
+#[test]
+fn peers_lines_are_refused() {
+    let err = known::parse("a * diverges-from-peers x any/decode_json\n").unwrap_err();
+    assert!(
+        format!("{err:#}").contains("no check is diverges-from-peers"),
+        "{err:#}"
     );
-    let failing = BTreeMap::from([(
-        ("a".to_string(), "1.0".to_string()),
-        cell_checks(&[("any/decode_json", ResultClass::DivergesFromPeers)]),
-    )]);
-    assert!(known::evaluate(&lines, &failing, &entries, &versions, true).is_empty());
 }
 
 #[test]
 fn known_failures_file_format() {
     let lines = known::parse(
-        "a 1.0 diverges-from-peers https://x case 0/map_sort,case 1/map_sort # c\n\n# only a comment\n",
+        "a 1.0 error:internal https://x case 0/map_sort,case 1/map_sort # c\n\n# only a comment\n",
     )
     .unwrap();
+    assert_eq!(lines[0].result, outcome("error:internal"));
     assert_eq!(lines.len(), 1);
     assert_eq!(lines[0].version.as_deref(), Some("1.0"));
     assert_eq!(
@@ -696,33 +726,54 @@ fn known_failures_file_format() {
         "pass is not a failure"
     );
     assert!(
-        known::parse("a * error x").is_err(),
+        known::parse("a * error:timeout x").is_err(),
         "the check list is required"
     );
     assert!(
-        known::parse("a * error x any/decode_json,").is_err(),
+        known::parse("a * error:timeout x any/decode_json,").is_err(),
         "an empty check item"
     );
     assert!(
-        known::parse("a * error x any/decode_json, any/decode_json").is_err(),
+        known::parse("a * error:timeout x any/decode_json, any/decode_json").is_err(),
         "a check listed twice"
     );
     assert!(
-        known::parse("a * error x any/decode_json\na 1.0 error y any/decode_json").is_err(),
+        known::parse("a * error:timeout x any/decode_json\na 1.0 error:exited y any/decode_json")
+            .is_err(),
         "a star line and a version line share a check"
     );
     assert!(
-        known::parse("a * error x any/decode_json\na 1.0 diverges-from-network y any/encode_json")
-            .is_ok(),
+        known::parse(
+            "a * error:timeout x any/decode_json\na 1.0 diverges-from-network y any/encode_json"
+        )
+        .is_ok(),
         "the same entry and version with other checks"
     );
-    assert!(known::parse("a 1.0 error x any/decode_json\na 2.0 error y any/decode_json").is_ok());
+    assert!(
+        known::parse(
+            "a 1.0 error:timeout x any/decode_json\na 2.0 error:timeout y any/decode_json"
+        )
+        .is_ok()
+    );
+    // an error names its kind, and a kind fits only its result
+    for bad in [
+        "error",
+        "error:panic",
+        "error:segfault",
+        "diverges-from-network:timeout",
+        "unsupported:panic",
+    ] {
+        assert!(
+            known::parse(&format!("a * {bad} x any/decode_json")).is_err(),
+            "{bad} is refused"
+        );
+    }
 }
 
 #[test]
 fn an_issue_url_keeps_its_fragment() {
     let lines = known::parse(
-        "a * error https://github.com/o/r/pull/1#issuecomment-2 any/decode_json # why\n  # indented comment\n",
+        "a * error:internal https://github.com/o/r/pull/1#issuecomment-2 any/decode_json # why\n  # indented comment\n",
     )
     .unwrap();
     assert_eq!(lines.len(), 1);
@@ -1095,12 +1146,14 @@ fn crashes_are_not_downgraded_by_max_protocol() {
         message: "boom".into(),
     }));
     assert_eq!(panic.result, ResultClass::DivergesFromNetwork);
+    assert_eq!(panic.failure, Some(FailureKind::Panic));
     let died = verdict(Err(Failure::Exited {
         status: "signal 9".into(),
         stderr: String::new(),
     }));
     assert_eq!(died.result, ResultClass::Error);
-    assert!(died.crashed);
+    assert!(died.crashed());
+    assert_eq!(died.failure, Some(FailureKind::Exited));
     // an ordinary divergence on a newer protocol is still not held against the version
     let rejected = verdict(Ok(Reply::Error {
         class: ErrorClass::Rejected,
@@ -1188,6 +1241,126 @@ fn a_reproduction_needs_its_named_checks_to_diverge() {
 
     let err = reproduce_rust(&c, reproductions(&c, &text("t.reject"))).unwrap_err();
     assert!(err.to_string().contains("not a counted check"), "{err}");
+}
+
+// a divergence on an entry newer than the version knows is unsupported there, as in a run, so
+// it neither reproduces the sighting nor shows the fix
+#[test]
+fn a_reproduction_judges_newer_entries_as_the_runner_does() {
+    rust_testees();
+    let c = corpus();
+    // t.order-wrong from protocol 30: rust 28.0.1 knows protocols up to 29, 30.0.0 up to 30
+    let text = std::fs::read_to_string(c.manifest()).unwrap();
+    let mut manifest: Value = serde_json::from_str(&text).unwrap();
+    for e in manifest["entries"].as_array_mut().unwrap() {
+        if e["id"] == "t.order-wrong" {
+            e["protocol"] = json!({"introduced": 30, "valid_min": 30});
+        }
+    }
+    write(&c.manifest(), manifest.to_string().as_bytes());
+    let row = format!(
+        "{ROW}entries = [\"t.order-wrong\"]\nfail = [\"28.0.1\", \"30.0.0\"]\npass = [\"28.0.0\"]\nmust_diverge = [{{ entry = \"t.order-wrong\", checks = [\"case 0/asset_order\"] }}]\n"
+    );
+    let cells = reproduce_rust(&c, reproductions(&c, &row)).unwrap();
+    let got: Vec<(&str, Observed)> = cells
+        .iter()
+        .map(|c| (c.version.as_str(), c.observed))
+        .collect();
+    assert_eq!(
+        got,
+        vec![
+            ("28.0.0", Observed::Inconclusive),
+            ("28.0.1", Observed::Inconclusive),
+            ("30.0.0", Observed::Fail)
+        ]
+    );
+    assert!(
+        cells[1].notes[0].contains("knows protocols up to 29"),
+        "{:?}",
+        cells[1].notes
+    );
+}
+
+// the check the sighting rests on cannot be answered, so the version shows neither the flaw nor
+// the fix, even where the row lets unsupported checks go uncounted
+#[test]
+fn an_unanswered_sighting_check_is_inconclusive() {
+    rust_testees();
+    let c = corpus();
+    let row = format!(
+        "{ROW}entries = [\"t.native\", \"t.accept\"]\nunsupported_not_counted = \"rust has no native projection\"\nfail = [\"28.0.1\"]\npass = [\"30.0.0\"]\nmust_diverge = [{{ entry = \"t.native\", checks = [\"case 0/to_native\"] }}]\n"
+    );
+    let cells = reproduce_rust(&c, reproductions(&c, &row)).unwrap();
+    assert!(
+        cells.iter().all(|c| c.observed == Observed::Inconclusive),
+        "{cells:?}"
+    );
+}
+
+#[test]
+fn a_check_named_twice_in_must_diverge_is_refused() {
+    let c = corpus();
+    for named in [
+        "[{ entry = \"t.accept\", checks = [\"any/decode_encode\", \"any/decode_encode\"] }]",
+        "[{ entry = \"t.accept\", checks = [\"any/decode_encode\"] }, { entry = \"t.accept\", checks = [\"any/decode_encode\"], failure = \"panic\" }]",
+    ] {
+        let file = reproductions(
+            &c,
+            &format!(
+                "{ROW}entries = [\"t.accept\"]\nfail = [\"28.0.1\"]\npass = [\"30.0.0\"]\nmust_diverge = {named}\n"
+            ),
+        );
+        let err = reproduce::ReproductionsFile::load(&file).unwrap_err();
+        assert!(err.to_string().contains("twice"), "{err}");
+    }
+    let file = reproductions(
+        &c,
+        &format!(
+            "{ROW}entries = [\"t.accept\"]\nfail = [\"28.0.1\"]\npass = [\"30.0.0\"]\nmust_diverge = [{{ entry = \"t.accept\", checks = [\"any/decode_encode\"], failure = \"timeout\" }}]\n"
+        ),
+    );
+    let err = reproduce::ReproductionsFile::load(&file).unwrap_err();
+    assert!(err.to_string().contains("not a divergence"), "{err}");
+}
+
+// a crash does not reproduce a sighting of a wrong answer, nor a wrong answer a crash sighting
+#[test]
+fn a_reproduction_diverges_only_in_the_named_way() {
+    use shapekit_conformance::compare::Verdict;
+    let c = corpus();
+    let load = |failure: &str| {
+        let file = reproductions(
+            &c,
+            &format!(
+                "{ROW}entries = [\"t.accept\"]\nfail = [\"28.0.1\"]\npass = [\"30.0.0\"]\nmust_diverge = [{{ entry = \"t.accept\", checks = [\"any/decode_encode\"]{failure} }}]\n"
+            ),
+        );
+        reproduce::ReproductionsFile::load(&file)
+            .unwrap()
+            .reproductions
+            .remove(0)
+    };
+    let verdict = |failure| Verdict {
+        result: ResultClass::DivergesFromNetwork,
+        detail: None,
+        actual: Value::Null,
+        failure,
+    };
+    let observe = |row: &reproduce::Reproduction, v: Verdict| {
+        reproduce::observe(row, &[("t.accept", "any/decode_encode", v)]).0
+    };
+    let wrong = load("");
+    let crash = load(", failure = \"panic\"");
+    assert_eq!(observe(&wrong, verdict(None)), Observed::Fail);
+    assert_eq!(
+        observe(&wrong, verdict(Some(FailureKind::Panic))),
+        Observed::Mixed
+    );
+    assert_eq!(
+        observe(&crash, verdict(Some(FailureKind::Panic))),
+        Observed::Fail
+    );
+    assert_eq!(observe(&crash, verdict(None)), Observed::Mixed);
 }
 
 fn existing(title: &str, entry: &str) -> String {
@@ -1373,6 +1546,41 @@ fn crosscheck_classifies_disagreements() {
     assert!(r.ok());
     let md = std::fs::read_to_string(c.dir.path().join("crosscheck/CROSSCHECK.md")).unwrap();
     assert!(md.contains("already in its known-failures list"), "{md}");
+}
+
+// a cross-check that ran nothing, or whose check no decoder confirmed, checked nothing
+#[test]
+fn crosscheck_fails_without_a_confirmed_check() {
+    use shapekit_conformance::crosscheck::{CrosscheckOptions, run};
+    let c = corpus();
+    // decoders without decode_json render nothing, so nothing disagrees and nothing is confirmed
+    let r = crosscheck(&c, fixture_versions(&c, &[("a", "ok"), ("b", "ok")]));
+    assert_eq!(r.checks, 1);
+    assert!(r.disagreements.is_empty());
+    assert!(!r.ok());
+    assert!(
+        r.problems()[0].contains("confirmed by no decoder"),
+        "{:?}",
+        r.problems()
+    );
+    // a selection without a json check runs none
+    let r = run(&CrosscheckOptions {
+        root: root(),
+        manifest: c.manifest(),
+        versions: fixture_versions(&c, &[("a", "json7"), ("b", "json7")]),
+        known_dir: c.known(),
+        sdks: vec!["a".into(), "b".into()],
+        selection: Selection {
+            ids: vec!["t.reject".into()],
+            ..Default::default()
+        },
+        build: false,
+        out: None,
+    })
+    .unwrap();
+    assert_eq!(r.checks, 0);
+    assert!(!r.ok());
+    assert!(r.problems()[0].contains("nothing was cross-checked"));
 }
 
 #[test]

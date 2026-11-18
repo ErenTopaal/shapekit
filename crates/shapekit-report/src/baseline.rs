@@ -70,8 +70,10 @@ pub fn matrix_units(m: &MatrixView) -> Units {
             for c in &cell.checks {
                 let k = (e.id.clone(), key.clone(), Some(c.check.clone()));
                 match ResultClass::parse(&c.result) {
+                    // with its kind of failure, so a crash where a wrong answer was listed
+                    // shows as changed
                     Some(r) if r.is_failure() => {
-                        u.failing.insert(k, c.result.clone());
+                        u.failing.insert(k, c.outcome());
                     }
                     Some(ResultClass::Pass) => {}
                     _ => {
@@ -259,17 +261,16 @@ pub fn compare_with_known(m: &MatrixView, current: &Units, dir: &Path) -> Result
             .get(sdk.as_str())
             .and_then(|ls| ls.iter().find(|l| l.covers_check(&key.0, version, check)));
         match line {
-            Some(l) if l.result.as_str() == result => c.unchanged += 1,
+            Some(l) if l.result.to_string() == *result => c.unchanged += 1,
             Some(l) => c.changed.push(change(
                 key,
                 &none,
-                Some(&l.result.as_str().to_owned()),
+                Some(&l.result.to_string()),
                 Some(result),
             )),
             None => c.new.push(change(key, &none, None, Some(result))),
         }
     }
-    let several = sdks.len() > 1;
     for (sdk, ls) in &lines {
         for l in ls {
             let keys: Vec<&String> = current
@@ -292,18 +293,10 @@ pub fn compare_with_known(m: &MatrixView, current: &Units, dir: &Path) -> Result
                     if current.failing.contains_key(&key) {
                         continue;
                     }
-                    // without other sdks there were no peers to diverge from
-                    if l.result == ResultClass::DivergesFromPeers && !several {
-                        continue;
-                    }
                     let passes = "pass".to_owned();
                     let now = current.other.get(&key).unwrap_or(&passes);
-                    c.fixed.push(change(
-                        &key,
-                        &none,
-                        Some(&l.result.as_str().to_owned()),
-                        Some(now),
-                    ));
+                    c.fixed
+                        .push(change(&key, &none, Some(&l.result.to_string()), Some(now)));
                 }
             }
         }

@@ -912,13 +912,14 @@ fn add_known_failures(
     }
     let _ = writeln!(text, "# {comment}");
     for (entry, a) in lines {
-        let mut by_result: BTreeMap<&str, BTreeSet<&str>> = BTreeMap::new();
+        let mut by_result: BTreeMap<String, BTreeSet<&str>> = BTreeMap::new();
         for c in &a.cell.checks {
             if matches!(c.result.as_str(), "pass" | "unsupported") {
                 continue;
             }
+            // with the kind of failure, which the line has to name to match
             by_result
-                .entry(c.result.as_str())
+                .entry(c.outcome())
                 .or_default()
                 .insert(c.check.as_str());
         }

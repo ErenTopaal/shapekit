@@ -9,7 +9,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
 use shapekit_manifest::{Entry, EntryKind, Manifest, build as manifest_build};
 
-use crate::compare::{self, Judged, ResultClass, Verdict};
+use crate::compare::{self, FailureKind, Judged, Outcome, ResultClass, Verdict};
 use crate::known;
 use crate::plan::{self, Check};
 use crate::testee::Testee;
@@ -56,11 +56,26 @@ pub struct CheckRecord {
     pub check: String,
     pub op: String,
     pub result: ResultClass,
+    /// How the check failed, where its result alone does not say: set on every `error` and on
+    /// a `diverges-from-network` where the sdk crashed instead of answering (`panic`). A
+    /// matrix written before the field existed reads with none.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub failure: Option<FailureKind>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub detail: Option<String>,
     pub expected: Value,
     pub actual: Value,
     pub source: String,
+}
+
+impl CheckRecord {
+    /// The result with its kind of failure, as a known-failures line names it.
+    pub fn outcome(&self) -> Outcome {
+        Outcome {
+            result: self.result,
+            failure: self.failure,
+        }
+    }
 }
 
 /// One entry on one testee.
@@ -295,7 +310,7 @@ pub fn evaluate_entry(
                     result: ResultClass::Error,
                     detail: Some("the entry yields no checks".into()),
                     actual: Value::Null,
-                    crashed: false,
+                    failure: Some(FailureKind::Unmappable),
                 },
                 false,
             );
@@ -358,7 +373,7 @@ pub fn run_check(check: &Check, testees: &mut [Testee]) -> Result<Vec<Verdict>> 
                     check.op
                 )),
                 actual: Value::String("unsupported".into()),
-                crashed: false,
+                failure: None,
             })
         } else {
             let answer = t.request(check.request.clone())?;
@@ -403,7 +418,7 @@ pub fn beyond_protocol(entry: &Entry, target: &Target, v: Verdict) -> Verdict {
     match target.max_protocol {
         Some(max)
             if p > max
-                && !v.crashed
+                && !v.crashed()
                 && matches!(
                     v.result,
                     ResultClass::DivergesFromNetwork | ResultClass::DivergesFromPeers
@@ -418,7 +433,7 @@ pub fn beyond_protocol(entry: &Entry, target: &Target, v: Verdict) -> Verdict {
                     v.detail.unwrap_or_default()
                 )),
                 actual: v.actual,
-                crashed: false,
+                failure: None,
             }
         }
         _ => v,
@@ -452,6 +467,7 @@ fn record(cell: &mut Cell, check: &Check, v: Verdict, reference: bool) -> Result
             check: check.name.clone(),
             op: check.op.clone(),
             result,
+            failure: v.failure,
             detail: v.detail,
             expected: compare::expected_view(&check.expect),
             actual: v.actual,
@@ -656,9 +672,7 @@ pub fn run(opts: &RunOptions) -> Result<RunOutcome> {
     let all_ids: BTreeSet<String> = manifest.entries.iter().map(|e| e.id.clone()).collect();
     let mut problems = Vec::new();
     let mut failing: BTreeSet<String> = BTreeSet::new();
-    // distinct sdks, not versions: only another sdk gives a peer vote
     let sdks: BTreeSet<&str> = targets.iter().map(|t| t.sdk.as_str()).collect();
-    let other_sdks = sdks.len() > 1;
     for sdk in sdks {
         let lines = known::load(&opts.known_dir, sdk)?;
         let mut results = BTreeMap::new();
@@ -675,7 +689,7 @@ pub fn run(opts: &RunOptions) -> Result<RunOutcome> {
                     &t.version,
                     checks
                         .iter()
-                        .filter(|(_, r)| r.is_failure())
+                        .filter(|(_, o)| o.is_failure())
                         .map(|(c, _)| c.as_str()),
                 );
                 results.insert((row.id.clone(), t.version.clone()), checks);
@@ -687,7 +701,7 @@ pub fn run(opts: &RunOptions) -> Result<RunOutcome> {
             .iter()
             .map(|v| v.version.clone())
             .collect();
-        for p in known::evaluate(&lines, &results, &all_ids, &all_versions, other_sdks) {
+        for p in known::evaluate(&lines, &results, &all_ids, &all_versions) {
             match p.version() {
                 Some(v) => {
                     failing.insert(format!("{sdk}@{v}"));
@@ -753,18 +767,18 @@ pub fn run(opts: &RunOptions) -> Result<RunOutcome> {
     })
 }
 
-/// Every check of a cell by name with its result: the recorded non-passes and references, and
-/// a pass for every other check the entry has.
+/// Every check of a cell by name with its result and kind of failure: the recorded non-passes
+/// and references, and a pass for every other check the entry has.
 pub fn cell_checks(names: &[String], cell: &Cell) -> known::CellChecks {
     let mut out: known::CellChecks = names
         .iter()
-        .map(|n| (n.clone(), ResultClass::Pass))
+        .map(|n| (n.clone(), Outcome::of(ResultClass::Pass)))
         .collect();
     for c in &cell.checks {
-        out.insert(c.check.clone(), c.result);
+        out.insert(c.check.clone(), c.outcome());
     }
     for c in &cell.reference_checks {
-        out.insert(c.clone(), ResultClass::Reference);
+        out.insert(c.clone(), Outcome::of(ResultClass::Reference));
     }
     out
 }

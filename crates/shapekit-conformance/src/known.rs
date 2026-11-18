@@ -10,10 +10,14 @@
 //! check names, separated by commas, each written exactly as the matrix names it
 //! (`testnet/decode_json`, `case 3/strkey_decode`). `<version>` is an exact version from
 //! versions.toml, or `*` for every version, which is only right when every version fails the
-//! same checks with the same result. `<result>` is what every listed check gives
-//! (`diverges-from-network`, `diverges-from-peers` or `error`); checks of one entry that fail
-//! with different results go on separate lines. `<issue>` links the upstream issue, or the
-//! drafted issue file under `findings/issues/` until it is filed.
+//! same checks with the same result. `<result>` is what every listed check gives, with the kind
+//! of failure where there is one: `diverges-from-network` for a wrong answer,
+//! `diverges-from-network:panic` for a crash instead of an answer, and `error:<kind>` for an
+//! error, the kind one of `bad-request`, `internal`, `timeout`, `exited`, `protocol` and
+//! `unmappable` (see `compare::Outcome`). A line matches only its own kind, so a known wrong
+//! answer does not cover a crash on the same check, nor a known bad request a timeout. Checks of
+//! one entry that fail with different results go on separate lines. `<issue>` links the
+//! upstream issue, or the drafted issue file under `findings/issues/` until it is filed.
 //!
 //! A `#` at the start of a line or after whitespace starts a comment, so an issue url such as
 //! `https://github.com/o/r/pull/1#issuecomment-2` keeps its fragment.
@@ -25,24 +29,22 @@
 //! versions outside the run are not checked, except that every line must name an entry that
 //! exists and a version versions.toml lists.
 //!
-//! A `diverges-from-peers` result exists only when more than one sdk answers the same check
-//! (peer votes are one per sdk, see `compare::judge_peers`), so a run of one sdk cannot
-//! reproduce it: there such a check is not reported for passing, and it is checked in full
-//! whenever the run holds more than one sdk.
+//! `diverges-from-peers` cannot be listed: implementation-defined checks are recorded as passes
+//! with the answer kept (see `compare::judge_peers`), so no check ever has that result.
 
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::Path;
 
 use anyhow::{Context, Result, bail, ensure};
 
-use crate::compare::ResultClass;
+use crate::compare::{Outcome, ResultClass};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct KnownLine {
     pub entry: String,
     /// `None` for `*`.
     pub version: Option<String>,
-    pub result: ResultClass,
+    pub result: Outcome,
     pub issue: String,
     /// The check names the line covers; never empty.
     pub checks: BTreeSet<String>,
@@ -128,10 +130,13 @@ pub fn parse(text: &str) -> Result<Vec<KnownLine>> {
             );
             ensure!(checks.insert(c.clone()), "line {line}: lists {c:?} twice");
         }
-        let result = match ResultClass::parse(result) {
-            Some(r) if r.is_failure() => r,
-            Some(r) => bail!("line {line}: {r} is not a failure and cannot be listed"),
-            None => bail!("line {line}: unknown result {result:?}"),
+        let result = match Outcome::parse(result) {
+            Ok(r) if r.result == ResultClass::DivergesFromPeers => bail!(
+                "line {line}: no check is diverges-from-peers: implementation-defined checks are recorded as passes"
+            ),
+            Ok(r) if r.is_failure() => r,
+            Ok(r) => bail!("line {line}: {r} is not a failure and cannot be listed"),
+            Err(why) => bail!("line {line}: {why}"),
         };
         let version = (version != "*").then(|| version.to_string());
         if let Some((prev, shared)) = out.iter().find_map(|k| {
@@ -166,21 +171,21 @@ pub enum Problem {
         entry: String,
         version: String,
         check: String,
-        result: ResultClass,
+        result: Outcome,
     },
     WrongResult {
         entry: String,
         version: String,
         check: String,
-        listed: ResultClass,
-        actual: ResultClass,
+        listed: Outcome,
+        actual: Outcome,
         line: usize,
     },
     NoLongerFails {
         entry: String,
         version: String,
         check: String,
-        actual: ResultClass,
+        actual: Outcome,
         line: usize,
     },
     UnknownCheck {
@@ -271,19 +276,18 @@ impl std::fmt::Display for Problem {
     }
 }
 
-/// Every check of one entry on one version, by name, with its result (passes included).
-pub type CellChecks = BTreeMap<String, ResultClass>;
+/// Every check of one entry on one version, by name, with its result and kind of failure
+/// (passes included).
+pub type CellChecks = BTreeMap<String, Outcome>;
 
 /// Checks one sdk's results against its list. `results` holds every (entry, version) the run
 /// covered with all of its checks; `all_entries` is every id in the manifest; `all_versions`
-/// every version of the sdk in versions.toml; `other_sdks` says whether the run held more
-/// than one distinct sdk, so that peer votes existed.
+/// every version of the sdk in versions.toml.
 pub fn evaluate(
     lines: &[KnownLine],
     results: &BTreeMap<(String, String), CellChecks>,
     all_entries: &BTreeSet<String>,
     all_versions: &BTreeSet<String>,
-    other_sdks: bool,
 ) -> Vec<Problem> {
     let mut problems = Vec::new();
     for l in lines {
@@ -331,8 +335,6 @@ pub fn evaluate(
                         line: l.line,
                     });
                 }
-                // without other sdks there were no peers to diverge from
-                (Some(l), false) if l.result == ResultClass::DivergesFromPeers && !other_sdks => {}
                 (Some(l), false) => {
                     let (entry, version, check) = at();
                     problems.push(Problem::NoLongerFails {

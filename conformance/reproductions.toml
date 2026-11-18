@@ -5,14 +5,17 @@
 # errored check makes a cell inconclusive, which also fails the command.
 #
 # must_diverge names the checks that carry the sighting, as the matrix names them, per entry
-# (or per probe). a row fails on a version when every named check diverges, so a broad entry
+# (or per probe), each check once. a row fails on a version when every named check diverges
+# with a wrong answer, or with failure = "panic" on its item by crashing, so a broad entry
 # selection cannot hold through some other defect; it passes when every counted check passes.
-# a version where checks diverge but not every named one is "diverges elsewhere", which holds
-# for neither list. a version may not be listed under both fail and pass.
+# a version where checks diverge but not every named one in the named way is "diverges
+# elsewhere", which holds for neither list. a version may not be listed under both fail and
+# pass. a divergence on an entry from a protocol newer than the version knows counts as
+# unsupported there, as in a run.
 #
 # a row with unsupported_not_counted (which must say why) leaves its unsupported checks out of
-# the count; they are still listed in the output, and a cell with no counted check left is
-# inconclusive.
+# the count; they are still listed in the output, and a cell with no counted check left, or
+# with a named check unsupported, is inconclusive.
 
 schema = 1
 

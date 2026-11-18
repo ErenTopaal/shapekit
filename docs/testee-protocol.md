@@ -510,8 +510,23 @@ every disagreement is a single-SDK divergence already in that SDK's known-failur
 <entry-id> <version or *> <result> <issue link or findings/issues/ draft> <check>[, <check>...]
 ```
 
-The first four fields are separated by whitespace. `<result>` is `diverges-from-network`,
-`diverges-from-peers` or `error`. Everything after the issue is the list of failing checks,
+The first four fields are separated by whitespace. `<result>` is the check's result with the
+kind of failure where it has one, as the matrix records it in a check's `failure`:
+
+| `<result>` | the check |
+|---|---|
+| `diverges-from-network` | the SDK answered, and the answer is wrong |
+| `diverges-from-network:panic` | the SDK crashed instead of answering (`panic`) |
+| `error:bad-request`, `error:internal` | the testee answered with that error class |
+| `error:timeout` | no answer within the timeout |
+| `error:exited` | the testee process died |
+| `error:protocol` | the answer broke this protocol |
+| `error:unmappable` | the runner could not turn the corpus entry into a request |
+
+A line matches only its own kind, so a known wrong answer does not hide a crash on the same
+check, nor a known bad request a timeout; an `error` always names its kind. No check is ever
+`diverges-from-peers` (implementation-defined checks are recorded as passes), so a line cannot
+list it. Everything after the issue is the list of failing checks,
 separated by commas, each named exactly as the matrix names it (`testnet/decode_json`,
 `case 3/strkey_decode`). Every listed check must fail with `<result>`; checks of one entry
 that fail with different results go on separate lines. `*` stands for every version; use it
@@ -519,14 +534,13 @@ only when every version fails the same checks with the same result. A `#` starts
 only at the start of a line or after whitespace, so an issue URL keeps its `#fragment`. A
 missing `<sdk>.txt` counts as an empty list.
 
-Each check is judged on its own. A failing check (`diverges-from-network`,
-`diverges-from-peers`, `error`) listed with its result does not fail the run. A failing check
+Each check is judged on its own. A failing check (`diverges-from-network` or `error`) listed
+with its result and kind does not fail the run. A failing check
 that no line lists fails it, even when other checks of the same entry are listed, so a new
 regression next to a known failure is caught. A listed check that now passes, is `reference`,
 is unsupported, fails with another result, or is not a check of the entry fails the run too,
 until the line is fixed. Every line must name an entry in the manifest and a version in
-`versions.toml`. A `diverges-from-peers` line can no longer fail: in a run with other SDKs its
-check passing fails the run (a run of one SDK ignores the line), so remove the line.
+`versions.toml`.
 
 ## Limits the runner applies
 

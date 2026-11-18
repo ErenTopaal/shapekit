@@ -2,8 +2,10 @@
 //! must fail on the versions before its fix and pass on the versions with it.
 //!
 //! A row names the checks that carry the sighting (`must_diverge`). On a `fail` version every
-//! named check must diverge, so a broad selection cannot be satisfied by some other defect; on
-//! a `pass` version every counted check of the row must pass.
+//! named check must diverge in the way the row names, a wrong answer or with `failure =
+//! "panic"` a crash, so a broad selection cannot be satisfied by some other defect; on a `pass`
+//! version every counted check of the row must pass. Verdicts on entries from a protocol newer
+//! than the version knows are judged as the runner judges them (`runner::beyond_protocol`).
 
 use std::collections::{BTreeMap, BTreeSet};
 use std::fmt::Write as _;
@@ -12,9 +14,9 @@ use std::path::{Path, PathBuf};
 use anyhow::{Context, Result, bail, ensure};
 use serde::Deserialize;
 use serde_json::{Map, Value};
-use shapekit_manifest::EntryKind;
+use shapekit_manifest::{Entry, EntryKind};
 
-use crate::compare::ResultClass;
+use crate::compare::{FailureKind, ResultClass, Verdict};
 use crate::plan::{self, Check, Expect};
 use crate::runner::{self, Selection};
 use crate::versions::VersionsFile;
@@ -71,6 +73,10 @@ pub struct Diverge {
     #[serde(default)]
     pub probe: Option<String>,
     pub checks: Vec<String>,
+    /// How the checks diverge: absent for a wrong answer, `panic` for a crash instead of an
+    /// answer. A check that diverges the other way does not reproduce the sighting.
+    #[serde(default)]
+    pub failure: Option<FailureKind>,
 }
 
 impl Diverge {
@@ -156,6 +162,25 @@ impl ReproductionsFile {
                     r.id,
                     d.owner()
                 );
+                if let Some(k) = d.failure {
+                    ensure!(
+                        k.result() == ResultClass::DivergesFromNetwork,
+                        "reproduction {}: must_diverge for {} names failure {k}, which is an error, not a divergence",
+                        r.id,
+                        d.owner()
+                    );
+                }
+            }
+            let mut named = BTreeSet::new();
+            for d in &r.must_diverge {
+                for c in &d.checks {
+                    ensure!(
+                        named.insert((d.owner(), c.as_str())),
+                        "reproduction {}: must_diverge names {} `{c}` twice",
+                        r.id,
+                        d.owner()
+                    );
+                }
             }
         }
         Ok(file)
@@ -262,12 +287,20 @@ pub fn run(opts: &ReproduceOptions) -> Result<Vec<Cell>> {
                 .expect("ids come from the manifest");
             for c in plan::checks(entry, &corpus)? {
                 if r.ops.is_empty() || r.ops.contains(&c.op) {
-                    checks.push((id.clone(), c));
+                    checks.push(RowCheck {
+                        owner: id.clone(),
+                        entry: Some(entry),
+                        check: c,
+                    });
                 }
             }
         }
         for p in &r.probes {
-            checks.push((format!("probe {}", p.name), probe_check(p)?));
+            checks.push(RowCheck {
+                owner: format!("probe {}", p.name),
+                entry: None,
+                check: probe_check(p)?,
+            });
         }
         ensure!(
             !checks.is_empty(),
@@ -278,7 +311,9 @@ pub fn run(opts: &ReproduceOptions) -> Result<Vec<Cell>> {
             let owner = d.owner();
             for name in &d.checks {
                 ensure!(
-                    checks.iter().any(|(o, c)| *o == owner && &c.name == name),
+                    checks
+                        .iter()
+                        .any(|c| c.owner == owner && &c.check.name == name),
                     "reproduction {}: must_diverge names {owner} `{name}`, which is not a counted check of the row",
                     r.id
                 );
@@ -307,50 +342,20 @@ pub fn run(opts: &ReproduceOptions) -> Result<Vec<Cell>> {
                 continue;
             };
             let (entries, checks) = &row_checks[r.id.as_str()];
-            let mut notes = Vec::new();
-            let mut worst = ResultClass::Pass;
-            let mut counted = 0usize;
-            let mut named_diverge = 0usize;
-            let named_total: usize = r.must_diverge.iter().map(|d| d.checks.len()).sum();
-            for (owner, check) in checks {
-                let v = runner::run_check(check, &mut testees)?
+            let mut verdicts = Vec::with_capacity(checks.len());
+            for c in checks {
+                let v = runner::run_check(&c.check, &mut testees)?
                     .into_iter()
                     .next()
                     .expect("one testee gives one verdict");
-                if v.result != ResultClass::Pass {
-                    notes.push(format!(
-                        "{owner} {}: {}{}",
-                        check.name,
-                        v.result,
-                        v.detail.map(|d| format!(", {d}")).unwrap_or_default()
-                    ));
-                }
-                let diverges = matches!(
-                    v.result,
-                    ResultClass::DivergesFromNetwork | ResultClass::DivergesFromPeers
-                );
-                let named = r
-                    .must_diverge
-                    .iter()
-                    .any(|d| d.owner() == *owner && d.checks.contains(&check.name));
-                if named && diverges {
-                    named_diverge += 1;
-                }
-                if v.result == ResultClass::Unsupported && r.unsupported_not_counted.is_some() {
-                    continue;
-                }
-                counted += 1;
-                worst = worst.max(v.result);
+                // probes carry no entry, so no protocol to be beyond
+                let v = match c.entry {
+                    Some(entry) => runner::beyond_protocol(entry, &target, v),
+                    None => v,
+                };
+                verdicts.push((c.owner.as_str(), c.check.name.as_str(), v));
             }
-            let observed = match worst {
-                _ if counted == 0 => Observed::Inconclusive,
-                ResultClass::Unsupported | ResultClass::Error => Observed::Inconclusive,
-                _ if named_diverge == named_total => Observed::Fail,
-                ResultClass::Pass | ResultClass::Reference => Observed::Pass,
-                ResultClass::DivergesFromNetwork | ResultClass::DivergesFromPeers => {
-                    Observed::Mixed
-                }
-            };
+            let (observed, notes) = observe(r, &verdicts);
             cells.push(Cell {
                 reproduction: r.id.clone(),
                 version: version.clone(),
@@ -368,8 +373,68 @@ pub fn run(opts: &ReproduceOptions) -> Result<Vec<Cell>> {
     Ok(cells)
 }
 
-/// A row's resolved entry ids and its checks, each with the entry or probe it came from.
-type RowChecks = (Vec<String>, Vec<(String, Check)>);
+/// Judges one row on one version from the verdict of each of its checks, given with the owner
+/// (entry id or `probe <name>`) and name of the check. Returns what the row did and a note for
+/// every check that did not pass.
+pub fn observe(r: &Reproduction, verdicts: &[(&str, &str, Verdict)]) -> (Observed, Vec<String>) {
+    let mut notes = Vec::new();
+    let mut worst = ResultClass::Pass;
+    let mut counted = 0usize;
+    let mut named_diverge = 0usize;
+    let mut named_unanswered = false;
+    let named_total: usize = r.must_diverge.iter().map(|d| d.checks.len()).sum();
+    for (owner, name, v) in verdicts {
+        if v.result != ResultClass::Pass {
+            notes.push(format!(
+                "{owner} {name}: {}{}",
+                v.outcome(),
+                v.detail
+                    .as_deref()
+                    .map(|d| format!(", {d}"))
+                    .unwrap_or_default()
+            ));
+        }
+        let named = r
+            .must_diverge
+            .iter()
+            .find(|d| d.owner() == *owner && d.checks.iter().any(|c| c == name));
+        if let Some(d) = named {
+            if v.result == ResultClass::DivergesFromNetwork && v.failure == d.failure {
+                named_diverge += 1;
+            }
+            // a check the sighting rests on that the version cannot answer shows neither the
+            // flaw nor its fix, whether or not the row lets other unsupported checks go
+            if v.result == ResultClass::Unsupported {
+                named_unanswered = true;
+            }
+        }
+        if v.result == ResultClass::Unsupported && r.unsupported_not_counted.is_some() {
+            continue;
+        }
+        counted += 1;
+        worst = worst.max(v.result);
+    }
+    let observed = match worst {
+        _ if counted == 0 || named_unanswered => Observed::Inconclusive,
+        ResultClass::Unsupported | ResultClass::Error => Observed::Inconclusive,
+        _ if named_diverge == named_total => Observed::Fail,
+        ResultClass::Pass | ResultClass::Reference => Observed::Pass,
+        ResultClass::DivergesFromNetwork | ResultClass::DivergesFromPeers => Observed::Mixed,
+    };
+    (observed, notes)
+}
+
+/// One check of a row, with the entry or probe it came from.
+struct RowCheck<'m> {
+    /// The entry id, or `probe <name>`.
+    owner: String,
+    /// The entry; `None` for a probe.
+    entry: Option<&'m Entry>,
+    check: Check,
+}
+
+/// A row's resolved entry ids and its checks.
+type RowChecks<'m> = (Vec<String>, Vec<RowCheck<'m>>);
 
 fn probe_check(p: &Probe) -> Result<Check> {
     let mut request: Map<String, Value> = serde_json::to_value(&p.request)
