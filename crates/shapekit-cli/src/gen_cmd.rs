@@ -313,11 +313,13 @@ pub fn verify_raw_order(corpus: &Path, other: &Path) -> Result<bool> {
                 missing.push(rel.display().to_string());
                 continue;
             }
-            // byte-identical streams are counted apart: a copied corpus gives them too, and
-            // they say nothing about two runs
-            let same = std::fs::read(&a)? == std::fs::read(&b)?;
+            // byte-identical streams are left out of the comparison: a copied corpus gives
+            // them too, and they say nothing about two runs
+            let same = std::fs::read(&a).with_context(|| format!("reading {}", a.display()))?
+                == std::fs::read(&b).with_context(|| format!("reading {}", b.display()))?;
             if same {
                 identical.push(format!("{name} {network}"));
+                continue;
             }
             let fa = read_all(&a).with_context(|| format!("reading {}", a.display()))?;
             let fb = read_all(&b).with_context(|| format!("reading {}", b.display()))?;
@@ -363,18 +365,20 @@ pub fn verify_raw_order(corpus: &Path, other: &Path) -> Result<bool> {
             total.add(chain);
         }
     }
+    // a chain the second recording lacks is a chain whose order was never checked
     for m in &missing {
         println!("not in {}: {m}", other.display());
+        ok = false;
     }
     if !identical.is_empty() {
         println!(
-            "{} of the {compared} recordings are byte-identical in both corpora: {}",
+            "{} recordings are byte-identical in both corpora, so they are not counted: {}",
             identical.len(),
             identical.join(", ")
         );
     }
     println!(
-        "{compared} chain recordings, {ledgers} ledgers, {} change lists: {} reordered between keys, {} keys with 2+ changes, {} per-key order differences, {} content differences",
+        "{compared} independent chain recordings, {ledgers} ledgers, {} change lists: {} reordered between keys, {} keys with 2+ changes, {} per-key order differences, {} content differences",
         total.lists,
         total.lists_reordered,
         total.multi_change_keys,
@@ -383,7 +387,7 @@ pub fn verify_raw_order(corpus: &Path, other: &Path) -> Result<bool> {
     );
     if compared == 0 {
         bail!(
-            "no chain is recorded in both {} and {}",
+            "no chain is recorded independently in both {} and {}; byte-identical recordings do not count",
             corpus.display(),
             other.display()
         );

@@ -58,3 +58,37 @@ fn laws_check_of_a_corpus_without_ledgers() {
         );
     }
 }
+
+#[test]
+fn verify_raw_order_does_not_count_a_copied_recording() {
+    let tmp = tempfile::tempdir().unwrap();
+    for corpus in ["a", "b"] {
+        let dir = tmp.path().join(corpus).join("chains/c/testnet");
+        std::fs::create_dir_all(&dir).unwrap();
+        std::fs::write(dir.join("ledgers.xdr"), b"same bytes").unwrap();
+    }
+    // a chain only the first corpus holds
+    let only = tmp.path().join("a/chains/d/testnet");
+    std::fs::create_dir_all(&only).unwrap();
+    std::fs::write(only.join("ledgers.xdr"), b"x").unwrap();
+    let out = shapekit(&[
+        "gen",
+        "verify-raw-order",
+        "--corpus",
+        tmp.path().join("a").to_str().unwrap(),
+        "--other",
+        tmp.path().join("b").to_str().unwrap(),
+    ]);
+    assert_eq!(out.status.code(), Some(2), "{}", stderr(&out));
+    assert!(
+        stderr(&out).contains("no chain is recorded independently"),
+        "{}",
+        stderr(&out)
+    );
+    let stdout = String::from_utf8_lossy(&out.stdout);
+    assert!(stdout.contains("not in "), "{stdout}");
+    assert!(
+        stdout.contains("1 recordings are byte-identical"),
+        "{stdout}"
+    );
+}

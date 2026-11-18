@@ -334,7 +334,9 @@ enum GenCommand {
     /// Compare core's raw ledgers.xdr of every chain in two independent recordings: each
     /// ledger key's changes must come in the same order in both, and the recordings may
     /// differ only in the order between keys. This is the evidence the key-stable canonical
-    /// form rests on. Record the second set with `gen chains --corpus <copy>`.
+    /// form rests on. Record the second set with `gen chains --corpus <copy>`. A chain the
+    /// second set lacks fails; a recording byte-identical in both is not counted, since a
+    /// copy gives it too.
     VerifyRawOrder {
         /// The corpus holding the second recording.
         #[arg(long)]
