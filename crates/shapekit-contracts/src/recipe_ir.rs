@@ -576,6 +576,9 @@ struct Checker<'a> {
     with_memo: BTreeSet<String>,
     /// Labels of `host-function` steps whose function creates a contract.
     creators: BTreeSet<String>,
+    /// Labels some close's `order` names: those transactions are held back, unsubmitted,
+    /// until that close.
+    ordered: BTreeSet<String>,
 }
 
 impl Checker<'_> {
@@ -768,6 +771,15 @@ impl Contract for RecipeIr {
             last_close: None,
             with_memo: BTreeSet::new(),
             creators: BTreeSet::new(),
+            ordered: self
+                .steps
+                .iter()
+                .filter_map(|s| match s {
+                    Step::Close { order, .. } => Some(order.iter().cloned()),
+                    _ => None,
+                })
+                .flatten()
+                .collect(),
         };
         let mut slugs = BTreeSet::new();
         for (i, step) in self.steps.iter().enumerate() {
@@ -898,6 +910,26 @@ impl Contract for RecipeIr {
                         c.out.push(format!("{at}: the upgrade arms nothing"));
                     }
                     c.values(&at, config);
+                    // an upgrade closes a ledger too: a transaction held for a later ordered
+                    // close would see this close pass without it while its sequence number
+                    // stays taken
+                    let held: Vec<&String> = c
+                        .labels
+                        .iter()
+                        .filter(|(l, (j, kind))| {
+                            c.ordered.contains(*l)
+                                && *kind == LabelKind::Submitted { rejected: false }
+                                && c.last_close.is_none_or(|lc| lc < *j)
+                        })
+                        .map(|(l, _)| l)
+                        .collect();
+                    if !held.is_empty() {
+                        c.out.push(format!(
+                            "{at}: an upgrade closes a ledger while {} {} held for a later close's order; close that first",
+                            held.iter().map(|l| l.as_str()).collect::<Vec<_>>().join(", "),
+                            if held.len() == 1 { "is" } else { "are" }
+                        ));
+                    }
                     c.define(&at, i, label.as_ref(), LabelKind::Closed);
                     c.last_close = Some(i);
                 }

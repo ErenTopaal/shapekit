@@ -772,6 +772,18 @@ impl<'a> Session<'a> {
                     params.push(("flags", v.to_string()));
                     want.push(LedgerUpgrade::Flags(*v));
                 }
+                // validation refuses this; a session driven step by step must refuse it too,
+                // since the held transactions keep their sequence numbers through the close
+                ensure!(
+                    self.held.is_empty(),
+                    "an upgrade closes a ledger while {} {} held for a later close's order",
+                    self.held
+                        .iter()
+                        .map(|h| h.label.as_str())
+                        .collect::<Vec<_>>()
+                        .join(", "),
+                    if self.held.len() == 1 { "is" } else { "are" }
+                );
                 if !config.is_empty() {
                     let key = self.store_config(ctx, config)?;
                     params.push(("configupgradesetkey", key.key_base64()?));

@@ -86,7 +86,40 @@ pub struct ChainCtx {
     protocol: u32,
     root: SigningKey,
     captured: Vec<Captured>,
-    slugs: BTreeSet<String>,
+    slugs: Slugs,
+}
+
+/// The capture slugs a chain has used, and the entry ids they gave. A transaction capture
+/// gives two ids (`-envelope`, `-meta`), so a slug can be new and still give an id another
+/// capture already gave; both have to be unique.
+#[derive(Debug, Default)]
+struct Slugs {
+    bases: BTreeSet<String>,
+    ids: BTreeSet<String>,
+}
+
+impl Slugs {
+    /// Claims `slug` at `protocol` for one entry per suffix in `suffixes`, and returns
+    /// `p<protocol>-<slug>`, the part of the entry id before the suffix.
+    fn claim(&mut self, protocol: u32, slug: &str, suffixes: &[&str]) -> Result<String> {
+        crate::entry_io::check_slug(slug)?;
+        // protocol in the id keeps the chains of one family apart
+        let full = format!("p{protocol}-{slug}");
+        ensure!(
+            !self.bases.contains(&full),
+            "capture slug {slug} is used twice"
+        );
+        let ids: Vec<String> = suffixes.iter().map(|s| format!("{full}{s}")).collect();
+        for (i, id) in ids.iter().enumerate() {
+            ensure!(
+                !self.ids.contains(id) && !ids[..i].contains(id),
+                "capture slug {slug} gives the entry {id}, which another capture gives too"
+            );
+        }
+        self.bases.insert(full.clone());
+        self.ids.extend(ids);
+        Ok(full)
+    }
 }
 
 impl ChainCtx {
@@ -98,7 +131,7 @@ impl ChainCtx {
             protocol,
             root: shapekit_core_driver::keys::root_key(network.passphrase()),
             captured: Vec::new(),
-            slugs: BTreeSet::new(),
+            slugs: Slugs::default(),
         }
     }
 
@@ -207,17 +240,6 @@ impl ChainCtx {
         Ok(applied)
     }
 
-    fn claim_slug(&mut self, slug: &str) -> Result<String> {
-        crate::entry_io::check_slug(slug)?;
-        // protocol in the id keeps the chains of one family apart
-        let full = format!("p{}-{slug}", self.protocol);
-        ensure!(
-            self.slugs.insert(full.clone()),
-            "capture slug {slug} is used twice"
-        );
-        Ok(full)
-    }
-
     /// Records the bytes `selector` picks from the canonical meta of an
     /// already closed ledger as entry `<family>.p<protocol>-<slug>` (plus
     /// `-envelope` and `-meta` for a transaction).
@@ -226,7 +248,7 @@ impl ChainCtx {
             !spec.must_reject,
             "capture {slug}: what a closed ledger holds always decodes"
         );
-        let full = self.claim_slug(slug)?;
+        crate::entry_io::check_slug(slug)?;
         let ledger = selector.ledger();
         let frames = self.driver.recorder().frames();
         let frame = ledger
@@ -246,6 +268,8 @@ impl ChainCtx {
             &self.network_id(),
         )
         .with_context(|| format!("capture {slug}"))?;
+        let suffixes: Vec<&str> = parts.iter().map(|p| p.suffix).collect();
+        let full = self.slugs.claim(self.protocol, slug, &suffixes)?;
         for selected in parts {
             self.captured.push(Captured {
                 slug: format!("{full}{}", selected.suffix),
@@ -298,7 +322,7 @@ impl ChainCtx {
         ledger_seq: u32,
         spec: Spec,
     ) -> Result<()> {
-        let full = self.claim_slug(slug)?;
+        let full = self.slugs.claim(self.protocol, slug, &[""])?;
         let bytes = env.to_xdr(Limits::none())?;
         let decodes = xdr::decode(
             "TransactionEnvelope",
@@ -347,5 +371,26 @@ impl ChainCtx {
             .finish(target)
             .with_context(|| format!("writing the chain to {}", target.display()))?;
         Ok((summary, self.captured))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::Slugs;
+
+    #[test]
+    fn a_slug_cannot_give_an_entry_id_another_capture_gives() {
+        let mut s = Slugs::default();
+        assert_eq!(
+            s.claim(30, "pay", &["-envelope", "-meta"]).unwrap(),
+            "p30-pay"
+        );
+        let e = s.claim(30, "pay-meta", &[""]).unwrap_err().to_string();
+        assert!(e.contains("gives the entry p30-pay-meta"), "{e}");
+        let e = s.claim(30, "pay", &[""]).unwrap_err().to_string();
+        assert!(e.contains("used twice"), "{e}");
+        // a refused claim takes nothing
+        assert_eq!(s.claim(30, "pay-meta-2", &[""]).unwrap(), "p30-pay-meta-2");
+        assert!(s.claim(31, "pay", &["-envelope", "-meta"]).is_ok());
     }
 }

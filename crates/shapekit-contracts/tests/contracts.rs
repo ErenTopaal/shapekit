@@ -1054,6 +1054,32 @@ fn a_close_can_fix_the_order_of_what_it_applies() {
     };
     *order = vec!["second".into()];
     has_problem(&bad, "cannot carry a memo");
+
+    // an upgrade between a held transaction and the close that orders it closes a ledger
+    // without it
+    let mut bad = recipe();
+    bad.steps.insert(11, second(None));
+    bad.steps.insert(
+        12,
+        Step::Upgrade {
+            label: None,
+            protocol_version: None,
+            base_fee: Some(300),
+            base_reserve: None,
+            max_tx_set_size: None,
+            max_soroban_tx_set_size: None,
+            flags: None,
+            config: vec![],
+        },
+    );
+    let Step::Close { order, .. } = &mut bad.steps[13] else {
+        panic!("step 13 is the last close");
+    };
+    *order = vec!["second".into()];
+    has_problem(
+        &bad,
+        "step 12: an upgrade closes a ledger while second is held for a later close's order",
+    );
 }
 
 #[test]
