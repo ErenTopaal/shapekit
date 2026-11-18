@@ -624,7 +624,12 @@ pool, balance or contract ids or converts contract values. A type the binary doe
 `unsupported`, a non-zero exit with the command's error line is a rejection, and a Rust panic
 or a death by signal is a `panic`. `decode_limits` is `"ignored"`: the xdr commands take no
 limits. `hello` reports the version and the stellar-xdr crate that `stellar version` prints.
-A coverage build runs a `stellar` binary built with `-C instrument-coverage` from the crate
+Every run of the binary gets a config directory of the testee's own, removed when the testee
+exits, and 25 seconds: a run still going then is killed and answered as `internal`, before the
+runner's 30-second request timeout would kill the testee and leave the binary running. A
+`signed_payload` raw payload with padding that is not zero, or bytes after it, is
+`unsupported`: the command takes the key and the payload, and dropping those bytes would repair
+the input. A coverage build runs a `stellar` binary built with `-C instrument-coverage` from the crate
 source of the version instead of the release binary, and answers `coverage_snapshot`.
 
 ## The version matrix
