@@ -33,9 +33,10 @@ pub struct DoctorArgs {
     /// With indexer: the adapter command line you will pass to `check indexer`.
     #[arg(long)]
     adapter: Option<String>,
-    /// With lint: the indexerlint binary, a path or a name looked up on PATH.
-    #[arg(long, default_value = "indexerlint")]
-    linter: String,
+    /// With lint: the indexerlint binary, a path or a name looked up on PATH [default:
+    /// indexerlint].
+    #[arg(long)]
+    linter: Option<String>,
     /// Skip the checks that contact package registries and GitHub.
     #[arg(long)]
     offline: bool,
@@ -89,7 +90,7 @@ fn first_line(program: &str, args: &[&str]) -> Option<String> {
 /// Whether `program` can be started: an executable file at a path, or a name found on PATH
 /// as one. A file without an execute bit cannot be started, and the shell skips it on PATH.
 fn on_path(program: &str) -> bool {
-    if program.contains('/') {
+    if crate::lint_cmd::names_a_path(Path::new(program)) {
         return is_executable(Path::new(program));
     }
     std::env::var_os("PATH").is_some_and(|paths| {
@@ -377,6 +378,9 @@ fn indexer(r: &mut Report, a: &DoctorArgs) {
     }
 }
 
+/// The linter `shapekit lint` starts when no --linter is given.
+const DEFAULT_LINTER: &str = "indexerlint";
+
 fn lint(r: &mut Report, a: &DoctorArgs, pins: Option<&pins::Pins>) {
     tool(
         r,
@@ -384,11 +388,12 @@ fn lint(r: &mut Report, a: &DoctorArgs, pins: Option<&pins::Pins>) {
         pins,
         "lint: indexerlint loads packages with the go toolchain",
     );
-    if on_path(&a.linter) {
-        r.ok(&format!("indexerlint: {} found (lint)", a.linter));
+    let linter = a.linter.as_deref().unwrap_or(DEFAULT_LINTER);
+    if on_path(linter) {
+        r.ok(&format!("indexerlint: {linter} found (lint)"));
     } else {
         r.fail(
-            &format!("indexerlint: {} not found (lint)", a.linter),
+            &format!("indexerlint: {linter} not found (lint)"),
             &install_hint("indexerlint", None),
         );
     }
@@ -408,6 +413,11 @@ pub fn run(a: DoctorArgs) -> Result<bool> {
     if a.adapter.is_some() && !what.contains(&For::Indexer) {
         bail!(
             "--adapter applies to the indexer check, which you did not select; add `indexer` or drop --adapter"
+        );
+    }
+    if a.linter.is_some() && !what.contains(&For::Lint) {
+        bail!(
+            "--linter applies to the lint check, which you did not select; add `lint` or drop --linter"
         );
     }
     let mut r = Report::default();

@@ -1,7 +1,7 @@
 //! `shapekit lint`: runs indexerlint, the go linter in lint/, over a go module. indexerlint is a
 //! separate go binary because it loads packages with the go toolchain; this command starts it.
 
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::process::Command;
 
 use anyhow::{Context, Result, bail};
@@ -26,15 +26,27 @@ pub struct LintArgs {
     linter: PathBuf,
 }
 
+/// Whether a program given as `--linter` or `--adapter` names a path rather than a name
+/// looked up on PATH: it does when it contains a path separator, the rule the operating
+/// system applies when it starts a program. `lint` and `doctor` both decide with this, so
+/// doctor checks the program lint will start.
+pub fn names_a_path(program: &Path) -> bool {
+    program
+        .as_os_str()
+        .to_string_lossy()
+        .chars()
+        .any(std::path::is_separator)
+}
+
 pub fn run(a: LintArgs) -> Result<bool> {
     // a missing module would otherwise surface as the linter failing to start
     if !a.dir.is_dir() {
         bail!("module directory {} does not exist", a.dir.display());
     }
-    // indexerlint runs inside the module, so a path (anything with a /) is made absolute
-    // against the directory you ran from, as `shapekit doctor lint` checks it; a bare name
-    // is still looked up on PATH
-    let linter = if a.linter.components().count() > 1 {
+    // indexerlint runs inside the module, so a path is made absolute against the directory
+    // you ran from, as `shapekit doctor lint` checks it; a bare name is still looked up on
+    // PATH
+    let linter = if names_a_path(&a.linter) {
         std::path::absolute(&a.linter)
             .with_context(|| format!("resolving {}", a.linter.display()))?
     } else {
@@ -69,5 +81,19 @@ pub fn run(a: LintArgs) -> Result<bool> {
         Some(1) => Ok(false),
         Some(c) => bail!("{} exited with status {c}", linter.display()),
         None => bail!("{} was ended by a signal", linter.display()),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::names_a_path;
+    use std::path::Path;
+
+    #[test]
+    fn a_separator_anywhere_makes_a_path() {
+        for path in ["./indexerlint", "bin/indexerlint", "/usr/bin/x", "lint/"] {
+            assert!(names_a_path(Path::new(path)), "{path}");
+        }
+        assert!(!names_a_path(Path::new("indexerlint")));
     }
 }

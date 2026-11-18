@@ -101,6 +101,7 @@ fn an_option_for_a_check_not_selected_is_refused() {
     for args in [
         &["lint", "--sdk", "go"][..],
         &["sdk", "--offline", "--adapter", "x"][..],
+        &["sdk", "indexer", "--offline", "--linter", "x"][..],
     ] {
         let out = Command::new(env!("CARGO_BIN_EXE_shapekit"))
             .arg("doctor")
