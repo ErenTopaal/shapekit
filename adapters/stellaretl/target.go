@@ -151,7 +151,7 @@ func startTarget(ctx context.Context, image, cpus string, p wire.StartParams) (*
 }
 
 func (t *target) startGCS(ctx context.Context) error {
-	args := append([]string{"run", "-d", "--name", t.gcs, "--network-alias", gcsAlias, "--memory", "1g"}, t.runFlags()...)
+	args := append([]string{"run", "-d", "--name", t.gcs, "--network-alias", gcsAlias, "--memory", "1g", "--memory-swap", "1g"}, t.runFlags()...)
 	args = append(args, GCSImage, "-scheme", "http", "-port", gcsPort, "-public-host", gcsAlias+":"+gcsPort, "-backend", "memory")
 	if _, err := docker(ctx, args...); err != nil {
 		return wire.Errorf(wire.ClassTarget, "starting the GCS emulator: %v", err)

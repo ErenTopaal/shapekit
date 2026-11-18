@@ -228,7 +228,10 @@ func (t *target) startDB(ctx context.Context, memory uint64) error {
 }
 
 func (t *target) migrate(ctx context.Context, env []string) error {
-	args := []string{"run", "--rm", "--name", t.prefix + "-migrate", "--network", t.params.DockerNetwork}
+	// the migrations run under the same limit as the ingest process
+	limit := strconv.FormatUint(t.params.Limits.MemoryBytes, 10)
+	args := []string{"run", "--rm", "--name", t.prefix + "-migrate", "--network", t.params.DockerNetwork,
+		"--memory", limit, "--memory-swap", limit}
 	args = append(args, t.runFlags()...)
 	for _, e := range env {
 		args = append(args, "-e", e)

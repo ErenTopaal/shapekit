@@ -21,12 +21,17 @@ import (
 // (internal/integrationtests/infrastructure/containers.go): one `weed server
 // -s3` without auth, the bucket created through `weed shell` once the filer is
 // up.
+// s3Memory is the memory and swap limit of the seaweedfs container.
+const s3Memory = "1g"
+
 func (t *target) startS3(ctx context.Context) error {
 	p := t.params
 	script := fmt.Sprintf("weed server -dir=/data -s3 & "+
 		"until echo s3.bucket.list | weed shell -master localhost:9333 2>/dev/null | grep -q %[1]s; do "+
 		"echo s3.bucket.create -name %[1]s | weed shell -master localhost:9333 2>/dev/null; sleep 1; done; wait", s3Bucket)
-	args := []string{"run", "-d", "--name", t.s3, "--network", p.DockerNetwork, "--network-alias", t.s3}
+	// seaweedfs holds a chain's lake, a few megabytes; the cap keeps it from growing unbounded
+	args := []string{"run", "-d", "--name", t.s3, "--network", p.DockerNetwork, "--network-alias", t.s3,
+		"--memory", s3Memory, "--memory-swap", s3Memory}
 	args = append(args, t.runFlags()...)
 	args = append(args, "--entrypoint", "sh", SeaweedImage, "-c", script)
 	if _, err := docker(ctx, args...); err != nil {

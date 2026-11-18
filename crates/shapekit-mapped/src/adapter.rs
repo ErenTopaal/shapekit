@@ -405,6 +405,8 @@ impl Adapter {
         let steps = self.mapping().steps.clone();
         for (i, step) in steps.iter().enumerate() {
             let name = format!("{prefix}-step{}", i + 1);
+            // a step runs under the harness's memory limit, as the ingest container does
+            let limit = p.limits.memory_bytes.to_string();
             let mut args: Vec<String> = vec![
                 "run".into(),
                 "--rm".into(),
@@ -412,6 +414,10 @@ impl Adapter {
                 name.clone(),
                 "--network".into(),
                 network.into(),
+                "--memory".into(),
+                limit.clone(),
+                "--memory-swap".into(),
+                limit,
             ];
             args.extend(self.run_flags(network));
             args.extend(mounts.iter().cloned());

@@ -194,8 +194,8 @@ command = ["ingest"]
 restart = "on-failure"           # docker's --restart
 ```
 
-Steps and the ingest container get the same environment. The ingest container's `--memory` and
-`--memory-swap` are the harness's memory limit.
+Steps and the ingest container get the same environment. The `--memory` and `--memory-swap` of
+the ingest container and of every step are the harness's memory limit.
 
 ### `[status]`
 
