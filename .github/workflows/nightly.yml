@@ -208,9 +208,9 @@ jobs:
             "$RUNNER_TEMP/bin/shapekit" conformance run --sdk "$sdk" --all-versions \
               --out "target/conformance/$sdk" || status=1
           done
-          # implementation-defined entries diverge only next to the other sdks' answers; the
-          # peers are the three sdks the findings read
-          "$RUNNER_TEMP/bin/shapekit" conformance run --sdk rust --sdk go --sdk js --all-versions \
+          # implementation-defined entries diverge only next to the other sdks' answers; every
+          # sdk is a peer, as in the committed findings/inputs/conformance-peers.json
+          "$RUNNER_TEMP/bin/shapekit" conformance run --all-versions \
             --no-build --flag references-disagree --out target/conformance/peers || status=1
           exit "$status"
       - name: conformance reproduce
