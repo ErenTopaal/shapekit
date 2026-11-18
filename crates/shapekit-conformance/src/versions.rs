@@ -41,7 +41,29 @@ pub struct Sdk {
     #[serde(default = "default_timeout_ms")]
     pub timeout_ms: u64,
     pub memory: MemoryLimit,
+    /// What the package is, for the words drafted issues use: an SDK unless set.
+    #[serde(default)]
+    pub kind: PackageKind,
     pub versions: Vec<SdkVersion>,
+}
+
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum PackageKind {
+    #[default]
+    Sdk,
+    /// A command line tool, run as a subprocess by its testee.
+    Cli,
+}
+
+impl PackageKind {
+    /// How a drafted issue names the package.
+    pub fn noun(self) -> &'static str {
+        match self {
+            PackageKind::Sdk => "SDK",
+            PackageKind::Cli => "CLI",
+        }
+    }
 }
 
 fn default_timeout_ms() -> u64 {

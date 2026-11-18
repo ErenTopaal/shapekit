@@ -75,7 +75,77 @@ pub struct DraftOptions {
     pub matrix: PathBuf,
     pub manifest: PathBuf,
     pub versions: PathBuf,
+    /// The known-failures directory: every sdk's list there names the entries it diverges on,
+    /// so a draft can name the sibling sdks a single-sdk matrix does not show.
+    pub known_failures: PathBuf,
     pub out: PathBuf,
+    /// The triaged cause of a draft, by its file name: the finding's id, title and cause.
+    pub causes: BTreeMap<String, Cause>,
+}
+
+/// What the findings triage says about a draft.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Cause {
+    pub finding: String,
+    pub title: String,
+    pub cause: String,
+}
+
+/// What a draft says beyond the matrix: the other sdks that diverge on each entry, from their
+/// known-failures lists, and the triaged causes by draft file name.
+#[derive(Debug, Clone, Default)]
+pub struct DraftContext {
+    pub diverging: BTreeMap<String, BTreeSet<String>>,
+    pub causes: BTreeMap<String, Cause>,
+}
+
+impl DraftContext {
+    /// The sdks whose known-failures list under `dir` names a divergence on each entry.
+    pub fn from_known_failures(dir: &Path, versions: &VersionsFile) -> Result<DraftContext> {
+        let mut diverging: BTreeMap<String, BTreeSet<String>> = BTreeMap::new();
+        for sdk in versions.sdk.keys() {
+            for line in crate::known::load(dir, sdk)? {
+                if matches!(
+                    line.result,
+                    ResultClass::DivergesFromNetwork | ResultClass::DivergesFromPeers
+                ) {
+                    diverging.entry(line.entry).or_default().insert(sdk.clone());
+                }
+            }
+        }
+        Ok(DraftContext {
+            diverging,
+            causes: BTreeMap::new(),
+        })
+    }
+}
+
+// a check detail starts `the sdk ...`; a title starts with a capital and names what was
+// tested, and keeps only what precedes the detail's quoted message (stderr can carry emoji
+// and paths)
+fn subject(detail: &str, noun: &str, whole: bool) -> String {
+    let text = if whole {
+        detail
+    } else {
+        detail.split_once(": ").map_or(detail, |(head, _)| head)
+    };
+    let text = text.trim_end_matches('.');
+    if let Some(rest) = text.strip_prefix("the sdk") {
+        return format!("The {noun}{rest}");
+    }
+    let mut chars = text.chars();
+    match chars.next() {
+        Some(c) => c.to_uppercase().chain(chars).collect(),
+        None => String::new(),
+    }
+}
+
+fn sentence(text: &str) -> String {
+    let mut chars = text.chars();
+    match chars.next() {
+        Some(c) => c.to_uppercase().chain(chars).collect(),
+        None => String::new(),
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -98,6 +168,7 @@ pub fn drafts(
     manifest: &shapekit_manifest::Manifest,
     corpus: &Path,
     versions: &VersionsFile,
+    context: &DraftContext,
 ) -> Result<Vec<Draft>> {
     let mut out = Vec::new();
     for row in &matrix.entries {
@@ -133,7 +204,11 @@ pub fn drafts(
             .find(|e| e.id == row.id)
             .with_context(|| format!("matrix entry {} is not in the manifest", row.id))?;
         let checks = plan::checks(entry, corpus)?;
-        let affected: BTreeSet<&String> = by_sdk.keys().collect();
+        // the sdks diverging here in this matrix or in their own known-failures lists
+        let mut affected: BTreeSet<&String> = by_sdk.keys().collect();
+        if let Some(listed) = context.diverging.get(&row.id) {
+            affected.extend(listed.iter());
+        }
         for (sdk, failing) in &by_sdk {
             let sdk_conf = versions.sdk(sdk)?;
             let ops: BTreeSet<&str> = failing.iter().map(|(_, c)| c.op.as_str()).collect();
@@ -156,48 +231,20 @@ pub fn drafts(
             let mut vers: Vec<&str> = failing.iter().map(|(v, _)| v.as_str()).collect();
             vers.sort_unstable_by(|a, b| version_order(a, b));
             vers.dedup();
+            let noun = sdk_conf.kind.noun();
             let first = failing[0].1;
+            let file = file_name(sdk, &row.id);
+            let cause = context.causes.get(&file);
             let title = format!(
                 "{} {}: {} ({})",
                 sdk_conf.package,
                 vers.join(", "),
-                first
-                    .detail
-                    .as_deref()
-                    .unwrap_or(first.result.as_str())
-                    .trim_end_matches('.'),
+                subject(
+                    first.detail.as_deref().unwrap_or(first.result.as_str()),
+                    noun,
+                    false
+                ),
                 row.id
-            );
-            let tag = release_tag(&matrix.corpus_version);
-            let mut body = String::new();
-            let _ = writeln!(body, "## What happens\n");
-            let against = if first.result == ResultClass::DivergesFromPeers {
-                "the other Stellar SDKs (the protocol leaves this case to the implementation, so the SDKs are compared with each other)"
-            } else {
-                "the Stellar network"
-            };
-            let _ = writeln!(
-                body,
-                "On the input below, `{}` {} answers differently from {} in {} {}.\n",
-                sdk_conf.package,
-                vers.join(", "),
-                against,
-                failing.len(),
-                if failing.len() == 1 {
-                    "check"
-                } else {
-                    "checks"
-                }
-            );
-            let _ = writeln!(
-                body,
-                "A check is one call into the SDK with a known right answer. Each check below shows the call as a JSON request of the [shapekit testee protocol]({SHAPEKIT_URL}/blob/{tag}/docs/testee-protocol.md) (`op` names the SDK operation), the expected answer and the answer the SDK gave.\n"
-            );
-            let _ = writeln!(body, "## Input\n");
-            let _ = writeln!(
-                body,
-                "Corpus entry `{}` (family `{}`) of the [shapekit]({SHAPEKIT_URL}) corpus {}.\n",
-                row.id, entry.family, matrix.corpus_version
             );
             // the same check failing on several versions is shown once, with its versions
             let mut by_check: Vec<(&CheckRecord, Vec<&str>)> = Vec::new();
@@ -210,6 +257,53 @@ pub fn drafts(
                     None => by_check.push((ch, vec![version.as_str()])),
                 }
             }
+            let distinct: BTreeSet<&str> = failing.iter().map(|(_, c)| c.check.as_str()).collect();
+            let tag = release_tag(&matrix.corpus_version);
+            let mut body = String::new();
+            let _ = writeln!(body, "## What happens\n");
+            let against = if first.result == ResultClass::DivergesFromPeers {
+                "the other Stellar SDKs (the protocol leaves this case to the implementation, so the SDKs are compared with each other)"
+            } else {
+                "the Stellar network"
+            };
+            let _ = writeln!(
+                body,
+                "On the input below, `{}` {} answers differently from {} in {} {} on {} {}.\n",
+                sdk_conf.package,
+                vers.join(", "),
+                against,
+                distinct.len(),
+                if distinct.len() == 1 {
+                    "check"
+                } else {
+                    "checks"
+                },
+                vers.len(),
+                if vers.len() == 1 {
+                    "version"
+                } else {
+                    "versions"
+                }
+            );
+            if let Some(c) = cause {
+                let _ = writeln!(
+                    body,
+                    "The cause, as triaged in shapekit's findings ({}, {}): {}\n",
+                    c.finding,
+                    c.title,
+                    sentence(c.cause.trim())
+                );
+            }
+            let _ = writeln!(
+                body,
+                "A check is one call into the SDK with a known right answer. Each check below shows the call as a JSON request of the [shapekit testee protocol]({SHAPEKIT_URL}/blob/{tag}/docs/testee-protocol.md) (`op` names the SDK operation), the expected answer and the answer the SDK gave.\n"
+            );
+            let _ = writeln!(body, "## Input\n");
+            let _ = writeln!(
+                body,
+                "Corpus entry `{}` (family `{}`) of the [shapekit]({SHAPEKIT_URL}) corpus {}.\n",
+                row.id, entry.family, matrix.corpus_version
+            );
             for (ch, on) in by_check.iter().take(SHOWN_CHECKS) {
                 let request = checks
                     .iter()
@@ -221,7 +315,11 @@ pub fn drafts(
                     "### `{}` on {}\n\n{}\n\n```json\n{}\n```\n\nExpected: `{}`\n\nActual: `{}`\n",
                     ch.check,
                     on.join(", "),
-                    ch.detail.as_deref().unwrap_or(ch.result.as_str()),
+                    subject(
+                        ch.detail.as_deref().unwrap_or(ch.result.as_str()),
+                        noun,
+                        true
+                    ),
                     block(&request)?,
                     inline(&ch.expected),
                     inline(&ch.actual)
@@ -237,8 +335,10 @@ pub fn drafts(
             let _ = writeln!(body, "## Reproduce\n");
             let _ = writeln!(
                 body,
-                "From a checkout of {SHAPEKIT_URL} at tag `{tag}`:\n\n```sh\nshapekit conformance run --sdk {sdk} --version {} --entry {}\n```\n",
-                vers[0], row.id
+                "From a checkout of {SHAPEKIT_URL} at tag `{tag}`, with the Rust toolchain of its `rust-toolchain.toml` and the toolchain `{}` builds with (`shapekit doctor sdk --sdk {sdk}` lists what is missing):\n\n```sh\ncargo build --release --locked -p shapekit-cli\ntarget/release/shapekit conformance run --sdk {sdk} --version {} --entry {}\n```\n\nThe run builds the {noun}'s testee at that version as `conformance/versions.toml` describes, then runs the entry's checks.\n",
+                sdk_conf.package,
+                vers.last().expect("a draft has a version"),
+                row.id
             );
             let _ = writeln!(body, "## Where the expected answers come from\n");
             let _ = writeln!(body, "The expected answers are recorded in:\n");
@@ -249,7 +349,8 @@ pub fn drafts(
             if let Some(notes) = &entry.notes {
                 let _ = writeln!(
                     body,
-                    "\nHow the corpus entry was built and checked: {notes}"
+                    "\nHow the corpus entry was built and checked: {}",
+                    sentence(notes)
                 );
             }
             if !entry.linked_issues.is_empty() {
@@ -267,7 +368,7 @@ pub fn drafts(
             if siblings.is_empty() {
                 let _ = writeln!(
                     body,
-                    "None: of the SDKs tested, only this one diverges on this entry."
+                    "None: no other package of shapekit's conformance matrix diverges on this entry, in this run or in its list of known failures."
                 );
             } else {
                 for s in siblings {
@@ -276,7 +377,7 @@ pub fn drafts(
             }
             let _ = writeln!(body, "\n{MARKER}: `{}`", row.id);
             out.push(Draft {
-                file: file_name(sdk, &row.id),
+                file,
                 sdk: sdk.clone(),
                 entry: row.id.clone(),
                 repo,
@@ -460,7 +561,9 @@ pub fn draft(opts: &DraftOptions) -> Result<DraftReport> {
     let matrix = runner::load_matrix(&opts.matrix)?;
     let (manifest, corpus) = runner::load_manifest(&opts.manifest)?;
     let versions = VersionsFile::load(&opts.versions)?;
-    let drafts = drafts(&matrix, &manifest, &corpus, &versions)?;
+    let mut context = DraftContext::from_known_failures(&opts.known_failures, &versions)?;
+    context.causes = opts.causes.clone();
+    let drafts = drafts(&matrix, &manifest, &corpus, &versions, &context)?;
     std::fs::create_dir_all(&opts.out)
         .with_context(|| format!("creating {}", opts.out.display()))?;
     let mut covered: BTreeMap<(String, String), BTreeSet<String>> = BTreeMap::new();

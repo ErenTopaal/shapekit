@@ -729,8 +729,14 @@ fn draft_issues_for_a_divergence() {
     let out = runner::run(&options(&c, 1)).unwrap();
     let (manifest, corpus_dir) = runner::load_manifest(&c.manifest()).unwrap();
     let file = VersionsFile::load(&versions_file()).unwrap();
-    let drafts =
-        shapekit_conformance::issues::drafts(&out.matrix, &manifest, &corpus_dir, &file).unwrap();
+    let drafts = shapekit_conformance::issues::drafts(
+        &out.matrix,
+        &manifest,
+        &corpus_dir,
+        &file,
+        &Default::default(),
+    )
+    .unwrap();
     assert_eq!(drafts.len(), 1);
     let d = &drafts[0];
     assert_eq!(d.file, "rust-t.order-wrong.md");
@@ -775,10 +781,87 @@ fn a_divergence_beside_an_errored_check_is_still_drafted() {
     errored.result = ResultClass::Error;
     cell.checks.push(errored);
     cell.result = ResultClass::Error;
-    let drafts =
-        shapekit_conformance::issues::drafts(&out.matrix, &manifest, &corpus_dir, &file).unwrap();
+    let drafts = shapekit_conformance::issues::drafts(
+        &out.matrix,
+        &manifest,
+        &corpus_dir,
+        &file,
+        &Default::default(),
+    )
+    .unwrap();
     assert_eq!(drafts.len(), 1);
     assert_eq!(drafts[0].file, "rust-t.order-wrong.md");
+}
+
+#[test]
+fn drafts_name_siblings_from_known_failures_and_carry_the_triaged_cause() {
+    use shapekit_conformance::issues::{Cause, DraftContext};
+    rust_testees();
+    let c = corpus();
+    let out = runner::run(&options(&c, 1)).unwrap();
+    let (manifest, corpus_dir) = runner::load_manifest(&c.manifest()).unwrap();
+    let file = VersionsFile::load(&versions_file()).unwrap();
+    let context = DraftContext {
+        diverging: BTreeMap::from([(
+            "t.order-wrong".to_string(),
+            BTreeSet::from(["go".to_string(), "rust".to_string()]),
+        )]),
+        causes: BTreeMap::from([(
+            "rust-t.order-wrong.md".to_string(),
+            Cause {
+                finding: "RS-9".into(),
+                title: "assets order by text".into(),
+                cause: "the comparison reads the issuer as text.".into(),
+            },
+        )]),
+    };
+    let drafts =
+        shapekit_conformance::issues::drafts(&out.matrix, &manifest, &corpus_dir, &file, &context)
+            .unwrap();
+    let d = &drafts[0];
+    let go = file.sdk("go").unwrap();
+    assert!(
+        d.body.contains(&format!(
+            "- `{}` ({}) diverges on the same entry.",
+            go.package, go.issues_repo
+        )),
+        "{}",
+        d.body
+    );
+    assert!(!d.body.contains("None: "), "{}", d.body);
+    assert!(
+        d.body
+            .contains("(RS-9, assets order by text): The comparison reads the issuer as text."),
+        "{}",
+        d.body
+    );
+    // distinct checks and versions, not (version, check) records
+    let row = out
+        .matrix
+        .entries
+        .iter()
+        .find(|r| r.id == "t.order-wrong")
+        .unwrap();
+    let checks: BTreeSet<&str> = row
+        .cells
+        .values()
+        .flat_map(|c| &c.checks)
+        .filter(|c| c.result == ResultClass::DivergesFromNetwork)
+        .map(|c| c.check.as_str())
+        .collect();
+    assert!(
+        d.body
+            .contains(&format!("in {} checks on 1 version.", checks.len())),
+        "{}",
+        d.body
+    );
+    assert!(
+        d.body
+            .contains("cargo build --release --locked -p shapekit-cli")
+    );
+    // the title's detail starts with a capital and names what was tested
+    let detail = d.title.split(": ").nth(1).unwrap();
+    assert!(detail.starts_with("The SDK "), "{}", d.title);
 }
 
 #[test]
@@ -1077,7 +1160,9 @@ fn draft_issues_only_prunes_cells_the_matrix_covers() {
         matrix: out.join("divergence-matrix.json"),
         manifest: c.manifest(),
         versions: versions_file(),
+        known_failures: c.dir.path().join("no-known-failures"),
         out: drafts.clone(),
+        causes: Default::default(),
     };
     let report = issues::draft(&opts).unwrap();
     assert_eq!(report.removed, vec!["rust-t.accept.md".to_string()]);

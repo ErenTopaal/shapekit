@@ -1,6 +1,6 @@
 //! `shapekit conformance run|crosscheck|reproduce|sync-versions|seed-check|draft-issues|file-issues`.
 
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use anyhow::{Context, Result};
 use clap::Subcommand;
@@ -247,6 +247,17 @@ pub enum ConformanceCommand {
         /// The SDK versions and how to build and start each testee.
         #[arg(long, default_value = "conformance/versions.toml")]
         versions_file: PathBuf,
+        /// The known-failures lists of every sdk: a draft names as siblings the sdks whose list
+        /// holds a divergence on its entry, beside those diverging in the matrix.
+        #[arg(long, default_value = "conformance/known-failures")]
+        known_failures: PathBuf,
+        /// Findings triages whose findings name drafts under --out by `draft`; a draft carries
+        /// its finding's title and cause. Repeatable.
+        #[arg(
+            long = "triage",
+            default_values = ["findings/triage.toml", "candidate/findings/triage.toml"]
+        )]
+        triages: Vec<PathBuf>,
         /// Directory the issue bodies are written into.
         #[arg(long, default_value = "findings/issues")]
         out: PathBuf,
@@ -650,13 +661,18 @@ fn dispatch(cmd: ConformanceCommand) -> Result<bool> {
             matrix,
             manifest,
             versions_file,
+            known_failures,
+            triages,
             out,
         } => {
+            let causes = draft_causes(&triages, &out)?;
             let report = issues::draft(&issues::DraftOptions {
                 matrix,
                 manifest,
                 versions: versions_file,
+                known_failures,
                 out: out.clone(),
+                causes,
             })?;
             for f in &report.removed {
                 println!("removed stale draft {}", out.join(f).display());
@@ -684,4 +700,46 @@ fn dispatch(cmd: ConformanceCommand) -> Result<bool> {
             Ok(true)
         }
     }
+}
+
+/// The triaged cause of every draft under `out`, by file name, from the findings that name
+/// one in `draft`.
+fn draft_causes(
+    triages: &[PathBuf],
+    out: &Path,
+) -> Result<std::collections::BTreeMap<String, issues::Cause>> {
+    let normal = |p: &Path| -> PathBuf {
+        p.components()
+            .filter(|c| !matches!(c, std::path::Component::CurDir))
+            .collect()
+    };
+    let out = normal(out);
+    let mut causes = std::collections::BTreeMap::new();
+    for t in triages {
+        let triage = shapekit_findings::triage::load(t)?;
+        for f in &triage.findings {
+            let Some(draft) = &f.draft else { continue };
+            let draft = normal(Path::new(draft));
+            if draft.parent() != Some(out.as_path()) {
+                continue;
+            }
+            let Some(name) = draft.file_name().and_then(|n| n.to_str()) else {
+                continue;
+            };
+            let cause = issues::Cause {
+                finding: f.id.clone(),
+                title: f.title.clone(),
+                cause: f.cause.clone(),
+            };
+            if let Some(other) = causes.insert(name.to_owned(), cause) {
+                anyhow::bail!(
+                    "findings {} and {} both name the draft {}",
+                    other.finding,
+                    f.id,
+                    draft.display()
+                );
+            }
+        }
+    }
+    Ok(causes)
 }

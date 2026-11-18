@@ -506,6 +506,8 @@ const HEADER: &str = "\
 #                    lets the sdk's last version in the run vote instead). the wallet-backend
 #                    adapter and the linter use their own go-stellar-sdk pin in pins.toml
 #   issues_repo      where draft-issues points the issues
+#   kind             \"cli\" for a command line tool, so drafted issues call it the CLI; an sdk
+#                    otherwise
 #   timeout_ms       per-request timeout
 #   memory           rlimit set in the testee between fork and exec. \"as\" caps the address
 #                    space (rust, go reserve little up front); \"data\" caps private writable
@@ -940,6 +942,9 @@ fn render_sdk(out: &mut String, name: &str, sdk: &Sdk, plan: &SdkPlan) {
         "memory = {{ resource = \"{resource}\", mib = {} }}",
         sdk.memory.mib
     );
+    if sdk.kind == crate::versions::PackageKind::Cli {
+        let _ = writeln!(out, "kind = \"cli\"");
+    }
     for c in &plan.chosen {
         let (steps, command) = build_lines(name, &c.version);
         let _ = writeln!(out);

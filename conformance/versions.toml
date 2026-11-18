@@ -20,6 +20,8 @@
 #                    lets the sdk's last version in the run vote instead). the wallet-backend
 #                    adapter and the linter use their own go-stellar-sdk pin in pins.toml
 #   issues_repo      where draft-issues points the issues
+#   kind             "cli" for a command line tool, so drafted issues call it the CLI; an sdk
+#                    otherwise
 #   timeout_ms       per-request timeout
 #   memory           rlimit set in the testee between fork and exec. "as" caps the address
 #                    space (rust, go reserve little up front); "data" caps private writable
@@ -444,6 +446,7 @@ current = "30.0.1"
 issues_repo = "stellar/stellar-cli"
 timeout_ms = 30000
 memory = { resource = "as", mib = 4096 }
+kind = "cli"
 
 # 28.1.0: newest 28.x release; named in known-failures/stellar-cli.txt; xdr v28.0 (9c9c1459), protocols up to 29
 [[sdk.stellar-cli.versions]]
