@@ -85,7 +85,13 @@ fn pretty<T: Serialize>(v: &T) -> Result<Vec<u8>> {
     Ok(out)
 }
 
-fn one(root: &Path, def: &ImportDef) -> Result<ProvenanceEntry> {
+/// One input reduced in memory: the bytes to commit and the record of where they came from.
+struct Reduced {
+    out: Vec<u8>,
+    entry: ProvenanceEntry,
+}
+
+fn one(root: &Path, def: &ImportDef) -> Result<Reduced> {
     let from = root.join(&def.from);
     let (bytes, from_sha) = inputs::read(&from)?;
     let (out, reduction, describes) = match def.kind {
@@ -132,12 +138,7 @@ fn one(root: &Path, def: &ImportDef) -> Result<ProvenanceEntry> {
             (bytes, "none".to_owned(), describes)
         }
     };
-    let to = root.join(&def.to);
-    if let Some(dir) = to.parent() {
-        std::fs::create_dir_all(dir).with_context(|| format!("creating {}", dir.display()))?;
-    }
-    std::fs::write(&to, &out).with_context(|| format!("writing {}", to.display()))?;
-    Ok(ProvenanceEntry {
+    let entry = ProvenanceEntry {
         kind: def.kind,
         path: def.to.clone(),
         sha256: shapekit_manifest::sha256_hex(&out),
@@ -146,12 +147,35 @@ fn one(root: &Path, def: &ImportDef) -> Result<ProvenanceEntry> {
         command: def.command.clone(),
         reduction,
         describes,
-    })
+    };
+    Ok(Reduced { out, entry })
+}
+
+/// Writes `bytes` to a new file beside `to`, which [`replace`] later moves over `to`.
+fn stage(to: &Path, bytes: &[u8]) -> Result<tempfile::TempPath> {
+    let dir = to
+        .parent()
+        .context("an input path names a file in a directory")?;
+    std::fs::create_dir_all(dir).with_context(|| format!("creating {}", dir.display()))?;
+    let mut f = tempfile::Builder::new()
+        .prefix(".import-")
+        .tempfile_in(dir)
+        .with_context(|| format!("creating a file in {}", dir.display()))?;
+    std::io::Write::write_all(&mut f, bytes)
+        .with_context(|| format!("writing a file in {}", dir.display()))?;
+    Ok(f.into_temp_path())
+}
+
+fn replace(staged: tempfile::TempPath, to: &Path) -> Result<()> {
+    staged
+        .persist(to)
+        .with_context(|| format!("writing {}", to.display()))?;
+    Ok(())
 }
 
 /// Imports every input the triage declares and writes the provenance file. All sources are
-/// read before anything is written, so a missing run output leaves the committed inputs as
-/// they were.
+/// read and reduced before anything is written, so a missing or unreadable run output
+/// leaves the committed inputs as they were.
 pub fn import(root: &Path, triage: &Triage) -> Result<Provenance> {
     if triage.inputs.import.is_empty() {
         bail!("the triage declares no [[inputs.import]], so there is nothing to import");
@@ -166,9 +190,20 @@ pub fn import(root: &Path, triage: &Triage) -> Result<Provenance> {
             );
         }
     }
-    let mut entries = Vec::new();
+    // every input is read and reduced before anything is written, then every file is
+    // written beside its target before any target is replaced, so a failure in any of
+    // these steps leaves the committed inputs as they were; provenance goes last, so it
+    // never describes files that were not written
+    let mut reduced = Vec::new();
     for def in &triage.inputs.import {
-        entries.push(one(root, def).with_context(|| format!("importing {}", def.from))?);
+        reduced.push(one(root, def).with_context(|| format!("importing {}", def.from))?);
+    }
+    let mut entries = Vec::new();
+    let mut staged = Vec::new();
+    for r in reduced {
+        let to = root.join(&r.entry.path);
+        staged.push((stage(&to, &r.out)?, to));
+        entries.push(r.entry);
     }
     entries.sort_by(|a, b| a.path.cmp(&b.path));
     let p = Provenance {
@@ -176,7 +211,11 @@ pub fn import(root: &Path, triage: &Triage) -> Result<Provenance> {
         inputs: entries,
     };
     let path = root.join(triage.inputs.provenance_file());
-    std::fs::write(&path, pretty(&p)?).with_context(|| format!("writing {}", path.display()))?;
+    let provenance = stage(&path, &pretty(&p)?)?;
+    for (file, to) in staged {
+        replace(file, &to)?;
+    }
+    replace(provenance, &path)?;
     Ok(p)
 }
 
@@ -396,5 +435,36 @@ mod tests {
         let gone = triage("target/c/none.json");
         assert!(import(root, &gone).is_err());
         assert_eq!(std::fs::read(&to).unwrap(), b"{}");
+    }
+
+    #[test]
+    fn a_source_that_fails_to_reduce_leaves_every_input_alone() {
+        let dir = tempfile::tempdir().unwrap();
+        let root = dir.path();
+        std::fs::create_dir_all(root.join("target/c")).unwrap();
+        std::fs::create_dir_all(root.join("findings/inputs")).unwrap();
+        std::fs::write(
+            root.join("target/c/m.json"),
+            serde_json::to_vec(&matrix()).unwrap(),
+        )
+        .unwrap();
+        std::fs::write(root.join("target/c/bad.json"), b"not a matrix").unwrap();
+        let mut t = triage("target/c/m.json");
+        let mut second = t.inputs.import[0].clone();
+        second.from = "target/c/bad.json".into();
+        second.to = "findings/inputs/conformance-js.json".into();
+        t.inputs.import.push(second);
+        let first = root.join("findings/inputs/conformance-go.json");
+        std::fs::write(&first, b"before").unwrap();
+        let provenance = root.join(t.inputs.provenance_file());
+        std::fs::write(&provenance, b"before").unwrap();
+        assert!(import(root, &t).is_err());
+        assert_eq!(std::fs::read(&first).unwrap(), b"before");
+        assert_eq!(std::fs::read(&provenance).unwrap(), b"before");
+        let names: Vec<_> = std::fs::read_dir(root.join("findings/inputs"))
+            .unwrap()
+            .map(|e| e.unwrap().file_name().into_string().unwrap())
+            .collect();
+        assert_eq!(names.len(), 2, "{names:?}");
     }
 }
