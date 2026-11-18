@@ -372,6 +372,17 @@ fn vector_ops_honour_the_request_limits() {
 
 #[test]
 fn vector_ops_default_to_the_runner_decode_depth() {
+    // building, encoding and dropping a 1001-level value recurses once per level, past the
+    // default test thread stack in a debug build; the testee serves on a large stack too
+    std::thread::Builder::new()
+        .stack_size(crate::STACK_BYTES)
+        .spawn(vector_ops_default_to_the_runner_decode_depth_body)
+        .unwrap()
+        .join()
+        .unwrap();
+}
+
+fn vector_ops_default_to_the_runner_decode_depth_body() {
     use stellar_xdr::{ScVec, WriteXdr};
     // past the runner's 1000-level decode depth, which an unlimited decode would accept
     let mut deep = ScVal::U32(0);
@@ -385,4 +396,19 @@ fn vector_ops_default_to_the_runner_decode_depth() {
     // the input's own length is the default length limit, so a well-formed one fits
     let r = json!({"id": "33", "op": "map_sort", "entries": [{"key": U32_7, "val": U32_7}]});
     assert!(ok(r)["xdr"].is_string());
+}
+
+#[test]
+fn address_from_scval_writes_the_strkey() {
+    // SCV_ADDRESS of the account with key 32 bytes of 0x3a, then a u32
+    let r = ok(json!({"id": "1", "op": "address_from_scval",
+        "xdr": "AAAAEgAAAAAAAAAAOjo6Ojo6Ojo6Ojo6Ojo6Ojo6Ojo6Ojo6Ojo6Ojo6Ojo="}));
+    assert_eq!(
+        r["text"],
+        "GA5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DVTUJ"
+    );
+    assert_eq!(
+        error_class(json!({"id": "2", "op": "address_from_scval", "xdr": "AAAAAwAAAAc="})),
+        "rejected"
+    );
 }

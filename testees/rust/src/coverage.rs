@@ -60,7 +60,10 @@ fn llvm_tool(name: &str) -> Result<PathBuf, String> {
     if p.is_file() {
         Ok(p)
     } else {
-        Err(format!("{} is missing; the llvm-tools component is needed", p.display()))
+        Err(format!(
+            "{} is missing; the llvm-tools component is needed",
+            p.display()
+        ))
     }
 }
 
@@ -105,14 +108,25 @@ fn collect(dir: &Path) -> Result<Value, String> {
     let data = dir.join("testee.profdata");
     run(
         &llvm_tool("llvm-profdata")?,
-        &["merge".as_ref(), "-sparse".as_ref(), raw.as_os_str(), "-o".as_ref(), data.as_os_str()],
+        &[
+            "merge".as_ref(),
+            "-sparse".as_ref(),
+            raw.as_os_str(),
+            "-o".as_ref(),
+            data.as_os_str(),
+        ],
     )?;
     let exe = std::env::current_exe().map_err(|e| format!("locating the testee: {e}"))?;
     let mut flag = std::ffi::OsString::from("-instr-profile=");
     flag.push(&data);
     let json = run(
         &llvm_tool("llvm-cov")?,
-        &["export".as_ref(), "-format=text".as_ref(), flag.as_os_str(), exe.as_os_str()],
+        &[
+            "export".as_ref(),
+            "-format=text".as_ref(),
+            flag.as_os_str(),
+            exe.as_os_str(),
+        ],
     )?;
     let export: Value =
         serde_json::from_slice(&json).map_err(|e| format!("parsing llvm-cov export: {e}"))?;
@@ -138,8 +152,12 @@ fn collect(dir: &Path) -> Result<Value, String> {
                 if count == 0 || kind != 0 {
                     continue;
                 }
-                let Some(path) = files.get(file as usize) else { continue };
-                let Some(at) = path.find(&marker) else { continue };
+                let Some(path) = files.get(file as usize) else {
+                    continue;
+                };
+                let Some(at) = path.find(&marker) else {
+                    continue;
+                };
                 let rel = &path[at + marker.len()..];
                 ranges.insert(format!("{rel}:{ls}:{cs}-{le}:{ce}"));
             }
@@ -157,7 +175,12 @@ fn collect(dir: &Path) -> Result<Value, String> {
 /// llvm tool, so it is cheap enough to ask after every input.
 pub fn fresh() -> Result<Value, String> {
     static SEEN: Mutex<Vec<bool>> = Mutex::new(Vec::new());
-    let (begin, end) = unsafe { (__llvm_profile_begin_counters(), __llvm_profile_end_counters()) };
+    let (begin, end) = unsafe {
+        (
+            __llvm_profile_begin_counters(),
+            __llvm_profile_end_counters(),
+        )
+    };
     let bytes = (end as usize)
         .checked_sub(begin as usize)
         .ok_or("the counter section ends before it begins")?;
