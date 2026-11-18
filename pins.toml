@@ -384,16 +384,34 @@ ref = "refs/tags/v6"
 purpose = "ci cache"
 
 [[git]]
-name = "actions-upload-pages-artifact"
-url = "https://github.com/actions/upload-pages-artifact"
-ref = "refs/tags/v5"
-purpose = "site build artifact for github pages"
+name = "actions-download-artifact"
+url = "https://github.com/actions/download-artifact"
+ref = "refs/tags/v8"
+purpose = "ci artifact download"
 
 [[git]]
-name = "actions-deploy-pages"
-url = "https://github.com/actions/deploy-pages"
+name = "actions-setup-python"
+url = "https://github.com/actions/setup-python"
+ref = "refs/tags/v7"
+purpose = "ci python setup"
+
+[[git]]
+name = "actions-setup-dotnet"
+url = "https://github.com/actions/setup-dotnet"
 ref = "refs/tags/v5"
-purpose = "site deployment to github pages"
+purpose = "ci dotnet setup for the dotnet testee"
+
+[[git]]
+name = "shivammathur-setup-php"
+url = "https://github.com/shivammathur/setup-php"
+ref = "refs/tags/v2"
+purpose = "ci php setup for the php testee"
+
+[[git]]
+name = "actions-attest"
+url = "https://github.com/actions/attest"
+ref = "refs/tags/v4"
+purpose = "build provenance attestation of the release assets"
 
 # rust crates: workspace dependencies
 
