@@ -124,7 +124,7 @@ export async function loadLandingStats(): Promise<LandingStats> {
   const refusedArms = blockers["refused-before-ledger"] ?? 0
   const neverArms = blockers["never-emitted"] ?? 0
 
-  const all: (Finding & { short?: string })[] = findings.findings
+  const all: Finding[] = findings.findings
   const bugs = all.filter((f) => f.status !== "wont-fix")
   const landingFindings: LandingFinding[] = bugs.map((f) => ({
     id: f.id,

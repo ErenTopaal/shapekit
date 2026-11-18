@@ -6,6 +6,7 @@ import "@/landing/landing.css"
 import type { Route } from "./+types/home"
 import { loadLandingStats, type LandingFinding, type LandingStats } from "@/landing/stats"
 import { setupLanding } from "@/landing/setup"
+import { sdkName } from "@/lib/sdks"
 
 // the landing page. every number on it is read at build time from the json files `shapekit site
 // data` writes (src/landing/stats.ts); the motion and the interactive parts are in
@@ -33,18 +34,19 @@ const sevLabel: Record<string, string> = { "data-loss": "data loss", "wrong-data
 const sevOrder = ["data-loss", "wrong-data", "divergence", "robustness"]
 const bySeverity = (a: LandingFinding, b: LandingFinding) =>
   sevOrder.indexOf(a.severity) - sevOrder.indexOf(b.severity) || a.id.localeCompare(b.id, "en", { numeric: true })
-const sdkName: Record<string, [string, string]> = {
-  rust: ["Rs", "Rust"],
-  go: ["Go", "Go"],
-  js: ["Js", "JavaScript"],
-  python: ["Py", "Python"],
-  java: ["Jv", "Java"],
-  dart: ["Dt", "Dart"],
-  php: ["Ph", "PHP"],
-  dotnet: ["Ne", ".NET"],
-  kmp: ["Kt", "Kotlin Multiplatform"],
-  soroban: ["Sb", "soroban-sdk"],
-  "stellar-cli": ["Cl", "stellar-cli"],
+// the periodic-table symbol of each sdk key; the name comes from the site's one name table
+const sdkSymbol: Record<string, string> = {
+  rust: "Rs",
+  go: "Go",
+  js: "Js",
+  python: "Py",
+  java: "Jv",
+  dart: "Dt",
+  php: "Ph",
+  dotnet: "Ne",
+  kmp: "Kt",
+  soroban: "Sb",
+  "stellar-cli": "Cl",
 }
 const chipName: Record<string, string> = { kmp: "Kotlin" }
 const componentKind: Record<string, string> = {
@@ -74,7 +76,7 @@ function Kit({ s }: { s: LandingStats }) {
         <span className="kit-step"><b>2</b>Runs through your code</span>
         <span className="kit-h">SDKs and indexers</span>
         <div>
-          <div className="runner"><span className="runner-h">SDK conformance runner <span>{plural(s.sdks.length, "target", "targets")}</span></span><span className="chips" style={css({ "--d": "1100ms" })}>{s.sdks.map((k, i) => <span key={k.key} className="chipx tip" data-tip={`${k.package} ${k.current}`} style={css({ "--i": i })}>{chipName[k.key] ?? sdkName[k.key]?.[1] ?? k.key}</span>)}</span></div>
+          <div className="runner"><span className="runner-h">SDK conformance runner <span>{plural(s.sdks.length, "target", "targets")}</span></span><span className="chips" style={css({ "--d": "1100ms" })}>{s.sdks.map((k, i) => <span key={k.key} className="chipx tip" data-tip={`${k.package} ${k.current}`} style={css({ "--i": i })}>{chipName[k.key] ?? sdkName(k.key)}</span>)}</span></div>
           <div className="runner"><span className="runner-h">Indexer replay harness <span>{plural(s.runs.length, "indexer", "indexers")}</span></span><span className="chips" style={css({ "--d": "1500ms" })}>{s.runs.map((r, i) => <span key={r.target} className="chipx tip" data-tip={r.note ? r.note.charAt(0).toUpperCase() + r.note.slice(1) : r.target} style={css({ "--i": s.sdks.length + i })}>{r.target}</span>)}</span></div>
         </div>
         <span className="kit-note">Plus indexerlint for Go indexer code.</span>
@@ -152,7 +154,7 @@ function SdkTable({ s }: { s: LandingStats }) {
   return (
     <div className="ptable" data-r="">
       {s.sdks.map((k, i) => (
-        <div key={k.key} className="el"><span className="el-n"><span>{String(i + 1).padStart(2, "0")}</span><span>{k.current}</span></span><span className="el-sym">{sdkName[k.key]?.[0] ?? k.key.slice(0, 2)}</span><span><span className="el-name">{sdkName[k.key]?.[1] ?? k.key}</span><span className="el-pkg">{k.package}</span></span></div>
+        <div key={k.key} className="el"><span className="el-n"><span>{String(i + 1).padStart(2, "0")}</span><span>{k.current}</span></span><span className="el-sym">{sdkSymbol[k.key] ?? k.key.slice(0, 2)}</span><span><span className="el-name">{sdkName(k.key)}</span><span className="el-pkg">{k.package}</span></span></div>
       ))}
       <div className="el el-key"><strong data-count="">{s.sdks.length}</strong><span>SDK targets at their current release. Older versions run too, to find where a bug starts and ends.</span></div>
     </div>
