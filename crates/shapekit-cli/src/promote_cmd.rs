@@ -2,7 +2,8 @@
 //!
 //! An entry is promoted when the current version of every SDK in conformance/versions.toml
 //! passes it, or when each SDK that fails it has a finding in findings/triage.toml that takes
-//! the failure and names a drafted issue under findings/issues/. The failing cells of a
+//! the failure and names a drafted issue under findings/issues/. An entry cut from a chain
+//! also needs that chain under corpus/chains, where the harness replays it from. The failing cells of a
 //! promoted entry are added to conformance/known-failures/ with the finding's link, or its
 //! draft while nothing is filed, so the corpus run stays green.
 
@@ -83,7 +84,17 @@ pub fn run(args: PromoteArgs) -> Result<bool> {
         matrices.push(view);
     }
 
-    let (accepted, refusals) = decide(&args.entry, &versions, &matrices, &triage, &root);
+    let (accepted, mut refusals) = decide(&args.entry, &versions, &matrices, &triage, &root);
+    // the harness replays an entry from its chain under corpus/chains, so an entry cut from a
+    // chain moves only when the corpus holds that chain
+    if let Some(chain) = &entry.source.chain
+        && !args.corpus.join("chains").join(chain).is_dir()
+    {
+        refusals.push(format!(
+            "its chain {chain} is not under {}, so the harness could not replay the entry",
+            args.corpus.join("chains").display()
+        ));
+    }
     for a in &accepted {
         println!(
             "{}@{}: {} is finding {} ({})",

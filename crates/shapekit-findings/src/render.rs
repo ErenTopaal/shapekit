@@ -1,10 +1,19 @@
-//! `findings/FINDINGS.md` from a collection.
+//! `FINDINGS.md` from a collection.
 
 use std::fmt::Write;
 
 use crate::collect::{Collection, FindingRecord};
 
-fn link_or_decision(f: &FindingRecord) -> String {
+/// `../` once per component of `out`, the directory FINDINGS.md is written to relative to the
+/// repository root, so a draft path relative to the root resolves from the file.
+pub fn root_prefix(out: &std::path::Path) -> String {
+    out.components()
+        .filter(|c| matches!(c, std::path::Component::Normal(_)))
+        .map(|_| "../")
+        .collect()
+}
+
+fn link_or_decision(f: &FindingRecord, up: &str) -> String {
     match (&f.link, &f.reference, &f.reason) {
         (Some(l), _, _) => format!("[{}]({l})", short(l)),
         (_, Some(r), _) => format!("private: {r}"),
@@ -12,7 +21,7 @@ fn link_or_decision(f: &FindingRecord) -> String {
         _ => f
             .draft
             .as_ref()
-            .map(|d| format!("not filed, draft [{d}](../{d})"))
+            .map(|d| format!("not filed, draft [{d}]({up}{d})"))
             .unwrap_or_else(|| "not filed".into()),
     }
 }
@@ -27,7 +36,9 @@ fn short(link: &str) -> String {
     }
 }
 
-pub fn markdown(c: &Collection) -> String {
+/// The markdown of `c`; `up` leads from the file's directory to the repository root
+/// ([`root_prefix`]).
+pub fn markdown(c: &Collection, up: &str) -> String {
     let mut s = String::new();
     let _ = writeln!(
         s,
@@ -96,7 +107,7 @@ pub fn markdown(c: &Collection) -> String {
                 .map(|e| format!("`{e}`"))
                 .unwrap_or_default(),
             f.status.name(),
-            link_or_decision(f)
+            link_or_decision(f, up)
         );
     }
     for f in &c.findings {
@@ -113,7 +124,7 @@ pub fn markdown(c: &Collection) -> String {
                 f.caps.join(", ")
             },
             f.status.name(),
-            link_or_decision(f)
+            link_or_decision(f, up)
         );
         if let Some(e) = &f.minimal_entry {
             let _ = writeln!(s, "- minimal entry: `{e}`");
@@ -260,4 +271,17 @@ pub fn markdown(c: &Collection) -> String {
         );
     }
     s
+}
+
+#[cfg(test)]
+mod tests {
+    use super::root_prefix;
+    use std::path::Path;
+
+    #[test]
+    fn the_prefix_climbs_one_level_per_directory() {
+        assert_eq!(root_prefix(Path::new("findings")), "../");
+        assert_eq!(root_prefix(Path::new("candidate/findings")), "../../");
+        assert_eq!(root_prefix(Path::new("./candidate/findings/")), "../../");
+    }
 }

@@ -310,3 +310,30 @@ fn a_triaged_failure_with_a_draft_is_promoted_with_its_known_failure() {
     let again = promote(d, &[], &FIXTURE_SDKS);
     assert_eq!(again.status.code(), Some(2), "{}", text(&again));
 }
+
+#[test]
+fn an_entry_whose_chain_is_not_in_the_corpus_stays_a_candidate() {
+    let dir = layout();
+    let d = dir.path();
+    let r = repo();
+    let id = "cap01.bump-sequence.p30-bump-behind";
+    copy_dir(
+        &r.join("corpus/entries/cap01.bump-sequence").join(id),
+        &d.join("candidate/entries/cap01.bump-sequence").join(id),
+    );
+    let out = shapekit(d, &["manifest", "build", "--corpus", "candidate"]);
+    assert!(out.status.success(), "{}", text(&out));
+    let paths: Vec<String> = FIXTURE_SDKS.iter().map(|s| fixture(s)).collect();
+    let mut args = vec!["corpus", "promote", id, "--dry-run"];
+    for p in &paths {
+        args.push("--matrix");
+        args.push(p);
+    }
+    let out = shapekit(d, &args);
+    assert_eq!(out.status.code(), Some(1), "{}", text(&out));
+    assert!(
+        text(&out).contains("its chain cap01.bump-sequence.p30 is not under corpus/chains"),
+        "{}",
+        text(&out)
+    );
+}

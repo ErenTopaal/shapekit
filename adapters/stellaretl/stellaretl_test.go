@@ -104,3 +104,17 @@ func TestAFeeRefundIsNotTheClaimedCharge(t *testing.T) {
 		t.Fatal("the charge did not map")
 	}
 }
+
+func TestDumpTableOfNoRowsHasAnEmptyColumnList(t *testing.T) {
+	head, body, err := dumpTable("t", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	b, err := json.Marshal(head)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(b) != `{"name":"t","columns":[]}` || len(body) != 0 {
+		t.Fatalf("%s %v", b, body)
+	}
+}

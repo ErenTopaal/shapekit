@@ -82,7 +82,7 @@ pub fn run(cmd: FindingsCommand) -> Result<bool> {
             text.push('\n');
             std::fs::write(&json, text).with_context(|| format!("writing {}", json.display()))?;
             let md = c.out.join("FINDINGS.md");
-            std::fs::write(&md, render::markdown(&col))
+            std::fs::write(&md, render::markdown(&col, &render::root_prefix(&c.out)))
                 .with_context(|| format!("writing {}", md.display()))?;
             for (comp, by) in &col.summary.by_component {
                 let parts: Vec<String> = by.iter().map(|(k, v)| format!("{k} {v}")).collect();
@@ -142,7 +142,13 @@ pub fn run(cmd: FindingsCommand) -> Result<bool> {
             } else {
                 col.clone()
             };
-            let mut out = check::check(&c.root, &judged, written.as_ref(), written_md.as_deref());
+            let mut out = check::check(
+                &c.root,
+                &judged,
+                written.as_ref(),
+                written_md.as_deref(),
+                &render::root_prefix(&c.out),
+            );
             out.problems.extend(import::verify(&c.root, &t));
             out.ok = out.problems.is_empty() || (allow_draft && out.only_drafts());
             for p in &out.problems {

@@ -258,7 +258,9 @@ func dumpTable(name string, rows []map[string]any) (wire.DumpTable, []wire.DumpR
 		names = append(names, k)
 	}
 	sort.Strings(names)
-	table := wire.DumpTable{Name: name}
+	// an export with no rows is a table with an empty column list; a nil slice would be
+	// written as null, which the harness refuses
+	table := wire.DumpTable{Name: name, Columns: []wire.DumpColumn{}}
 	for _, k := range names {
 		table.Columns = append(table.Columns, wire.DumpColumn{Name: k, Type: keys[k]})
 	}

@@ -80,6 +80,7 @@ pub fn check(
     fresh: &Collection,
     written: Option<&Collection>,
     written_md: Option<&str>,
+    up: &str,
 ) -> Outcome {
     let mut out = Outcome::default();
     for o in &fresh.unmapped {
@@ -130,7 +131,7 @@ pub fn check(
         None => out
             .problems
             .push("findings/FINDINGS.md is missing; run `shapekit findings collect`".into()),
-        Some(md) if md != crate::render::markdown(fresh) => out.problems.push(
+        Some(md) if md != crate::render::markdown(fresh, up) => out.problems.push(
             "findings/FINDINGS.md differs from a fresh rendering of the inputs; run `shapekit findings collect`".into(),
         ),
         Some(_) => {}
@@ -178,7 +179,7 @@ mod tests {
     }
 
     fn md(c: &Collection) -> String {
-        crate::render::markdown(c)
+        crate::render::markdown(c, "../")
     }
 
     fn collection(findings: Vec<FindingRecord>) -> Collection {
@@ -228,14 +229,14 @@ mod tests {
                 Some("https://github.com/o/r/issues/1"),
             ),
         ]);
-        let out = check(Path::new("."), &c, Some(&c), Some(&md(&c)));
+        let out = check(Path::new("."), &c, Some(&c), Some(&md(&c)), "../");
         assert!(!out.ok);
         assert_eq!(out.pending, ["A"]);
         assert_eq!(out.problems.len(), 1, "{:?}", out.problems);
         assert!(out.only_drafts());
         let mut stale = c.clone();
         stale.summary.failures += 1;
-        let out = check(Path::new("."), &stale, Some(&c), Some(&md(&stale)));
+        let out = check(Path::new("."), &stale, Some(&c), Some(&md(&stale)), "../");
         assert!(
             !out.only_drafts(),
             "a stale record is not a draft: {:?}",
@@ -250,20 +251,21 @@ mod tests {
         let filed = finding("F", Status::Filed, Some("http://example.org/1"));
         let c = collection(vec![private.clone(), wont, filed]);
         assert_eq!(
-            check(Path::new("."), &c, Some(&c), Some(&md(&c)))
+            check(Path::new("."), &c, Some(&c), Some(&md(&c)), "../")
                 .problems
                 .len(),
-            3
+            3,
+            "../"
         );
         private.reference = Some("GHSA-xxxx".into());
         let c = collection(vec![private]);
-        assert!(check(Path::new("."), &c, Some(&c), Some(&md(&c))).ok);
+        assert!(check(Path::new("."), &c, Some(&c), Some(&md(&c)), "../").ok);
     }
 
     #[test]
     fn unmapped_failures_and_a_stale_record_fail() {
         let mut c = collection(vec![finding("B", Status::DuplicateOf, Some("https://x/1"))]);
-        assert!(check(Path::new("."), &c, Some(&c), Some(&md(&c))).ok);
+        assert!(check(Path::new("."), &c, Some(&c), Some(&md(&c)), "../").ok);
         let written = c.clone();
         c.unmapped.push(Occurrence {
             source: "conformance".into(),
@@ -272,11 +274,20 @@ mod tests {
             at: "go@v0.8.0".into(),
             what: "diverges-from-network".into(),
         });
-        let out = check(Path::new("."), &c, Some(&written), Some(&md(&c)));
+        let out = check(Path::new("."), &c, Some(&written), Some(&md(&c)), "../");
         assert_eq!(out.problems.len(), 2, "{:?}", out.problems);
-        assert!(!check(Path::new("."), &written, None, Some(&md(&written))).ok);
-        assert!(!check(Path::new("."), &written, Some(&written), None).ok);
-        assert!(!check(Path::new("."), &written, Some(&written), Some("# stale\n")).ok);
+        assert!(!check(Path::new("."), &written, None, Some(&md(&written)), "../").ok);
+        assert!(!check(Path::new("."), &written, Some(&written), None, "../").ok);
+        assert!(
+            !check(
+                Path::new("."),
+                &written,
+                Some(&written),
+                Some("# stale\n"),
+                "../"
+            )
+            .ok
+        );
     }
 
     #[test]
