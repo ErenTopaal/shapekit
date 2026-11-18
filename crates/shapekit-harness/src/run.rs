@@ -641,7 +641,11 @@ fn drive_adapter(
 /// The error of a chain whose cleanup failed as well: the chain's own cause first, then what
 /// the cleanup ran into, so the message reads in the order things happened.
 fn with_cleanup(e: &anyhow::Error, cleanup: &[String]) -> anyhow::Error {
-    anyhow!("{e:#}; cleaning up after it also failed: {}", cleanup.join("; "))
+    anyhow!(
+        "{}; cleaning up after it also failed: {}",
+        error_chain(e.as_ref()),
+        cleanup.join("; ")
+    )
 }
 
 /// Takes and writes the dump. A failure is kept on the chain, not raised: the verdicts do
@@ -908,7 +912,10 @@ mod tests {
     #[test]
     fn a_failed_cleanup_follows_the_chain_error() {
         let e = anyhow!("start failed (target): no image").context("starting the target");
-        let msg = format!("{:#}", with_cleanup(&e, &["stopping the target: stop failed".into()]));
+        let msg = format!(
+            "{:#}",
+            with_cleanup(&e, &["stopping the target: stop failed".into()])
+        );
         assert_eq!(
             msg,
             "starting the target: start failed (target): no image; cleaning up after it also \
