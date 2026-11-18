@@ -2,6 +2,35 @@
 
 A dated public log of what has landed in shapekit. Newest entry first.
 
+## 2026-11-18: 0.2.0 release candidate
+
+What 0.2.0 holds:
+
+- Corpus: 716 entries, 594 of them emitted by stellar-core. They cover 436 of the 499
+  `LedgerCloseMeta` union arms, 318 of the 328 family fragments and 44 of the 45 CAPs an indexer
+  can see; the per-CAP view is `corpus/coverage/COVERAGE.md`.
+- Obligations: every obligation in `corpus/coverage/obligations.json` has a status, met,
+  unmeetable or open, and `shapekit coverage --check` fails on one without. By kind: format
+  3,869 of 3,869 met; core test sections 29,691 of 29,691; fields 203 of 203; SDK versions 28 of
+  28; gaps 9 met and 4 open of 13; protocol gate sides 505 met (375 by branch count, 130
+  inferred from an execution count) and 185 open of 690; seeds 72 met and 142 open of 214. No
+  obligation is unmeetable.
+- SDK conformance over the corpus: the `stellar-xdr` crate 28.0.0 to 30.0.0, go-stellar-sdk
+  v0.7.1 to v0.9.0, `@stellar/stellar-sdk` 16.3.0 to 17.4.0, soroban-sdk 28.0.0 and 29.0.1, the
+  Python `stellar-sdk` 16.1.1 and 17.0.1, the Java `network.lightsail:stellar-sdk` 5.0.0 and
+  6.0.0, `stellar_flutter_sdk` 3.12.0, `soneso/stellar-php-sdk` 1.18.0, `stellar-dotnet-sdk`
+  16.0.0 and 17.0.0, the Kotlin Multiplatform SDK 1.18.0 and stellar-cli 28.1.0 and 30.0.1.
+- Harness: wallet-backend at `3e22515a`, stellar-rpc from its pinned release image and
+  stellar-etl, every chain on both networks; the numbers are in the entry below. Indexer checks
+  need a Linux host with Docker; on macOS `check indexer` stops and says so.
+- Findings: 24 findings covering 611 failures, 0 unmapped, none pending filing
+  (`shapekit findings check`). The candidate lane holds 39 drafted findings, not filed
+  (`candidate/findings/FINDINGS.md`).
+- Release build: two independent local builds of the Linux x86-64 assets from clean checkouts
+  of this tree (`shapekit`, `indexerlint`, `wb-adapter`, `corpus-0.2.0.tar.zst` and the golden
+  snapshot, made with the commands of `release.yml`) give the same SHA256SUMS. The builds for
+  Linux arm64 and macOS run only on the release runners.
+
 ## 2026-11-17: explorer witnesses in the candidate lane, stellar-etl in the findings, version 0.2.0
 
 - The workspace, the three adapters and the site package say 0.2.0, so the corpus manifest's
