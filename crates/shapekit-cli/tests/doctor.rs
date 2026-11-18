@@ -71,3 +71,47 @@ command = ["target/demo/testee"]
         "{out}"
     );
 }
+
+#[test]
+fn a_linter_without_an_execute_bit_is_not_found() {
+    use std::os::unix::fs::PermissionsExt;
+    let tmp = tempfile::tempdir().unwrap();
+    std::fs::write(tmp.path().join("indexerlint"), "#!/bin/sh\n").unwrap();
+    let (code, out) = doctor(tmp.path(), &["lint", "--linter", "./indexerlint"]);
+    assert_eq!(code, Some(1), "{out}");
+    assert!(
+        out.contains("FAIL  indexerlint: ./indexerlint not found"),
+        "{out}"
+    );
+    std::fs::set_permissions(
+        tmp.path().join("indexerlint"),
+        std::fs::Permissions::from_mode(0o755),
+    )
+    .unwrap();
+    let (_, out) = doctor(tmp.path(), &["lint", "--linter", "./indexerlint"]);
+    assert!(
+        out.contains("ok    indexerlint: ./indexerlint found"),
+        "{out}"
+    );
+}
+
+#[test]
+fn an_option_for_a_check_not_selected_is_refused() {
+    let tmp = tempfile::tempdir().unwrap();
+    for args in [
+        &["lint", "--sdk", "go"][..],
+        &["sdk", "--offline", "--adapter", "x"][..],
+    ] {
+        let out = Command::new(env!("CARGO_BIN_EXE_shapekit"))
+            .arg("doctor")
+            .args(args)
+            .current_dir(tmp.path())
+            .output()
+            .unwrap();
+        assert_eq!(out.status.code(), Some(2), "{args:?}");
+        assert!(
+            String::from_utf8_lossy(&out.stderr).contains("which you did not select"),
+            "{args:?}"
+        );
+    }
+}

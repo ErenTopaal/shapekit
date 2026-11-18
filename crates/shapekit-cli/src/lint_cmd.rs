@@ -27,7 +27,20 @@ pub struct LintArgs {
 }
 
 pub fn run(a: LintArgs) -> Result<bool> {
-    let mut cmd = Command::new(&a.linter);
+    // a missing module would otherwise surface as the linter failing to start
+    if !a.dir.is_dir() {
+        bail!("module directory {} does not exist", a.dir.display());
+    }
+    // indexerlint runs inside the module, so a path (anything with a /) is made absolute
+    // against the directory you ran from, as `shapekit doctor lint` checks it; a bare name
+    // is still looked up on PATH
+    let linter = if a.linter.components().count() > 1 {
+        std::path::absolute(&a.linter)
+            .with_context(|| format!("resolving {}", a.linter.display()))?
+    } else {
+        a.linter.clone()
+    };
+    let mut cmd = Command::new(&linter);
     if a.json {
         cmd.args(["-format", "json"]);
     }
@@ -46,15 +59,15 @@ pub fn run(a: LintArgs) -> Result<bool> {
             "{} not found. Download indexerlint-<os>-<arch> from a shapekit release, or build \
              it from a checkout with `(cd lint && go build -o indexerlint ./cmd/indexerlint)`, \
              then put it on PATH or pass --linter <path>",
-            a.linter.display()
+            linter.display()
         ),
-        Err(e) => return Err(e).with_context(|| format!("starting {}", a.linter.display())),
+        Err(e) => return Err(e).with_context(|| format!("starting {}", linter.display())),
     };
     // indexerlint exits 0 without findings, 1 with findings, 2 on a usage or load error
     match status.code() {
         Some(0) => Ok(true),
         Some(1) => Ok(false),
-        Some(c) => bail!("{} exited with status {c}", a.linter.display()),
-        None => bail!("{} was ended by a signal", a.linter.display()),
+        Some(c) => bail!("{} exited with status {c}", linter.display()),
+        None => bail!("{} was ended by a signal", linter.display()),
     }
 }

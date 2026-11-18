@@ -5,7 +5,7 @@ use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::time::Duration;
 
-use anyhow::Result;
+use anyhow::{Result, bail};
 use clap::{Args, ValueEnum};
 
 use crate::error_text::chain;
@@ -86,13 +86,20 @@ fn first_line(program: &str, args: &[&str]) -> Option<String> {
     Some(text.lines().next().unwrap_or("").trim().to_owned())
 }
 
-/// Whether `program` can be started: a path that exists, or a name found on PATH.
+/// Whether `program` can be started: an executable file at a path, or a name found on PATH
+/// as one. A file without an execute bit cannot be started, and the shell skips it on PATH.
 fn on_path(program: &str) -> bool {
     if program.contains('/') {
-        return Path::new(program).is_file();
+        return is_executable(Path::new(program));
     }
-    std::env::var_os("PATH")
-        .is_some_and(|paths| std::env::split_paths(&paths).any(|dir| dir.join(program).is_file()))
+    std::env::var_os("PATH").is_some_and(|paths| {
+        std::env::split_paths(&paths).any(|dir| is_executable(&dir.join(program)))
+    })
+}
+
+fn is_executable(path: &Path) -> bool {
+    use std::os::unix::fs::PermissionsExt;
+    std::fs::metadata(path).is_ok_and(|m| m.is_file() && m.permissions().mode() & 0o111 != 0)
 }
 
 fn install_hint(tool: &str, pinned: Option<&str>) -> String {
@@ -393,6 +400,16 @@ pub fn run(a: DoctorArgs) -> Result<bool> {
     } else {
         a.what.clone()
     };
+    // an option for a check that does not run would be silently ignored, and you would
+    // read the result as covering it
+    if !a.sdks.is_empty() && !what.contains(&For::Sdk) {
+        bail!("--sdk applies to the sdk check, which you did not select; add `sdk` or drop --sdk");
+    }
+    if a.adapter.is_some() && !what.contains(&For::Indexer) {
+        bail!(
+            "--adapter applies to the indexer check, which you did not select; add `indexer` or drop --adapter"
+        );
+    }
     let mut r = Report::default();
     let needs_checkout = what.iter().any(|w| matches!(w, For::Sdk | For::Indexer));
     let pins = if a.pins.is_file() {
