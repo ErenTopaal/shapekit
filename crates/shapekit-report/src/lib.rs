@@ -31,6 +31,7 @@ use serde::{Deserialize, Serialize};
 use shapekit_findings::collect::{self, Collection, FindingRecord, Occurrence};
 use shapekit_findings::inputs::{self, MatrixView};
 use shapekit_findings::triage::{self, Triage};
+use shapekit_findings::version::newest;
 use shapekit_harness::report::{MARKDOWN_FILE as HARNESS_MD, REPORT_FILE as HARNESS_REPORT};
 use shapekit_manifest::{Entry, Manifest};
 use shapekit_registry::{Registry, ValidatedByCore};
@@ -172,55 +173,18 @@ impl Group {
 /// The `source` of an occurrence that cites an implementation-defined answer.
 const ANSWER_SOURCE: &str = "answer";
 
-/// Orders two versions as releases are ordered: numeric parts by value (`v0.10.0` after
-/// `v0.9.0`), a prerelease before its release, and a leading `v` ignored.
-fn version_order(a: &str, b: &str) -> std::cmp::Ordering {
-    fn split(v: &str) -> (Vec<&str>, Option<&str>) {
-        let v = v.strip_prefix('v').unwrap_or(v);
-        let (core, pre) = match v.split_once('-') {
-            Some((c, p)) => (c, Some(p)),
-            None => (v, None),
-        };
-        (core.split('.').collect(), pre)
-    }
-    fn part(a: &str, b: &str) -> std::cmp::Ordering {
-        match (a.parse::<u64>(), b.parse::<u64>()) {
-            (Ok(x), Ok(y)) => x.cmp(&y),
-            // a numeric part sorts before a named one, as semver orders identifiers
-            (Ok(_), Err(_)) => std::cmp::Ordering::Less,
-            (Err(_), Ok(_)) => std::cmp::Ordering::Greater,
-            (Err(_), Err(_)) => a.cmp(b),
-        }
-    }
-    let ((ca, pa), (cb, pb)) = (split(a), split(b));
-    let core = ca
-        .iter()
-        .zip(&cb)
-        .map(|(x, y)| part(x, y))
-        .find(|o| o.is_ne())
-        .unwrap_or_else(|| ca.len().cmp(&cb.len()));
-    core.then_with(|| match (pa, pb) {
-        (None, None) => std::cmp::Ordering::Equal,
-        (None, Some(_)) => std::cmp::Ordering::Greater,
-        (Some(_), None) => std::cmp::Ordering::Less,
-        (Some(x), Some(y)) => {
-            let (xs, ys): (Vec<&str>, Vec<&str>) = (x.split('.').collect(), y.split('.').collect());
-            xs.iter()
-                .zip(&ys)
-                .map(|(p, q)| part(p, q))
-                .find(|o| o.is_ne())
-                .unwrap_or_else(|| xs.len().cmp(&ys.len()))
-        }
-    })
-}
-
-/// The sdk and version of the newest failing testee of `entry`.
+/// The sdk and version to rerun `entry` with: the first sdk (by name) it failed on, as the
+/// findings record chooses, at the newest failing version of that sdk in release order.
+/// Versions of two sdks are never compared with each other: they number unrelated releases.
 fn newest_failing<'o>(occurrences: &'o [Occurrence], entry: &str) -> Option<(&'o str, &'o str)> {
-    occurrences
+    let failing: Vec<(&str, &str)> = occurrences
         .iter()
         .filter(|o| o.entry.as_deref() == Some(entry) && o.source != ANSWER_SOURCE)
         .filter_map(|o| o.on.split_once('@'))
-        .max_by(|a, b| version_order(a.1, b.1))
+        .collect();
+    let sdk = failing.iter().map(|(s, _)| *s).min()?;
+    let version = newest(failing.iter().filter(|(s, _)| *s == sdk).map(|(_, v)| *v))?;
+    Some((sdk, version))
 }
 
 /// One failure, or one baseline failure, compared across the two runs.
@@ -846,17 +810,6 @@ pub fn write_summary(r: &Report, path: &Path, html_name: Option<&str>) -> Result
 mod tests {
     use super::*;
 
-    #[test]
-    fn versions_order_as_releases() {
-        use std::cmp::Ordering::*;
-        assert_eq!(version_order("v0.10.0", "v0.9.0"), Greater);
-        assert_eq!(version_order("0.9.0", "v0.9.0"), Equal);
-        assert_eq!(version_order("1.0.0-rc.1", "1.0.0"), Less);
-        assert_eq!(version_order("1.0.0-rc.10", "1.0.0-rc.9"), Greater);
-        assert_eq!(version_order("17.4.0", "17.10.0"), Less);
-        assert_eq!(version_order("1.2", "1.2.1"), Less);
-    }
-
     fn occ(source: &str, on: &str) -> Occurrence {
         Occurrence {
             source: source.into(),
@@ -876,6 +829,17 @@ mod tests {
         ];
         assert_eq!(newest_failing(&occs, "e"), Some(("go", "v0.10.0")));
         assert_eq!(newest_failing(&occs, "other"), None);
+    }
+
+    #[test]
+    fn the_rerun_sdk_is_chosen_before_its_version() {
+        // js's 17.4.0 is not "newer" than go's v0.10.0: they number different releases
+        let occs = [
+            occ("conformance", "js@17.4.0"),
+            occ("conformance", "go@v0.9.0"),
+            occ("conformance", "go@v0.10.0+build.1"),
+        ];
+        assert_eq!(newest_failing(&occs, "e"), Some(("go", "v0.10.0+build.1")));
     }
 
     #[test]
