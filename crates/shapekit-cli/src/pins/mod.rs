@@ -293,6 +293,9 @@ fn validate(pins: &Pins) -> Result<()> {
     for c in &pins.crates {
         let what = format!("crate {}@{}", c.name, c.version);
         require_unique(&mut seen, "crate", format!("{}@{}", c.name, c.version))?;
+        if let Some(why) = remote::crate_name_problem(&c.name) {
+            bail!("{what}: {why}");
+        }
         if !is_lower_hex(&c.checksum, 64) {
             bail!("{what}: checksum must be 64 lowercase hex characters");
         }
@@ -484,6 +487,14 @@ purpose = "go testee"
     fn rejects_short_ref_name() {
         let text = SAMPLE.replace("ref = \"refs/tags/v7\"", "ref = \"v7\"");
         assert!(err_of(&text).contains("full ref name"));
+    }
+
+    #[test]
+    fn rejects_a_name_that_is_not_a_crate_name() {
+        for bad in ["", "é", "9lives", "a/b"] {
+            let text = SAMPLE.replace("name = \"toml\"", &format!("name = {bad:?}"));
+            assert!(err_of(&text).contains("a crate name"), "{bad:?}");
+        }
     }
 
     #[test]

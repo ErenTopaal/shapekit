@@ -171,15 +171,37 @@ impl Http {
     }
 }
 
-/// Path of a crate's file in the crates.io sparse index.
-pub fn sparse_index_path(name: &str) -> String {
-    let name = name.to_lowercase();
-    match name.len() {
+/// Why `name` is not a crate name crates.io accepts, or `None` when it is one: 1 to 64
+/// ASCII letters, digits, `-` and `_`, starting with a letter.
+pub fn crate_name_problem(name: &str) -> Option<&'static str> {
+    if name.is_empty() || name.len() > 64 {
+        return Some("a crate name is 1 to 64 characters");
+    }
+    if !name.starts_with(|c: char| c.is_ascii_alphabetic()) {
+        return Some("a crate name starts with an ASCII letter");
+    }
+    if !name
+        .bytes()
+        .all(|b| b.is_ascii_alphanumeric() || b == b'-' || b == b'_')
+    {
+        return Some("a crate name holds only ASCII letters, digits, - and _");
+    }
+    None
+}
+
+/// Path of a crate's file in the crates.io sparse index. The index layout cuts the name
+/// into byte prefixes, so a name that is not a crate name is refused rather than cut.
+pub fn sparse_index_path(name: &str) -> Result<String> {
+    if let Some(why) = crate_name_problem(name) {
+        bail!("{name:?} is not a crate name: {why}");
+    }
+    let name = name.to_ascii_lowercase();
+    Ok(match name.len() {
         1 => format!("1/{name}"),
         2 => format!("2/{name}"),
         3 => format!("3/{}/{name}", &name[..1]),
         _ => format!("{}/{}/{name}", &name[..2], &name[2..4]),
-    }
+    })
 }
 
 /// The go proxy escapes upper case letters as `!` plus the lower case letter.
@@ -291,11 +313,17 @@ mod tests {
 
     #[test]
     fn sparse_index_paths() {
-        assert_eq!(sparse_index_path("hex"), "3/h/hex");
-        assert_eq!(sparse_index_path("tar"), "3/t/tar");
-        assert_eq!(sparse_index_path("clap"), "cl/ap/clap");
-        assert_eq!(sparse_index_path("stellar-xdr"), "st/el/stellar-xdr");
-        assert_eq!(sparse_index_path("Inflector"), "in/fl/inflector");
+        let path = |n| sparse_index_path(n).unwrap();
+        assert_eq!(path("a"), "1/a");
+        assert_eq!(path("hex"), "3/h/hex");
+        assert_eq!(path("tar"), "3/t/tar");
+        assert_eq!(path("clap"), "cl/ap/clap");
+        assert_eq!(path("stellar-xdr"), "st/el/stellar-xdr");
+        assert_eq!(path("Inflector"), "in/fl/inflector");
+        // names the index cannot hold are refused, not cut mid character
+        for bad in ["", "é", "aé", "1abc", "a b", &"a".repeat(65)] {
+            assert!(sparse_index_path(bad).is_err(), "{bad:?}");
+        }
     }
 
     #[test]

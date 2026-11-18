@@ -30,6 +30,16 @@ fn invalid_file_fails_before_any_network_call() {
 }
 
 #[test]
+fn a_file_without_pins_is_an_error() {
+    let dir = tempfile::tempdir().unwrap();
+    let path = dir.path().join("pins.toml");
+    std::fs::write(&path, "schema = 1\n").unwrap();
+    let out = shapekit(&["pins", "verify", "--file", path.to_str().unwrap()]);
+    assert_eq!(out.status.code(), Some(2));
+    assert!(String::from_utf8_lossy(&out.stderr).contains("lists no pins"));
+}
+
+#[test]
 fn registered_commands() {
     let out = shapekit(&["--help"]);
     let help = String::from_utf8_lossy(&out.stdout);

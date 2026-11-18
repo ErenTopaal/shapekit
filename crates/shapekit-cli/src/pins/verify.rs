@@ -4,7 +4,7 @@ use std::path::Path;
 use std::sync::Mutex;
 use std::sync::atomic::{AtomicUsize, Ordering};
 
-use anyhow::Result;
+use anyhow::{Result, bail};
 
 use super::check::{self, Verdict};
 use super::remote::{self, Http};
@@ -152,7 +152,7 @@ fn jobs<'a>(pins: &'a Pins, http: &'a Http) -> Vec<(&'static str, String, Job<'a
                 // crates.io api it has no one-request-per-second crawler limit
                 let url = format!(
                     "https://index.crates.io/{}",
-                    remote::sparse_index_path(&c.name)
+                    net(remote::sparse_index_path(&c.name))?
                 );
                 check::check_crate(&net(http.get_text(&url))?, &c.version, &c.checksum)
             }),
@@ -258,6 +258,13 @@ pub fn format_outcome(o: &Outcome) -> String {
 pub fn run(path: &Path, workers: usize) -> Result<bool> {
     let pins = super::load(path)?;
     let outcomes = verify(&pins, workers)?;
+    // a file that pins nothing proves nothing, which a passing run must not suggest
+    if outcomes.is_empty() {
+        bail!(
+            "{} lists no pins, so there is nothing to verify",
+            path.display()
+        );
+    }
     for o in &outcomes {
         println!("{}", format_outcome(o));
     }
