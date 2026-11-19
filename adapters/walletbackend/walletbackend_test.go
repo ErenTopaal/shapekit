@@ -366,10 +366,11 @@ FROM scratch
 		t.Fatal("a listed base was resolved")
 		return "", nil
 	}
-	flags, set, notes, err := pinnedContexts(context.Background(), got, noResolve)
+	plan, err := pinnedContexts(context.Background(), got, noResolve)
 	if err != nil {
 		t.Fatal(err)
 	}
+	flags, set, notes := plan.Flags, plan.Set, plan.Notes
 	if len(flags) != 4 || flags[1] != "golang:1.25.9-bookworm=docker-image://"+BaseImages["golang:1.25.9-bookworm"] || len(set) != 64 || len(notes) != 0 {
 		t.Fatalf("flags %q set %q notes %q", flags, set, notes)
 	}
@@ -381,16 +382,17 @@ FROM scratch
 		}
 		return digest, nil
 	}
-	flags, _, notes, err = pinnedContexts(context.Background(), []string{"alpine:3"}, resolve)
+	plan, err = pinnedContexts(context.Background(), []string{"alpine:3"}, resolve)
 	if err != nil {
 		t.Fatal(err)
 	}
+	flags, notes = plan.Flags, plan.Notes
 	if len(flags) != 2 || flags[1] != "alpine:3=docker-image://"+digest || len(notes) != 1 ||
 		!strings.Contains(notes[0], "BaseImages in adapters/walletbackend/docker.go") {
 		t.Fatalf("flags %q notes %q", flags, notes)
 	}
 	failing := func(context.Context, string) (string, error) { return "", errors.New("no registry") }
-	if _, _, _, err := pinnedContexts(context.Background(), []string{"alpine:3"}, failing); err == nil ||
+	if _, err := pinnedContexts(context.Background(), []string{"alpine:3"}, failing); err == nil ||
 		!strings.Contains(err.Error(), "BaseImages in adapters/walletbackend/docker.go") {
 		t.Fatalf("an unresolvable base: %v", err)
 	}

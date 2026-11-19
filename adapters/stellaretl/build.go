@@ -38,6 +38,10 @@ const GCSImage = "fsouza/fake-gcs-server:1.56.1@sha256:797ce226d62f947c009dc4024
 
 const baseLabel = "shapekit.stellar-etl.bases"
 
+// resolvedLabel records the digest each base BaseImages does not list resolved
+// to (pinning.Label), so later chains build on the same one.
+const resolvedLabel = "shapekit.stellar-etl.resolved"
+
 // source is a git clone of stellar-etl.
 type source struct {
 	dir string
@@ -155,10 +159,9 @@ func dockerfileBases(dockerfile []byte) ([]string, error) {
 	return bases, nil
 }
 
-// pinnedContexts returns the --build-context flags that replace each base with
-// its digest, a stable digest of that set for the image label, and a note for
-// each base BaseImages does not list.
-func pinnedContexts(ctx context.Context, bases []string, resolve pinning.Resolver) ([]string, string, []string, error) {
+// pinnedContexts plans the build on each base's digest: its pin in BaseImages,
+// or for a base BaseImages does not list, the digest resolve gives.
+func pinnedContexts(ctx context.Context, bases []string, resolve pinning.Resolver) (pinning.Plan, error) {
 	return pinning.Contexts(ctx, BaseImages, "BaseImages in adapters/stellaretl/build.go", bases, resolve)
 }
 
@@ -179,12 +182,15 @@ func (s source) ensureImage(ctx context.Context, commit, builder string) (string
 	if err != nil {
 		return "", nil, fmt.Errorf("docker/Dockerfile at %s: %w", commit, err)
 	}
-	contexts, baseSet, notes, err := pinnedContexts(ctx, bases, pinning.RegistryDigest)
+	// a base resolved for an earlier chain is built on the same digest, without asking the
+	// registry again; a missing image or label leaves nothing recorded
+	recorded, _ := docker(ctx, "image", "inspect", "--format", "{{index .Config.Labels \""+resolvedLabel+"\"}}", tag)
+	plan, err := pinnedContexts(ctx, bases, pinning.Cached(pinning.Recorded(recorded), pinning.RegistryDigest))
 	if err != nil {
 		return "", nil, fmt.Errorf("docker/Dockerfile at %s: %w", commit, err)
 	}
-	if got, err := docker(ctx, "image", "inspect", "--format", "{{index .Config.Labels \""+baseLabel+"\"}}", tag); err == nil && got == baseSet {
-		return tag, notes, nil
+	if got, err := docker(ctx, "image", "inspect", "--format", "{{index .Config.Labels \""+baseLabel+"\"}}", tag); err == nil && got == plan.Set {
+		return tag, plan.Notes, nil
 	}
 	archive := exec.CommandContext(ctx, "git", "-C", s.dir, "archive", "--format=tar", commit) //nolint:gosec // commit was checked to be 40 hex digits
 	out, err := archive.StdoutPipe()
@@ -200,10 +206,11 @@ func (s source) ensureImage(ctx context.Context, commit, builder string) (string
 	if builder != "" {
 		args = append(args, "--builder", builder)
 	}
-	args = append(args, contexts...)
+	args = append(args, plan.Flags...)
 	args = append(args,
 		"--label", "shapekit.stellar-etl.commit="+commit,
-		"--label", baseLabel+"="+baseSet,
+		"--label", baseLabel+"="+plan.Set,
+		"--label", resolvedLabel+"="+pinning.Label(plan.Resolved),
 		"-t", tag, "-")
 	buildErr := dockerStream(ctx, out, args...)
 	_, drainErr := io.Copy(io.Discard, out)
@@ -217,7 +224,7 @@ func (s source) ensureImage(ctx context.Context, commit, builder string) (string
 	if drainErr != nil {
 		return "", nil, fmt.Errorf("git archive %s: %w", commit, drainErr)
 	}
-	return tag, notes, nil
+	return tag, plan.Notes, nil
 }
 
 func docker(ctx context.Context, args ...string) (string, error) {

@@ -157,12 +157,15 @@ func (s source) ensureImage(ctx context.Context, commit, builder string) (string
 	if err != nil {
 		return "", nil, fmt.Errorf("the Dockerfile at %s: %w", commit, err)
 	}
-	contexts, baseSet, notes, err := pinnedContexts(ctx, bases, pinning.RegistryDigest)
+	// a base resolved for an earlier chain is built on the same digest, without asking the
+	// registry again; a missing image or label leaves nothing recorded
+	recorded, _ := docker(ctx, "image", "inspect", "--format", "{{index .Config.Labels \""+resolvedLabel+"\"}}", tag)
+	plan, err := pinnedContexts(ctx, bases, pinning.Cached(pinning.Recorded(recorded), pinning.RegistryDigest))
 	if err != nil {
 		return "", nil, fmt.Errorf("the Dockerfile at %s: %w", commit, err)
 	}
-	if got, err := docker(ctx, "image", "inspect", "--format", "{{index .Config.Labels \""+baseLabel+"\"}}", tag); err == nil && got == baseSet {
-		return tag, notes, nil
+	if got, err := docker(ctx, "image", "inspect", "--format", "{{index .Config.Labels \""+baseLabel+"\"}}", tag); err == nil && got == plan.Set {
+		return tag, plan.Notes, nil
 	}
 	archive := exec.CommandContext(ctx, "git", "-C", s.dir, "archive", "--format=tar", commit) //nolint:gosec // commit was checked to be 40 hex digits
 	out, err := archive.StdoutPipe()
@@ -178,10 +181,11 @@ func (s source) ensureImage(ctx context.Context, commit, builder string) (string
 	if builder != "" {
 		args = append(args, "--builder", builder)
 	}
-	args = append(args, contexts...)
+	args = append(args, plan.Flags...)
 	args = append(args, "--build-arg", "GIT_COMMIT="+commit,
 		"--label", "shapekit.wallet-backend.commit="+commit,
-		"--label", baseLabel+"="+baseSet,
+		"--label", baseLabel+"="+plan.Set,
+		"--label", resolvedLabel+"="+pinning.Label(plan.Resolved),
 		"-t", tag, "-")
 	buildErr := dockerStream(ctx, out, args...)
 	// drain whatever docker did not read so git archive can exit
@@ -196,5 +200,5 @@ func (s source) ensureImage(ctx context.Context, commit, builder string) (string
 	if drainErr != nil {
 		return "", nil, fmt.Errorf("git archive %s: %w", commit, drainErr)
 	}
-	return tag, notes, nil
+	return tag, plan.Notes, nil
 }

@@ -60,9 +60,13 @@ func TestContexts(t *testing.T) {
 		asked = append(asked, ref)
 		return resolved, nil
 	}
-	flags, set, notes, err := Contexts(context.Background(), pins, "BaseImages in x.go", []string{"golang:1.25", "debian:trixie", byDigest}, resolve)
+	plan, err := Contexts(context.Background(), pins, "BaseImages in x.go", []string{"golang:1.25", "debian:trixie", byDigest}, resolve)
 	if err != nil {
 		t.Fatal(err)
+	}
+	flags, set, notes := plan.Flags, plan.Set, plan.Notes
+	if Label(plan.Resolved) != "debian:trixie="+resolved {
+		t.Errorf("resolved %v", plan.Resolved)
 	}
 	if strings.Join(asked, " ") != "debian:trixie" {
 		t.Errorf("resolved %q", asked)
@@ -78,12 +82,12 @@ func TestContexts(t *testing.T) {
 		t.Errorf("notes %q", notes)
 	}
 	// the set digest does not depend on the order of the bases
-	_, set2, _, err := Contexts(context.Background(), pins, "BaseImages in x.go", []string{byDigest, "debian:trixie", "golang:1.25"}, resolve)
-	if err != nil || set2 != set || len(set) != 64 {
-		t.Errorf("set %q and %q: %v", set, set2, err)
+	plan2, err := Contexts(context.Background(), pins, "BaseImages in x.go", []string{byDigest, "debian:trixie", "golang:1.25"}, resolve)
+	if err != nil || plan2.Set != set || len(set) != 64 {
+		t.Errorf("set %q and %q: %v", set, plan2.Set, err)
 	}
 	failing := func(context.Context, string) (string, error) { return "", errors.New("no registry") }
-	if _, _, _, err := Contexts(context.Background(), pins, "BaseImages in x.go", []string{"debian:trixie"}, failing); err == nil ||
+	if _, err := Contexts(context.Background(), pins, "BaseImages in x.go", []string{"debian:trixie"}, failing); err == nil ||
 		!strings.Contains(err.Error(), "no registry") || !strings.Contains(err.Error(), "BaseImages in x.go") {
 		t.Errorf("unresolvable: %v", err)
 	}
@@ -102,5 +106,29 @@ func TestRepository(t *testing.T) {
 		if got := Repository(ref); got != want {
 			t.Errorf("%s: %s, want %s", ref, got, want)
 		}
+	}
+}
+
+func TestRecordedResolutionsAreReused(t *testing.T) {
+	d1 := "docker.io/library/debian@sha256:" + strings.Repeat("44", 32)
+	d2 := "ghcr.io/x/y@sha256:" + strings.Repeat("55", 32)
+	label := Label(map[string]string{"debian:trixie": d1, "ghcr.io/x/y:2": d2})
+	got := Recorded(label)
+	if len(got) != 2 || got["debian:trixie"] != d1 || got["ghcr.io/x/y:2"] != d2 {
+		t.Fatalf("%q read back as %v", label, got)
+	}
+	if len(Recorded("<no value>")) != 0 || len(Recorded("")) != 0 || len(Recorded("a=b")) != 0 {
+		t.Fatal("an unreadable label was read")
+	}
+	asked := 0
+	r := Cached(got, func(context.Context, string) (string, error) {
+		asked++
+		return d2, nil
+	})
+	if d, err := r(context.Background(), "debian:trixie"); err != nil || d != d1 || asked != 0 {
+		t.Fatalf("recorded: %s %v, asked %d", d, err, asked)
+	}
+	if d, err := r(context.Background(), "alpine:3"); err != nil || d != d2 || asked != 1 {
+		t.Fatalf("not recorded: %s %v, asked %d", d, err, asked)
 	}
 }

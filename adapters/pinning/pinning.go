@@ -54,16 +54,29 @@ func SDKProtocol(table map[string]uint32, version, where string) (uint32, string
 // reference resolves to now.
 type Resolver func(ctx context.Context, ref string) (string, error)
 
-// Contexts returns the buildx flags that build each base on a fixed digest, a
-// stable digest of that set for an image label, and a note for each base the
-// table does not list. A listed base is built on its pin (table maps the FROM
-// reference to <repository>@sha256:<hex>, as pins.toml lists it). A base the
-// Dockerfile already names by digest is built on that digest. Any other base is
-// resolved by resolve and built on the digest it returns, which the note
-// records. where names the table for the messages, for example "BaseImages in
-// adapters/walletbackend/docker.go".
-func Contexts(ctx context.Context, table map[string]string, where string, bases []string, resolve Resolver) ([]string, string, []string, error) {
+// Plan is how an image is built on its bases.
+type Plan struct {
+	// Flags are the buildx --build-context flags that build each base on its
+	// digest.
+	Flags []string
+	// Set is a stable digest of every base and its digest, for an image label.
+	Set string
+	// Notes name each base the table does not list and the digest it is built on.
+	Notes []string
+	// Resolved maps each base the table does not list to the digest it
+	// resolved to, for Label.
+	Resolved map[string]string
+}
+
+// Contexts plans the build of an image on bases. A listed base is built on its
+// pin (table maps the FROM reference to <repository>@sha256:<hex>, as
+// pins.toml lists it). A base the Dockerfile already names by digest is built
+// on that digest. Any other base is resolved by resolve and built on the
+// digest it returns, which the plan's notes record. where names the table for
+// the messages, for example "BaseImages in adapters/walletbackend/docker.go".
+func Contexts(ctx context.Context, table map[string]string, where string, bases []string, resolve Resolver) (Plan, error) {
 	var flags, set, notes []string
+	resolved := map[string]string{}
 	for _, b := range bases {
 		pinned, ok := table[b]
 		switch {
@@ -75,17 +88,58 @@ func Contexts(ctx context.Context, table map[string]string, where string, bases 
 		default:
 			r, err := resolve(ctx, b)
 			if err != nil {
-				return nil, "", nil, fmt.Errorf("base image %s is not in %s and its digest could not be resolved: %w; add it to that table and pins.toml in a shapekit release", b, where, err)
+				return Plan{}, fmt.Errorf("base image %s is not in %s and its digest could not be resolved: %w; add it to that table and pins.toml in a shapekit release", b, where, err)
 			}
 			pinned = r
+			resolved[b] = r
 			flags = append(flags, "--build-context", b+"=docker-image://"+pinned)
-			notes = append(notes, fmt.Sprintf("base image %s is not in %s; it is built on %s, the digest its tag resolves to now", b, where, pinned))
+			notes = append(notes, fmt.Sprintf("base image %s is not in %s; it is built on %s, the digest its tag resolved to", b, where, pinned))
 		}
 		set = append(set, b+"="+pinned)
 	}
 	sort.Strings(set)
 	sum := sha256.Sum256([]byte(strings.Join(set, "\n")))
-	return flags, hex.EncodeToString(sum[:]), notes, nil
+	return Plan{Flags: flags, Set: hex.EncodeToString(sum[:]), Notes: notes, Resolved: resolved}, nil
+}
+
+// Label is the value of an image label recording resolved, which Recorded
+// reads back.
+func Label(resolved map[string]string) string {
+	refs := make([]string, 0, len(resolved))
+	for r := range resolved {
+		refs = append(refs, r)
+	}
+	sort.Strings(refs)
+	parts := make([]string, 0, len(refs))
+	for _, r := range refs {
+		parts = append(parts, r+"="+resolved[r])
+	}
+	return strings.Join(parts, " ")
+}
+
+// Recorded reads a Label value back. Entries it cannot read are left out, so
+// they are resolved again.
+func Recorded(label string) map[string]string {
+	out := map[string]string{}
+	for f := range strings.FieldsSeq(label) {
+		ref, digest, ok := strings.Cut(f, "=")
+		if ok && ref != "" && strings.Contains(digest, "@sha256:") {
+			out[ref] = digest
+		}
+	}
+	return out
+}
+
+// Cached resolves a reference from recorded first, so every chain of a run
+// builds on the digest the first one resolved and asks the registry once; the
+// rest through resolve.
+func Cached(recorded map[string]string, resolve Resolver) Resolver {
+	return func(ctx context.Context, ref string) (string, error) {
+		if d, ok := recorded[ref]; ok {
+			return d, nil
+		}
+		return resolve(ctx, ref)
+	}
 }
 
 // Repository is the full repository name docker gives an image reference

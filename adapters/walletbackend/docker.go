@@ -31,6 +31,10 @@ var BaseImages = map[string]string{
 // on, so an image built before the pins (or on other pins) is rebuilt.
 const baseLabel = "shapekit.wallet-backend.bases"
 
+// resolvedLabel records the digest each base BaseImages does not list resolved
+// to (pinning.Label), so later chains build on the same one.
+const resolvedLabel = "shapekit.wallet-backend.resolved"
+
 // dockerfileBases returns the external images a Dockerfile builds FROM, in
 // order and without repeats. Stage names defined earlier in the file and
 // scratch are not images.
@@ -73,10 +77,9 @@ func dockerfileBases(dockerfile []byte) ([]string, error) {
 	return bases, nil
 }
 
-// pinnedContexts returns the --build-context flags that replace each base with
-// its digest, a stable digest of that set for the image label, and a note for
-// each base BaseImages does not list.
-func pinnedContexts(ctx context.Context, bases []string, resolve pinning.Resolver) ([]string, string, []string, error) {
+// pinnedContexts plans the build on each base's digest: its pin in BaseImages,
+// or for a base BaseImages does not list, the digest resolve gives.
+func pinnedContexts(ctx context.Context, bases []string, resolve pinning.Resolver) (pinning.Plan, error) {
 	return pinning.Contexts(ctx, BaseImages, "BaseImages in adapters/walletbackend/docker.go", bases, resolve)
 }
 

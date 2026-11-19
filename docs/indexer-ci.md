@@ -278,7 +278,7 @@ A pull request that bumps `go-stellar-sdk` or a base image past these tables sti
 | a version older than every listed one, or not a semantic version | stops with an error that names the table and asks for a shapekit release that lists it |
 | a `FROM` image in `BaseImages` | builds on its pinned digest |
 | a `FROM` image the Dockerfile names by digest (`image@sha256:...`) | builds on that digest |
-| any other `FROM` image | resolves its tag to a digest through the registry (`docker buildx imagetools inspect`) and builds on that digest. When the registry cannot be reached it stops with an error that names the table |
+| any other `FROM` image | resolves its tag to a digest through the registry (`docker buildx imagetools inspect`) and builds on that digest. The image records it in a label, so the later chains of the run build on the same digest without asking the registry again. When the registry cannot be reached or refuses the request (Docker Hub's rate limit, for example), it stops with an error that names the table |
 
 Each case the tables do not list is written to the adapter log as a `note:` line and recorded
 with the protocol or digest the run used, in the `components` of each chain in
