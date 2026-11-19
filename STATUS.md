@@ -2,6 +2,78 @@
 
 A dated public log of what has landed in shapekit. Newest entry first.
 
+## 2026-11-19: 0.2.0 released, candidate findings filed upstream
+
+- shapekit 0.2.0 is released from a signed tag:
+  <https://github.com/ErenTopaal/shapekit/releases/tag/v0.2.0>. It holds the CLI, `indexerlint`
+  and `wb-adapter` for Linux and macOS on x86-64 and arm64, `corpus-0.2.0.tar.zst` (1,092
+  entries), `goldens-core-v30.0.0.tar.zst` and `SHA256SUMS`. Every asset has a build provenance
+  attestation. The README lists the sha256 of each asset and the commands to download and
+  check them; [docs/sdk-ci.md](docs/sdk-ci.md) and [docs/indexer-ci.md](docs/indexer-ci.md)
+  show the workflow inputs filled in for this release.
+- 26 candidate findings are filed upstream; each now has status `filed` and its link in
+  `candidate/findings/triage.toml`:
+  - stellar_flutter_sdk, 7: [#291](https://github.com/Soneso/stellar_flutter_sdk/issues/291) (DART-BOUNDS),
+    [#292](https://github.com/Soneso/stellar_flutter_sdk/issues/292) (DART-INFLATION),
+    [#293](https://github.com/Soneso/stellar_flutter_sdk/issues/293) (DART-MAXTIME),
+    [#294](https://github.com/Soneso/stellar_flutter_sdk/issues/294) (DART-OFFERTEXT),
+    [#295](https://github.com/Soneso/stellar_flutter_sdk/issues/295) (DART-OFFERU64),
+    [#296](https://github.com/Soneso/stellar_flutter_sdk/issues/296) (DART-PRICE),
+    [#297](https://github.com/Soneso/stellar_flutter_sdk/issues/297) (DART-UTF8);
+  - stellar-php-sdk, 6: [#239](https://github.com/Soneso/stellar-php-sdk/issues/239) (PHP-BOUNDS),
+    [#240](https://github.com/Soneso/stellar-php-sdk/issues/240) (PHP-CBKEY-JSON),
+    [#241](https://github.com/Soneso/stellar-php-sdk/issues/241) (PHP-HEXHASH),
+    [#242](https://github.com/Soneso/stellar-php-sdk/issues/242) (PHP-INFLATION),
+    [#243](https://github.com/Soneso/stellar-php-sdk/issues/243) (PHP-JSON-DEPTH),
+    [#244](https://github.com/Soneso/stellar-php-sdk/issues/244) (PHP-SETOPTIONS);
+  - dotnet-stellar-sdk, 5: [#274](https://github.com/Beans-BV/dotnet-stellar-sdk/issues/274) (NET-DEPRECATED-OPS),
+    [#275](https://github.com/Beans-BV/dotnet-stellar-sdk/issues/275) (NET-DEPTH),
+    [#276](https://github.com/Beans-BV/dotnet-stellar-sdk/issues/276) (NET-PRICE),
+    [#277](https://github.com/Beans-BV/dotnet-stellar-sdk/issues/277) (NET-SCVEC),
+    [#278](https://github.com/Beans-BV/dotnet-stellar-sdk/issues/278) (NET-STRKEY);
+  - kmp-stellar-sdk, 5: [#168](https://github.com/Soneso/kmp-stellar-sdk/issues/168) (KMP-BOUNDS),
+    [#169](https://github.com/Soneso/kmp-stellar-sdk/issues/169) (KMP-JSON-DEPTH),
+    [#170](https://github.com/Soneso/kmp-stellar-sdk/issues/170) (KMP-MUXED-SOURCE),
+    [#171](https://github.com/Soneso/kmp-stellar-sdk/issues/171) (KMP-TXOBJECT),
+    [#172](https://github.com/Soneso/kmp-stellar-sdk/issues/172) (KMP-UTF8);
+  - stellar-cli, 2: [#2894](https://github.com/stellar/stellar-cli/issues/2894) (CLI-ALLOC),
+    [#2895](https://github.com/stellar/stellar-cli/issues/2895) (CLI-DEPTH);
+  - stellar-etl, 1: [#518](https://github.com/stellar/stellar-etl/issues/518) (ETL-4).
+- Four candidate findings that duplicate open issues add a reproduction there as a comment:
+  [dotnet-stellar-sdk#247](https://github.com/Beans-BV/dotnet-stellar-sdk/issues/247) (NET-UTF8),
+  [dotnet-stellar-sdk#257](https://github.com/Beans-BV/dotnet-stellar-sdk/issues/257) (NET-ISSUER-ORDER),
+  [rs-stellar-xdr#628](https://github.com/stellar/rs-stellar-xdr/issues/628) (CLI-JSON-DEPTH) and
+  [stellar-cli#2769](https://github.com/stellar/stellar-cli/issues/2769) (CLI-TXHASH-V1).
+- PHP-UINT64 stays a draft:
+  [stellar-php-sdk#229](https://github.com/Soneso/stellar-php-sdk/pull/229) fixes it on the
+  SDK's main branch, and no release holds the fix yet. It is rerun on the next release and
+  filed only if it still fails there.
+- Candidate lane: 46 findings covering 847 failures, 0 unmapped: 26 filed, 8 duplicates of
+  another issue, 11 recorded as won't fix and 1 draft
+  (`shapekit findings check --triage candidate/findings/triage.toml --out candidate/findings --allow-draft`).
+  The main record is unchanged: 25 findings covering 891 failures, 215 more held by candidate
+  findings, 0 unmapped, none pending filing.
+- `conformance/known-failures/*.txt` point at the filed issues; only the PHP-UINT64 lines
+  still point at its draft.
+- The dashboard's findings page lists the candidate lane beside the main record, and the landing
+  page counts the filed candidate findings and the duplicates with their upstream links.
+- Proposals to run the corpus in each project's CI with the reusable workflows, one issue per
+  project:
+  [rs-stellar-xdr#646](https://github.com/stellar/rs-stellar-xdr/issues/646),
+  [go-stellar-sdk#6059](https://github.com/stellar/go-stellar-sdk/issues/6059),
+  [js-stellar-sdk#1914](https://github.com/stellar/js-stellar-sdk/issues/1914),
+  [rs-soroban-sdk#2164](https://github.com/stellar/rs-soroban-sdk/issues/2164),
+  [stellar-cli#2896](https://github.com/stellar/stellar-cli/issues/2896),
+  [py-stellar-base#1277](https://github.com/StellarCN/py-stellar-base/issues/1277),
+  [java-stellar-sdk#845](https://github.com/lightsail-network/java-stellar-sdk/issues/845),
+  [stellar_flutter_sdk#298](https://github.com/Soneso/stellar_flutter_sdk/issues/298),
+  [stellar-php-sdk#247](https://github.com/Soneso/stellar-php-sdk/issues/247),
+  [dotnet-stellar-sdk#279](https://github.com/Beans-BV/dotnet-stellar-sdk/issues/279),
+  [kmp-stellar-sdk#173](https://github.com/Soneso/kmp-stellar-sdk/issues/173),
+  [wallet-backend#835](https://github.com/stellar/wallet-backend/issues/835),
+  [stellar-etl#519](https://github.com/stellar/stellar-etl/issues/519) and
+  [stellar-rpc#1202](https://github.com/stellar/stellar-rpc/issues/1202).
+
 ## 2026-11-18: PostgreSQL indexers connect through a mapping file
 
 - `shapekit check indexer --mapping <file>` (and `harness run`, `harness reproduce`) connects an
