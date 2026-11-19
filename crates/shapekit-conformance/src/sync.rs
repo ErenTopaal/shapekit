@@ -548,8 +548,9 @@ const HEADER: &str = "\
 # imports (xdrlib3, pynacl) are pinned.
 # java: one source (testees/java/src) built by maven per version from
 # testees/java/versions/<version>/pom.xml into target/testees/java/<version>/, whose lib/ jars
-# are checked against testees/java/versions/<version>/lib.sha256, so the resolved dependency
-# tree (gson above all) is pinned, not only the sdk version.
+# are checked against testees/java/versions/<version>/lib.sha256 by scripts/check-jars.sh (every
+# hash, and no jar the file does not list), so the resolved dependency tree (gson above all) is
+# pinned, not only the sdk version.
 # dart: the sources in testees/dart are copied next to the pubspec and lock file committed under
 # testees/dart/versions/<version>/ into target/testees/dart/<version>/, resolved with `flutter
 # pub get --enforce-lockfile` (stellar_flutter_sdk declares a flutter dependency, so the flutter
@@ -761,15 +762,12 @@ fn build_lines(sdk: &str, v: &str) -> (Vec<String>, Vec<String>) {
                         ])
                     ),
                     format!(
-                        "  {{ argv = {}, dir = {} }},",
+                        "  {{ argv = {} }},",
                         array(&[
-                            s("sha256sum"),
-                            s("--check"),
-                            s("--strict"),
-                            s("--quiet"),
-                            format!("../../../../../testees/java/versions/{v}/lib.sha256"),
-                        ]),
-                        quote(&format!("{t}/lib"))
+                            s("scripts/check-jars.sh"),
+                            format!("{t}/lib"),
+                            format!("testees/java/versions/{v}/lib.sha256"),
+                        ])
                     ),
                 ],
                 vec![s("java"), s("-jar"), format!("{t}/testee.jar")],
@@ -913,15 +911,12 @@ fn build_lines(sdk: &str, v: &str) -> (Vec<String>, Vec<String>) {
                         ])
                     ),
                     format!(
-                        "  {{ argv = {}, dir = {} }},",
+                        "  {{ argv = {} }},",
                         array(&[
-                            s("sha256sum"),
-                            s("--check"),
-                            s("--strict"),
-                            s("--quiet"),
-                            format!("../../../../../testees/kmp/versions/{v}/lib.sha256"),
-                        ]),
-                        quote(&format!("{t}/lib"))
+                            s("scripts/check-jars.sh"),
+                            format!("{t}/lib"),
+                            format!("testees/kmp/versions/{v}/lib.sha256"),
+                        ])
                     ),
                 ],
                 vec![s("java"), s("-jar"), format!("{t}/testee.jar")],

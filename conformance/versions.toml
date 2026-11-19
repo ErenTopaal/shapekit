@@ -62,8 +62,9 @@
 # imports (xdrlib3, pynacl) are pinned.
 # java: one source (testees/java/src) built by maven per version from
 # testees/java/versions/<version>/pom.xml into target/testees/java/<version>/, whose lib/ jars
-# are checked against testees/java/versions/<version>/lib.sha256, so the resolved dependency
-# tree (gson above all) is pinned, not only the sdk version.
+# are checked against testees/java/versions/<version>/lib.sha256 by scripts/check-jars.sh (every
+# hash, and no jar the file does not list), so the resolved dependency tree (gson above all) is
+# pinned, not only the sdk version.
 # dart: the sources in testees/dart are copied next to the pubspec and lock file committed under
 # testees/dart/versions/<version>/ into target/testees/dart/<version>/, resolved with `flutter
 # pub get --enforce-lockfile` (stellar_flutter_sdk declares a flutter dependency, so the flutter
@@ -371,7 +372,7 @@ memory = { resource = "data", mib = 4096 }
 version = "5.0.0"
 build = [
   { argv = ["mvn", "-B", "-q", "-f", "testees/java/versions/5.0.0/pom.xml", "-DskipTests", "package"] },
-  { argv = ["sha256sum", "--check", "--strict", "--quiet", "../../../../../testees/java/versions/5.0.0/lib.sha256"], dir = "target/testees/java/5.0.0/lib" },
+  { argv = ["scripts/check-jars.sh", "target/testees/java/5.0.0/lib", "testees/java/versions/5.0.0/lib.sha256"] },
 ]
 command = ["java", "-jar", "target/testees/java/5.0.0/testee.jar"]
 max_protocol = 29
@@ -381,7 +382,7 @@ max_protocol = 29
 version = "6.0.0"
 build = [
   { argv = ["mvn", "-B", "-q", "-f", "testees/java/versions/6.0.0/pom.xml", "-DskipTests", "package"] },
-  { argv = ["sha256sum", "--check", "--strict", "--quiet", "../../../../../testees/java/versions/6.0.0/lib.sha256"], dir = "target/testees/java/6.0.0/lib" },
+  { argv = ["scripts/check-jars.sh", "target/testees/java/6.0.0/lib", "testees/java/versions/6.0.0/lib.sha256"] },
 ]
 command = ["java", "-jar", "target/testees/java/6.0.0/testee.jar"]
 max_protocol = 30
@@ -464,7 +465,7 @@ memory = { resource = "data", mib = 4096 }
 version = "1.18.0"
 build = [
   { argv = ["mvn", "-B", "-q", "-f", "testees/kmp/versions/1.18.0/pom.xml", "-DskipTests", "package"] },
-  { argv = ["sha256sum", "--check", "--strict", "--quiet", "../../../../../testees/kmp/versions/1.18.0/lib.sha256"], dir = "target/testees/kmp/1.18.0/lib" },
+  { argv = ["scripts/check-jars.sh", "target/testees/kmp/1.18.0/lib", "testees/kmp/versions/1.18.0/lib.sha256"] },
 ]
 command = ["java", "-jar", "target/testees/kmp/1.18.0/testee.jar"]
 max_protocol = 30
