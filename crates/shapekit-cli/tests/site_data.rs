@@ -158,6 +158,25 @@ fn site_data_matches_the_committed_files() {
         summary["arms_uncovered"].as_u64().unwrap(),
         all_arms - covered_arms
     );
+    // the CAP total leaves out the CAPs with a blocker, and the parts of the corpus by source
+    // add up to every entry
+    let visible = summary["caps_indexer_visible"].as_u64().unwrap();
+    let blocked = summary["caps_indexer_visible_with_reason"]
+        .as_u64()
+        .unwrap();
+    assert!(
+        summary["caps_indexer_visible_core_emitted"]
+            .as_u64()
+            .unwrap()
+            <= visible - blocked
+    );
+    let by_source: u64 = summary["entries_by_source_class"]
+        .as_object()
+        .unwrap()
+        .values()
+        .map(|n| n.as_u64().unwrap())
+        .sum();
+    assert_eq!(by_source, summary["entries"].as_u64().unwrap());
 
     // every file the site links to exists in the checkout
     let ids: std::collections::BTreeSet<&str> = entries["entries"]
@@ -338,6 +357,36 @@ fn site_data_matches_the_committed_files() {
         );
     }
     assert!(read("routes/home.tsx").contains("s.arms.percent"));
+    // the same holds for the CAPs, the corpus by source and what the harness found in each
+    // indexer: one function of site/src/lib/metrics.ts each, called by every page that shows it
+    assert!(metrics.contains("s.caps_indexer_visible - blocked"));
+    assert!(metrics.contains("caps.total"));
+    for (func, pages) in [
+        (
+            "capCoverage(",
+            &["landing/stats.ts", "pages/overview.tsx"][..],
+        ),
+        (
+            "entryComposition(",
+            &["landing/stats.ts", "pages/overview.tsx", "pages/corpus.tsx"][..],
+        ),
+        (
+            "foundText(",
+            &[
+                "landing/stats.ts",
+                "pages/overview.tsx",
+                "pages/indexer.tsx",
+            ][..],
+        ),
+    ] {
+        for page in pages {
+            assert!(read(page).contains(func), "{page} does not call {func}");
+        }
+    }
+    // the landing page shows no out-of-scope count; the indexer page keeps it
+    let home = read("routes/home.tsx");
+    assert!(!home.contains("out of scope") && !home.contains("out-of-scope"));
+    assert!(!read("landing/stats.ts").contains("out-of-scope"));
     let mut stack = vec![site.clone()];
     while let Some(dir) = stack.pop() {
         for e in std::fs::read_dir(&dir).unwrap() {
