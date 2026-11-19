@@ -77,8 +77,10 @@ export interface LandingStats {
   fields: { notValidated: number; exercised: number }
   findings: LandingFinding[]
   findingsIntended: string[]
-  findingsFiled: number
-  findingsReported: number
+  /** upstream issues shapekit filed that the findings link, each counted once */
+  issuesFiled: number
+  /** upstream issues the findings link that shapekit did not file, each counted once */
+  issuesReported: number
   sdks: Sdk[]
   runs: IndexerRun[]
   bugs: Bug[]
@@ -129,12 +131,18 @@ export async function loadLandingStats(): Promise<LandingStats> {
   // duplicate of an issue reported before; drafts and won't-fix records stay off the page
   const candidates = (findings.candidates?.findings ?? []).filter((f) => f.status === "filed" || f.status === "duplicate-of")
   const bugs = [...all.filter((f) => f.status !== "wont-fix"), ...candidates]
+  // shapekit's own issues are the links of the filed findings of both lanes; a finding that
+  // links one of them is shapekit's whatever its status, so it is never counted as reported before
+  const ownLinks = new Set([...all, ...(findings.candidates?.findings ?? [])].flatMap((f) => (f.status === "filed" && f.link ? [f.link] : [])))
+  const own = (f: Finding) => f.link !== null && ownLinks.has(f.link)
+  // findings that share one upstream link count once
+  const issues = (keep: (f: Finding) => boolean) => new Set(bugs.filter(keep).map((f) => f.link ?? f.id)).size
   const landingFindings: LandingFinding[] = bugs.map((f) => ({
     id: f.id,
     title: f.short ?? f.title,
     component: f.component,
     severity: f.severity,
-    filed: f.status === "filed",
+    filed: own(f),
     link: f.link,
     ref: issueRef(f.link),
   }))
@@ -238,8 +246,8 @@ export async function loadLandingStats(): Promise<LandingStats> {
     fields: { notValidated: sum.fields_not_fully_validated, exercised: sum.fields_not_fully_validated_exercised },
     findings: landingFindings,
     findingsIntended: all.filter((f) => f.status === "wont-fix").map((f) => f.id),
-    findingsFiled: bugs.filter((f) => f.status === "filed").length,
-    findingsReported: bugs.filter((f) => f.status !== "filed").length,
+    issuesFiled: issues(own),
+    issuesReported: issues((f) => !own(f)),
     sdks,
     runs,
     bugs: bugsOut,

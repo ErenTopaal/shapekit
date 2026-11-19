@@ -205,6 +205,30 @@ fn site_data_matches_the_committed_files() {
         }
     }
 
+    // the landing page counts a finding as reported before only when shapekit did not file its
+    // link: a finding of either lane whose link is an issue a filed finding holds is filed too
+    let rows: Vec<&Value> = findings["findings"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .chain(cand["findings"].as_array().unwrap())
+        .collect();
+    let own: std::collections::BTreeSet<&str> = rows
+        .iter()
+        .filter(|f| f["status"] == "filed")
+        .filter_map(|f| f["link"].as_str())
+        .collect();
+    for f in &rows {
+        if let Some(l) = f["link"].as_str() {
+            assert!(
+                f["status"] == "filed" || !own.contains(l),
+                "{} is {} of {l}, an issue shapekit filed",
+                f["id"],
+                f["status"]
+            );
+        }
+    }
+
     // conformance: every matrix entry is a corpus entry, and cell counts add up
     let conformance = read_json(&out.join("conformance.json"));
     // one per sdk of the versions file, with or without a committed matrix

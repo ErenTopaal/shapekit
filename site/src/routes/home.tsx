@@ -96,7 +96,7 @@ function Kit({ s }: { s: LandingStats }) {
           {finds.map((x, i) => <a key={x.id} className={`fi tip sev-${sevKey[x.severity] ?? "dv"}${x.filed ? "" : " o"}`} href="#findings" data-tip={`${x.id}: ${x.title}`} aria-label={x.id} style={css({ "--i": i })}></a>)}
         </span>
         <span className="kit-sev">{sevOrder.map((k) => <span key={k}><i className={`sev-${sevKey[k]}`}></i>{bySev(k)} {sevLabel[k]}</span>)}</span>
-        <span className="kit-key"><span><i style={css({ "--sw": "var(--c-ink)" })}></i>{s.findingsFiled} filed upstream</span><span><i style={css({ "--sw": "transparent", border: "var(--bw-strong) solid var(--c-ink)" })}></i>{s.findingsReported} reproduced</span></span>
+        <span className="kit-key"><span><i style={css({ "--sw": "var(--c-ink)" })}></i>{plural(s.issuesFiled, "issue", "issues")} filed</span><span><i style={css({ "--sw": "transparent", border: "var(--bw-strong) solid var(--c-ink)" })}></i>{s.issuesReported} reproduced</span></span>
         <a className="arrow-link kit-go" href="#findings">Every finding</a>
       </div>
     </figure>
@@ -110,7 +110,7 @@ function FindingsHead({ s }: { s: LandingStats }) {
   return (
     <div className="fd-big" data-r="">
       <span className="fd-num tnum" data-count="">{f(s.findings.length)}</span>
-      <span className="fd-num-cap"><strong>findings in {components} components.</strong><span>{s.findingsFiled} filed upstream by shapekit. {s.findingsReported} reported before, now reproduced.{intended}</span></span>
+      <span className="fd-num-cap"><strong>findings in {components} components.</strong><span>{plural(s.issuesFiled, "issue", "issues")} filed upstream by shapekit. {plural(s.issuesReported, "issue", "issues")} reported before by others, now reproduced.{intended}</span></span>
     </div>
   )
 }
