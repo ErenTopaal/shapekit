@@ -164,9 +164,12 @@ func Repository(ref string) string {
 }
 
 // RegistryDigest resolves ref through the registry with docker buildx
-// imagetools: the digest of the manifest (or index) its tag names now.
+// imagetools: the digest of the manifest (or index) its tag names now, which is
+// the sha256 of the raw manifest bytes. --raw fetches that one manifest and not
+// the per-platform ones, so a resolution costs one request against a
+// registry's pull limit.
 func RegistryDigest(ctx context.Context, ref string) (string, error) {
-	cmd := exec.CommandContext(ctx, "docker", "buildx", "imagetools", "inspect", "--format", "{{json .Manifest}}", ref) //nolint:gosec // docker is the fixed program; ref comes from the target's Dockerfile
+	cmd := exec.CommandContext(ctx, "docker", "buildx", "imagetools", "inspect", "--raw", ref) //nolint:gosec // docker is the fixed program; ref comes from the target's Dockerfile
 	var stderr strings.Builder
 	cmd.Stderr = &stderr
 	out, err := cmd.Output()
@@ -174,13 +177,14 @@ func RegistryDigest(ctx context.Context, ref string) (string, error) {
 		return "", fmt.Errorf("docker buildx imagetools inspect %s: %w: %s", ref, err, strings.TrimSpace(stderr.String()))
 	}
 	var m struct {
-		Digest string `json:"digest"`
+		SchemaVersion int `json:"schemaVersion"`
 	}
 	if err := json.Unmarshal(out, &m); err != nil {
 		return "", fmt.Errorf("reading the manifest of %s: %w", ref, err)
 	}
-	if !strings.HasPrefix(m.Digest, "sha256:") || len(m.Digest) != len("sha256:")+64 {
-		return "", fmt.Errorf("the manifest of %s has digest %q", ref, m.Digest)
+	if m.SchemaVersion != 2 {
+		return "", fmt.Errorf("the manifest of %s has schema version %d, not 2", ref, m.SchemaVersion)
 	}
-	return Repository(ref) + "@" + m.Digest, nil
+	sum := sha256.Sum256(out)
+	return Repository(ref) + "@sha256:" + hex.EncodeToString(sum[:]), nil
 }

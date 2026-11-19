@@ -164,7 +164,10 @@ func (s source) ensureImage(ctx context.Context, commit, builder string) (string
 	if err != nil {
 		return "", nil, fmt.Errorf("the Dockerfile at %s: %w", commit, err)
 	}
-	if got, err := docker(ctx, "image", "inspect", "--format", "{{index .Config.Labels \""+baseLabel+"\"}}", tag); err == nil && got == plan.Set {
+	// an image built before the resolutions were recorded is built again (from the
+	// build cache), so it records them and later chains skip the registry
+	if got, err := docker(ctx, "image", "inspect", "--format", "{{index .Config.Labels \""+baseLabel+"\"}}", tag); err == nil && got == plan.Set &&
+		(len(plan.Resolved) == 0 || recorded == pinning.Label(plan.Resolved)) {
 		return tag, plan.Notes, nil
 	}
 	archive := exec.CommandContext(ctx, "git", "-C", s.dir, "archive", "--format=tar", commit) //nolint:gosec // commit was checked to be 40 hex digits
