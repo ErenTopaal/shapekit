@@ -4,7 +4,7 @@ import { load, type Entry } from "@/lib/data"
 import { bySdkOrder, sdkName } from "@/lib/sdks"
 import { docs, expectations, label, verdictMeaning } from "@/lib/terms"
 import { findingRows } from "@/lib/metrics"
-import { indexerVerdicts, sdkFailures, verdictText } from "@/lib/results"
+import { indexerVerdicts, sdkFailures } from "@/lib/results"
 import { capPath, entriesPath, findingPath, sdkPath } from "@/lib/paths"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import {
@@ -163,9 +163,9 @@ export function EntryPage() {
         <div>
           <dt className="font-medium">Expected answer</dt>
           <dd className="text-muted-foreground">
-            <TextLink to={`/dashboard/glossary#expected-${e.expected.decode}`}>
+            <GlossaryLink id={`expected-${e.expected.decode}`}>
               <Id>{e.expected.decode}</Id>
-            </TextLink>, {e.expected.validity}
+            </GlossaryLink>, {e.expected.validity}
             {e.expected.roundtrip ? ", round-trips" : ""}
             {expectation ? `: ${expectation.meaning}` : ""}
           </dd>
@@ -173,9 +173,9 @@ export function EntryPage() {
         <div>
           <dt className="font-medium">Source</dt>
           <dd className="text-muted-foreground">
-            <TextLink to={`/dashboard/glossary#source-${e.source}`}>
+            <GlossaryLink id={`source-${e.source}`}>
               <Id>{e.source}</Id>
-            </TextLink>
+            </GlossaryLink>
             {e.synthetic && e.source !== "synthetic" ? ", synthetic" : ""}
             {e.ledger_seq !== null ? `, ledger ${e.ledger_seq}` : ""}
             {e.provenance_url ? (
@@ -258,7 +258,7 @@ export function EntryPage() {
                   </TableCell>
                   <TableCell className="align-top">
                     <Status tone="diverge" wrap>
-                      {label(x.result)}
+                      <GlossaryLink id={`check-${x.result}`}>{label(x.result)}</GlossaryLink>
                     </Status>
                   </TableCell>
                   <TableCell className="hidden align-top text-xs whitespace-normal sm:table-cell">
@@ -284,7 +284,10 @@ export function EntryPage() {
             {hx.map((r) => (
               <li key={`${r.target}/${r.network}`}>
                 <Status tone={verdictTone(r.verdict)}>
-                  {r.target} on {r.network}: {verdictText(r)}
+                  <span>
+                    {r.target} on {r.network}: <GlossaryLink id={`verdict-${r.verdict}`}>{label(r.verdict)}</GlossaryLink>
+                    {r.reason ? ` (${r.reason})` : null}
+                  </span>
                 </Status>{" "}
                 <span className="text-muted-foreground">{verdictMeaning(r.verdict)}.</span>{" "}
                 {verdictTone(r.verdict) === "diverge" ? (
@@ -305,7 +308,8 @@ export function EntryPage() {
                   </TextLink>
                   <span className="flex-1">{x.short ?? x.title}</span>
                   <span className="shrink-0 text-muted-foreground">
-                    {label(x.severity)}, {label(x.status)}
+                    <GlossaryLink id={`severity-${x.severity}`}>{label(x.severity)}</GlossaryLink>,{" "}
+                    <GlossaryLink id={`status-${x.status}`}>{label(x.status)}</GlossaryLink>
                     {x.link ? (
                       <>
                         , <ExtLink href={x.link}>{issueLabel(x.link)}</ExtLink>

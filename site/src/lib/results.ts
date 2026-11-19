@@ -1,7 +1,7 @@
 // the results of the committed runs for one corpus entry, read by the entry list, the entry
 // page and the cap pages
 import type { Conformance, HarnessRun } from "./data"
-import { checkResults, label } from "./terms"
+import { checkResults } from "./terms"
 
 export const failingResults = new Set(checkResults.filter((c) => c.id !== "unsupported").map((c) => c.id))
 
@@ -42,5 +42,3 @@ export function indexerVerdicts(runs: HarnessRun[], id: string) {
       .map(([network, r]) => ({ target: run.describe?.target ?? `run ${i + 1}`, network, verdict: r.verdict, reason: r.reason })),
   )
 }
-
-export const verdictText = (r: { verdict: string; reason: string | null }) => (r.reason ? `${label(r.verdict)} (${r.reason})` : label(r.verdict))

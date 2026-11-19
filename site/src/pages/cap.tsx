@@ -152,7 +152,8 @@ export function CapPage() {
                 </TextLink>
                 <span className="flex-1">{f.short ?? f.title}</span>
                 <span className="shrink-0 text-muted-foreground">
-                  {f.component}, {label(f.severity)}, {label(f.status)}
+                  {f.component}, <GlossaryLink id={`severity-${f.severity}`}>{label(f.severity)}</GlossaryLink>,{" "}
+                  <GlossaryLink id={`status-${f.status}`}>{label(f.status)}</GlossaryLink>
                 </span>
               </li>
             ))}
