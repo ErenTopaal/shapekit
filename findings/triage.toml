@@ -41,8 +41,8 @@ from = "target/findings/wallet-backend-3e22515a/harness-report.json"
 to = "findings/inputs/harness-wallet-backend-3e22515a.json"
 command = "shapekit harness run --network both --repeat 2 --adapter \"adapters/bin/wb-adapter --commit 3e22515a44979fdc3a558fda3991ca2b48e38cef\" --out target/findings/wallet-backend-3e22515a"
 
-# stellar-etl, the second adapter: its findings have no upstream decision yet, so they stay in
-# the candidate triage, which imports the same run, and hold the failures of this input there
+# stellar-etl, the second adapter: its findings stay in the candidate triage, which imports the
+# same run, and hold the failures of this input there
 [[inputs.import]]
 kind = "harness"
 from = "target/findings/stellar-etl-7e3fc9af/harness-report.json"

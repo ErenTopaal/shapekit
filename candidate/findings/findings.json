@@ -92,8 +92,9 @@
       "robustness": 16
     },
     "by_status": {
-      "draft": 27,
+      "draft": 1,
       "duplicate-of": 8,
+      "filed": 26,
       "wont-fix": 11
     }
   },
@@ -1860,7 +1861,8 @@
       ],
       "minimal_entry": "cap38.liquidity-pools.p30-revoke-redeems-pool-shares",
       "reproduce": "shapekit harness run --chain cap38.liquidity-pools.p30 --network testnet --adapter \"adapters/bin/etl-adapter --commit 7e3fc9af95359dad6ba939fa88791f49cdf531ae\"",
-      "status": "draft",
+      "status": "filed",
+      "link": "https://github.com/stellar/stellar-etl/issues/518",
       "draft": "candidate/findings/issues/stellar-etl-E4.md",
       "cause": "A revocation that redeems pool shares removes the owner's pool share trustline; addLiquidityPoolRevokedEffect (internal/transform/effects.go L1152-L1219 at 7e3fc9af), called from addSetTrustLineFlagsEffects and addAllowTrustEffects, writes claimable_balance_created and liquidity_pool_revoked from the operation's changes but no trustline_removed for the removed entry. The source does not say whether this is intended.",
       "siblings": [],
@@ -2004,7 +2006,8 @@
       ],
       "minimal_entry": "soroban.invoke-basics.synth-ghsa-3xhm-spec-outputs-2",
       "reproduce": "shapekit conformance run --sdk dart --version 3.12.0 --entry soroban.invoke-basics.synth-ghsa-3xhm-spec-outputs-2",
-      "status": "draft",
+      "status": "filed",
+      "link": "https://github.com/Soneso/stellar_flutter_sdk/issues/291",
       "draft": "candidate/findings/issues/dart-classic.max-length.synth-tx-101-operations.md",
       "cause": "The generated decoders read a variable-length array, string or opaque with XdrDataInputStream.readArrayLength or readBytes, which bound the count only by the bytes left in the input (lib/src/xdr/xdr_data_io.dart L380-L394), and never check the maximum the schema declares: XdrSCSpecFunctionV0 reads `outputs<1>` with no bound (lib/src/xdr/xdr_sc_spec_function_v0.dart L63), XdrPreconditionsV2 reads `extraSigners<2>` the same way (lib/src/xdr/xdr_preconditions_v2.dart L102). 3.12.0 reads 101 operations, 21 signatures, a 29-byte text memo, a 33-byte symbol, a 65-byte data value, payload and signature, 6 path assets, 11 claimants, 3 extra signers and 2 spec outputs, all of which stellar-core refuses. Nesting is bounded by XdrDataInputStream's own counters, 500 recursive type decodes and 128 nested delegate signatures (lib/src/xdr/xdr_data_io.dart L317-L340), where core counts every nested type, so ScVal maps and vectors and authorization trees past core's limit decode too; the maintainers chose that count on purpose (#248, #249). Every witness is synthetic or refused by core.",
       "siblings": [
@@ -2173,7 +2176,8 @@
       ],
       "minimal_entry": "soroban.scval-shapes.p30-string-not-utf8-envelope",
       "reproduce": "shapekit conformance run --sdk dart --version 3.12.0 --entry soroban.scval-shapes.p30-string-not-utf8-envelope",
-      "status": "draft",
+      "status": "filed",
+      "link": "https://github.com/Soneso/stellar_flutter_sdk/issues/297",
       "draft": "candidate/findings/issues/dart-classic.memo-bytes.p30-memo-ff.md",
       "cause": "XdrDataInputStream.readString returns utf8.decode of the bytes (lib/src/xdr/xdr_data_io.dart L365-L366 at 3.12.0), which throws a FormatException on bytes that are not UTF-8. The XDR string type is bytes, and stellar-core applied transactions whose text memo, InvokeContractArgs function name, ScString or ScSymbol holds bytes that are not UTF-8; those fail to decode, which also stops decode_json, encode_json and the transaction hash. PR #177 kept memo, symbol and string as String on purpose, and documentation/sep/sep-51.md says such a value cannot reach the JSON path from a real envelope, which these core-applied transactions contradict. js-stellar-sdk#1823 is the same class: there the bytes are mangled instead of refused.",
       "siblings": [
@@ -2321,7 +2325,8 @@
       ],
       "minimal_entry": "cap03.offer-liabilities.synth-textual-offer-id-noncanonical",
       "reproduce": "shapekit conformance run --sdk dart --version 3.12.0 --entry cap03.offer-liabilities.synth-textual-offer-id-noncanonical",
-      "status": "draft",
+      "status": "filed",
+      "link": "https://github.com/Soneso/stellar_flutter_sdk/issues/294",
       "draft": "candidate/findings/issues/dart-cap03.offer-liabilities.synth-textual-offer-id-noncanonical.md",
       "cause": "toOperationBody passes the offer id text to BigInt.parse (lib/src/manage_sell_offer_operation.dart L111), which takes a sign, surrounding whitespace and a 0x prefix, and keeps any size, so \"0x10\", \" 16 \", \"+16\" and \"-0\" read as 16 or 0, and 9223372036854775808 and 18446744073709551615 are written as the int64 -9223372036854775808 and -1. The text forms are the ones RS-1 (rs-stellar-xdr#627), GO-TEXTID and js-stellar-sdk#1907 accept; the wrap to another id is js-stellar-sdk#1785's. Separate code in each sdk.",
       "siblings": [
@@ -2374,7 +2379,8 @@
       ],
       "minimal_entry": "cap03.offer-liabilities.synth-negative-offer-id",
       "reproduce": "shapekit conformance run --sdk dart --version 3.12.0 --entry cap03.offer-liabilities.synth-negative-offer-id",
-      "status": "draft",
+      "status": "filed",
+      "link": "https://github.com/Soneso/stellar_flutter_sdk/issues/295",
       "draft": "candidate/findings/issues/dart-cap03.offer-liabilities.synth-negative-offer-id.md",
       "cause": "The generator override tools/xdr-generator/generator/field_overrides.rb L76-L85 (\"offer IDs are always positive\") makes the int64 offer id an XdrUint64 in XdrManageSellOfferOp (lib/src/xdr/xdr_manage_sell_offer_op.dart L34 at 3.12.0), XdrManageBuyOfferOp, XdrOfferEntry, XdrLedgerKeyOffer, XdrClaimOfferAtom and XdrClaimOfferAtomV0. The bytes round trip, but XDR-JSON renders offer id -16 as \"18446744073709551600\" and refuses the canonical \"-16\" (\"XdrUint64 holds -16, outside the range of a uint64\"). A negative offer id reaches a ledger only in operations that failed before protocol 15.",
       "siblings": [
@@ -2514,7 +2520,8 @@
       ],
       "minimal_entry": "cap26.inflation.p11-inflation-not-time",
       "reproduce": "shapekit conformance run --sdk dart --version 3.12.0 --entry cap26.inflation.p11-inflation-not-time",
-      "status": "draft",
+      "status": "filed",
+      "link": "https://github.com/Soneso/stellar_flutter_sdk/issues/292",
       "draft": "candidate/findings/issues/dart-cap26.inflation.p11-inflation-payout.md",
       "cause": "Operation.fromXdr has no case for INFLATION and throws \"Unknown operation body OperationType.9\" (lib/src/operation.dart L258-L259), so the sdk cannot build a transaction object, nor its hash, for envelopes from before protocol 12 that core applied.",
       "siblings": [
@@ -2604,7 +2611,8 @@
       ],
       "minimal_entry": "soroban.scval-shapes.synth-string-nonzero-padding",
       "reproduce": "shapekit conformance run --sdk php --version 1.18.0 --entry soroban.scval-shapes.synth-string-nonzero-padding",
-      "status": "draft",
+      "status": "filed",
+      "link": "https://github.com/Soneso/stellar-php-sdk/issues/239",
       "draft": "candidate/findings/issues/php-classic.max-length.synth-tx-101-operations.md",
       "cause": "XdrBuffer::readOpaqueVariable and readString take a maxLength the generated decoders never pass, and skip the padding without reading it (Soneso/StellarSDK/Xdr/XdrBuffer.php L158-L173); readArrayLength bounds a count only by the bytes left (XdrPreconditionsV2::decode reads extraSigners<2> with it, Xdr/XdrPreconditionsV2.php L74). Nesting is capped at DECODE_DEPTH_LIMIT (500) recursive decodes (Xdr/XdrBuffer.php L33), not core's limit. 1.18.0 reads 101 operations, 21 signatures, a 29-byte memo, a 33-byte symbol, 65-byte payloads, 6 path assets, 11 claimants, 3 extra signers, 2 spec outputs, nonzero padding in strings, bytes and signer keys, and ScVal and authorization trees past core's depth, all of which stellar-core refuses.",
       "siblings": [
@@ -3087,7 +3095,8 @@
       ],
       "minimal_entry": "cap70.scp-timing.p30-scp-timing-upgrade",
       "reproduce": "shapekit conformance run --sdk php --version 1.18.0 --entry cap70.scp-timing.p30-scp-timing-upgrade",
-      "status": "draft",
+      "status": "filed",
+      "link": "https://github.com/Soneso/stellar-php-sdk/issues/241",
       "draft": "candidate/findings/issues/php-cap15.fee-bump.p30-fee-source-is-inner-source-meta.md",
       "cause": "XdrInnerTransactionResultPair and XdrConfigUpgradeSetKey keep their hash as hex text (bin2hex in decode, Soneso/StellarSDK/Xdr/XdrInnerTransactionResultPair.php L21 and Xdr/XdrConfigUpgradeSetKey.php L18), while the base classes' toJsonValue hex-encodes the field again (Xdr/XdrInnerTransactionResultPairBase.php L52), so XDR-JSON carries a 128-character string. Reading that JSON back fails (\"Unexpected length for value. Has length 16, expected 32\") or crashes with a TypeError in XdrEncoder::opaqueFixed. The bytes round trip; only XDR-JSON is wrong. Encoding the pair from a decoded value also raises php warnings (pack(): illegal hex digit) on stderr.",
       "siblings": [
@@ -3622,7 +3631,8 @@
       ],
       "minimal_entry": "explore.witnesses.g2-r0014-l143",
       "reproduce": "shapekit conformance run --sdk php --version 1.18.0 --entry explore.witnesses.g2-r0014-l143",
-      "status": "draft",
+      "status": "filed",
+      "link": "https://github.com/Soneso/stellar-php-sdk/issues/240",
       "draft": "candidate/findings/issues/php-cap23.claimable-balances.p30-claim-through-depth-4-meta.md",
       "cause": "XdrLedgerKeyBase::toJsonValue writes the claimable_balance arm as the bare ClaimableBalanceID, and fromJsonValue reads it that way (Soneso/StellarSDK/Xdr/XdrLedgerKeyBase.php L148 and L183), where the schema's arm is the struct LedgerKeyClaimableBalance { balance_id }, so the canonical XDR-JSON of every removed or restored claimable balance is refused (\"Expected string for XdrClaimableBalanceID JSON value, got array\").",
       "siblings": [
@@ -3790,7 +3800,8 @@
       ],
       "minimal_entry": "soroban.scval-shapes.synth-scmap-depth-197-deepest-accepted",
       "reproduce": "shapekit conformance run --sdk php --version 1.18.0 --entry soroban.scval-shapes.synth-scmap-depth-197-deepest-accepted",
-      "status": "draft",
+      "status": "filed",
+      "link": "https://github.com/Soneso/stellar-php-sdk/issues/243",
       "draft": "candidate/findings/issues/php-soroban.auth-trees.synth-auth-depth-493-deepest-accepted.md",
       "cause": "toJson calls json_encode without a depth (Soneso/StellarSDK/Xdr/XdrTransactionEnvelopeBase.php L123-L128 at 1.18.0, and the same in every generated class), so php's default of 512 applies when the sdk writes XDR-JSON. Reading goes through XdrJsonHelper, which passes DECODE_MAX_DEPTH, set to the same 512 (Xdr/XdrJsonHelper.php L40 and L859). The XDR-JSON of authorization trees and ScVal maps that stellar-core accepts nests deeper, so both directions refuse it (\"Maximum stack depth exceeded\").",
       "siblings": [
@@ -3956,7 +3967,8 @@
       ],
       "minimal_entry": "cap26.inflation.p11-inflation-not-time",
       "reproduce": "shapekit conformance run --sdk php --version 1.18.0 --entry cap26.inflation.p11-inflation-not-time",
-      "status": "draft",
+      "status": "filed",
+      "link": "https://github.com/Soneso/stellar-php-sdk/issues/242",
       "draft": "candidate/findings/issues/php-cap26.inflation.p11-inflation-payout.md",
       "cause": "AbstractOperation::fromXdr has no case for INFLATION and throws \"Unknown operation type: 9\" (Soneso/StellarSDK/AbstractOperation.php L132), so the sdk cannot build a transaction object, nor its hash, for envelopes core applied before protocol 12. The same as DART-INFLATION in the Dart sdk.",
       "siblings": [
@@ -4430,7 +4442,8 @@
       ],
       "minimal_entry": "cap26.inflation.p11-inflation-not-time",
       "reproduce": "shapekit conformance run --sdk dotnet --version 17.0.0 --entry cap26.inflation.p11-inflation-not-time",
-      "status": "draft",
+      "status": "filed",
+      "link": "https://github.com/Beans-BV/dotnet-stellar-sdk/issues/274",
       "draft": "candidate/findings/issues/dotnet-cap18.maintain-liabilities.golden-3f24be68a9962089-4.md",
       "cause": "Operation.FromXdr throws NotSupportedException for ALLOW_TRUST and INFLATION (StellarDotnetSdk/Operations/Operation.cs L101-L106 at 17.0.0, since PR #15 removed the builders), so the sdk builds no transaction object, nor hash, for envelopes core applied. Allow trust is still a valid operation in protocol 30; inflation was valid until protocol 12. Mainnet ledger 37466023 envelope 108 (allow trust) and testnet ledger 5521432 envelopes 2 and 8 cannot be hashed.",
       "siblings": [
@@ -4869,7 +4882,7 @@
       "reproduce": "shapekit conformance run --sdk dotnet --version 17.0.0 --entry cap38.liquidity-pools.p30-change-trust-pool-byte-order-envelope",
       "status": "duplicate-of",
       "link": "https://github.com/Beans-BV/dotnet-stellar-sdk/issues/257",
-      "reason": "#257 (2026-10-06) reports the cause and PR #272 fixes it; comment on #257 that Transaction.FromEnvelopeXdr also refuses applied change trust pool operations (\"Asset A must be < Asset B\")",
+      "reason": "#257 (2026-10-06) reports the cause and PR #272 fixes it; commented on #257 that Transaction.FromEnvelopeXdr also refuses applied change trust pool operations (\"Asset A must be < Asset B\")",
       "cause": "AssetTypeCreditAlphaNum4.CompareTo and AssetTypeCreditAlphaNum12.CompareTo compare issuers with string.Compare over the G strkey text (StellarDotnetSdk/Assets/AssetTypeCreditAlphaNum4.cs L57-L72), where core compares the raw key bytes; the base32 alphabet does not keep byte order. LiquidityPoolConstantProductParameters refuses pairs in the network's order (\"Asset A must be < Asset B\"), takes pairs in the wrong one, and Transaction.FromEnvelopeXdr refuses applied change trust operations on such a pool. This is Beans-BV/dotnet-stellar-sdk#257, open; js-stellar-sdk#1766 fixed the same class.",
       "siblings": [],
       "related": [
@@ -4959,7 +4972,8 @@
       ],
       "minimal_entry": "soroban.scval-shapes.synth-event-vec-depth-101",
       "reproduce": "shapekit conformance run --sdk dotnet --version 17.0.0 --entry soroban.scval-shapes.synth-event-vec-depth-101",
-      "status": "draft",
+      "status": "filed",
+      "link": "https://github.com/Beans-BV/dotnet-stellar-sdk/issues/275",
       "draft": "candidate/findings/issues/dotnet-soroban.auth-trees.p30-declared-depth-245.md",
       "cause": "XdrDataInputStream counts every nested decode against DefaultMaxDepth, 200 (StellarDotnetSdk.Xdr/XdrDataInputStream.cs L18 at 17.0.0), and the generated Decode methods throw \"Maximum decoding depth reached\" past it, so authorization trees and ScVal values core accepted at its own limit do not decode, nor hash.",
       "siblings": [
@@ -5152,7 +5166,7 @@
       "reproduce": "shapekit conformance run --sdk dotnet --version 17.0.0 --entry soroban.scval-shapes.p30-string-not-utf8-envelope",
       "status": "duplicate-of",
       "link": "https://github.com/Beans-BV/dotnet-stellar-sdk/issues/247",
-      "reason": "#247 (inline strings, memo text, hash changes) and #246 (SCString, SCSymbol and names at the SDK layer), both 2026-10-01, cover it; comment on #247 with the MemoTooLongException a 28-byte memo with replacement characters causes in FromEnvelopeXdr, and the core golden witnesses",
+      "reason": "#247 (inline strings, memo text, hash changes) and #246 (SCString, SCSymbol and names at the SDK layer), both 2026-10-01, cover it; commented on #247 with the MemoTooLongException a 28-byte memo with replacement characters causes in FromEnvelopeXdr, and the core golden witnesses",
       "cause": "On 17.0.0 the XDR typedefs SCString, SCSymbol, String32 and String64 keep the raw bytes (SCString.cs L54), but the text memo is read with XdrDataInputStream.ReadString, Encoding.UTF8.GetString, which replaces bytes that are not UTF-8 (StellarDotnetSdk.Xdr/XdrDataInputStream.cs L88-L91, Memo.cs L72), and the SDK's SCString and SCSymbol objects hold a .NET string (Soroban/SCVal.cs L1586, L1656). So memo text loses its bytes in decode and encode, the transaction object hashes other bytes for memos and ScVal strings and symbols, and a 28-byte memo whose replacement characters take more bytes is refused (MemoTooLongException). js-stellar-sdk#1823 is the same class.",
       "siblings": [
         "DART-UTF8",
@@ -5283,7 +5297,8 @@
       ],
       "minimal_entry": "cap23.claimable-balances.synth-strkey-b-invalid",
       "reproduce": "shapekit conformance run --sdk dotnet --version 17.0.0 --entry cap23.claimable-balances.synth-strkey-b-invalid",
-      "status": "draft",
+      "status": "filed",
+      "link": "https://github.com/Beans-BV/dotnet-stellar-sdk/issues/278",
       "draft": "candidate/findings/issues/dotnet-cap23.claimable-balances.synth-strkey-b-invalid.md",
       "cause": "DecodeClaimableBalanceId checks only the version byte and checksum (StellarDotnetSdk/StrKey.cs L447-L450 at 17.0.0), so a balance id with sub-version 1 decodes; DecodeSignedPayload reads the payload with the XDR decoder and does not check that it consumed the whole strkey (L405-L420), so a payload one byte long or a length prefix shorter than the bytes decodes.",
       "siblings": [
@@ -5399,7 +5414,8 @@
       ],
       "minimal_entry": "soroban.auth-trees.golden-5f615b0f98ae09f3-11",
       "reproduce": "shapekit conformance run --sdk dotnet --version 17.0.0 --entry soroban.auth-trees.golden-5f615b0f98ae09f3-11",
-      "status": "draft",
+      "status": "filed",
+      "link": "https://github.com/Beans-BV/dotnet-stellar-sdk/issues/277",
       "draft": "candidate/findings/issues/dotnet-soroban.auth-trees.golden-5f615b0f98ae09f3-11.md",
       "cause": "SCVal.FromXdr refuses SCV_VEC with an absent body (\"SCV_VEC with an absent vector body\", StellarDotnetSdk/Soroban/SCVal.cs L1753), which a contract's arguments can carry in an envelope core applied, so the transaction object and its hash cannot be built.",
       "siblings": [],
@@ -5510,7 +5526,8 @@
       ],
       "minimal_entry": "explore.witnesses.f62d-r0008-l75",
       "reproduce": "shapekit conformance run --sdk kmp --version 1.18.0 --entry explore.witnesses.f62d-r0008-l75",
-      "status": "draft",
+      "status": "filed",
+      "link": "https://github.com/Soneso/kmp-stellar-sdk/issues/170",
       "draft": "candidate/findings/issues/kmp-cap27.muxed-accounts.p28-claimable-balance-tx-source-id-1.md",
       "cause": "Transaction.fromV1EnvelopeXdr keeps only MuxedAccount.fromXdr(tx.sourceAccount).accountId, the G account (commonMain/kotlin/com/soneso/stellar/sdk/Transaction.kt L332 at 1.18.0), and toV1Xdr writes MuxedAccount(sourceAccount) back (L191), so a muxed source becomes a plain account: the rebuilt envelope is another transaction and AbstractTransaction.hash() is not the hash the network wrote. Mainnet transaction 17fee99b... (ledger 36196205) hashes to 0039d670... on 1.18.0.",
       "siblings": [
@@ -5774,7 +5791,8 @@
       ],
       "minimal_entry": "classic.memo-bytes.synth-memo-text-nonzero-padding",
       "reproduce": "shapekit conformance run --sdk kmp --version 1.18.0 --entry classic.memo-bytes.synth-memo-text-nonzero-padding",
-      "status": "draft",
+      "status": "filed",
+      "link": "https://github.com/Soneso/kmp-stellar-sdk/issues/172",
       "draft": "candidate/findings/issues/kmp-classic.memo-bytes.p30-memo-truncated-sequence-28.md",
       "cause": "XdrReader.readString returns bytes.decodeToString() on every target (jvmMain XdrReader.jvm.kt, jsMain XdrReader.js.kt and nativeMain XdrReader.native.kt, L59-L69 at 1.18.0), which replaces bytes that are not UTF-8, and the writer encodes the string back as UTF-8; text memos, ScString, ScSymbol and function names the network applied lose their bytes, decode and encode do not round trip, the transaction hash differs, and the transaction object refuses a memo whose replacement characters take more than 28 bytes (Memo.kt L101). PR #57 and docs/sep/sep-51.md L448 document String members as lossy, and PR #61 kept SCString and the SCV_STRING and SCV_SYMBOL arms as String. js-stellar-sdk#1823 is the same class.",
       "siblings": [
@@ -5943,7 +5961,8 @@
       ],
       "minimal_entry": "soroban.scval-shapes.synth-string-nonzero-padding",
       "reproduce": "shapekit conformance run --sdk kmp --version 1.18.0 --entry soroban.scval-shapes.synth-string-nonzero-padding",
-      "status": "draft",
+      "status": "filed",
+      "link": "https://github.com/Soneso/kmp-stellar-sdk/issues/168",
       "draft": "candidate/findings/issues/kmp-cap21.preconditions.synth-extra-signers-3.md",
       "cause": "The generated decoders read arrays with XdrReader.readArrayLength, bounded only by the bytes left (PreconditionsV2Xdr reads extraSigners<2> with it, commonMain/kotlin/com/soneso/stellar/sdk/xdr/PreconditionsV2Xdr.kt L86), and XdrReader skips padding without reading it (jvmMain/kotlin/com/soneso/stellar/sdk/xdr/XdrReader.jvm.kt L64-L67), so values over their bound and padding that is not zero decode where stellar-core refuses them.",
       "siblings": [
@@ -6131,7 +6150,8 @@
       ],
       "minimal_entry": "soroban.scval-shapes.synth-event-vec-depth-101",
       "reproduce": "shapekit conformance run --sdk kmp --version 1.18.0 --entry soroban.scval-shapes.synth-event-vec-depth-101",
-      "status": "draft",
+      "status": "filed",
+      "link": "https://github.com/Soneso/kmp-stellar-sdk/issues/169",
       "draft": "candidate/findings/issues/kmp-soroban.auth-trees.p30-declared-depth-245.md",
       "cause": "XdrJson caps nesting at RECURSION_CAP, 128 (commonMain/kotlin/com/soneso/stellar/sdk/xdr/XdrJson.kt L50 at 1.18.0, checked at L448 and L901). On the witnesses, writing XDR-JSON (decode_json) passes and only reading it back (encode_json) refuses (\"input nests deeper than the limit of 128\"), so the sdk writes XDR-JSON of authorization trees and ScVal vectors stellar-core accepted that its own reader refuses. PR #137 keeps the cap at 128 for JSON on purpose and docs/sep/sep-51.md L491 documents the limit.",
       "siblings": [
@@ -6368,7 +6388,8 @@
       ],
       "minimal_entry": "soroban.scval-shapes.synth-bytes-length-overrun",
       "reproduce": "shapekit conformance run --sdk stellar-cli --version 30.0.1 --entry soroban.scval-shapes.synth-bytes-length-overrun",
-      "status": "draft",
+      "status": "filed",
+      "link": "https://github.com/stellar/stellar-cli/issues/2894",
       "draft": "candidate/findings/issues/stellar-cli-soroban.scval-shapes.synth-bytes-length-overrun.md",
       "cause": "stellar xdr decode is stellar-xdr's cli (stellar-xdr 30.0.0 src/cli/decode.rs L78-L100), which reads every input under Limits::none(), and BytesM::read_xdr allocates the length the prefix declares before reading the bytes (src/generated.rs L2003-L2026, vec![0u8; len] at L2016; VecM<u8> L1536 and StringM L2490 the same). For the 12-byte ScVal 00 00 00 0d ff ff ff ff 01 02 03 04 the process reserves 4,294,967,295 bytes of address space and returns a clean error (\"failed to fill whole buffer\"); resident memory stays near 22 MiB. Only with RLIMIT_AS below about 5 GB, or under strict overcommit (not tested), does the allocation fail, and the process then aborts with SIGABRT (\"memory allocation of 4294967295 bytes failed\"). rs-stellar-xdr#623 reports the crate-level cause.",
       "siblings": [],
@@ -6433,7 +6454,7 @@
       "reproduce": "shapekit conformance run --sdk stellar-cli --version 30.0.1 --entry classic.failed-tx.p9-change-trust-native-internal-error-envelope",
       "status": "duplicate-of",
       "link": "https://github.com/stellar/stellar-cli/issues/2769",
-      "reason": "#2769 (2026-10-01) covers fee bump envelopes; comment on #2769 with the v0 part: PR #2791 kept v0 refused, and utils::transaction_env_hash returns Unsupported for TxV0 (utils.rs L45), so every pre-protocol-13 mainnet envelope is refused",
+      "reason": "#2769 (2026-10-01) covers fee bump envelopes; commented on #2769 with the v0 part: PR #2791 kept v0 refused, and utils::transaction_env_hash returns Unsupported for TxV0 (utils.rs L45), so every pre-protocol-13 mainnet envelope is refused",
       "cause": "tx hash runs unwrap_envelope_v1 on the envelope (soroban-cli 30.0.1 src/commands/tx/hash.rs L31, src/commands/tx/xdr.rs L79-L84), which returns OnlyTransactionV1Supported (xdr.rs L18-L19) for a TransactionV0 or fee bump envelope, so the hash of those transactions, which stellar-core computes, cannot be had from the command.",
       "siblings": [
         "DART-INFLATION",
@@ -7785,7 +7806,8 @@
       ],
       "minimal_entry": "soroban.scval-shapes.p30-map-depth-over",
       "reproduce": "shapekit conformance run --sdk stellar-cli --version 30.0.1 --entry soroban.scval-shapes.p30-map-depth-over",
-      "status": "draft",
+      "status": "filed",
+      "link": "https://github.com/stellar/stellar-cli/issues/2895",
       "draft": "candidate/findings/issues/stellar-cli-soroban.auth-trees.p30-declared-depth-245.md",
       "cause": "tx_envelope_from_input reads the envelope with Limits::depth(XDR_DEPTH_LIMIT) (soroban-cli 30.0.1 src/commands/tx/xdr.rs L41), and XDR_DEPTH_LIMIT is 500 (src/utils.rs L21; utils.rs L60 re-encodes the signature payload under the same limit), so the hash of a transaction whose authorization tree or ScVal stellar-core accepted can be refused (\"failed to decode XDR: depth limit exceeded\"). PR #2675 set 500 on purpose against stack overflow; from protocol 28 core's limit is 1000 (TransactionUtils.cpp validateXDRForProtocol). The witnesses are local chains.",
       "siblings": [
@@ -7862,7 +7884,7 @@
       "reproduce": "shapekit conformance run --sdk stellar-cli --version 30.0.1 --entry soroban.scval-shapes.synth-event-vec-depth-101",
       "status": "duplicate-of",
       "link": "https://github.com/stellar/rs-stellar-xdr/issues/628",
-      "reason": "same root cause as rs-stellar-xdr#628, which is ours: stellar xdr encode is that crate's cli and picks the fix up when stellar-cli bumps stellar-xdr; comment on #628 with the stellar xdr encode command line",
+      "reason": "same root cause as rs-stellar-xdr#628, which is ours: stellar xdr encode is that crate's cli and picks the fix up when stellar-cli bumps stellar-xdr; commented on #628 with the stellar xdr encode command line",
       "cause": "stellar xdr encode reads its input with Type::from_json_collecting_ignored_fields (stellar-xdr 30.0.0 src/cli/encode.rs L96), which builds serde_json::Deserializer::from_reader without disable_recursion_limit (src/generated/type_enum.rs L16183), so serde_json's default limit of 128 refuses the XDR-JSON of authorization trees, ScVal maps and vectors that the network accepted and that stellar xdr decode itself writes (recursion limit exceeded).",
       "siblings": [
         "KMP-JSON-DEPTH",
@@ -8392,7 +8414,8 @@
       ],
       "minimal_entry": "explore.witnesses.g2-r0010-l92",
       "reproduce": "shapekit conformance run --sdk dart --version 3.12.0 --entry explore.witnesses.g2-r0010-l92",
-      "status": "draft",
+      "status": "filed",
+      "link": "https://github.com/Soneso/stellar_flutter_sdk/issues/296",
       "draft": "candidate/findings/issues/dart-cap03.offer-liabilities.mainnet-37466023.md",
       "cause": "AbstractTransaction.fromEnvelopeXdr(..).hash(network) rebuilds every operation before hashing. ManageSellOfferOperation builder() turns the XDR price into Price(n, d).toDecimalString() and toOperationBody reads it back with Price.fromString (lib/src/manage_sell_offer_operation.dart L109 and L135-L143 at 3.12.0), which since PR #196 recovers the fraction exactly but in lowest terms (lib/src/price.dart L185-L195), so it writes the reduced fraction and an offer or liquidity pool deposit bound such as 6836306/1144362402, 7/7 or 2147483647/2147483647 is hashed as another fraction (lib/src/transaction.dart L108-L110). ManageBuyOfferOperation (L110, L144), CreatePassiveSellOfferOperation (L94, L124) and LiquidityPoolDepositOperation (L135-L136, L165-L168) take the same round trip.",
       "siblings": [
@@ -8485,7 +8508,8 @@
       ],
       "minimal_entry": "explore.witnesses.f62d-r0000-l96",
       "reproduce": "shapekit conformance run --sdk dart --version 3.12.0 --entry explore.witnesses.f62d-r0000-l96",
-      "status": "draft",
+      "status": "filed",
+      "link": "https://github.com/Soneso/stellar_flutter_sdk/issues/293",
       "draft": "candidate/findings/issues/dart-explore.witnesses.f62d-r0000-l96.md",
       "cause": "TimeBounds.fromXdr reads the max time with BigInt.toInt (lib/src/transaction.dart L1088-L1093 at 3.12.0, toInt at L1090-L1091), which clamps 18446744073709551615 to 9223372036854775807, and toXdr writes the clamped value back (L1096-L1101), so a transaction core applied with max_time 2^64-1 hashes to another value.",
       "siblings": [
@@ -8535,7 +8559,8 @@
       ],
       "minimal_entry": "explore.witnesses.g2-r0010-l92",
       "reproduce": "shapekit conformance run --sdk dotnet --version 17.0.0 --entry explore.witnesses.g2-r0010-l92",
-      "status": "draft",
+      "status": "filed",
+      "link": "https://github.com/Beans-BV/dotnet-stellar-sdk/issues/276",
       "draft": "candidate/findings/issues/dotnet-cap03.offer-liabilities.mainnet-37466023.md",
       "cause": "ManageSellOfferOperation.FromXdr turns the price into decimal.Divide(N, D) written as a string, and ToOperationBody reads it back with Price.FromString (StellarDotnetSdk/Operations/ManageSellOfferOperation.cs L83 and L95-L106, Price.cs L55-L96, a continued fraction bounded by int.MaxValue), which writes another fraction for prices not in lowest terms and turns 1/2147483647 into 0/1, so Transaction.FromEnvelopeXdr(..).Hash(network) is not the network hash. ManageBuyOfferOperation.cs (L85, L104) and CreatePassiveSellOfferOperation.cs (L74, L90) take the same round trip.",
       "siblings": [
@@ -8680,7 +8705,8 @@
       ],
       "minimal_entry": "explore.witnesses.f62d-r0004-l69",
       "reproduce": "shapekit conformance run --sdk kmp --version 1.18.0 --entry explore.witnesses.f62d-r0004-l69",
-      "status": "draft",
+      "status": "filed",
+      "link": "https://github.com/Soneso/kmp-stellar-sdk/issues/171",
       "draft": "candidate/findings/issues/kmp-explore.witnesses.f62d-r0000-l96.md",
       "cause": "AbstractTransaction.fromEnvelopeXdr refuses transactions core applied: TimeBounds reads the uint64 max time into a signed Long and requires it to be >= 0 (commonMain/kotlin/com/soneso/stellar/sdk/TimeBounds.kt L25-L26 at 1.18.0, \"maxTime must be >= 0\" for 2^64-1), and the manage offer operations refuse offer id -1 (\"Offer ID must be non-negative\", Operation.kt L441 and L496), so the transaction hash cannot be had; the class of the candidate lane's other transaction-object refusals.",
       "siblings": [
@@ -8790,7 +8816,8 @@
       ],
       "minimal_entry": "explore.witnesses.g2-r0015-l71",
       "reproduce": "shapekit conformance run --sdk php --version 1.18.0 --entry explore.witnesses.g2-r0015-l71",
-      "status": "draft",
+      "status": "filed",
+      "link": "https://github.com/Soneso/stellar-php-sdk/issues/244",
       "draft": "candidate/findings/issues/php-explore.witnesses.g2-r0015-l71.md",
       "cause": "AbstractTransaction::fromEnvelopeXdr(..)->hash(network) rebuilds the operation, and SetOptionsOperation::toOperationBody writes inflationDestination, clearFlags, setFlags and homeDomain only when they are truthy (Soneso/StellarSDK/SetOptionsOperation.php L200-L224 at 1.18.0, `if ($this->clearFlags)`), so a present 0, an empty home domain and the one-character home domain \"0\", which php also treats as false, become absent and the sdk hashes other bytes than the network. #15 fixed the same pattern for the weights and thresholds in 2022.",
       "siblings": [
