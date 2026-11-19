@@ -43,3 +43,36 @@ fn a_relative_linter_path_is_found_from_where_you_run() {
     let ran_in = std::fs::read_to_string(tmp.path().join("bin/ran-in")).unwrap();
     assert!(ran_in.trim_end().ends_with("module"), "{ran_in}");
 }
+
+#[test]
+fn dot_relative_linter_paths_are_found_from_where_you_run() {
+    let tmp = tempfile::tempdir().unwrap();
+    std::fs::create_dir_all(tmp.path().join("work/module")).unwrap();
+    std::fs::write(
+        tmp.path().join("work/indexerlint"),
+        "#!/bin/sh\npwd > \"$(dirname \"$0\")/ran-in\"\n",
+    )
+    .unwrap();
+    std::fs::set_permissions(
+        tmp.path().join("work/indexerlint"),
+        std::fs::Permissions::from_mode(0o755),
+    )
+    .unwrap();
+    // `./indexerlint` from the directory that holds it, and `../work/indexerlint` from the
+    // module directory itself
+    for (cwd, module, linter) in [
+        ("work", "./module", "./indexerlint"),
+        ("work/module", ".", "../indexerlint"),
+    ] {
+        let _ = std::fs::remove_file(tmp.path().join("work/ran-in"));
+        let out = lint(&tmp.path().join(cwd), &[module, "--linter", linter]);
+        assert_eq!(
+            out.status.code(),
+            Some(0),
+            "{cwd} {linter}: {}",
+            String::from_utf8_lossy(&out.stderr)
+        );
+        let ran_in = std::fs::read_to_string(tmp.path().join("work/ran-in")).unwrap();
+        assert!(ran_in.trim_end().ends_with("work/module"), "{ran_in}");
+    }
+}
