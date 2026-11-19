@@ -564,7 +564,7 @@ export default function Home({ loaderData: s }: Route.ComponentProps) {
     <div className="cv-fact" data-r="" style={css({ "--i": "1" })}><strong className="tnum">{s.caps.covered}/{s.caps.visible}</strong><span>CAPs that an indexer can see have an entry from stellar-core.</span></div>
     <div className="cv-fact" data-r="" style={css({ "--i": "2" })}><strong className="tnum">{s.fields.exercised}/{s.fields.notValidated}</strong><span>fields that stellar-core does not fully validate are in the corpus.</span></div>
     </div>
-    <div className="cv-foot"><span><span className="mono">shapekit coverage --check</span> fails when these counts are out of date.</span><a className="arrow-link" href="/dashboard/corpus#caps">Coverage for each CAP</a></div>
+    <div className="cv-foot"><span><span className="mono">shapekit coverage --check</span> fails when these counts are out of date.</span><a className="arrow-link" href="/dashboard/corpus">Coverage for each CAP</a></div>
     </div>
     </section>
 

@@ -1,7 +1,7 @@
 import type { ReactNode } from "react"
 import { Link } from "react-router"
 import { cn } from "@/lib/utils"
-import { label, verdicts, verdictMeaning } from "@/lib/terms"
+import { label as termLabel, verdicts, verdictMeaning } from "@/lib/terms"
 import type { Counts } from "@/lib/data"
 import { fmt } from "@/components/common"
 
@@ -29,7 +29,7 @@ export function VerdictBar({ counts, className }: { counts: Counts; className?: 
       {parts.map((v) => (
         <span
           key={v}
-          title={`${counts[v]} ${label(v)}`}
+          title={`${counts[v]} ${termLabel(v)}`}
           className={cn("h-full min-w-[3px] first:rounded-l-[4px] last:rounded-r-[4px]", verdictFill[v])}
           style={{ flexGrow: counts[v] ?? 0, flexBasis: 0 }}
         />
@@ -47,7 +47,7 @@ export function VerdictLegend({ counts, className, describe = false }: { counts:
         <li key={v} className="flex items-center gap-1.5" title={describe ? undefined : verdictMeaning(v)}>
           <VerdictSwatch verdict={v} />
           <span className="num font-medium">{fmt.format(counts[v] ?? 0)}</span>
-          <span className="text-muted-foreground">{label(v)}</span>
+          <span className="text-muted-foreground">{termLabel(v)}</span>
         </li>
       ))}
     </ul>
