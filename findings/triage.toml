@@ -19,7 +19,8 @@ manifest = "corpus/manifest.json"
 # each entry's caps, arms, notes, fields_exercised, linked_issues and obligations.
 harness = [
   "findings/inputs/harness-wallet-backend-3e22515a.json",
-  "findings/inputs/harness-stellar-etl-2b24ec89.json",
+  "findings/inputs/harness-stellar-etl-7e3fc9af.json",
+  "findings/inputs/harness-stellar-rpc-30.0.1.json",
 ]
 matrices = [
   "findings/inputs/conformance-rust.json",
@@ -44,9 +45,17 @@ command = "shapekit harness run --network both --repeat 2 --adapter \"adapters/b
 # the candidate triage, which imports the same run, and hold the failures of this input there
 [[inputs.import]]
 kind = "harness"
-from = "target/findings/stellar-etl-2b24ec89/harness-report.json"
-to = "findings/inputs/harness-stellar-etl-2b24ec89.json"
-command = "shapekit harness run --network both --adapter \"adapters/bin/etl-adapter --commit 2b24ec89ddce7fc0beb7795de982c93e6895eaf3 --cpus 2\" --out target/findings/stellar-etl-2b24ec89"
+from = "target/findings/stellar-etl-7e3fc9af/harness-report.json"
+to = "findings/inputs/harness-stellar-etl-7e3fc9af.json"
+command = "shapekit harness run --network both --adapter \"adapters/bin/etl-adapter --commit 7e3fc9af95359dad6ba939fa88791f49cdf531ae --cpus 2\" --out target/findings/stellar-etl-7e3fc9af"
+
+# stellar-rpc, the third indexer, through the rpc-adapter with getEvents (the method the
+# committed expectations crates/shapekit-harness/expect/stellar-rpc.toml pin)
+[[inputs.import]]
+kind = "harness"
+from = "target/findings/stellar-rpc-30.0.1/harness-report.json"
+to = "findings/inputs/harness-stellar-rpc-30.0.1.json"
+command = "shapekit harness run --network both --adapter \"adapters/bin/rpc-adapter --cpus 2 --events-from events\" --out target/findings/stellar-rpc-30.0.1"
 
 [[inputs.import]]
 kind = "conformance"
@@ -88,6 +97,11 @@ adapter = "adapters/bin/wb-adapter --commit {version}"
 [targets.stellar-etl]
 repo = "stellar/stellar-etl"
 adapter = "adapters/bin/etl-adapter --commit {version}"
+
+# the pinned release only: rpc-adapter runs another release with --image, --version and --commit
+[targets.stellar-rpc]
+repo = "stellar/stellar-rpc"
+adapter = "adapters/bin/rpc-adapter --cpus 2 --events-from events"
 
 # wallet-backend, current pin, harness
 

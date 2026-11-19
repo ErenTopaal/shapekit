@@ -10,14 +10,14 @@ manifest = "corpus/manifest.json"
 dir = "candidate/findings/inputs"
 # the stellar-etl run is imported here and, from the same run output, as a main input of
 # findings/triage.toml, whose check counts the failures as held by the ETL findings below
-harness = ["candidate/findings/inputs/harness-stellar-etl-2b24ec89.json"]
+harness = ["candidate/findings/inputs/harness-stellar-etl-7e3fc9af.json"]
 matrices = ["candidate/findings/inputs/conformance-go-textual-offer-id.json", "candidate/findings/inputs/conformance-dart.json", "candidate/findings/inputs/conformance-php.json", "candidate/findings/inputs/conformance-dotnet.json", "candidate/findings/inputs/conformance-kmp.json", "candidate/findings/inputs/conformance-stellar-cli.json"]
 
 [[inputs.import]]
 kind = "harness"
-from = "target/findings/stellar-etl-2b24ec89/harness-report.json"
-to = "candidate/findings/inputs/harness-stellar-etl-2b24ec89.json"
-command = "shapekit harness run --network both --adapter \"adapters/bin/etl-adapter --commit 2b24ec89ddce7fc0beb7795de982c93e6895eaf3 --cpus 2\" --out target/findings/stellar-etl-2b24ec89"
+from = "target/findings/stellar-etl-7e3fc9af/harness-report.json"
+to = "candidate/findings/inputs/harness-stellar-etl-7e3fc9af.json"
+command = "shapekit harness run --network both --adapter \"adapters/bin/etl-adapter --commit 7e3fc9af95359dad6ba939fa88791f49cdf531ae --cpus 2\" --out target/findings/stellar-etl-7e3fc9af"
 
 [[inputs.import]]
 kind = "conformance"
@@ -36,7 +36,7 @@ component = "stellar-etl"
 severity = "robustness"
 status = "wont-fix"
 reason = "intended for the data stellar-etl reads: the public ledger lake holds history re-emitted by a current core, so every ledger there carries TransactionMeta v4, which unified events need. Only locally recorded chains below protocol 23 hold v2 or v3 meta"
-cause = "export_token_transfer builds the processor with NewEventsProcessorForUnifiedEvents (internal/transform/token_transfer.go L15 at 2b24ec89), which reads the CAP-67 unified events stream and returns \"expected version 4 got N\" for any other meta version (go-stellar-sdk processors/token_transfer/token_transfer_processor.go L474-L478 at e31e3b146d00, the pseudo-version stellar-etl pins). The command exits 1, the adapter retries it, and the harness stops the chain at its first ledger with a transaction: every entry of the five corpus chains recorded at protocols 9 to 22 (meta v2 or v3), and of the 20 explorer chains below protocol 23 recorded with classic events and their backfill off, is not evaluated, on both networks."
+cause = "export_token_transfer builds the processor with NewEventsProcessorForUnifiedEvents (internal/transform/token_transfer.go L15 at 7e3fc9af), which reads the CAP-67 unified events stream and returns \"expected version 4 got N\" for any other meta version (go-stellar-sdk processors/token_transfer/token_transfer_processor.go L474-L478 at v0.9.0, the version stellar-etl pins). The command exits 1, the adapter retries it, and the harness stops the chain at its first ledger with a transaction: every entry of the five corpus chains recorded at protocols 9 to 22 (meta v2 or v3), and of the 20 explorer chains below protocol 23 recorded with classic events and their backfill off, is not evaluated, on both networks."
 
 [[finding.harness]]
 target = "stellar-etl"
@@ -78,7 +78,7 @@ component = "stellar-etl"
 severity = "data-loss"
 status = "draft"
 draft = "candidate/findings/issues/stellar-etl-E1.md"
-cause = "transformEffects derives the effects of an InvokeHostFunction operation only from Stellar asset contract events (addInvokeHostFunctionEffects, internal/transform/effects.go L1326-L1440 at 2b24ec89), which turn transfer, mint, clawback and burn into credit and debit effects. A trustline the contract's trust() function opens (CAP-73) changes the ledger without such an event, so it gets no trustline_created effect, while a ChangeTrust operation that opens the same trustline does (addChangeTrustEffects, L647-L705). The source does not say whether this is intended."
+cause = "transformEffects derives the effects of an InvokeHostFunction operation only from Stellar asset contract events (addInvokeHostFunctionEffects, internal/transform/effects.go L1326-L1440 at 7e3fc9af), which turn transfer, mint, clawback and burn into credit and debit effects. A trustline the contract's trust() function opens (CAP-73) changes the ledger without such an event, so it gets no trustline_created effect, while a ChangeTrust operation that opens the same trustline does (addChangeTrustEffects, L647-L705). The source does not say whether this is intended."
 
 [[finding.harness]]
 target = "stellar-etl"
@@ -92,7 +92,7 @@ component = "stellar-etl"
 severity = "data-loss"
 status = "draft"
 draft = "candidate/findings/issues/stellar-etl-E2.md"
-cause = "An XLM transfer through the native asset contract to an account that does not exist creates it (CAP-73). transformEffects writes account_debited and account_credited for the transfer event (addInvokeHostFunctionEffects, internal/transform/effects.go L1326-L1440 at 2b24ec89) but account_created only for a CreateAccount operation (addAccountCreatedEffects, L411-L437), so the new account has no account_created effect. The source does not say whether this is intended."
+cause = "An XLM transfer through the native asset contract to an account that does not exist creates it (CAP-73). transformEffects writes account_debited and account_credited for the transfer event (addInvokeHostFunctionEffects, internal/transform/effects.go L1326-L1440 at 7e3fc9af) but account_created only for a CreateAccount operation (addAccountCreatedEffects, L411-L437), so the new account has no account_created effect. The source does not say whether this is intended."
 
 [[finding.harness]]
 target = "stellar-etl"
@@ -106,7 +106,7 @@ component = "stellar-etl"
 severity = "data-loss"
 status = "draft"
 draft = "candidate/findings/issues/stellar-etl-E3.md"
-cause = "Core removes a pre-auth signer in txChangesBefore whether its transaction succeeds or fails, and a fee bump's also from the fee source. effects() returns nothing for a failed transaction and builds effects per operation from the operation's own changes (internal/transform/effects.go L60-L176 at 2b24ec89); signer_removed comes only from addSetOptionsEffects (L530-L645). The source does not say whether this is intended."
+cause = "Core removes a pre-auth signer in txChangesBefore whether its transaction succeeds or fails, and a fee bump's also from the fee source. effects() returns nothing for a failed transaction and builds effects per operation from the operation's own changes (internal/transform/effects.go L60-L176 at 7e3fc9af); signer_removed comes only from addSetOptionsEffects (L530-L645). The source does not say whether this is intended."
 
 [[finding.harness]]
 target = "stellar-etl"
@@ -120,7 +120,7 @@ component = "stellar-etl"
 severity = "data-loss"
 status = "draft"
 draft = "candidate/findings/issues/stellar-etl-E4.md"
-cause = "A revocation that redeems pool shares removes the owner's pool share trustline; addLiquidityPoolRevokedEffect (internal/transform/effects.go L1152-L1219 at 2b24ec89), called from addSetTrustLineFlagsEffects and addAllowTrustEffects, writes claimable_balance_created and liquidity_pool_revoked from the operation's changes but no trustline_removed for the removed entry. The source does not say whether this is intended."
+cause = "A revocation that redeems pool shares removes the owner's pool share trustline; addLiquidityPoolRevokedEffect (internal/transform/effects.go L1152-L1219 at 7e3fc9af), called from addSetTrustLineFlagsEffects and addAllowTrustEffects, writes claimable_balance_created and liquidity_pool_revoked from the operation's changes but no trustline_removed for the removed entry. The source does not say whether this is intended."
 
 [[finding.harness]]
 target = "stellar-etl"

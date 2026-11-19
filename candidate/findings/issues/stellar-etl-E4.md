@@ -1,7 +1,7 @@
 <!-- repo: stellar/stellar-etl -->
 # Question: no `trustline_removed` effect for the pool share trustline a revocation removes
 
-Checked at [2b24ec89](https://github.com/stellar/stellar-etl/commit/2b24ec89ddce7fc0beb7795de982c93e6895eaf3) (v2.8.34). `internal/transform/effects.go` is the same in v2.8.35, the latest release.
+Checked at [7e3fc9af](https://github.com/stellar/stellar-etl/commit/7e3fc9af95359dad6ba939fa88791f49cdf531ae) (v2.8.35). `internal/transform/effects.go` is the same in v2.8.35, the latest release.
 
 ## What we see
 
@@ -11,7 +11,7 @@ The effects table has `trustline_flags_updated`, `claimable_balance_created` and
 
 ## Where it comes from
 
-[`addLiquidityPoolRevokedEffect`](https://github.com/stellar/stellar-etl/blob/2b24ec89ddce7fc0beb7795de982c93e6895eaf3/internal/transform/effects.go#L1152-L1219), which both [`addSetTrustLineFlagsEffects`](https://github.com/stellar/stellar-etl/blob/2b24ec89ddce7fc0beb7795de982c93e6895eaf3/internal/transform/effects.go#L1101-L1106) and `addAllowTrustEffects` call, writes the claimable balances and one `liquidity_pool_revoked` effect from the operation's changes, and does not look at the removed trustline entry.
+[`addLiquidityPoolRevokedEffect`](https://github.com/stellar/stellar-etl/blob/7e3fc9af95359dad6ba939fa88791f49cdf531ae/internal/transform/effects.go#L1152-L1219), which both [`addSetTrustLineFlagsEffects`](https://github.com/stellar/stellar-etl/blob/7e3fc9af95359dad6ba939fa88791f49cdf531ae/internal/transform/effects.go#L1101-L1106) and `addAllowTrustEffects` call, writes the claimable balances and one `liquidity_pool_revoked` effect from the operation's changes, and does not look at the removed trustline entry.
 
 ## Question
 
@@ -31,7 +31,7 @@ From a checkout of the shapekit repository at tag `v0.2.0` (needs Go and Docker)
 
 ```sh
 (cd adapters && go build -o bin/etl-adapter ./stellaretl/cmd/etl-adapter)
-shapekit harness run --chain cap38.liquidity-pools.p30 --network testnet --adapter "adapters/bin/etl-adapter --commit 2b24ec89ddce7fc0beb7795de982c93e6895eaf3"
+shapekit harness run --chain cap38.liquidity-pools.p30 --network testnet --adapter "adapters/bin/etl-adapter --commit 7e3fc9af95359dad6ba939fa88791f49cdf531ae"
 ```
 
 In `harness-out/HARNESS.md`, the Entries table lists the entry `cap38.liquidity-pools.p30-revoke-redeems-pool-shares` with the verdict `dropped` and the detail `trustline-removed is missing`.

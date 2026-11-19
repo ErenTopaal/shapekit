@@ -18,8 +18,8 @@ By status: draft 45, wont-fix 1.
 
 | id | component | severity | CAPs | minimal entry | status | link or decision |
 |---|---|---|---|---|---|---|
-| [ETL-META-V4](#etl-meta-v4) | stellar-etl | robustness | CAP-0002, CAP-0003, CAP-0006, CAP-0026, CAP-0028, CAP-0067 | `classic.failed-tx.p9-change-trust-native-internal-error-envelope` | wont-fix | intended for the data stellar-etl reads: the public ledger lake holds history re-emitted by a current core, so every ledger there carries TransactionMeta v4, which unified events need. Only locally recorded chains below protocol 23 hold v2 or v3 meta |
-| [ETL-1](#etl-1) | stellar-etl | data-loss | CAP-0046-06, CAP-0073 | `cap73.sac-trust.p28-trust-envelope` | draft | not filed, draft [candidate/findings/issues/stellar-etl-E1.md](../../candidate/findings/issues/stellar-etl-E1.md) |
+| [ETL-META-V4](#etl-meta-v4) | stellar-etl | robustness | CAP-0001, CAP-0002, CAP-0003, CAP-0006, CAP-0015, CAP-0019, CAP-0023, CAP-0024, CAP-0026, CAP-0028, CAP-0033, CAP-0035, CAP-0038, CAP-0046, CAP-0046-01, CAP-0046-02, CAP-0046-05, CAP-0046-06, CAP-0046-07, CAP-0046-08, CAP-0046-09, CAP-0046-10, CAP-0046-11, CAP-0046-12, CAP-0054, CAP-0067, PRE-CAP | `classic.failed-tx.p9-change-trust-native-internal-error-envelope` | wont-fix | intended for the data stellar-etl reads: the public ledger lake holds history re-emitted by a current core, so every ledger there carries TransactionMeta v4, which unified events need. Only locally recorded chains below protocol 23 hold v2 or v3 meta |
+| [ETL-1](#etl-1) | stellar-etl | data-loss | CAP-0038, CAP-0046-01, CAP-0046-02, CAP-0046-06, CAP-0046-11, CAP-0073 | `cap73.sac-trust.p28-trust-envelope` | draft | not filed, draft [candidate/findings/issues/stellar-etl-E1.md](../../candidate/findings/issues/stellar-etl-E1.md) |
 | [ETL-2](#etl-2) | stellar-etl | data-loss | CAP-0046-06, CAP-0073 | `cap73.sac-trust.p28-xlm-transfer-creates-account-envelope` | draft | not filed, draft [candidate/findings/issues/stellar-etl-E2.md](../../candidate/findings/issues/stellar-etl-E2.md) |
 | [ETL-3](#etl-3) | stellar-etl | data-loss | CAP-0002, CAP-0015, CAP-0028 | `cap15.fee-bump.p30-fee-source-is-inner-source-pre-auth-signer-envelope` | draft | not filed, draft [candidate/findings/issues/stellar-etl-E3.md](../../candidate/findings/issues/stellar-etl-E3.md) |
 | [ETL-4](#etl-4) | stellar-etl | data-loss | CAP-0038 | `cap38.liquidity-pools.p30-revoke-redeems-pool-shares` | draft | not filed, draft [candidate/findings/issues/stellar-etl-E4.md](../../candidate/findings/issues/stellar-etl-E4.md) |
@@ -30,243 +30,243 @@ By status: draft 45, wont-fix 1.
 | [DART-OFFERTEXT](#dart-offertext) | stellar_flutter_sdk | divergence | CAP-0003, CAP-0006 | `cap03.offer-liabilities.synth-textual-offer-id-noncanonical` | draft | not filed, draft [candidate/findings/issues/dart-cap03.offer-liabilities.synth-textual-offer-id-noncanonical.md](../../candidate/findings/issues/dart-cap03.offer-liabilities.synth-textual-offer-id-noncanonical.md) |
 | [DART-OFFERU64](#dart-offeru64) | stellar_flutter_sdk | divergence | CAP-0003, CAP-0006 | `cap03.offer-liabilities.synth-negative-offer-id` | draft | not filed, draft [candidate/findings/issues/dart-cap03.offer-liabilities.synth-negative-offer-id.md](../../candidate/findings/issues/dart-cap03.offer-liabilities.synth-negative-offer-id.md) |
 | [DART-SIGNEDPAYLOAD-JSON](#dart-signedpayload-json) | stellar_flutter_sdk | divergence | CAP-0040 | `cap40.signed-payload-signer.p28-set-options-empty-payload` | draft | not filed, draft [candidate/findings/issues/dart-cap40.signed-payload-signer.synth-empty-payload-signer.md](../../candidate/findings/issues/dart-cap40.signed-payload-signer.synth-empty-payload-signer.md) |
-| [DART-INFLATION](#dart-inflation) | stellar_flutter_sdk | robustness | CAP-0026 | `cap26.inflation.p11-inflation-not-time` | draft | not filed, draft [candidate/findings/issues/dart-cap26.inflation.p11-inflation-payout.md](../../candidate/findings/issues/dart-cap26.inflation.p11-inflation-payout.md) |
+| [DART-INFLATION](#dart-inflation) | stellar_flutter_sdk | robustness | CAP-0026, PRE-CAP | `cap26.inflation.p11-inflation-not-time` | draft | not filed, draft [candidate/findings/issues/dart-cap26.inflation.p11-inflation-payout.md](../../candidate/findings/issues/dart-cap26.inflation.p11-inflation-payout.md) |
 | [PHP-BOUNDS](#php-bounds) | soneso/stellar-php-sdk | robustness | CAP-0019, CAP-0021, CAP-0023, CAP-0024, CAP-0040, CAP-0046, CAP-0046-01, CAP-0046-02, CAP-0046-05, CAP-0046-07, CAP-0046-08, CAP-0046-11, CAP-0046-12, CAP-0054, CAP-0058 | `soroban.scval-shapes.synth-string-nonzero-padding` | draft | not filed, draft [candidate/findings/issues/php-classic.max-length.synth-tx-101-operations.md](../../candidate/findings/issues/php-classic.max-length.synth-tx-101-operations.md) |
-| [PHP-UINT64](#php-uint64) | soneso/stellar-php-sdk | divergence | CAP-0001, CAP-0019, CAP-0027, CAP-0046, CAP-0046-01, CAP-0046-02, CAP-0046-05, CAP-0046-07, CAP-0046-08, CAP-0046-12, CAP-0054, CAP-0058, CAP-0067, CAP-0084 | `cap01.bump-sequence.p30-bump-negative` | draft | not filed, draft [candidate/findings/issues/php-cap27.muxed-accounts.p30-tx-source-and-payment-destination-id-2p64-1.md](../../candidate/findings/issues/php-cap27.muxed-accounts.p30-tx-source-and-payment-destination-id-2p64-1.md) |
-| [PHP-HEXHASH](#php-hexhash) | soneso/stellar-php-sdk | divergence | CAP-0002, CAP-0015, CAP-0028, CAP-0042, CAP-0046-01, CAP-0046-09, CAP-0046-10, CAP-0070, CAP-0077 | `cap70.scp-timing.p30-scp-timing-upgrade` | draft | not filed, draft [candidate/findings/issues/php-cap15.fee-bump.p30-fee-source-is-inner-source-meta.md](../../candidate/findings/issues/php-cap15.fee-bump.p30-fee-source-is-inner-source-meta.md) |
-| [PHP-CBKEY-JSON](#php-cbkey-json) | soneso/stellar-php-sdk | divergence | CAP-0002, CAP-0003, CAP-0006, CAP-0023, CAP-0028, CAP-0035, CAP-0067 | `explore.witnesses.g2-r0014-l143` | draft | not filed, draft [candidate/findings/issues/php-cap23.claimable-balances.p30-claim-through-depth-4-meta.md](../../candidate/findings/issues/php-cap23.claimable-balances.p30-claim-through-depth-4-meta.md) |
+| [PHP-UINT64](#php-uint64) | soneso/stellar-php-sdk | divergence | CAP-0001, CAP-0019, CAP-0021, CAP-0024, CAP-0027, CAP-0046, CAP-0046-01, CAP-0046-02, CAP-0046-05, CAP-0046-07, CAP-0046-08, CAP-0046-12, CAP-0054, CAP-0058, CAP-0063, CAP-0067, CAP-0084, PRE-CAP | `cap01.bump-sequence.p30-bump-negative` | draft | not filed, draft [candidate/findings/issues/php-cap27.muxed-accounts.p30-tx-source-and-payment-destination-id-2p64-1.md](../../candidate/findings/issues/php-cap27.muxed-accounts.p30-tx-source-and-payment-destination-id-2p64-1.md) |
+| [PHP-HEXHASH](#php-hexhash) | soneso/stellar-php-sdk | divergence | CAP-0002, CAP-0006, CAP-0015, CAP-0021, CAP-0023, CAP-0024, CAP-0028, CAP-0033, CAP-0035, CAP-0038, CAP-0042, CAP-0046, CAP-0046-01, CAP-0046-08, CAP-0046-09, CAP-0046-10, CAP-0070, CAP-0077, PRE-CAP | `cap70.scp-timing.p30-scp-timing-upgrade` | draft | not filed, draft [candidate/findings/issues/php-cap15.fee-bump.p30-fee-source-is-inner-source-meta.md](../../candidate/findings/issues/php-cap15.fee-bump.p30-fee-source-is-inner-source-meta.md) |
+| [PHP-CBKEY-JSON](#php-cbkey-json) | soneso/stellar-php-sdk | divergence | CAP-0002, CAP-0003, CAP-0006, CAP-0023, CAP-0028, CAP-0033, CAP-0035, CAP-0063, CAP-0067 | `explore.witnesses.g2-r0014-l143` | draft | not filed, draft [candidate/findings/issues/php-cap23.claimable-balances.p30-claim-through-depth-4-meta.md](../../candidate/findings/issues/php-cap23.claimable-balances.p30-claim-through-depth-4-meta.md) |
 | [PHP-JSON-DEPTH](#php-json-depth) | soneso/stellar-php-sdk | robustness | CAP-0046-01, CAP-0046-11 | `soroban.scval-shapes.synth-scmap-depth-197-deepest-accepted` | draft | not filed, draft [candidate/findings/issues/php-soroban.auth-trees.synth-auth-depth-493-deepest-accepted.md](../../candidate/findings/issues/php-soroban.auth-trees.synth-auth-depth-493-deepest-accepted.md) |
 | [PHP-SIGNEDPAYLOAD-JSON](#php-signedpayload-json) | soneso/stellar-php-sdk | divergence | CAP-0040 | `cap40.signed-payload-signer.p28-set-options-empty-payload` | draft | not filed, draft [candidate/findings/issues/php-cap40.signed-payload-signer.synth-empty-payload-signer.md](../../candidate/findings/issues/php-cap40.signed-payload-signer.synth-empty-payload-signer.md) |
-| [PHP-INFLATION](#php-inflation) | soneso/stellar-php-sdk | robustness | CAP-0026 | `cap26.inflation.p11-inflation-not-time` | draft | not filed, draft [candidate/findings/issues/php-cap26.inflation.p11-inflation-payout.md](../../candidate/findings/issues/php-cap26.inflation.p11-inflation-payout.md) |
+| [PHP-INFLATION](#php-inflation) | soneso/stellar-php-sdk | robustness | CAP-0026, PRE-CAP | `cap26.inflation.p11-inflation-not-time` | draft | not filed, draft [candidate/findings/issues/php-cap26.inflation.p11-inflation-payout.md](../../candidate/findings/issues/php-cap26.inflation.p11-inflation-payout.md) |
 | [PHP-MUXEDID](#php-muxedid) | soneso/stellar-php-sdk | divergence | CAP-0027 | `cap27.muxed-accounts.synth-textual-muxed-id-noncanonical` | draft | not filed, draft [candidate/findings/issues/php-cap27.muxed-accounts.synth-textual-muxed-id-noncanonical.md](../../candidate/findings/issues/php-cap27.muxed-accounts.synth-textual-muxed-id-noncanonical.md) |
-| [NET-CREATECONTRACT](#net-createcontract) | stellar-dotnet-sdk | robustness | CAP-0046, CAP-0046-02, CAP-0046-05, CAP-0046-06, CAP-0046-07, CAP-0046-08, CAP-0046-11, CAP-0046-12, CAP-0054, CAP-0058, CAP-0073 | `cap73.sac-trust.p28-deploy-xlm-sac-envelope` | draft | not filed, draft [candidate/findings/issues/dotnet-cap73.sac-trust.golden-504393015a71bc7a-8.md](../../candidate/findings/issues/dotnet-cap73.sac-trust.golden-504393015a71bc7a-8.md) |
-| [NET-DEPRECATED-OPS](#net-deprecated-ops) | stellar-dotnet-sdk | robustness | CAP-0002, CAP-0018, CAP-0026, CAP-0028, CAP-0038 | `cap26.inflation.p11-inflation-not-time` | draft | not filed, draft [candidate/findings/issues/dotnet-cap18.maintain-liabilities.golden-3f24be68a9962089-4.md](../../candidate/findings/issues/dotnet-cap18.maintain-liabilities.golden-3f24be68a9962089-4.md) |
+| [NET-CREATECONTRACT](#net-createcontract) | stellar-dotnet-sdk | robustness | CAP-0003, CAP-0019, CAP-0021, CAP-0027, CAP-0033, CAP-0038, CAP-0042, CAP-0046, CAP-0046-01, CAP-0046-02, CAP-0046-05, CAP-0046-06, CAP-0046-07, CAP-0046-08, CAP-0046-11, CAP-0046-12, CAP-0054, CAP-0058, CAP-0063, CAP-0067, CAP-0073, CAP-0088 | `cap73.sac-trust.p28-deploy-xlm-sac-envelope` | draft | not filed, draft [candidate/findings/issues/dotnet-cap73.sac-trust.golden-504393015a71bc7a-8.md](../../candidate/findings/issues/dotnet-cap73.sac-trust.golden-504393015a71bc7a-8.md) |
+| [NET-DEPRECATED-OPS](#net-deprecated-ops) | stellar-dotnet-sdk | robustness | CAP-0002, CAP-0018, CAP-0021, CAP-0024, CAP-0026, CAP-0028, CAP-0033, CAP-0035, CAP-0038, CAP-0046-01, PRE-CAP | `cap26.inflation.p11-inflation-not-time` | draft | not filed, draft [candidate/findings/issues/dotnet-cap18.maintain-liabilities.golden-3f24be68a9962089-4.md](../../candidate/findings/issues/dotnet-cap18.maintain-liabilities.golden-3f24be68a9962089-4.md) |
 | [NET-ISSUER-ORDER](#net-issuer-order) | stellar-dotnet-sdk | divergence | CAP-0038 | `cap38.liquidity-pools.p30-change-trust-pool-byte-order-envelope` | draft | not filed, draft [candidate/findings/issues/dotnet-cap38.liquidity-pools.p30-change-trust-pool-byte-order-envelope.md](../../candidate/findings/issues/dotnet-cap38.liquidity-pools.p30-change-trust-pool-byte-order-envelope.md) |
 | [NET-DEPTH](#net-depth) | stellar-dotnet-sdk | robustness | CAP-0046-01, CAP-0046-11 | `soroban.scval-shapes.synth-event-vec-depth-101` | draft | not filed, draft [candidate/findings/issues/dotnet-soroban.auth-trees.p30-declared-depth-245.md](../../candidate/findings/issues/dotnet-soroban.auth-trees.p30-declared-depth-245.md) |
 | [NET-UTF8](#net-utf8) | stellar-dotnet-sdk | data-loss | CAP-0019, CAP-0046-01, CAP-0046-11, CAP-0071, CAP-0071-01, CAP-0071-02 | `soroban.scval-shapes.p30-string-not-utf8-envelope` | draft | not filed, draft [candidate/findings/issues/dotnet-cap71.credentials.golden-e25799a2e2e9eea2-17.md](../../candidate/findings/issues/dotnet-cap71.credentials.golden-e25799a2e2e9eea2-17.md) |
 | [NET-STRKEY](#net-strkey) | stellar-dotnet-sdk | divergence | CAP-0023, CAP-0027, CAP-0040 | `cap23.claimable-balances.synth-strkey-b-invalid` | draft | not filed, draft [candidate/findings/issues/dotnet-cap23.claimable-balances.synth-strkey-b-invalid.md](../../candidate/findings/issues/dotnet-cap23.claimable-balances.synth-strkey-b-invalid.md) |
 | [NET-SCVEC](#net-scvec) | stellar-dotnet-sdk | robustness | CAP-0046-11 | `soroban.auth-trees.golden-5f615b0f98ae09f3-11` | draft | not filed, draft [candidate/findings/issues/dotnet-soroban.auth-trees.golden-5f615b0f98ae09f3-11.md](../../candidate/findings/issues/dotnet-soroban.auth-trees.golden-5f615b0f98ae09f3-11.md) |
 | [NET-BOUNDS](#net-bounds) | stellar-dotnet-sdk | robustness | CAP-0019, CAP-0024 | `classic.max-length.synth-memo-text-29-bytes` | draft | not filed, draft [candidate/findings/issues/dotnet-classic.max-length.synth-memo-text-29-bytes.md](../../candidate/findings/issues/dotnet-classic.max-length.synth-memo-text-29-bytes.md) |
-| [KMP-MUXED-SOURCE](#kmp-muxed-source) | kmp-stellar-sdk | data-loss | CAP-0019, CAP-0027, CAP-0046, CAP-0046-01, CAP-0046-11, CAP-0071, CAP-0071-01, CAP-0071-02 | `soroban.scval-shapes.p30-string-not-utf8-envelope` | draft | not filed, draft [candidate/findings/issues/kmp-cap27.muxed-accounts.p28-claimable-balance-tx-source-id-1.md](../../candidate/findings/issues/kmp-cap27.muxed-accounts.p28-claimable-balance-tx-source-id-1.md) |
+| [KMP-MUXED-SOURCE](#kmp-muxed-source) | kmp-stellar-sdk | data-loss | CAP-0001, CAP-0003, CAP-0006, CAP-0019, CAP-0023, CAP-0024, CAP-0027, CAP-0033, CAP-0035, CAP-0038, CAP-0046, CAP-0046-01, CAP-0046-11, CAP-0063, CAP-0071, CAP-0071-01, CAP-0071-02, PRE-CAP | `soroban.scval-shapes.p30-string-not-utf8-envelope` | draft | not filed, draft [candidate/findings/issues/kmp-cap27.muxed-accounts.p28-claimable-balance-tx-source-id-1.md](../../candidate/findings/issues/kmp-cap27.muxed-accounts.p28-claimable-balance-tx-source-id-1.md) |
 | [KMP-UTF8](#kmp-utf8) | kmp-stellar-sdk | data-loss | CAP-0019, CAP-0046-01 | `classic.memo-bytes.synth-memo-text-nonzero-padding` | draft | not filed, draft [candidate/findings/issues/kmp-classic.memo-bytes.p30-memo-truncated-sequence-28.md](../../candidate/findings/issues/kmp-classic.memo-bytes.p30-memo-truncated-sequence-28.md) |
 | [KMP-BOUNDS](#kmp-bounds) | kmp-stellar-sdk | robustness | CAP-0019, CAP-0021, CAP-0023, CAP-0024, CAP-0040, CAP-0046, CAP-0046-01, CAP-0046-02, CAP-0046-05, CAP-0046-07, CAP-0046-08, CAP-0046-11, CAP-0046-12, CAP-0054, CAP-0058 | `soroban.scval-shapes.synth-string-nonzero-padding` | draft | not filed, draft [candidate/findings/issues/kmp-cap21.preconditions.synth-extra-signers-3.md](../../candidate/findings/issues/kmp-cap21.preconditions.synth-extra-signers-3.md) |
 | [KMP-JSON-DEPTH](#kmp-json-depth) | kmp-stellar-sdk | robustness | CAP-0046-01, CAP-0046-11 | `soroban.scval-shapes.synth-event-vec-depth-101` | draft | not filed, draft [candidate/findings/issues/kmp-soroban.auth-trees.p30-declared-depth-245.md](../../candidate/findings/issues/kmp-soroban.auth-trees.p30-declared-depth-245.md) |
 | [KMP-SIGNEDPAYLOAD-JSON](#kmp-signedpayload-json) | kmp-stellar-sdk | divergence | CAP-0040 | `cap40.signed-payload-signer.p28-set-options-empty-payload` | draft | not filed, draft [candidate/findings/issues/kmp-cap40.signed-payload-signer.p28-extra-signer-empty-payload.md](../../candidate/findings/issues/kmp-cap40.signed-payload-signer.p28-extra-signer-empty-payload.md) |
 | [CLI-ALLOC](#cli-alloc) | stellar-cli | robustness | CAP-0046-01 | `soroban.scval-shapes.synth-bytes-length-overrun` | draft | not filed, draft [candidate/findings/issues/stellar-cli-soroban.scval-shapes.synth-bytes-length-overrun.md](../../candidate/findings/issues/stellar-cli-soroban.scval-shapes.synth-bytes-length-overrun.md) |
-| [CLI-TXHASH-V1](#cli-txhash-v1) | stellar-cli | divergence | CAP-0002, CAP-0003, CAP-0006, CAP-0015, CAP-0026, CAP-0028 | `classic.failed-tx.p9-change-trust-native-internal-error-envelope` | draft | not filed, draft [candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md](../../candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md) |
+| [CLI-TXHASH-V1](#cli-txhash-v1) | stellar-cli | divergence | CAP-0002, CAP-0003, CAP-0006, CAP-0015, CAP-0019, CAP-0021, CAP-0023, CAP-0024, CAP-0026, CAP-0028, CAP-0033, CAP-0035, CAP-0038, CAP-0042, CAP-0046-08, PRE-CAP | `classic.failed-tx.p9-change-trust-native-internal-error-envelope` | draft | not filed, draft [candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md](../../candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md) |
 | [CLI-DEPTH](#cli-depth) | stellar-cli | divergence | CAP-0046-01, CAP-0046-11 | `soroban.scval-shapes.p30-map-depth-max-envelope` | draft | not filed, draft [candidate/findings/issues/stellar-cli-soroban.auth-trees.p30-declared-depth-245.md](../../candidate/findings/issues/stellar-cli-soroban.auth-trees.p30-declared-depth-245.md) |
 | [CLI-JSON-DEPTH](#cli-json-depth) | stellar-cli | divergence | CAP-0046-01, CAP-0046-11 | `soroban.scval-shapes.synth-event-vec-depth-101` | draft | not filed, draft [candidate/findings/issues/stellar-cli-soroban.auth-trees.synth-auth-depth-493-deepest-accepted.md](../../candidate/findings/issues/stellar-cli-soroban.auth-trees.synth-auth-depth-493-deepest-accepted.md) |
 | [CLI-SIGNEDPAYLOAD-JSON](#cli-signedpayload-json) | stellar-cli | divergence | CAP-0040 | `cap40.signed-payload-signer.p28-set-options-empty-payload` | draft | not filed, draft [candidate/findings/issues/stellar-cli-cap40.signed-payload-signer.p28-extra-signer-empty-payload.md](../../candidate/findings/issues/stellar-cli-cap40.signed-payload-signer.p28-extra-signer-empty-payload.md) |
 | [CLI-STRKEY-TRIM](#cli-strkey-trim) | stellar-cli | robustness | CAP-0023, CAP-0027, CAP-0038, CAP-0040, CAP-0046, CAP-0046-02, CAP-0046-05, CAP-0046-07, CAP-0046-08, CAP-0046-12, CAP-0054, CAP-0058, CAP-0084 | `cap27.muxed-accounts.synth-strkey-g-noncanonical-chars` | draft | not filed, draft [candidate/findings/issues/stellar-cli-cap23.claimable-balances.synth-strkey-b-invalid.md](../../candidate/findings/issues/stellar-cli-cap23.claimable-balances.synth-strkey-b-invalid.md) |
-| [DART-PRICE](#dart-price) | stellar_flutter_sdk | divergence | CAP-0003, CAP-0006, CAP-0015 | `explore.witnesses.g2-r0010-l92` | draft | not filed, draft [candidate/findings/issues/dart-cap03.offer-liabilities.mainnet-37466023.md](../../candidate/findings/issues/dart-cap03.offer-liabilities.mainnet-37466023.md) |
-| [DART-MAXTIME](#dart-maxtime) | stellar_flutter_sdk | divergence |  | `explore.witnesses.f62d-r0000-l96` | draft | not filed, draft [candidate/findings/issues/dart-explore.witnesses.f62d-r0000-l96.md](../../candidate/findings/issues/dart-explore.witnesses.f62d-r0000-l96.md) |
-| [NET-PRICE](#net-price) | stellar-dotnet-sdk | divergence | CAP-0003, CAP-0006, CAP-0015 | `explore.witnesses.g2-r0010-l92` | draft | not filed, draft [candidate/findings/issues/dotnet-cap03.offer-liabilities.mainnet-37466023.md](../../candidate/findings/issues/dotnet-cap03.offer-liabilities.mainnet-37466023.md) |
-| [KMP-TXOBJECT](#kmp-txobject) | kmp-stellar-sdk | divergence |  | `explore.witnesses.f62d-r0004-l69` | draft | not filed, draft [candidate/findings/issues/kmp-explore.witnesses.f62d-r0000-l96.md](../../candidate/findings/issues/kmp-explore.witnesses.f62d-r0000-l96.md) |
-| [PHP-OFFERID](#php-offerid) | soneso/stellar-php-sdk | divergence |  | `explore.witnesses.f62d-r0004-l69` | draft | not filed, draft [candidate/findings/issues/php-explore.witnesses.f62d-r0004-l69.md](../../candidate/findings/issues/php-explore.witnesses.f62d-r0004-l69.md) |
-| [PHP-SETOPTIONS](#php-setoptions) | soneso/stellar-php-sdk | divergence |  | `explore.witnesses.g2-r0015-l71` | draft | not filed, draft [candidate/findings/issues/php-explore.witnesses.g2-r0015-l71.md](../../candidate/findings/issues/php-explore.witnesses.g2-r0015-l71.md) |
+| [DART-PRICE](#dart-price) | stellar_flutter_sdk | divergence | CAP-0003, CAP-0006, CAP-0015, CAP-0038, PRE-CAP | `explore.witnesses.g2-r0010-l92` | draft | not filed, draft [candidate/findings/issues/dart-cap03.offer-liabilities.mainnet-37466023.md](../../candidate/findings/issues/dart-cap03.offer-liabilities.mainnet-37466023.md) |
+| [DART-MAXTIME](#dart-maxtime) | stellar_flutter_sdk | divergence | CAP-0024 | `explore.witnesses.f62d-r0000-l96` | draft | not filed, draft [candidate/findings/issues/dart-explore.witnesses.f62d-r0000-l96.md](../../candidate/findings/issues/dart-explore.witnesses.f62d-r0000-l96.md) |
+| [NET-PRICE](#net-price) | stellar-dotnet-sdk | divergence | CAP-0003, CAP-0006, CAP-0015, PRE-CAP | `explore.witnesses.g2-r0010-l92` | draft | not filed, draft [candidate/findings/issues/dotnet-cap03.offer-liabilities.mainnet-37466023.md](../../candidate/findings/issues/dotnet-cap03.offer-liabilities.mainnet-37466023.md) |
+| [KMP-TXOBJECT](#kmp-txobject) | kmp-stellar-sdk | divergence | CAP-0006, CAP-0024 | `explore.witnesses.f62d-r0004-l69` | draft | not filed, draft [candidate/findings/issues/kmp-explore.witnesses.f62d-r0000-l96.md](../../candidate/findings/issues/kmp-explore.witnesses.f62d-r0000-l96.md) |
+| [PHP-OFFERID](#php-offerid) | soneso/stellar-php-sdk | divergence | CAP-0006 | `explore.witnesses.f62d-r0004-l69` | draft | not filed, draft [candidate/findings/issues/php-explore.witnesses.f62d-r0004-l69.md](../../candidate/findings/issues/php-explore.witnesses.f62d-r0004-l69.md) |
+| [PHP-SETOPTIONS](#php-setoptions) | soneso/stellar-php-sdk | divergence | PRE-CAP | `explore.witnesses.g2-r0015-l71` | draft | not filed, draft [candidate/findings/issues/php-explore.witnesses.g2-r0015-l71.md](../../candidate/findings/issues/php-explore.witnesses.g2-r0015-l71.md) |
 
 ## ETL-META-V4
 
 stellar-etl's token transfer export halts on ledgers whose transaction meta is below version 4
 
-export_token_transfer builds the processor with NewEventsProcessorForUnifiedEvents (internal/transform/token_transfer.go L15 at 2b24ec89), which reads the CAP-67 unified events stream and returns "expected version 4 got N" for any other meta version (go-stellar-sdk processors/token_transfer/token_transfer_processor.go L474-L478 at e31e3b146d00, the pseudo-version stellar-etl pins). The command exits 1, the adapter retries it, and the harness stops the chain at its first ledger with a transaction: every entry of the five corpus chains recorded at protocols 9 to 22 (meta v2 or v3), and of the 20 explorer chains below protocol 23 recorded with classic events and their backfill off, is not evaluated, on both networks.
+export_token_transfer builds the processor with NewEventsProcessorForUnifiedEvents (internal/transform/token_transfer.go L15 at 7e3fc9af), which reads the CAP-67 unified events stream and returns "expected version 4 got N" for any other meta version (go-stellar-sdk processors/token_transfer/token_transfer_processor.go L474-L478 at v0.9.0, the version stellar-etl pins). The command exits 1, the adapter retries it, and the harness stops the chain at its first ledger with a transaction: every entry of the five corpus chains recorded at protocols 9 to 22 (meta v2 or v3), and of the 20 explorer chains below protocol 23 recorded with classic events and their backfill off, is not evaluated, on both networks.
 
 - component: stellar-etl
 - severity: robustness
-- CAPs: CAP-0002, CAP-0003, CAP-0006, CAP-0026, CAP-0028, CAP-0067
+- CAPs: CAP-0001, CAP-0002, CAP-0003, CAP-0006, CAP-0015, CAP-0019, CAP-0023, CAP-0024, CAP-0026, CAP-0028, CAP-0033, CAP-0035, CAP-0038, CAP-0046, CAP-0046-01, CAP-0046-02, CAP-0046-05, CAP-0046-06, CAP-0046-07, CAP-0046-08, CAP-0046-09, CAP-0046-10, CAP-0046-11, CAP-0046-12, CAP-0054, CAP-0067, PRE-CAP
 - status: wont-fix (intended for the data stellar-etl reads: the public ledger lake holds history re-emitted by a current core, so every ledger there carries TransactionMeta v4, which unified events need. Only locally recorded chains below protocol 23 hold v2 or v3 meta)
 - minimal entry: `classic.failed-tx.p9-change-trust-native-internal-error-envelope`
-- reproduce: `shapekit harness run --chain classic.failed-tx.change-trust-native.p9 --network testnet --adapter "adapters/bin/etl-adapter --commit 2b24ec89ddce7fc0beb7795de982c93e6895eaf3"`
+- reproduce: `shapekit harness run --chain classic.failed-tx.change-trust-native.p9 --network testnet --adapter "adapters/bin/etl-adapter --commit 7e3fc9af95359dad6ba939fa88791f49cdf531ae"`
 - recipe: `chain:classic.failed-tx.change-trust-native.p9`
-- affected stellar-etl: fails on 2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (1 of 1 tested)
+- affected stellar-etl: fails on 7e3fc9af95359dad6ba939fa88791f49cdf531ae (1 of 1 tested)
 - other SDKs failing the same entries: dart@3.12.0, dotnet@16.0.0, dotnet@17.0.0, kmp@1.18.0, php@1.18.0, stellar-cli@28.1.0, stellar-cli@30.0.1
 - siblings: [CLI-TXHASH-V1](#cli-txhash-v1), [DART-INFLATION](#dart-inflation), [KMP-MUXED-SOURCE](#kmp-muxed-source), [NET-CREATECONTRACT](#net-createcontract), [NET-DEPRECATED-OPS](#net-deprecated-ops), [NET-PRICE](#net-price), [PHP-CBKEY-JSON](#php-cbkey-json), [PHP-HEXHASH](#php-hexhash), [PHP-INFLATION](#php-inflation), [PHP-SETOPTIONS](#php-setoptions), [PHP-UINT64](#php-uint64)
 - observed: 182 failure(s) on 91 entries
 
 <details><summary>occurrences</summary>
 
-- `cap03.offer-liabilities.p17-manage-buy-offer-claim-atom-v0` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 71
-- `cap03.offer-liabilities.p17-manage-buy-offer-claim-atom-v0` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 71
-- `cap03.offer-liabilities.p17-manage-sell-offer-claim-atom-v0` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 70
-- `cap03.offer-liabilities.p17-manage-sell-offer-claim-atom-v0` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 70
-- `cap03.offer-liabilities.p17-path-payment-strict-receive-claim-atom-v0` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 72
-- `cap03.offer-liabilities.p17-path-payment-strict-receive-claim-atom-v0` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 72
-- `cap03.offer-liabilities.p17-path-payment-strict-send-claim-atom-v0` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 73
-- `cap03.offer-liabilities.p17-path-payment-strict-send-claim-atom-v0` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 73
-- `cap26.inflation.p11-inflation-not-time` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 74
-- `cap26.inflation.p11-inflation-not-time` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 74
-- `cap26.inflation.p11-inflation-payout` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 66
-- `cap26.inflation.p11-inflation-payout` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 66
-- `cap67.unified-events.p22-account-merge-muxed-destination` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 85
-- `cap67.unified-events.p22-account-merge-muxed-destination` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 85
-- `cap67.unified-events.p22-claim-claimable-balance` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 80
-- `cap67.unified-events.p22-claim-claimable-balance` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 80
-- `cap67.unified-events.p22-clawback` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 76
-- `cap67.unified-events.p22-clawback` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 76
-- `cap67.unified-events.p22-clawback-claimable-balance` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 82
-- `cap67.unified-events.p22-clawback-claimable-balance` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 82
-- `cap67.unified-events.p22-create-claimable-balance` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 79
-- `cap67.unified-events.p22-create-claimable-balance` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 79
-- `cap67.unified-events.p22-liquidity-pool-deposit` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 84
-- `cap67.unified-events.p22-liquidity-pool-deposit` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 84
-- `cap67.unified-events.p22-path-payment-muxed-destination` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 75
-- `cap67.unified-events.p22-path-payment-muxed-destination` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 75
-- `cap67.unified-events.p22-payment-burn` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 69
-- `cap67.unified-events.p22-payment-burn` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 69
-- `cap67.unified-events.p22-payment-memo-hash` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 74
-- `cap67.unified-events.p22-payment-memo-hash` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 74
-- `cap67.unified-events.p22-payment-memo-id` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 72
-- `cap67.unified-events.p22-payment-memo-id` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 72
-- `cap67.unified-events.p22-payment-memo-text` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 73
-- `cap67.unified-events.p22-payment-memo-text` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 73
-- `cap67.unified-events.p22-payment-mint` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 67
-- `cap67.unified-events.p22-payment-mint` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 67
-- `cap67.unified-events.p22-payment-muxed-destination` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 71
-- `cap67.unified-events.p22-payment-muxed-destination` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 71
-- `cap67.unified-events.p22-payment-to-self` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 70
-- `cap67.unified-events.p22-payment-to-self` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 70
-- `cap67.unified-events.p22-payment-transfer` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 68
-- `cap67.unified-events.p22-payment-transfer` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 68
-- `cap67.unified-events.p22-set-authorized-false` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 77
-- `cap67.unified-events.p22-set-authorized-false` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 77
-- `cap67.unified-events.p22-set-authorized-true` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 78
-- `cap67.unified-events.p22-set-authorized-true` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 78
-- `classic.failed-tx.p12-allow-trust-self-not-allowed` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 74
-- `classic.failed-tx.p12-allow-trust-self-not-allowed` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 74
-- `classic.failed-tx.p12-allow-trust-trust-not-required` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 73
-- `classic.failed-tx.p12-allow-trust-trust-not-required` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 73
-- `classic.failed-tx.p12-change-trust-self-not-allowed` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 75
-- `classic.failed-tx.p12-change-trust-self-not-allowed` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 75
-- `classic.failed-tx.p12-manage-buy-offer-buy-no-issuer` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 69
-- `classic.failed-tx.p12-manage-buy-offer-buy-no-issuer` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 69
-- `classic.failed-tx.p12-manage-buy-offer-sell-no-issuer` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 68
-- `classic.failed-tx.p12-manage-buy-offer-sell-no-issuer` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 68
-- `classic.failed-tx.p12-manage-sell-offer-buy-no-issuer` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 67
-- `classic.failed-tx.p12-manage-sell-offer-buy-no-issuer` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 67
-- `classic.failed-tx.p12-manage-sell-offer-sell-no-issuer` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 66
-- `classic.failed-tx.p12-manage-sell-offer-sell-no-issuer` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 66
-- `classic.failed-tx.p12-path-payment-strict-receive-no-issuer` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 70
-- `classic.failed-tx.p12-path-payment-strict-receive-no-issuer` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 70
-- `classic.failed-tx.p12-path-payment-strict-send-no-issuer` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 71
-- `classic.failed-tx.p12-path-payment-strict-send-no-issuer` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 71
-- `classic.failed-tx.p12-payment-no-issuer` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 72
-- `classic.failed-tx.p12-payment-no-issuer` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 72
-- `classic.failed-tx.p9-change-trust-native-internal-error-envelope` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 65
-- `classic.failed-tx.p9-change-trust-native-internal-error-envelope` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 65
-- `classic.failed-tx.p9-change-trust-native-internal-error-meta` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 65
-- `classic.failed-tx.p9-change-trust-native-internal-error-meta` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 65
-- `explore.witnesses.f62c-r0016-l93` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 93
-- `explore.witnesses.f62c-r0016-l93` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 93
-- `explore.witnesses.f62c-r0016-l94` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 94
-- `explore.witnesses.f62c-r0016-l94` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 94
-- `explore.witnesses.f62c-r0017-l77` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 77
-- `explore.witnesses.f62c-r0017-l77` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 77
-- `explore.witnesses.f62c-r0017-l78` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 78
-- `explore.witnesses.f62c-r0017-l78` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 78
-- `explore.witnesses.f62d-r0001-l66` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 66
-- `explore.witnesses.f62d-r0001-l66` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 66
-- `explore.witnesses.f62d-r0001-l67` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 67
-- `explore.witnesses.f62d-r0001-l67` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 67
-- `explore.witnesses.f62d-r0001-l69` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 69
-- `explore.witnesses.f62d-r0001-l69` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 69
-- `explore.witnesses.f62d-r0001-l72` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 72
-- `explore.witnesses.f62d-r0001-l72` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 72
-- `explore.witnesses.f62d-r0001-l73` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 73
-- `explore.witnesses.f62d-r0001-l73` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 73
-- `explore.witnesses.f62d-r0002-l66` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 66
-- `explore.witnesses.f62d-r0002-l66` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 66
-- `explore.witnesses.f62d-r0002-l68` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 68
-- `explore.witnesses.f62d-r0002-l68` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 68
-- `explore.witnesses.f62d-r0002-l75` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 75
-- `explore.witnesses.f62d-r0002-l75` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 75
-- `explore.witnesses.f62d-r0002-l77` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 77
-- `explore.witnesses.f62d-r0002-l77` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 77
-- `explore.witnesses.f62d-r0002-l79` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 79
-- `explore.witnesses.f62d-r0002-l79` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 79
-- `explore.witnesses.f62d-r0002-l84` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 84
-- `explore.witnesses.f62d-r0002-l84` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 84
-- `explore.witnesses.f63-p21-r0001-l66` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 66
-- `explore.witnesses.f63-p21-r0001-l66` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 66
-- `explore.witnesses.f63-p21-r0001-l67` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 67
-- `explore.witnesses.f63-p21-r0001-l67` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 67
-- `explore.witnesses.f63-p21-r0001-l68` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 68
-- `explore.witnesses.f63-p21-r0001-l68` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 68
-- `explore.witnesses.f63-p21-r0001-l69` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 69
-- `explore.witnesses.f63-p21-r0001-l69` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 69
-- `explore.witnesses.f63-p21-r0001-l72` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 72
-- `explore.witnesses.f63-p21-r0001-l72` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 72
-- `explore.witnesses.f63-p21-r0001-l73` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 73
-- `explore.witnesses.f63-p21-r0001-l73` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 73
-- `explore.witnesses.f63-p21-r0001-l86` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 86
-- `explore.witnesses.f63-p21-r0001-l86` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 86
-- `explore.witnesses.g1-r0016-l66` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 66
-- `explore.witnesses.g1-r0016-l66` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 66
-- `explore.witnesses.g1-r0016-l74` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 74
-- `explore.witnesses.g1-r0016-l74` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 74
-- `explore.witnesses.g2-r0001-l102` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 102
-- `explore.witnesses.g2-r0001-l102` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 102
-- `explore.witnesses.g2-r0001-l112` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 112
-- `explore.witnesses.g2-r0001-l112` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 112
-- `explore.witnesses.g2-r0001-l113` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 113
-- `explore.witnesses.g2-r0001-l113` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 113
-- `explore.witnesses.g2-r0001-l114` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 114
-- `explore.witnesses.g2-r0001-l114` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 114
-- `explore.witnesses.g2-r0001-l115` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 115
-- `explore.witnesses.g2-r0001-l115` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 115
-- `explore.witnesses.g2-r0001-l72` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 72
-- `explore.witnesses.g2-r0001-l72` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 72
-- `explore.witnesses.g2-r0001-l81` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 81
-- `explore.witnesses.g2-r0001-l81` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 81
-- `explore.witnesses.g2-r0001-l82` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 82
-- `explore.witnesses.g2-r0001-l82` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 82
-- `explore.witnesses.g2-r0001-l83` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 83
-- `explore.witnesses.g2-r0001-l83` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 83
-- `explore.witnesses.g2-r0001-l84` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 84
-- `explore.witnesses.g2-r0001-l84` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 84
-- `explore.witnesses.g2-r0001-l85` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 85
-- `explore.witnesses.g2-r0001-l85` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 85
-- `explore.witnesses.g2-r0001-l86` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 86
-- `explore.witnesses.g2-r0001-l86` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 86
-- `explore.witnesses.g2-r0015-l67` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 67
-- `explore.witnesses.g2-r0015-l67` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 67
-- `explore.witnesses.g2-r0015-l69` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 69
-- `explore.witnesses.g2-r0015-l69` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 69
-- `explore.witnesses.g2-r0015-l71` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 71
-- `explore.witnesses.g2-r0015-l71` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 71
-- `explore.witnesses.g2-r0015-l72` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 72
-- `explore.witnesses.g2-r0015-l72` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 72
-- `explore.witnesses.g2-r0017-l129` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 129
-- `explore.witnesses.g2-r0017-l129` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 129
-- `explore.witnesses.g2-r0017-l130` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 130
-- `explore.witnesses.g2-r0017-l130` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 130
-- `explore.witnesses.g2-r0019-l69` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 69
-- `explore.witnesses.g2-r0019-l69` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 69
-- `explore.witnesses.g2-r0020-l69` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 69
-- `explore.witnesses.g2-r0020-l69` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 69
-- `explore.witnesses.g2-r0023-l119` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 119
-- `explore.witnesses.g2-r0023-l119` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 119
-- `explore.witnesses.g2-r0027-l67` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 67
-- `explore.witnesses.g2-r0027-l67` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 67
-- `explore.witnesses.g2-r0027-l69` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 69
-- `explore.witnesses.g2-r0027-l69` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 69
-- `explore.witnesses.g2-r0030-l95` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 95
-- `explore.witnesses.g2-r0030-l95` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 95
-- `explore.witnesses.g2-r0030-l99` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 99
-- `explore.witnesses.g2-r0030-l99` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 99
-- `explore.witnesses.g2-r0031-l66` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 66
-- `explore.witnesses.g2-r0031-l66` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 66
-- `explore.witnesses.g2-r0031-l67` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 67
-- `explore.witnesses.g2-r0031-l67` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 67
-- `explore.witnesses.g2-r0033-l66` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 66
-- `explore.witnesses.g2-r0033-l66` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 66
-- `explore.witnesses.g2-r0036-l71` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 71
-- `explore.witnesses.g2-r0036-l71` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 71
-- `explore.witnesses.g2-r0040-l74` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 74
-- `explore.witnesses.g2-r0040-l74` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 74
-- `explore.witnesses.g2-r0041-l89` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 89
-- `explore.witnesses.g2-r0041-l89` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 89
-- `explore.witnesses.g2-r0042-l67` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 67
-- `explore.witnesses.g2-r0042-l67` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 67
+- `cap03.offer-liabilities.p17-manage-buy-offer-claim-atom-v0` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 71
+- `cap03.offer-liabilities.p17-manage-buy-offer-claim-atom-v0` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 71
+- `cap03.offer-liabilities.p17-manage-sell-offer-claim-atom-v0` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 70
+- `cap03.offer-liabilities.p17-manage-sell-offer-claim-atom-v0` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 70
+- `cap03.offer-liabilities.p17-path-payment-strict-receive-claim-atom-v0` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 72
+- `cap03.offer-liabilities.p17-path-payment-strict-receive-claim-atom-v0` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 72
+- `cap03.offer-liabilities.p17-path-payment-strict-send-claim-atom-v0` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 73
+- `cap03.offer-liabilities.p17-path-payment-strict-send-claim-atom-v0` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 73
+- `cap26.inflation.p11-inflation-not-time` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 74
+- `cap26.inflation.p11-inflation-not-time` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 74
+- `cap26.inflation.p11-inflation-payout` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 66
+- `cap26.inflation.p11-inflation-payout` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 66
+- `cap67.unified-events.p22-account-merge-muxed-destination` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 85
+- `cap67.unified-events.p22-account-merge-muxed-destination` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 85
+- `cap67.unified-events.p22-claim-claimable-balance` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 80
+- `cap67.unified-events.p22-claim-claimable-balance` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 80
+- `cap67.unified-events.p22-clawback` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 76
+- `cap67.unified-events.p22-clawback` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 76
+- `cap67.unified-events.p22-clawback-claimable-balance` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 82
+- `cap67.unified-events.p22-clawback-claimable-balance` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 82
+- `cap67.unified-events.p22-create-claimable-balance` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 79
+- `cap67.unified-events.p22-create-claimable-balance` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 79
+- `cap67.unified-events.p22-liquidity-pool-deposit` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 84
+- `cap67.unified-events.p22-liquidity-pool-deposit` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 84
+- `cap67.unified-events.p22-path-payment-muxed-destination` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 75
+- `cap67.unified-events.p22-path-payment-muxed-destination` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 75
+- `cap67.unified-events.p22-payment-burn` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 69
+- `cap67.unified-events.p22-payment-burn` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 69
+- `cap67.unified-events.p22-payment-memo-hash` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 74
+- `cap67.unified-events.p22-payment-memo-hash` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 74
+- `cap67.unified-events.p22-payment-memo-id` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 72
+- `cap67.unified-events.p22-payment-memo-id` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 72
+- `cap67.unified-events.p22-payment-memo-text` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 73
+- `cap67.unified-events.p22-payment-memo-text` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 73
+- `cap67.unified-events.p22-payment-mint` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 67
+- `cap67.unified-events.p22-payment-mint` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 67
+- `cap67.unified-events.p22-payment-muxed-destination` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 71
+- `cap67.unified-events.p22-payment-muxed-destination` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 71
+- `cap67.unified-events.p22-payment-to-self` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 70
+- `cap67.unified-events.p22-payment-to-self` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 70
+- `cap67.unified-events.p22-payment-transfer` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 68
+- `cap67.unified-events.p22-payment-transfer` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 68
+- `cap67.unified-events.p22-set-authorized-false` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 77
+- `cap67.unified-events.p22-set-authorized-false` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 77
+- `cap67.unified-events.p22-set-authorized-true` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 78
+- `cap67.unified-events.p22-set-authorized-true` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 78
+- `classic.failed-tx.p12-allow-trust-self-not-allowed` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 74
+- `classic.failed-tx.p12-allow-trust-self-not-allowed` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 74
+- `classic.failed-tx.p12-allow-trust-trust-not-required` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 73
+- `classic.failed-tx.p12-allow-trust-trust-not-required` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 73
+- `classic.failed-tx.p12-change-trust-self-not-allowed` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 75
+- `classic.failed-tx.p12-change-trust-self-not-allowed` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 75
+- `classic.failed-tx.p12-manage-buy-offer-buy-no-issuer` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 69
+- `classic.failed-tx.p12-manage-buy-offer-buy-no-issuer` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 69
+- `classic.failed-tx.p12-manage-buy-offer-sell-no-issuer` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 68
+- `classic.failed-tx.p12-manage-buy-offer-sell-no-issuer` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 68
+- `classic.failed-tx.p12-manage-sell-offer-buy-no-issuer` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 67
+- `classic.failed-tx.p12-manage-sell-offer-buy-no-issuer` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 67
+- `classic.failed-tx.p12-manage-sell-offer-sell-no-issuer` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 66
+- `classic.failed-tx.p12-manage-sell-offer-sell-no-issuer` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 66
+- `classic.failed-tx.p12-path-payment-strict-receive-no-issuer` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 70
+- `classic.failed-tx.p12-path-payment-strict-receive-no-issuer` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 70
+- `classic.failed-tx.p12-path-payment-strict-send-no-issuer` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 71
+- `classic.failed-tx.p12-path-payment-strict-send-no-issuer` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 71
+- `classic.failed-tx.p12-payment-no-issuer` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 72
+- `classic.failed-tx.p12-payment-no-issuer` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 72
+- `classic.failed-tx.p9-change-trust-native-internal-error-envelope` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 65
+- `classic.failed-tx.p9-change-trust-native-internal-error-envelope` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 65
+- `classic.failed-tx.p9-change-trust-native-internal-error-meta` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 65
+- `classic.failed-tx.p9-change-trust-native-internal-error-meta` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 65
+- `explore.witnesses.f62c-r0016-l93` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 93
+- `explore.witnesses.f62c-r0016-l93` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 93
+- `explore.witnesses.f62c-r0016-l94` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 94
+- `explore.witnesses.f62c-r0016-l94` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 94
+- `explore.witnesses.f62c-r0017-l77` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 77
+- `explore.witnesses.f62c-r0017-l77` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 77
+- `explore.witnesses.f62c-r0017-l78` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 78
+- `explore.witnesses.f62c-r0017-l78` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 78
+- `explore.witnesses.f62d-r0001-l66` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 66
+- `explore.witnesses.f62d-r0001-l66` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 66
+- `explore.witnesses.f62d-r0001-l67` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 67
+- `explore.witnesses.f62d-r0001-l67` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 67
+- `explore.witnesses.f62d-r0001-l69` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 69
+- `explore.witnesses.f62d-r0001-l69` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 69
+- `explore.witnesses.f62d-r0001-l72` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 72
+- `explore.witnesses.f62d-r0001-l72` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 72
+- `explore.witnesses.f62d-r0001-l73` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 73
+- `explore.witnesses.f62d-r0001-l73` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 73
+- `explore.witnesses.f62d-r0002-l66` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 66
+- `explore.witnesses.f62d-r0002-l66` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 66
+- `explore.witnesses.f62d-r0002-l68` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 68
+- `explore.witnesses.f62d-r0002-l68` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 68
+- `explore.witnesses.f62d-r0002-l75` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 75
+- `explore.witnesses.f62d-r0002-l75` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 75
+- `explore.witnesses.f62d-r0002-l77` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 77
+- `explore.witnesses.f62d-r0002-l77` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 77
+- `explore.witnesses.f62d-r0002-l79` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 79
+- `explore.witnesses.f62d-r0002-l79` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 79
+- `explore.witnesses.f62d-r0002-l84` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 84
+- `explore.witnesses.f62d-r0002-l84` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 84
+- `explore.witnesses.f63-p21-r0001-l66` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 66
+- `explore.witnesses.f63-p21-r0001-l66` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 66
+- `explore.witnesses.f63-p21-r0001-l67` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 67
+- `explore.witnesses.f63-p21-r0001-l67` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 67
+- `explore.witnesses.f63-p21-r0001-l68` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 68
+- `explore.witnesses.f63-p21-r0001-l68` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 68
+- `explore.witnesses.f63-p21-r0001-l69` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 69
+- `explore.witnesses.f63-p21-r0001-l69` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 69
+- `explore.witnesses.f63-p21-r0001-l72` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 72
+- `explore.witnesses.f63-p21-r0001-l72` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 72
+- `explore.witnesses.f63-p21-r0001-l73` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 73
+- `explore.witnesses.f63-p21-r0001-l73` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 73
+- `explore.witnesses.f63-p21-r0001-l86` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 86
+- `explore.witnesses.f63-p21-r0001-l86` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 86
+- `explore.witnesses.g1-r0016-l66` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 66
+- `explore.witnesses.g1-r0016-l66` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 66
+- `explore.witnesses.g1-r0016-l74` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 74
+- `explore.witnesses.g1-r0016-l74` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 74
+- `explore.witnesses.g2-r0001-l102` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 102
+- `explore.witnesses.g2-r0001-l102` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 102
+- `explore.witnesses.g2-r0001-l112` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 112
+- `explore.witnesses.g2-r0001-l112` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 112
+- `explore.witnesses.g2-r0001-l113` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 113
+- `explore.witnesses.g2-r0001-l113` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 113
+- `explore.witnesses.g2-r0001-l114` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 114
+- `explore.witnesses.g2-r0001-l114` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 114
+- `explore.witnesses.g2-r0001-l115` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 115
+- `explore.witnesses.g2-r0001-l115` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 115
+- `explore.witnesses.g2-r0001-l72` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 72
+- `explore.witnesses.g2-r0001-l72` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 72
+- `explore.witnesses.g2-r0001-l81` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 81
+- `explore.witnesses.g2-r0001-l81` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 81
+- `explore.witnesses.g2-r0001-l82` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 82
+- `explore.witnesses.g2-r0001-l82` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 82
+- `explore.witnesses.g2-r0001-l83` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 83
+- `explore.witnesses.g2-r0001-l83` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 83
+- `explore.witnesses.g2-r0001-l84` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 84
+- `explore.witnesses.g2-r0001-l84` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 84
+- `explore.witnesses.g2-r0001-l85` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 85
+- `explore.witnesses.g2-r0001-l85` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 85
+- `explore.witnesses.g2-r0001-l86` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 86
+- `explore.witnesses.g2-r0001-l86` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 86
+- `explore.witnesses.g2-r0015-l67` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 67
+- `explore.witnesses.g2-r0015-l67` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 67
+- `explore.witnesses.g2-r0015-l69` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 69
+- `explore.witnesses.g2-r0015-l69` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 69
+- `explore.witnesses.g2-r0015-l71` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 71
+- `explore.witnesses.g2-r0015-l71` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 71
+- `explore.witnesses.g2-r0015-l72` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 72
+- `explore.witnesses.g2-r0015-l72` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 72
+- `explore.witnesses.g2-r0017-l129` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 129
+- `explore.witnesses.g2-r0017-l129` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 129
+- `explore.witnesses.g2-r0017-l130` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 130
+- `explore.witnesses.g2-r0017-l130` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 130
+- `explore.witnesses.g2-r0019-l69` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 69
+- `explore.witnesses.g2-r0019-l69` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 69
+- `explore.witnesses.g2-r0020-l69` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 69
+- `explore.witnesses.g2-r0020-l69` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 69
+- `explore.witnesses.g2-r0023-l119` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 119
+- `explore.witnesses.g2-r0023-l119` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 119
+- `explore.witnesses.g2-r0027-l67` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 67
+- `explore.witnesses.g2-r0027-l67` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 67
+- `explore.witnesses.g2-r0027-l69` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 69
+- `explore.witnesses.g2-r0027-l69` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 69
+- `explore.witnesses.g2-r0030-l95` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 95
+- `explore.witnesses.g2-r0030-l95` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 95
+- `explore.witnesses.g2-r0030-l99` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 99
+- `explore.witnesses.g2-r0030-l99` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 99
+- `explore.witnesses.g2-r0031-l66` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 66
+- `explore.witnesses.g2-r0031-l66` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 66
+- `explore.witnesses.g2-r0031-l67` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 67
+- `explore.witnesses.g2-r0031-l67` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 67
+- `explore.witnesses.g2-r0033-l66` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 66
+- `explore.witnesses.g2-r0033-l66` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 66
+- `explore.witnesses.g2-r0036-l71` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 71
+- `explore.witnesses.g2-r0036-l71` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 71
+- `explore.witnesses.g2-r0040-l74` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 74
+- `explore.witnesses.g2-r0040-l74` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 74
+- `explore.witnesses.g2-r0041-l89` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 89
+- `explore.witnesses.g2-r0041-l89` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 89
+- `explore.witnesses.g2-r0042-l67` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 67
+- `explore.witnesses.g2-r0042-l67` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 67
 
 </details>
 
@@ -274,32 +274,32 @@ export_token_transfer builds the processor with NewEventsProcessorForUnifiedEven
 
 question: the effects table has no trustline_created for a trustline a Stellar asset contract trust() call opens
 
-transformEffects derives the effects of an InvokeHostFunction operation only from Stellar asset contract events (addInvokeHostFunctionEffects, internal/transform/effects.go L1326-L1440 at 2b24ec89), which turn transfer, mint, clawback and burn into credit and debit effects. A trustline the contract's trust() function opens (CAP-73) changes the ledger without such an event, so it gets no trustline_created effect, while a ChangeTrust operation that opens the same trustline does (addChangeTrustEffects, L647-L705). The source does not say whether this is intended.
+transformEffects derives the effects of an InvokeHostFunction operation only from Stellar asset contract events (addInvokeHostFunctionEffects, internal/transform/effects.go L1326-L1440 at 7e3fc9af), which turn transfer, mint, clawback and burn into credit and debit effects. A trustline the contract's trust() function opens (CAP-73) changes the ledger without such an event, so it gets no trustline_created effect, while a ChangeTrust operation that opens the same trustline does (addChangeTrustEffects, L647-L705). The source does not say whether this is intended.
 
 - component: stellar-etl
 - severity: data-loss
-- CAPs: CAP-0046-06, CAP-0073
+- CAPs: CAP-0038, CAP-0046-01, CAP-0046-02, CAP-0046-06, CAP-0046-11, CAP-0073
 - status: draft (not filed, draft [candidate/findings/issues/stellar-etl-E1.md](../../candidate/findings/issues/stellar-etl-E1.md))
 - minimal entry: `cap73.sac-trust.p28-trust-envelope`
-- reproduce: `shapekit harness run --chain cap73.sac-trust.p28 --network testnet --adapter "adapters/bin/etl-adapter --commit 2b24ec89ddce7fc0beb7795de982c93e6895eaf3"`
+- reproduce: `shapekit harness run --chain cap73.sac-trust.p28 --network testnet --adapter "adapters/bin/etl-adapter --commit 7e3fc9af95359dad6ba939fa88791f49cdf531ae"`
 - recipe: `chain:cap73.sac-trust.p28`
-- affected stellar-etl: fails on 2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (1 of 1 tested)
+- affected stellar-etl: fails on 7e3fc9af95359dad6ba939fa88791f49cdf531ae (1 of 1 tested)
 - observed: 12 failure(s) on 6 entries
 
 <details><summary>occurrences</summary>
 
-- `cap73.sac-trust.p28-trust-envelope` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): dropped trustline-created: trustline-created is missing
-- `cap73.sac-trust.p28-trust-envelope` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): dropped trustline-created: trustline-created is missing
-- `cap73.sac-trust.p28-trust-meta` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): dropped trustline-created: trustline-created is missing
-- `cap73.sac-trust.p28-trust-meta` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): dropped trustline-created: trustline-created is missing
-- `cap73.sac-trust.p30-trust-envelope` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): dropped trustline-created: trustline-created is missing
-- `cap73.sac-trust.p30-trust-envelope` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): dropped trustline-created: trustline-created is missing
-- `cap73.sac-trust.p30-trust-meta` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): dropped trustline-created: trustline-created is missing
-- `cap73.sac-trust.p30-trust-meta` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): dropped trustline-created: trustline-created is missing
-- `explore.pairs.sac-trust-p28-a-l66` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): dropped trustline-created: trustline-created is missing
-- `explore.pairs.sac-trust-p28-a-l66` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): dropped trustline-created: trustline-created is missing
-- `explore.pairs.sac-trust-p30-a-l70` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): dropped trustline-created: trustline-created is missing
-- `explore.pairs.sac-trust-p30-a-l70` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): dropped trustline-created: trustline-created is missing
+- `cap73.sac-trust.p28-trust-envelope` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): dropped trustline-created: trustline-created is missing
+- `cap73.sac-trust.p28-trust-envelope` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): dropped trustline-created: trustline-created is missing
+- `cap73.sac-trust.p28-trust-meta` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): dropped trustline-created: trustline-created is missing
+- `cap73.sac-trust.p28-trust-meta` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): dropped trustline-created: trustline-created is missing
+- `cap73.sac-trust.p30-trust-envelope` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): dropped trustline-created: trustline-created is missing
+- `cap73.sac-trust.p30-trust-envelope` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): dropped trustline-created: trustline-created is missing
+- `cap73.sac-trust.p30-trust-meta` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): dropped trustline-created: trustline-created is missing
+- `cap73.sac-trust.p30-trust-meta` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): dropped trustline-created: trustline-created is missing
+- `explore.pairs.sac-trust-p28-a-l66` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): dropped trustline-created: trustline-created is missing
+- `explore.pairs.sac-trust-p28-a-l66` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): dropped trustline-created: trustline-created is missing
+- `explore.pairs.sac-trust-p30-a-l70` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): dropped trustline-created: trustline-created is missing
+- `explore.pairs.sac-trust-p30-a-l70` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): dropped trustline-created: trustline-created is missing
 
 </details>
 
@@ -307,28 +307,28 @@ transformEffects derives the effects of an InvokeHostFunction operation only fro
 
 question: the effects table has no account_created for an account a Stellar asset contract transfer creates
 
-An XLM transfer through the native asset contract to an account that does not exist creates it (CAP-73). transformEffects writes account_debited and account_credited for the transfer event (addInvokeHostFunctionEffects, internal/transform/effects.go L1326-L1440 at 2b24ec89) but account_created only for a CreateAccount operation (addAccountCreatedEffects, L411-L437), so the new account has no account_created effect. The source does not say whether this is intended.
+An XLM transfer through the native asset contract to an account that does not exist creates it (CAP-73). transformEffects writes account_debited and account_credited for the transfer event (addInvokeHostFunctionEffects, internal/transform/effects.go L1326-L1440 at 7e3fc9af) but account_created only for a CreateAccount operation (addAccountCreatedEffects, L411-L437), so the new account has no account_created effect. The source does not say whether this is intended.
 
 - component: stellar-etl
 - severity: data-loss
 - CAPs: CAP-0046-06, CAP-0073
 - status: draft (not filed, draft [candidate/findings/issues/stellar-etl-E2.md](../../candidate/findings/issues/stellar-etl-E2.md))
 - minimal entry: `cap73.sac-trust.p28-xlm-transfer-creates-account-envelope`
-- reproduce: `shapekit harness run --chain cap73.sac-trust.p28 --network testnet --adapter "adapters/bin/etl-adapter --commit 2b24ec89ddce7fc0beb7795de982c93e6895eaf3"`
+- reproduce: `shapekit harness run --chain cap73.sac-trust.p28 --network testnet --adapter "adapters/bin/etl-adapter --commit 7e3fc9af95359dad6ba939fa88791f49cdf531ae"`
 - recipe: `chain:cap73.sac-trust.p28`
-- affected stellar-etl: fails on 2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (1 of 1 tested)
+- affected stellar-etl: fails on 7e3fc9af95359dad6ba939fa88791f49cdf531ae (1 of 1 tested)
 - observed: 8 failure(s) on 4 entries
 
 <details><summary>occurrences</summary>
 
-- `cap73.sac-trust.p28-xlm-transfer-creates-account-envelope` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): dropped account-created: account-created is missing
-- `cap73.sac-trust.p28-xlm-transfer-creates-account-envelope` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): dropped account-created: account-created is missing
-- `cap73.sac-trust.p28-xlm-transfer-creates-account-meta` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): dropped account-created: account-created is missing
-- `cap73.sac-trust.p28-xlm-transfer-creates-account-meta` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): dropped account-created: account-created is missing
-- `cap73.sac-trust.p30-xlm-transfer-creates-account-envelope` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): dropped account-created: account-created is missing
-- `cap73.sac-trust.p30-xlm-transfer-creates-account-envelope` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): dropped account-created: account-created is missing
-- `cap73.sac-trust.p30-xlm-transfer-creates-account-meta` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): dropped account-created: account-created is missing
-- `cap73.sac-trust.p30-xlm-transfer-creates-account-meta` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): dropped account-created: account-created is missing
+- `cap73.sac-trust.p28-xlm-transfer-creates-account-envelope` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): dropped account-created: account-created is missing
+- `cap73.sac-trust.p28-xlm-transfer-creates-account-envelope` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): dropped account-created: account-created is missing
+- `cap73.sac-trust.p28-xlm-transfer-creates-account-meta` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): dropped account-created: account-created is missing
+- `cap73.sac-trust.p28-xlm-transfer-creates-account-meta` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): dropped account-created: account-created is missing
+- `cap73.sac-trust.p30-xlm-transfer-creates-account-envelope` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): dropped account-created: account-created is missing
+- `cap73.sac-trust.p30-xlm-transfer-creates-account-envelope` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): dropped account-created: account-created is missing
+- `cap73.sac-trust.p30-xlm-transfer-creates-account-meta` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): dropped account-created: account-created is missing
+- `cap73.sac-trust.p30-xlm-transfer-creates-account-meta` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): dropped account-created: account-created is missing
 
 </details>
 
@@ -336,28 +336,28 @@ An XLM transfer through the native asset contract to an account that does not ex
 
 question: the effects table has no signer_removed for a pre-auth signer core removes when its transaction applies
 
-Core removes a pre-auth signer in txChangesBefore whether its transaction succeeds or fails, and a fee bump's also from the fee source. effects() returns nothing for a failed transaction and builds effects per operation from the operation's own changes (internal/transform/effects.go L60-L176 at 2b24ec89); signer_removed comes only from addSetOptionsEffects (L530-L645). The source does not say whether this is intended.
+Core removes a pre-auth signer in txChangesBefore whether its transaction succeeds or fails, and a fee bump's also from the fee source. effects() returns nothing for a failed transaction and builds effects per operation from the operation's own changes (internal/transform/effects.go L60-L176 at 7e3fc9af); signer_removed comes only from addSetOptionsEffects (L530-L645). The source does not say whether this is intended.
 
 - component: stellar-etl
 - severity: data-loss
 - CAPs: CAP-0002, CAP-0015, CAP-0028
 - status: draft (not filed, draft [candidate/findings/issues/stellar-etl-E3.md](../../candidate/findings/issues/stellar-etl-E3.md))
 - minimal entry: `cap15.fee-bump.p30-fee-source-is-inner-source-pre-auth-signer-envelope`
-- reproduce: `shapekit harness run --chain cap15.fee-bump.p30 --network testnet --adapter "adapters/bin/etl-adapter --commit 2b24ec89ddce7fc0beb7795de982c93e6895eaf3"`
+- reproduce: `shapekit harness run --chain cap15.fee-bump.p30 --network testnet --adapter "adapters/bin/etl-adapter --commit 7e3fc9af95359dad6ba939fa88791f49cdf531ae"`
 - recipe: `chain:cap15.fee-bump.p30`
-- affected stellar-etl: fails on 2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (1 of 1 tested)
+- affected stellar-etl: fails on 7e3fc9af95359dad6ba939fa88791f49cdf531ae (1 of 1 tested)
 - other SDKs failing the same entries: php@1.18.0, stellar-cli@30.0.1
 - siblings: [CLI-TXHASH-V1](#cli-txhash-v1), [PHP-HEXHASH](#php-hexhash)
 - observed: 6 failure(s) on 3 entries
 
 <details><summary>occurrences</summary>
 
-- `cap15.fee-bump.p30-fee-source-is-inner-source-pre-auth-signer-envelope` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): dropped signer-removed: signer-removed is missing
-- `cap15.fee-bump.p30-fee-source-is-inner-source-pre-auth-signer-envelope` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): dropped signer-removed: signer-removed is missing
-- `cap15.fee-bump.p30-fee-source-is-inner-source-pre-auth-signer-meta` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): dropped signer-removed: signer-removed is missing
-- `cap15.fee-bump.p30-fee-source-is-inner-source-pre-auth-signer-meta` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): dropped signer-removed: signer-removed is missing
-- `classic.failed-tx.p30-pre-auth-failed-removes-signer` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): dropped signer-removed: signer-removed is missing
-- `classic.failed-tx.p30-pre-auth-failed-removes-signer` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): dropped signer-removed: signer-removed is missing
+- `cap15.fee-bump.p30-fee-source-is-inner-source-pre-auth-signer-envelope` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): dropped signer-removed: signer-removed is missing
+- `cap15.fee-bump.p30-fee-source-is-inner-source-pre-auth-signer-envelope` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): dropped signer-removed: signer-removed is missing
+- `cap15.fee-bump.p30-fee-source-is-inner-source-pre-auth-signer-meta` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): dropped signer-removed: signer-removed is missing
+- `cap15.fee-bump.p30-fee-source-is-inner-source-pre-auth-signer-meta` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): dropped signer-removed: signer-removed is missing
+- `classic.failed-tx.p30-pre-auth-failed-removes-signer` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): dropped signer-removed: signer-removed is missing
+- `classic.failed-tx.p30-pre-auth-failed-removes-signer` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): dropped signer-removed: signer-removed is missing
 
 </details>
 
@@ -365,22 +365,22 @@ Core removes a pre-auth signer in txChangesBefore whether its transaction succee
 
 question: the effects table has no trustline_removed for the pool share trustline a revocation removes
 
-A revocation that redeems pool shares removes the owner's pool share trustline; addLiquidityPoolRevokedEffect (internal/transform/effects.go L1152-L1219 at 2b24ec89), called from addSetTrustLineFlagsEffects and addAllowTrustEffects, writes claimable_balance_created and liquidity_pool_revoked from the operation's changes but no trustline_removed for the removed entry. The source does not say whether this is intended.
+A revocation that redeems pool shares removes the owner's pool share trustline; addLiquidityPoolRevokedEffect (internal/transform/effects.go L1152-L1219 at 7e3fc9af), called from addSetTrustLineFlagsEffects and addAllowTrustEffects, writes claimable_balance_created and liquidity_pool_revoked from the operation's changes but no trustline_removed for the removed entry. The source does not say whether this is intended.
 
 - component: stellar-etl
 - severity: data-loss
 - CAPs: CAP-0038
 - status: draft (not filed, draft [candidate/findings/issues/stellar-etl-E4.md](../../candidate/findings/issues/stellar-etl-E4.md))
 - minimal entry: `cap38.liquidity-pools.p30-revoke-redeems-pool-shares`
-- reproduce: `shapekit harness run --chain cap38.liquidity-pools.p30 --network testnet --adapter "adapters/bin/etl-adapter --commit 2b24ec89ddce7fc0beb7795de982c93e6895eaf3"`
+- reproduce: `shapekit harness run --chain cap38.liquidity-pools.p30 --network testnet --adapter "adapters/bin/etl-adapter --commit 7e3fc9af95359dad6ba939fa88791f49cdf531ae"`
 - recipe: `chain:cap38.liquidity-pools.p30`
-- affected stellar-etl: fails on 2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (1 of 1 tested)
+- affected stellar-etl: fails on 7e3fc9af95359dad6ba939fa88791f49cdf531ae (1 of 1 tested)
 - observed: 2 failure(s) on 1 entry
 
 <details><summary>occurrences</summary>
 
-- `cap38.liquidity-pools.p30-revoke-redeems-pool-shares` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (mainnet): dropped trustline-removed: trustline-removed is missing
-- `cap38.liquidity-pools.p30-revoke-redeems-pool-shares` stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3 (testnet): dropped trustline-removed: trustline-removed is missing
+- `cap38.liquidity-pools.p30-revoke-redeems-pool-shares` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (mainnet): dropped trustline-removed: trustline-removed is missing
+- `cap38.liquidity-pools.p30-revoke-redeems-pool-shares` stellar-etl@7e3fc9af95359dad6ba939fa88791f49cdf531ae (testnet): dropped trustline-removed: trustline-removed is missing
 
 </details>
 
@@ -594,7 +594,7 @@ Operation.fromXdr has no case for INFLATION and throws "Unknown operation body O
 
 - component: stellar_flutter_sdk
 - severity: robustness
-- CAPs: CAP-0026
+- CAPs: CAP-0026, PRE-CAP
 - status: draft (not filed, draft [candidate/findings/issues/dart-cap26.inflation.p11-inflation-payout.md](../../candidate/findings/issues/dart-cap26.inflation.p11-inflation-payout.md))
 - minimal entry: `cap26.inflation.p11-inflation-not-time`
 - reproduce: `shapekit conformance run --sdk dart --version 3.12.0 --entry cap26.inflation.p11-inflation-not-time`
@@ -663,7 +663,7 @@ uint64 fields are php ints, which hold 2^64-1 as -1, and XdrJsonHelper::uint64To
 
 - component: soneso/stellar-php-sdk
 - severity: divergence
-- CAPs: CAP-0001, CAP-0019, CAP-0027, CAP-0046, CAP-0046-01, CAP-0046-02, CAP-0046-05, CAP-0046-07, CAP-0046-08, CAP-0046-12, CAP-0054, CAP-0058, CAP-0067, CAP-0084
+- CAPs: CAP-0001, CAP-0019, CAP-0021, CAP-0024, CAP-0027, CAP-0046, CAP-0046-01, CAP-0046-02, CAP-0046-05, CAP-0046-07, CAP-0046-08, CAP-0046-12, CAP-0054, CAP-0058, CAP-0063, CAP-0067, CAP-0084, PRE-CAP
 - status: draft (not filed, draft [candidate/findings/issues/php-cap27.muxed-accounts.p30-tx-source-and-payment-destination-id-2p64-1.md](../../candidate/findings/issues/php-cap27.muxed-accounts.p30-tx-source-and-payment-destination-id-2p64-1.md))
 - minimal entry: `cap01.bump-sequence.p30-bump-negative`
 - reproduce: `shapekit conformance run --sdk php --version 1.18.0 --entry cap01.bump-sequence.p30-bump-negative`
@@ -712,7 +712,7 @@ XdrInnerTransactionResultPair and XdrConfigUpgradeSetKey keep their hash as hex 
 
 - component: soneso/stellar-php-sdk
 - severity: divergence
-- CAPs: CAP-0002, CAP-0015, CAP-0028, CAP-0042, CAP-0046-01, CAP-0046-09, CAP-0046-10, CAP-0070, CAP-0077
+- CAPs: CAP-0002, CAP-0006, CAP-0015, CAP-0021, CAP-0023, CAP-0024, CAP-0028, CAP-0033, CAP-0035, CAP-0038, CAP-0042, CAP-0046, CAP-0046-01, CAP-0046-08, CAP-0046-09, CAP-0046-10, CAP-0070, CAP-0077, PRE-CAP
 - status: draft (not filed, draft [candidate/findings/issues/php-cap15.fee-bump.p30-fee-source-is-inner-source-meta.md](../../candidate/findings/issues/php-cap15.fee-bump.p30-fee-source-is-inner-source-meta.md))
 - minimal entry: `cap70.scp-timing.p30-scp-timing-upgrade`
 - reproduce: `shapekit conformance run --sdk php --version 1.18.0 --entry cap70.scp-timing.p30-scp-timing-upgrade`
@@ -795,7 +795,7 @@ XdrLedgerKeyBase::toJsonValue writes the claimable_balance arm as the bare Claim
 
 - component: soneso/stellar-php-sdk
 - severity: divergence
-- CAPs: CAP-0002, CAP-0003, CAP-0006, CAP-0023, CAP-0028, CAP-0035, CAP-0067
+- CAPs: CAP-0002, CAP-0003, CAP-0006, CAP-0023, CAP-0028, CAP-0033, CAP-0035, CAP-0063, CAP-0067
 - status: draft (not filed, draft [candidate/findings/issues/php-cap23.claimable-balances.p30-claim-through-depth-4-meta.md](../../candidate/findings/issues/php-cap23.claimable-balances.p30-claim-through-depth-4-meta.md))
 - minimal entry: `explore.witnesses.g2-r0014-l143`
 - reproduce: `shapekit conformance run --sdk php --version 1.18.0 --entry explore.witnesses.g2-r0014-l143`
@@ -888,7 +888,7 @@ AbstractOperation::fromXdr has no case for INFLATION and throws "Unknown operati
 
 - component: soneso/stellar-php-sdk
 - severity: robustness
-- CAPs: CAP-0026
+- CAPs: CAP-0026, PRE-CAP
 - status: draft (not filed, draft [candidate/findings/issues/php-cap26.inflation.p11-inflation-payout.md](../../candidate/findings/issues/php-cap26.inflation.p11-inflation-payout.md))
 - minimal entry: `cap26.inflation.p11-inflation-not-time`
 - reproduce: `shapekit conformance run --sdk php --version 1.18.0 --entry cap26.inflation.p11-inflation-not-time`
@@ -937,7 +937,7 @@ CreateContractOperation.FromXdr reads only HostFunction.CreateContractV2 (Stella
 
 - component: stellar-dotnet-sdk
 - severity: robustness
-- CAPs: CAP-0046, CAP-0046-02, CAP-0046-05, CAP-0046-06, CAP-0046-07, CAP-0046-08, CAP-0046-11, CAP-0046-12, CAP-0054, CAP-0058, CAP-0073
+- CAPs: CAP-0003, CAP-0019, CAP-0021, CAP-0027, CAP-0033, CAP-0038, CAP-0042, CAP-0046, CAP-0046-01, CAP-0046-02, CAP-0046-05, CAP-0046-06, CAP-0046-07, CAP-0046-08, CAP-0046-11, CAP-0046-12, CAP-0054, CAP-0058, CAP-0063, CAP-0067, CAP-0073, CAP-0088
 - status: draft (not filed, draft [candidate/findings/issues/dotnet-cap73.sac-trust.golden-504393015a71bc7a-8.md](../../candidate/findings/issues/dotnet-cap73.sac-trust.golden-504393015a71bc7a-8.md))
 - minimal entry: `cap73.sac-trust.p28-deploy-xlm-sac-envelope`
 - reproduce: `shapekit conformance run --sdk dotnet --version 17.0.0 --entry cap73.sac-trust.p28-deploy-xlm-sac-envelope`
@@ -997,7 +997,7 @@ Operation.FromXdr throws NotSupportedException for ALLOW_TRUST and INFLATION (St
 
 - component: stellar-dotnet-sdk
 - severity: robustness
-- CAPs: CAP-0002, CAP-0018, CAP-0026, CAP-0028, CAP-0038
+- CAPs: CAP-0002, CAP-0018, CAP-0021, CAP-0024, CAP-0026, CAP-0028, CAP-0033, CAP-0035, CAP-0038, CAP-0046-01, PRE-CAP
 - status: draft (not filed, draft [candidate/findings/issues/dotnet-cap18.maintain-liabilities.golden-3f24be68a9962089-4.md](../../candidate/findings/issues/dotnet-cap18.maintain-liabilities.golden-3f24be68a9962089-4.md))
 - minimal entry: `cap26.inflation.p11-inflation-not-time`
 - reproduce: `shapekit conformance run --sdk dotnet --version 17.0.0 --entry cap26.inflation.p11-inflation-not-time`
@@ -1246,7 +1246,7 @@ Transaction.fromV1EnvelopeXdr keeps only MuxedAccount.fromXdr(tx.sourceAccount).
 
 - component: kmp-stellar-sdk
 - severity: data-loss
-- CAPs: CAP-0019, CAP-0027, CAP-0046, CAP-0046-01, CAP-0046-11, CAP-0071, CAP-0071-01, CAP-0071-02
+- CAPs: CAP-0001, CAP-0003, CAP-0006, CAP-0019, CAP-0023, CAP-0024, CAP-0027, CAP-0033, CAP-0035, CAP-0038, CAP-0046, CAP-0046-01, CAP-0046-11, CAP-0063, CAP-0071, CAP-0071-01, CAP-0071-02, PRE-CAP
 - status: draft (not filed, draft [candidate/findings/issues/kmp-cap27.muxed-accounts.p28-claimable-balance-tx-source-id-1.md](../../candidate/findings/issues/kmp-cap27.muxed-accounts.p28-claimable-balance-tx-source-id-1.md))
 - minimal entry: `soroban.scval-shapes.p30-string-not-utf8-envelope`
 - reproduce: `shapekit conformance run --sdk kmp --version 1.18.0 --entry soroban.scval-shapes.p30-string-not-utf8-envelope`
@@ -1460,7 +1460,7 @@ tx hash runs unwrap_envelope_v1 on the envelope (soroban-cli 30.0.1 src/commands
 
 - component: stellar-cli
 - severity: divergence
-- CAPs: CAP-0002, CAP-0003, CAP-0006, CAP-0015, CAP-0026, CAP-0028
+- CAPs: CAP-0002, CAP-0003, CAP-0006, CAP-0015, CAP-0019, CAP-0021, CAP-0023, CAP-0024, CAP-0026, CAP-0028, CAP-0033, CAP-0035, CAP-0038, CAP-0042, CAP-0046-08, PRE-CAP
 - status: draft (not filed, draft [candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md](../../candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md))
 - minimal entry: `classic.failed-tx.p9-change-trust-native-internal-error-envelope`
 - reproduce: `shapekit conformance run --sdk stellar-cli --version 30.0.1 --entry classic.failed-tx.p9-change-trust-native-internal-error-envelope`
@@ -1796,7 +1796,7 @@ AbstractTransaction.fromEnvelopeXdr(..).hash(network) rebuilds every operation b
 
 - component: stellar_flutter_sdk
 - severity: divergence
-- CAPs: CAP-0003, CAP-0006, CAP-0015
+- CAPs: CAP-0003, CAP-0006, CAP-0015, CAP-0038, PRE-CAP
 - status: draft (not filed, draft [candidate/findings/issues/dart-cap03.offer-liabilities.mainnet-37466023.md](../../candidate/findings/issues/dart-cap03.offer-liabilities.mainnet-37466023.md))
 - minimal entry: `explore.witnesses.g2-r0010-l92`
 - reproduce: `shapekit conformance run --sdk dart --version 3.12.0 --entry explore.witnesses.g2-r0010-l92`
@@ -1825,7 +1825,7 @@ TimeBounds.fromXdr reads the max time with BigInt.toInt (lib/src/transaction.dar
 
 - component: stellar_flutter_sdk
 - severity: divergence
-- CAPs: none
+- CAPs: CAP-0024
 - status: draft (not filed, draft [candidate/findings/issues/dart-explore.witnesses.f62d-r0000-l96.md](../../candidate/findings/issues/dart-explore.witnesses.f62d-r0000-l96.md))
 - minimal entry: `explore.witnesses.f62d-r0000-l96`
 - reproduce: `shapekit conformance run --sdk dart --version 3.12.0 --entry explore.witnesses.f62d-r0000-l96`
@@ -1849,7 +1849,7 @@ ManageSellOfferOperation.FromXdr turns the price into decimal.Divide(N, D) writt
 
 - component: stellar-dotnet-sdk
 - severity: divergence
-- CAPs: CAP-0003, CAP-0006, CAP-0015
+- CAPs: CAP-0003, CAP-0006, CAP-0015, PRE-CAP
 - status: draft (not filed, draft [candidate/findings/issues/dotnet-cap03.offer-liabilities.mainnet-37466023.md](../../candidate/findings/issues/dotnet-cap03.offer-liabilities.mainnet-37466023.md))
 - minimal entry: `explore.witnesses.g2-r0010-l92`
 - reproduce: `shapekit conformance run --sdk dotnet --version 17.0.0 --entry explore.witnesses.g2-r0010-l92`
@@ -1885,7 +1885,7 @@ AbstractTransaction.fromEnvelopeXdr refuses transactions core applied: TimeBound
 
 - component: kmp-stellar-sdk
 - severity: divergence
-- CAPs: none
+- CAPs: CAP-0006, CAP-0024
 - status: draft (not filed, draft [candidate/findings/issues/kmp-explore.witnesses.f62d-r0000-l96.md](../../candidate/findings/issues/kmp-explore.witnesses.f62d-r0000-l96.md))
 - minimal entry: `explore.witnesses.f62d-r0004-l69`
 - reproduce: `shapekit conformance run --sdk kmp --version 1.18.0 --entry explore.witnesses.f62d-r0004-l69`
@@ -1910,7 +1910,7 @@ The offer id check of ManageSellOfferOperationBuilder::setOfferId (Soneso/Stella
 
 - component: soneso/stellar-php-sdk
 - severity: divergence
-- CAPs: none
+- CAPs: CAP-0006
 - status: draft (not filed, draft [candidate/findings/issues/php-explore.witnesses.f62d-r0004-l69.md](../../candidate/findings/issues/php-explore.witnesses.f62d-r0004-l69.md))
 - minimal entry: `explore.witnesses.f62d-r0004-l69`
 - reproduce: `shapekit conformance run --sdk php --version 1.18.0 --entry explore.witnesses.f62d-r0004-l69`
@@ -1934,7 +1934,7 @@ AbstractTransaction::fromEnvelopeXdr(..)->hash(network) rebuilds the operation, 
 
 - component: soneso/stellar-php-sdk
 - severity: divergence
-- CAPs: none
+- CAPs: PRE-CAP
 - status: draft (not filed, draft [candidate/findings/issues/php-explore.witnesses.g2-r0015-l71.md](../../candidate/findings/issues/php-explore.witnesses.g2-r0015-l71.md))
 - minimal entry: `explore.witnesses.g2-r0015-l71`
 - reproduce: `shapekit conformance run --sdk php --version 1.18.0 --entry explore.witnesses.g2-r0015-l71`
@@ -1954,11 +1954,11 @@ AbstractTransaction::fromEnvelopeXdr(..)->hash(network) rebuilds the operation, 
 
 | kind | path | sha256 | detail |
 |---|---|---|---|
-| manifest | `corpus/manifest.json` | `8ac5e84ddcf7aec4` | corpus 0.2.0 |
-| harness | `candidate/findings/inputs/harness-stellar-etl-2b24ec89.json` | `c5c32c836f1fd026` | stellar-etl 2b24ec89ddce7fc0beb7795de982c93e6895eaf3, 1652 entries, manifest 8ac5e84ddcf7aec435b37b637d40a445251f12114403de451bd381fa98cf5139 |
+| manifest | `corpus/manifest.json` | `c2645ea07473da19` | corpus 0.2.0 |
+| harness | `candidate/findings/inputs/harness-stellar-etl-7e3fc9af.json` | `1485336574c2eefa` | stellar-etl 7e3fc9af95359dad6ba939fa88791f49cdf531ae, 1652 entries, manifest replay digest 5e8290d81f72bf5fe62e2b9cf18858adf5118c3b2edaf48374cb530e847070ee |
 | conformance | `candidate/findings/inputs/conformance-go-textual-offer-id.json` | `36d74fa433e3643d` | corpus 0.2.0, go@v0.7.1 go@v0.7.2 go@v0.7.3 go@v0.8.0 go@v0.9.0 |
-| conformance | `candidate/findings/inputs/conformance-dart.json` | `8700ffae4ba8e4e4` | corpus 0.2.0, dart@3.12.0 |
-| conformance | `candidate/findings/inputs/conformance-php.json` | `37a1d2012a8a49fa` | corpus 0.2.0, php@1.18.0 |
-| conformance | `candidate/findings/inputs/conformance-dotnet.json` | `afe142a50d448cdc` | corpus 0.2.0, dotnet@16.0.0 dotnet@17.0.0 |
-| conformance | `candidate/findings/inputs/conformance-kmp.json` | `fd3e2da635cd957d` | corpus 0.2.0, kmp@1.18.0 |
-| conformance | `candidate/findings/inputs/conformance-stellar-cli.json` | `c8c9edd63c657eb0` | corpus 0.2.0, stellar-cli@28.1.0 stellar-cli@30.0.1 |
+| conformance | `candidate/findings/inputs/conformance-dart.json` | `c7fc472d415fb7d7` | corpus 0.2.0, dart@3.12.0 |
+| conformance | `candidate/findings/inputs/conformance-php.json` | `e1a6272c54d1eae3` | corpus 0.2.0, php@1.18.0 |
+| conformance | `candidate/findings/inputs/conformance-dotnet.json` | `81ae6f285fb3d976` | corpus 0.2.0, dotnet@16.0.0 dotnet@17.0.0 |
+| conformance | `candidate/findings/inputs/conformance-kmp.json` | `017d2748922b263c` | corpus 0.2.0, kmp@1.18.0 |
+| conformance | `candidate/findings/inputs/conformance-stellar-cli.json` | `032db931832013f0` | corpus 0.2.0, stellar-cli@28.1.0 stellar-cli@30.0.1 |

@@ -6,7 +6,7 @@
       "path": "findings/inputs/conformance-go.json",
       "sha256": "026df90d4078af7d52c832b7fbf4c58cc5675a9c15c1f82e6920c024b3d372b3",
       "from": "target/conformance/go/divergence-matrix.json",
-      "from_sha256": "2e1d49c640c71374d4e7c201da81c3f6cc3d9d84b4a6a0277a32fd5c1b4ef525",
+      "from_sha256": "e75269d6d8f20f56694614e46cd79aa9b248e7d2e73d5a1b8094f23a9675a500",
       "command": "shapekit conformance run --sdk go --all-versions --out target/conformance/go",
       "reduction": "failing cells only, with their failing checks; check details cut to 400 characters; implementation-defined answers kept whole",
       "describes": "corpus 0.2.0, go@v0.7.1 go@v0.7.2 go@v0.7.3 go@v0.8.0 go@v0.9.0"
@@ -16,7 +16,7 @@
       "path": "findings/inputs/conformance-js.json",
       "sha256": "d2271af5b9411aa59ae4d38e99e1d3ada633464411dfd6bd220ffcc8d849448c",
       "from": "target/conformance/js/divergence-matrix.json",
-      "from_sha256": "5726d8f33380b7597110b6cc84b3a2e2ef0849c0cc936d33ada934321f354fcb",
+      "from_sha256": "10c7c20e54a27c8f00ca26469f06c0b465b65269cdd049541ffa1c0ae9dfec89",
       "command": "shapekit conformance run --sdk js --all-versions --out target/conformance/js",
       "reduction": "failing cells only, with their failing checks; check details cut to 400 characters; implementation-defined answers kept whole",
       "describes": "corpus 0.2.0, js@16.3.0 js@16.3.1 js@16.4.1 js@17.2.0 js@17.2.1 js@17.3.0 js@17.4.0"
@@ -26,7 +26,7 @@
       "path": "findings/inputs/conformance-peers.json",
       "sha256": "3babe47d4f50bab7456c021cb40d38f4cdbc496250c207bba889489b7ebfcd36",
       "from": "target/conformance/peers/divergence-matrix.json",
-      "from_sha256": "861bbd9d30214b1ce7d022c2394bae5198d111da4dc4d17057f2a1f8c98d0e46",
+      "from_sha256": "97680427427ffec1da7506698ec7c574b9f864964569c1ccdb22cddda66f227b",
       "command": "shapekit conformance run --all-versions --flag references-disagree --out target/conformance/peers",
       "reduction": "failing cells only, with their failing checks; check details cut to 400 characters; implementation-defined answers kept whole",
       "describes": "corpus 0.2.0, dart@3.12.0 dotnet@16.0.0 dotnet@17.0.0 go@v0.7.1 go@v0.7.2 go@v0.7.3 go@v0.8.0 go@v0.9.0 java@5.0.0 java@6.0.0 js@16.3.0 js@16.3.1 js@16.4.1 js@17.2.0 js@17.2.1 js@17.3.0 js@17.4.0 kmp@1.18.0 php@1.18.0 python@16.1.1 python@17.0.1 rust@28.0.0 rust@28.0.1 rust@30.0.0 soroban@28.0.0 soroban@29.0.1 stellar-cli@28.1.0 stellar-cli@30.0.1"
@@ -36,30 +36,40 @@
       "path": "findings/inputs/conformance-rust.json",
       "sha256": "3723db6dc7b664e37cc4941d9d1dd980c0be3aa2e6e570042ec11f2062cf3f01",
       "from": "target/conformance/rust/divergence-matrix.json",
-      "from_sha256": "bf064b346072de29063c24d3166a263845f5c899194739528f272c8faa825bed",
+      "from_sha256": "83b2bbf816b9d0e24c279fad33900b71d56c790f03dd7c191fb7b4b37f09eeb5",
       "command": "shapekit conformance run --sdk rust --all-versions --out target/conformance/rust",
       "reduction": "failing cells only, with their failing checks; check details cut to 400 characters; implementation-defined answers kept whole",
       "describes": "corpus 0.2.0, rust@28.0.0 rust@28.0.1 rust@30.0.0"
     },
     {
       "kind": "harness",
-      "path": "findings/inputs/harness-stellar-etl-2b24ec89.json",
-      "sha256": "c5c32c836f1fd0264ec7811f26cae1ae35283a2b0939fd17b3d2a9f8f49c0388",
-      "from": "target/findings/stellar-etl-2b24ec89/harness-report.json",
-      "from_sha256": "c5c32c836f1fd0264ec7811f26cae1ae35283a2b0939fd17b3d2a9f8f49c0388",
-      "command": "shapekit harness run --network both --adapter \"adapters/bin/etl-adapter --commit 2b24ec89ddce7fc0beb7795de982c93e6895eaf3 --cpus 2\" --out target/findings/stellar-etl-2b24ec89",
+      "path": "findings/inputs/harness-stellar-etl-7e3fc9af.json",
+      "sha256": "1485336574c2eefaa12d5af143d39db6a3c5c8b58e9cfd4e4ec2f44f2b952202",
+      "from": "target/findings/stellar-etl-7e3fc9af/harness-report.json",
+      "from_sha256": "1485336574c2eefaa12d5af143d39db6a3c5c8b58e9cfd4e4ec2f44f2b952202",
+      "command": "shapekit harness run --network both --adapter \"adapters/bin/etl-adapter --commit 7e3fc9af95359dad6ba939fa88791f49cdf531ae --cpus 2\" --out target/findings/stellar-etl-7e3fc9af",
       "reduction": "none",
-      "describes": "stellar-etl 2b24ec89ddce7fc0beb7795de982c93e6895eaf3, 1652 entries, manifest 8ac5e84ddcf7aec435b37b637d40a445251f12114403de451bd381fa98cf5139"
+      "describes": "stellar-etl 7e3fc9af95359dad6ba939fa88791f49cdf531ae, 1652 entries, manifest c2645ea07473da19f106db724883d7d813300144b8b337332a3ef8b697b21c52"
+    },
+    {
+      "kind": "harness",
+      "path": "findings/inputs/harness-stellar-rpc-30.0.1.json",
+      "sha256": "fa8d6eb658097d897428d4760c64ae339373a24a77342062a2d12210f82d899d",
+      "from": "target/findings/stellar-rpc-30.0.1/harness-report.json",
+      "from_sha256": "fa8d6eb658097d897428d4760c64ae339373a24a77342062a2d12210f82d899d",
+      "command": "shapekit harness run --network both --adapter \"adapters/bin/rpc-adapter --cpus 2 --events-from events\" --out target/findings/stellar-rpc-30.0.1",
+      "reduction": "none",
+      "describes": "stellar-rpc 30.0.1-6b6ec60c8bde5a93984b6290065d3882d384b25d, 1652 entries, manifest c2645ea07473da19f106db724883d7d813300144b8b337332a3ef8b697b21c52"
     },
     {
       "kind": "harness",
       "path": "findings/inputs/harness-wallet-backend-3e22515a.json",
-      "sha256": "48596ee09b2e0e8cbe6881cc43e27677793c70d25b5966b631911592dc87bbfa",
+      "sha256": "f2abfab233d771f125556138290e23194954033902c13b7d4b788590b6861d09",
       "from": "target/findings/wallet-backend-3e22515a/harness-report.json",
-      "from_sha256": "48596ee09b2e0e8cbe6881cc43e27677793c70d25b5966b631911592dc87bbfa",
+      "from_sha256": "f2abfab233d771f125556138290e23194954033902c13b7d4b788590b6861d09",
       "command": "shapekit harness run --network both --repeat 2 --adapter \"adapters/bin/wb-adapter --commit 3e22515a44979fdc3a558fda3991ca2b48e38cef\" --out target/findings/wallet-backend-3e22515a",
       "reduction": "none",
-      "describes": "wallet-backend 3e22515a44979fdc3a558fda3991ca2b48e38cef, 1652 entries, manifest 8ac5e84ddcf7aec435b37b637d40a445251f12114403de451bd381fa98cf5139"
+      "describes": "wallet-backend 3e22515a44979fdc3a558fda3991ca2b48e38cef, 1652 entries, manifest c2645ea07473da19f106db724883d7d813300144b8b337332a3ef8b697b21c52"
     },
     {
       "kind": "lint",

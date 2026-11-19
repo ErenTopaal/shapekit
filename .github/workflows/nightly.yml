@@ -690,6 +690,11 @@ jobs:
         with:
           name: harness-stellar-etl
           path: ${{ runner.temp }}/harness-stellar-etl
+      - name: harness report, stellar-rpc with getEvents, both networks
+        uses: actions/download-artifact@v8
+        with:
+          name: harness-stellar-rpc-events
+          path: ${{ runner.temp }}/harness-stellar-rpc-events
       - name: indexerlint on wallet-backend at the pin
         run: |
           set -euo pipefail
@@ -721,6 +726,10 @@ jobs:
           dir="target/findings/stellar-etl-${pin:0:8}"
           mkdir -p "$dir"
           cp "$RUNNER_TEMP/harness-stellar-etl/harness-report.json" "$dir/"
+          tag=$(python3 -I -c 'import tomllib; print(next(i["tag"] for i in tomllib.load(open("pins.toml", "rb"))["image"] if i["name"] == "stellar-rpc"))')
+          dir="target/findings/stellar-rpc-$tag"
+          mkdir -p "$dir"
+          cp "$RUNNER_TEMP/harness-stellar-rpc-events/harness-report.json" "$dir/"
       - name: import tonight's runs as the triage inputs
         # the triage reads committed, reduced copies of the run outputs (findings/inputs);
         # import-inputs replaces them with tonight's, so the check below judges these runs

@@ -1,7 +1,7 @@
 <!-- repo: stellar/stellar-etl -->
 # Question: no `signer_removed` effect for a pre-auth signer core removes when its transaction applies
 
-Checked at [2b24ec89](https://github.com/stellar/stellar-etl/commit/2b24ec89ddce7fc0beb7795de982c93e6895eaf3) (v2.8.34). `internal/transform/effects.go` is the same in v2.8.35, the latest release.
+Checked at [7e3fc9af](https://github.com/stellar/stellar-etl/commit/7e3fc9af95359dad6ba939fa88791f49cdf531ae) (v2.8.35). `internal/transform/effects.go` is the same in v2.8.35, the latest release.
 
 ## What we see
 
@@ -11,7 +11,7 @@ The effects table has no `signer_removed` row for it.
 
 ## Where it comes from
 
-[`effects`](https://github.com/stellar/stellar-etl/blob/2b24ec89ddce7fc0beb7795de982c93e6895eaf3/internal/transform/effects.go#L60-L176) returns no effects for a failed transaction and builds the others per operation from the operation's own changes. The only source of `signer_removed` is [`addSetOptionsEffects`](https://github.com/stellar/stellar-etl/blob/2b24ec89ddce7fc0beb7795de982c93e6895eaf3/internal/transform/effects.go#L530-L645), so a signer removed by core outside a `SetOptions` operation gets none.
+[`effects`](https://github.com/stellar/stellar-etl/blob/7e3fc9af95359dad6ba939fa88791f49cdf531ae/internal/transform/effects.go#L60-L176) returns no effects for a failed transaction and builds the others per operation from the operation's own changes. The only source of `signer_removed` is [`addSetOptionsEffects`](https://github.com/stellar/stellar-etl/blob/7e3fc9af95359dad6ba939fa88791f49cdf531ae/internal/transform/effects.go#L530-L645), so a signer removed by core outside a `SetOptions` operation gets none.
 
 ## Question
 
@@ -37,7 +37,7 @@ From a checkout of the shapekit repository at tag `v0.2.0` (needs Go and Docker)
 
 ```sh
 (cd adapters && go build -o bin/etl-adapter ./stellaretl/cmd/etl-adapter)
-shapekit harness run --chain classic.failed-tx.p30 --chain cap15.fee-bump.p30 --network testnet --adapter "adapters/bin/etl-adapter --commit 2b24ec89ddce7fc0beb7795de982c93e6895eaf3"
+shapekit harness run --chain classic.failed-tx.p30 --chain cap15.fee-bump.p30 --network testnet --adapter "adapters/bin/etl-adapter --commit 7e3fc9af95359dad6ba939fa88791f49cdf531ae"
 ```
 
 In `harness-out/HARNESS.md`, the Entries table lists the entries `classic.failed-tx.p30-pre-auth-failed-removes-signer` and `cap15.fee-bump.p30-fee-source-is-inner-source-pre-auth-signer-meta` with the verdict `dropped` and the detail `signer-removed is missing`.

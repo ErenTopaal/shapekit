@@ -1,7 +1,7 @@
 <!-- repo: stellar/stellar-etl -->
 # Question: no `account_created` effect for an account a Stellar asset contract transfer creates
 
-Checked at [2b24ec89](https://github.com/stellar/stellar-etl/commit/2b24ec89ddce7fc0beb7795de982c93e6895eaf3) (v2.8.34). `internal/transform/effects.go` is the same in v2.8.35, the latest release.
+Checked at [7e3fc9af](https://github.com/stellar/stellar-etl/commit/7e3fc9af95359dad6ba939fa88791f49cdf531ae) (v2.8.35). `internal/transform/effects.go` is the same in v2.8.35, the latest release.
 
 ## What we see
 
@@ -9,7 +9,7 @@ Since protocol 26 ([CAP-73](https://github.com/stellar/stellar-protocol/blob/ced
 
 ## Where it comes from
 
-[`addInvokeHostFunctionEffects`](https://github.com/stellar/stellar-etl/blob/2b24ec89ddce7fc0beb7795de982c93e6895eaf3/internal/transform/effects.go#L1326-L1440) builds the effects of a contract call from its Stellar asset contract events only. `account_created` is written only for a `CreateAccount` operation ([`addAccountCreatedEffects`](https://github.com/stellar/stellar-etl/blob/2b24ec89ddce7fc0beb7795de982c93e6895eaf3/internal/transform/effects.go#L411-L437)).
+[`addInvokeHostFunctionEffects`](https://github.com/stellar/stellar-etl/blob/7e3fc9af95359dad6ba939fa88791f49cdf531ae/internal/transform/effects.go#L1326-L1440) builds the effects of a contract call from its Stellar asset contract events only. `account_created` is written only for a `CreateAccount` operation ([`addAccountCreatedEffects`](https://github.com/stellar/stellar-etl/blob/7e3fc9af95359dad6ba939fa88791f49cdf531ae/internal/transform/effects.go#L411-L437)).
 
 ## Question
 
@@ -29,7 +29,7 @@ From a checkout of the shapekit repository at tag `v0.2.0` (needs Go and Docker)
 
 ```sh
 (cd adapters && go build -o bin/etl-adapter ./stellaretl/cmd/etl-adapter)
-shapekit harness run --chain cap73.sac-trust.p30 --network testnet --adapter "adapters/bin/etl-adapter --commit 2b24ec89ddce7fc0beb7795de982c93e6895eaf3"
+shapekit harness run --chain cap73.sac-trust.p30 --network testnet --adapter "adapters/bin/etl-adapter --commit 7e3fc9af95359dad6ba939fa88791f49cdf531ae"
 ```
 
 In `harness-out/HARNESS.md`, the Entries table lists the entry `cap73.sac-trust.p30-xlm-transfer-creates-account-meta` with the verdict `dropped` and the detail `account-created is missing`.
