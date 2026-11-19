@@ -7,7 +7,7 @@ Stellar xdr decode reserves 4 GiB for a 12-byte input whose length prefix asks f
 
 ## Cause
 
-Stellar xdr decode is stellar-xdr's cli (stellar-xdr 30.0.0 src/cli/decode.rs L78-L100), which reads every input under Limits::none(), and BytesM::read_xdr allocates the length the prefix declares before reading the bytes (src/generated.rs L2003-L2026, vec![0u8; len] at L2016; VecM<u8> L1536 and StringM L2490 the same). For the 12-byte ScVal 00 00 00 0d ff ff ff ff 01 02 03 04 the process reserves 4,294,967,295 bytes of address space and returns a clean error ("failed to fill whole buffer"); resident memory stays near 22 MiB. Only with RLIMIT_AS below about 5 GB, or under strict overcommit (not tested), does the allocation fail, and the process then aborts with SIGABRT ("memory allocation of 4294967295 bytes failed"). rs-stellar-xdr#623 reports the crate-level cause.
+Stellar xdr decode is stellar-xdr's cli (stellar-xdr 30.0.0 src/cli/decode.rs L78-L100), which reads every input under Limits::none(), and BytesM::read_xdr allocates the length the prefix declares before reading the bytes (src/generated.rs L2003-L2026, vec![0u8; len] at L2016; VecM<u8> L1536 and StringM L2490 the same). For the 12-byte ScVal 00 00 00 0d ff ff ff ff 01 02 03 04 the process reserves 4,294,967,295 bytes of address space and returns a clean error ("failed to fill whole buffer"); resident memory stays near 22 MiB. Only with RLIMIT_AS below about 5 GB, or under strict overcommit (not tested), does the allocation fail, and the process then aborts with SIGABRT ("memory allocation of 4294967295 bytes failed").
 
 ## Affected versions
 
