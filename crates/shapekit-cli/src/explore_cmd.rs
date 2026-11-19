@@ -1108,6 +1108,11 @@ mod tests {
         let chain = Path::new(env!("CARGO_MANIFEST_DIR"))
             .join("../../corpus/chains/cap01.bump-sequence.p30");
         let lane = tempfile::tempdir().unwrap();
+        let registry = shapekit_registry::Registry::load(
+            &Path::new(env!("CARGO_MANIFEST_DIR")).join("../../registry"),
+        )
+        .unwrap();
+        let arm_caps = shapekit_manifest::arm_caps::ArmCaps::new(&registry);
         let run = |credited: Option<&BTreeSet<String>>| {
             chain_entries(
                 &chain,
@@ -1119,6 +1124,7 @@ mod tests {
                 credited,
                 false,
                 lane.path(),
+                &arm_caps,
             )
         };
         assert!(run(None).unwrap());
