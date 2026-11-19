@@ -125,7 +125,10 @@ export async function loadLandingStats(): Promise<LandingStats> {
   const neverArms = blockers["never-emitted"] ?? 0
 
   const all: Finding[] = findings.findings
-  const bugs = all.filter((f) => f.status !== "wont-fix")
+  // the candidate lane's findings join once they have an upstream decision: filed, or a
+  // duplicate of an issue reported before; drafts and won't-fix records stay off the page
+  const candidates = (findings.candidates?.findings ?? []).filter((f) => f.status === "filed" || f.status === "duplicate-of")
+  const bugs = [...all.filter((f) => f.status !== "wont-fix"), ...candidates]
   const landingFindings: LandingFinding[] = bugs.map((f) => ({
     id: f.id,
     title: f.short ?? f.title,

@@ -55,6 +55,12 @@ const componentKind: Record<string, string> = {
   "js-stellar-sdk": "JavaScript SDK",
   "rs-stellar-xdr": "Rust XDR",
   "stellar-core": "Validator",
+  "stellar_flutter_sdk": "Dart SDK",
+  "soneso/stellar-php-sdk": "PHP SDK",
+  "stellar-dotnet-sdk": ".NET SDK",
+  "kmp-stellar-sdk": "Kotlin Multiplatform SDK",
+  "stellar-cli": "CLI",
+  "stellar-etl": "Indexer",
 }
 const componentOrder = Object.keys(componentKind)
 const plural = (n: number, one: string, many: string) => `${f(n)} ${n === 1 ? one : many}`

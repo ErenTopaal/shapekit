@@ -164,6 +164,7 @@ Every number the dashboard shows is read from JSON that `shapekit site data` wri
 | `findings/inputs/*` | those reduced run outputs, as `findings/triage.toml` names them |
 | `adapters/walletbackend/reproductions.toml` | the wallet-backend sightings `shapekit harness reproduce` checks, with their commits and expected verdicts |
 | `findings/findings.json` | the findings record and its summary |
+| `candidate/findings/findings.json` | the candidate lane's findings record and its summary, beside the main one (the record next to the triage `findings/triage.toml` names as `candidates`) |
 | `conformance/versions.toml` | the SDK version matrix and the current version of each SDK |
 | `conformance/known-failures/*.txt` | known-failure lines per SDK and version |
 | `conformance/reproductions.toml` | the upstream sightings the runner must reproduce |

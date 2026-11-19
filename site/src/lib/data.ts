@@ -365,6 +365,15 @@ export interface Findings {
   unmapped: number
   input_problems: string[]
   findings: Finding[]
+  /** the candidate lane's record: findings of the newer SDKs, stellar-cli and stellar-etl,
+   * with a summary of their own */
+  candidates?: {
+    record: string
+    summary: Findings["summary"]
+    unmapped: number
+    input_problems: string[]
+    findings: Finding[]
+  }
 }
 
 interface Files {

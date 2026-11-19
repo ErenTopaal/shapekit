@@ -269,29 +269,44 @@ export function FindingsPage() {
       );
   }, [target]);
 
+  const cand = findings.candidates;
+  const both = useMemo(
+    () => [...findings.findings, ...(cand?.findings ?? [])],
+    [findings, cand],
+  );
   const options = {
-    component: [
-      ...new Set(findings.findings.map((f) => f.component)),
-    ].toSorted(),
-    severity: [...new Set(findings.findings.map((f) => f.severity))].toSorted(
+    component: [...new Set(both.map((f) => f.component))].toSorted(),
+    severity: [...new Set(both.map((f) => f.severity))].toSorted(
       (a, b) => severityRank(a) - severityRank(b),
     ),
-    status: [...new Set(findings.findings.map((f) => f.status))].toSorted(),
+    status: [...new Set(both.map((f) => f.status))].toSorted(),
   };
-  const rows = useMemo(() => {
+  const [rows, candRows] = useMemo(() => {
     const needle = q.trim().toLowerCase();
-    return findings.findings.filter(
-      (f) =>
-        (component === "all" || f.component === component) &&
-        (severity === "all" || f.severity === severity) &&
-        (status === "all" || f.status === status) &&
-        (!needle ||
-          f.id.toLowerCase().includes(needle) ||
-          f.title.toLowerCase().includes(needle) ||
-          f.caps.some((c) => c.toLowerCase().includes(needle)) ||
-          f.entries.some((e) => e.includes(needle))),
-    );
-  }, [findings, q, component, severity, status]);
+    const keep = (f: Finding) =>
+      (component === "all" || f.component === component) &&
+      (severity === "all" || f.severity === severity) &&
+      (status === "all" || f.status === status) &&
+      (!needle ||
+        f.id.toLowerCase().includes(needle) ||
+        f.title.toLowerCase().includes(needle) ||
+        f.caps.some((c) => c.toLowerCase().includes(needle)) ||
+        f.entries.some((e) => e.includes(needle)));
+    return [findings.findings.filter(keep), (cand?.findings ?? []).filter(keep)];
+  }, [findings, cand, q, component, severity, status]);
+  const list = (fs: Finding[]) => (
+    <ol className={cn("mt-2 flex flex-col divide-y border-y")}>
+      {fs.map((f) => (
+        <FindingItem
+          key={f.id}
+          f={f}
+          entries={entries}
+          open={toggled.get(f.id) ?? f.id === target}
+          onOpen={(o) => setToggled((prev) => new Map(prev).set(f.id, o))}
+        />
+      ))}
+    </ol>
+  );
 
   const filters = [
     { key: "component", label: "Component", value: component },
@@ -324,7 +339,11 @@ export function FindingsPage() {
           </Term>
         ))}
         {statuses
-          .filter((x) => (s.by_status[x.id] ?? 0) > 0)
+          .filter(
+            (x) =>
+              (s.by_status[x.id] ?? 0) + (cand?.summary.by_status[x.id] ?? 0) >
+              0,
+          )
           .map((x) => (
             <Term
               key={x.id}
@@ -400,18 +419,38 @@ export function FindingsPage() {
           </EmptyHeader>
         </Empty>
       ) : (
-        <ol className={cn("mt-2 flex flex-col divide-y border-y")}>
-          {rows.map((f) => (
-            <FindingItem
-              key={f.id}
-              f={f}
-              entries={entries}
-              open={toggled.get(f.id) ?? f.id === target}
-              onOpen={(o) => setToggled((prev) => new Map(prev).set(f.id, o))}
-            />
-          ))}
-        </ol>
+        list(rows)
       )}
+
+      {cand ? (
+        <section className="flex flex-col pt-8" aria-labelledby="candidates-h">
+          <h2
+            id="candidates-h"
+            className="text-lg font-semibold tracking-tight"
+          >
+            Candidate lane
+          </h2>
+          <p className="max-w-[80ch] pt-2 text-sm text-muted-foreground">
+            Findings triaged in a record of their own, most of them in the
+            Dart, PHP, .NET and Kotlin Multiplatform SDKs, stellar-cli and
+            stellar-etl.{" "}
+            {cand.summary.findings} findings cover{" "}
+            {fmt.format(cand.summary.failures)} failures, and{" "}
+            {cand.unmapped === 0
+              ? "no failure is left without a finding"
+              : `${cand.unmapped} failures have no finding`}
+            . Source: <RepoLink path={cand.record} />; the triage is in{" "}
+            <RepoLink path="candidate/findings/triage.toml" />.
+          </p>
+          <p
+            className="pt-3 text-sm text-muted-foreground"
+            aria-live="polite"
+          >
+            {candRows.length} of {cand.findings.length} findings shown.
+          </p>
+          {candRows.length > 0 ? list(candRows) : null}
+        </section>
+      ) : null}
 
       <section
         className="flex flex-col gap-2 pt-8 text-sm text-muted-foreground"

@@ -68,6 +68,7 @@ fn site_data_matches_the_committed_files() {
         "pins.toml",
         "findings/triage.toml",
         "findings/findings.json",
+        "candidate/findings/findings.json",
         "conformance/versions.toml",
         "conformance/reproductions.toml",
         "corpus/coverage/COVERAGE.md",
@@ -188,6 +189,17 @@ fn site_data_matches_the_committed_files() {
     assert_eq!(findings["summary"], record["summary"]);
     assert_eq!(len(&findings["findings"]), len(&record["findings"]));
     for f in findings["findings"].as_array().unwrap() {
+        if let Some(d) = f["draft"].as_str() {
+            assert!(root.join(d).is_file(), "draft {d} is missing");
+        }
+    }
+    // the candidate lane: its own record's summary and rows, beside the main record's
+    let cand_record = read_json(&root.join("candidate/findings/findings.json"));
+    let cand = &findings["candidates"];
+    assert_eq!(cand["record"], "candidate/findings/findings.json");
+    assert_eq!(cand["summary"], cand_record["summary"]);
+    assert_eq!(len(&cand["findings"]), len(&cand_record["findings"]));
+    for f in cand["findings"].as_array().unwrap() {
         if let Some(d) = f["draft"].as_str() {
             assert!(root.join(d).is_file(), "draft {d} is missing");
         }

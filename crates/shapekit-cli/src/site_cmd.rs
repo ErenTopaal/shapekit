@@ -173,6 +173,19 @@ pub fn write_data(
     let triage: Triage = triage::load(&src.path("findings/triage.toml"))?;
     let findings: Collection = serde_json::from_slice(&src.read("findings/findings.json")?)
         .context("parsing findings/findings.json")?;
+    // the candidate lane's record sits beside its triage, as `findings collect --out` writes it
+    let candidates: Option<(String, Collection)> = match &triage.candidates {
+        Some(rel) => {
+            let dir = Path::new(rel)
+                .parent()
+                .context("the candidate triage path has no directory")?;
+            let record = dir.join("findings.json").to_string_lossy().into_owned();
+            let c: Collection = serde_json::from_slice(&src.read(&record)?)
+                .with_context(|| format!("parsing {record}"))?;
+            Some((record, c))
+        }
+        None => None,
+    };
 
     src.read("conformance/versions.toml")?;
     let versions = VersionsFile::load(&src.path("conformance/versions.toml"))?;
@@ -194,7 +207,7 @@ pub fn write_data(
     let entries_out = entries_json(&manifest, &src.path("corpus"), &registry, &checklist)?;
     let conformance_out = conformance_json(&mut src, &triage, &versions, &reproductions)?;
     let harness_out = harness_json(&mut src, &triage)?;
-    let findings_out = findings_json(&findings);
+    let findings_out = findings_json(&findings, candidates.as_ref());
 
     let files: Vec<(&str, Value)> = vec![
         ("coverage.json", coverage_out),
@@ -1124,9 +1137,31 @@ fn harness_reproductions(src: &mut Sources, runs: &[Value]) -> Result<Value> {
     Ok(json!({ "table": HARNESS_REPRODUCTIONS, "rows": rows }))
 }
 
-fn findings_json(c: &Collection) -> Value {
-    let findings: Vec<Value> = c
-        .findings
+fn findings_json(c: &Collection, candidates: Option<&(String, Collection)>) -> Value {
+    let mut out = json!({
+        "schema": SITE_SCHEMA,
+        "summary": c.summary,
+        "inputs": c.inputs,
+        "unmapped": c.unmapped.len(),
+        "input_problems": c.input_problems,
+        "findings": finding_rows(c),
+    });
+    // the candidate lane: findings of the newer sdks, stellar-cli and stellar-etl, with their
+    // own record and summary, so the main record's numbers stay its own
+    if let Some((record, cand)) = candidates {
+        out["candidates"] = json!({
+            "record": record,
+            "summary": cand.summary,
+            "unmapped": cand.unmapped.len(),
+            "input_problems": cand.input_problems,
+            "findings": finding_rows(cand),
+        });
+    }
+    out
+}
+
+fn finding_rows(c: &Collection) -> Vec<Value> {
+    c.findings
         .iter()
         .map(|f| {
             let mut by_source: BTreeMap<&str, usize> = BTreeMap::new();
@@ -1155,15 +1190,7 @@ fn findings_json(c: &Collection) -> Value {
                 "occurrences_by_source": by_source,
             })
         })
-        .collect();
-    json!({
-        "schema": SITE_SCHEMA,
-        "summary": c.summary,
-        "inputs": c.inputs,
-        "unmapped": c.unmapped.len(),
-        "input_problems": c.input_problems,
-        "findings": findings,
-    })
+        .collect()
 }
 
 fn meta_json(
