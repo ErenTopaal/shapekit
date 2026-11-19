@@ -12,6 +12,11 @@ run with python3 -I from testees/java after the jars are in the local maven repo
 build of the versions does that):
 
     python3 -I gentypes.py
+
+a development build of the sdk (docs/sdk-ci.md) reports a version this table may not know, so
+its build writes a table of its own, for that one version and jar:
+
+    python3 -I gentypes.py --version <version> --jar <sdk jar> --out <file>
 """
 
 import argparse
@@ -179,8 +184,12 @@ def main():
     p.add_argument("--manifest", default="../../corpus/manifest.json")
     p.add_argument("--versions", default="versions")
     p.add_argument("--extra", default="TransactionMeta")
+    p.add_argument("--version", help="write the table of this one version, read from --jar, instead of versions/")
+    p.add_argument("--jar", help="the sdk jar of the --version build")
     p.add_argument("--out", default="src/main/java/org/shapekit/testee/TypesGen.java")
     args = p.parse_args()
+    if (args.version is None) != (args.jar is None):
+        raise SystemExit("--version and --jar go together")
 
     with open(args.schema, encoding="utf-8") as f:
         schema = json.load(f)
@@ -200,12 +209,17 @@ def main():
     if unknown:
         raise SystemExit(f"the manifest names types the schema does not define: {unknown}")
 
-    versions = sorted(os.listdir(args.versions), key=lambda v: tuple(int(x) for x in v.split(".")))
+    if args.version is not None:
+        versions = [args.version]
+        jars = {args.version: args.jar}
+    else:
+        versions = sorted(os.listdir(args.versions), key=lambda v: tuple(int(x) for x in v.split(".")))
+        jars = {v: os.path.expanduser(SDK_JAR.format(v=v)) for v in versions}
     if not versions:
         raise SystemExit(f"no versions in {args.versions}")
     tables = {}
     for v in versions:
-        jar = os.path.expanduser(SDK_JAR.format(v=v))
+        jar = jars[v]
         if not os.path.isfile(jar):
             raise SystemExit(f"{jar} is missing; build versions/{v}/pom.xml first")
         tables[v] = sdk_types(jar)

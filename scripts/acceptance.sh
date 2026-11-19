@@ -139,11 +139,13 @@ python_testee() {
   "target/testees/python/$v/venv/bin/python" -B -E -s -m unittest discover -s testees/python/tests -t testees/python
 }
 
-# the unit tests (maven surefire) of the java or kmp testee at the sdk's current version
+# the unit tests (maven surefire) of the java or kmp testee at the sdk's current version, and
+# the type table generator's one-version mode against the committed table
 maven_testee() {
   local v
   v=$(python3 -I -c 'import sys, tomllib; print(tomllib.load(open(sys.argv[1], "rb"))["sdk"][sys.argv[2]]["current"])' conformance/versions.toml "$1")
   mvn -B -q -f "testees/$1/versions/$v/pom.xml" test
+  python3 -I -m unittest discover -s "testees/$1/tests"
 }
 
 # the dotnet testee's unit checks, run against the build testee_build dotnet made

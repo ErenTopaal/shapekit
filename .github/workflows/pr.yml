@@ -195,6 +195,7 @@ jobs:
           set -euo pipefail
           v=$(python3 -I -c 'import sys, tomllib; print(tomllib.load(open(sys.argv[1], "rb"))["sdk"]["java"]["current"])' conformance/versions.toml)
           mvn -B -q -f "testees/java/versions/$v/pom.xml" test
+          python3 -I -m unittest discover -s testees/java/tests
       - name: type table
         # the generator reads every version's build, so the versions the run above did not
         # build are built first, with the build steps of conformance/versions.toml
@@ -595,6 +596,7 @@ jobs:
           set -euo pipefail
           v=$(python3 -I -c 'import sys, tomllib; print(tomllib.load(open(sys.argv[1], "rb"))["sdk"]["kmp"]["current"])' conformance/versions.toml)
           mvn -B -q -f "testees/kmp/versions/$v/pom.xml" test
+          python3 -I -m unittest discover -s testees/kmp/tests
       - name: type table
         run: |
           set -euo pipefail
