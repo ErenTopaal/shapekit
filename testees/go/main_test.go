@@ -274,3 +274,12 @@ func TestAddressFromScVal(t *testing.T) {
 		t.Errorf("u32: %v", got[1])
 	}
 }
+
+// TestEmptyLinesAreSkipped: an empty line gets no response, like in every other testee, so the
+// responses stay one per request.
+func TestEmptyLinesAreSkipped(t *testing.T) {
+	got := roundTrip(t, "\n"+`{"id":"0","op":"hello"}`+"\n\n"+`{"id":"1","op":"hello"}`+"\n\n")
+	if len(got) != 2 || got[0]["id"] != "0" || got[1]["id"] != "1" {
+		t.Fatalf("responses %v, want hello 0 and 1 only", got)
+	}
+}

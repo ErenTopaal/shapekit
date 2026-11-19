@@ -39,8 +39,9 @@ func serve(in io.Reader, out io.Writer) error {
 		if readErr != nil && !errors.Is(readErr, io.EOF) {
 			return fmt.Errorf("read request: %w", readErr)
 		}
-		if len(line) > 0 {
-			if err := enc.Encode(handle(bytes.TrimSuffix(line, []byte("\n")))); err != nil {
+		// an empty line gets no response, as in every other testee
+		if line = bytes.TrimSuffix(line, []byte("\n")); len(line) > 0 {
+			if err := enc.Encode(handle(line)); err != nil {
 				return fmt.Errorf("write response: %w", err)
 			}
 			if err := w.Flush(); err != nil {

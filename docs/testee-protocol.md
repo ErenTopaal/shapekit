@@ -47,6 +47,8 @@ schema describe the same protocol; if they disagree, report it as a bug.
 - `id`: a string the runner chooses. No two requests to the same testee carry the same `id`.
   Echo it back. Answer a line that is not a JSON object with a string `id` with `"id": ""`
   and a `bad-request` error.
+- Skip an empty line (a `\n` with nothing before it) without answering. The runner never sends
+  one, and every testee here skips it, so a stray newline does not shift the responses.
 - `op`: one of the operation names below.
 - The other members depend on `op`. A testee must ignore members it does not know, so that
   later protocol versions can add optional members.
