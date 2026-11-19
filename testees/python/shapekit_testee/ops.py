@@ -63,6 +63,14 @@ UNSUPPORTED_OPS = {
 class Ops:
     def __init__(self, coverage: Any = None) -> None:
         self.coverage = coverage
+        if coverage is not None:
+            # coverage picked its packages from the sdk's declared dependencies before the
+            # import; the api the import shows has to be the same one
+            want = ["stellar_sdk"] + (["stellar_xdr"] if sdkapi.STELLAR_XDR else []) + (
+                ["stellar_strkey"] if sdkapi.STRKEY_CLASSES else []
+            )
+            if coverage.packages != want:
+                raise Internal(f"coverage measures {coverage.packages}, but the sdk's api uses {want}")
         self.version = importlib.metadata.version(SDK_PACKAGE)
         if stellar_sdk.__version__ != self.version:
             raise Internal(
