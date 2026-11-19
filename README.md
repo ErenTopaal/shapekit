@@ -129,8 +129,8 @@ shapekit check sdk                           # every SDK at its current version
 
 The divergence matrix is written to `target/conformance/MATRIX.md`. `shapekit check sdk` is
 `shapekit conformance run` with the options most runs need; `shapekit conformance run --help`
-lists the rest. To run the corpus in an SDK repository's own CI, see
-[docs/sdk-ci.md](docs/sdk-ci.md).
+lists the rest. To run the corpus in an SDK repository's own CI against the pull request's
+code, for any of the eleven SDKs above, see [docs/sdk-ci.md](docs/sdk-ci.md).
 
 ### Replay chains into an indexer
 

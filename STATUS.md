@@ -57,6 +57,13 @@ What 0.2.0 holds:
   862 entries (504 before the promotion), java 6.0.0 on 841 (488), php on 137 (85), stellar-cli
   30.0.1 on 132 (59), dotnet 17.0.0 on 90 (58), kmp on 80 (67) and dart on 47 (37). Every one of
   those failures has a line in `conformance/known-failures/`.
+- SDK CI: the reusable `sdk-conformance.yml` workflow runs any of the eleven testees, not only
+  rust, go and js, against the calling SDK repository's own checkout, and sets up only that
+  SDK's toolchain. [docs/sdk-ci.md](docs/sdk-ci.md) has a versions file and a workflow file for
+  each SDK. The Python, Java and KMP builds write a type table for the checkout's version, so a
+  version bump needs no new shapekit release. Each documented build was run against a shallow
+  clone of the SDK's default branch, except py-stellar-base, whose unreleased changes remove
+  the API the Python testee calls; there it was run against the 17.0.1 tag.
 - Harness, every chain on both networks, 1,652 entries per run:
   - wallet-backend at `3e22515a`, twice in one process: 1,206 pass, 166 mishandled, 56 dropped
     and 224 out of scope (906 entries before: 678, 106, 44, 78).
