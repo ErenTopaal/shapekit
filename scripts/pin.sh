@@ -8,7 +8,7 @@
 #        scripts/pin.sh maven <artifact> "<version> <file url> <sha256>" of the one [[maven]] pin
 #                                       of that artifact
 #        scripts/pin.sh maven-urls <artifact>  every url that serves that file, one per line:
-#                                       maven central, its official mirrors, and for maven
+#                                       maven central, the mirrors it lists, and for maven
 #                                       itself the apache archive (the order pins verify uses)
 #        scripts/pin.sh toolchain <name> "<version> <artifact> <sha256>" of a [[toolchain]]
 #
@@ -37,7 +37,7 @@ table = {
 if table is None:
     sys.exit(f"unknown kind {kind}, expected image, git, tag, release, maven, maven-urls or toolchain")
 key = "artifact" if table == "maven" else "name"
-# maven central first, then its official mirrors; MAVEN_REPOSITORIES in
+# maven central first, then the mirrors it lists in its repository metadata; MAVEN_REPOSITORIES in
 # crates/shapekit-cli/src/pins/mod.rs holds the same list
 repositories = [
     "https://repo1.maven.org/maven2",

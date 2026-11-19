@@ -64,7 +64,7 @@ fi
 
 read -r tag _ url sha256 < <(scripts/pin.sh release jdk)
 fetch "$dest/$tag" "$sha256" "$url"
-# maven central, then its official mirrors and the apache archive (scripts/pin.sh maven-urls)
+# maven central, the mirrors it lists and the apache archive (scripts/pin.sh maven-urls)
 read -r version _ sha256 < <(scripts/pin.sh maven apache-maven)
 urls=$(scripts/pin.sh maven-urls apache-maven)
 mapfile -t urls <<<"$urls"

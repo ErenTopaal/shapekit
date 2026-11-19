@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- the settings scripts/with-java.sh retries a maven build with when maven central refused it:
-     central is read from google's official mirror of it, which sits on other infrastructure.
-     the build runs with strict checksums, and the jars a testee build copies into lib/ are still
+     central is read from google's mirror of it, which central lists in its repository metadata
+     and which runs on other infrastructure. the build runs with strict checksums, and the jars a testee build copies into lib/ are still
      checked against the version's lib.sha256, whichever source served them. -->
 <settings xmlns="http://maven.apache.org/SETTINGS/1.2.0"
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"

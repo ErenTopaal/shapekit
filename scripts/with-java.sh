@@ -7,7 +7,7 @@
 #
 # a mvn command that fails because maven central refused a download (its cdn has answered 404 to
 # some ci runners for files it serves everywhere else) runs once more with
-# scripts/maven-mirror-settings.xml, which reads central from google's official mirror, and with
+# scripts/maven-mirror-settings.xml, which reads central from google's mirror of it, and with
 # strict checksums. any other failure is final. the retry replaces the user settings file
 # (~/.m2/settings.xml) for that run.
 #

@@ -155,10 +155,10 @@ pub struct MavenPin {
     pub purpose: String,
 }
 
-/// Maven Central, then its official mirrors, in the order `pins verify` and scripts/pin.sh try
-/// them. Central's cdn has answered 404 to some CI runners for files it serves everywhere else;
-/// repo.maven.apache.org is the same service under its other name, google's copy sits on other
-/// infrastructure.
+/// Maven Central, then mirrors it lists in its repository metadata, in the order `pins verify`
+/// and scripts/pin.sh try them. Central's cdn has answered 404 to some CI runners for files it
+/// serves everywhere else; repo.maven.apache.org is the same service under its other name,
+/// google's copy runs on other infrastructure.
 pub const MAVEN_REPOSITORIES: [&str; 3] = [
     "https://repo1.maven.org/maven2",
     "https://repo.maven.apache.org/maven2",
