@@ -1,19 +1,35 @@
 <!-- repo: Soneso/kmp-stellar-sdk -->
-# com.soneso.stellar:stellar-sdk-jvm 1.18.0: the sdk refused a value the network accepts: IllegalArgumentException: maxTime must be >= 0 (explore.witnesses.f62d-r0000-l96)
+# com.soneso.stellar:stellar-sdk-jvm 1.18.0: the transaction object refuses values the network applied: max time 2^64-1 and offer id -1
 
 ## What happens
 
-On the input below, `com.soneso.stellar:stellar-sdk-jvm` 1.18.0 answers differently from the Stellar network in 2 checks.
+The transaction object refuses values the network applied: max time 2^64-1 and offer id -1.
+
+## Cause
+
+AbstractTransaction.fromEnvelopeXdr refuses transactions core applied: TimeBounds reads the uint64 max time into a signed Long and requires it to be >= 0 (commonMain/kotlin/com/soneso/stellar/sdk/TimeBounds.kt L25-L26 at 1.18.0, "maxTime must be >= 0" for 2^64-1), and the manage offer operations refuse offer id -1 ("Offer ID must be non-negative", Operation.kt L441 and L496), so the transaction hash cannot be had; the class of the candidate lane's other transaction-object refusals.
+
+## Affected versions
+
+`com.soneso.stellar:stellar-sdk-jvm` 1.18.0, every version shapekit ran.
+
+## Entries
+
+shapekit's finding KMP-TXOBJECT takes 2 corpus entries on this SDK: `explore.witnesses.f62d-r0000-l96`, `explore.witnesses.f62d-r0004-l69`. The checks below are those of `explore.witnesses.f62d-r0000-l96`.
+
+## Checks on `explore.witnesses.f62d-r0000-l96`
+
+On this entry, `com.soneso.stellar:stellar-sdk-jvm` 1.18.0 answers differently from the Stellar network in 2 checks on 1 version.
 
 A check is one call into the SDK with a known right answer. Each check below shows the call as a JSON request of the [shapekit testee protocol](https://github.com/ErenTopaal/shapekit/blob/v0.2.0/docs/testee-protocol.md) (`op` names the SDK operation), the expected answer and the answer the SDK gave.
 
-## Input
+A check named `mainnet/...` or `testnet/...` names the network passphrase it hashes or signs with. The data is a ledger stellar-core closed on a private network shapekit ran locally (chain `explore.f62d.r0000`), not a transaction or ledger of that network.
 
 Corpus entry `explore.witnesses.f62d-r0000-l96` (family `explore.witnesses`) of the [shapekit](https://github.com/ErenTopaal/shapekit) corpus 0.2.0.
 
 ### `testnet/tx_hash 0` on 1.18.0
 
-the sdk refused a value the network accepts: IllegalArgumentException: maxTime must be >= 0
+The SDK refused a value the network accepts: IllegalArgumentException: maxTime must be >= 0
 
 ```json
 {
@@ -31,7 +47,7 @@ Actual: `{"rejected":"IllegalArgumentException: maxTime must be >= 0"}`
 
 ### `mainnet/tx_hash 0` on 1.18.0
 
-the sdk refused a value the network accepts: IllegalArgumentException: maxTime must be >= 0
+The SDK refused a value the network accepts: IllegalArgumentException: maxTime must be >= 0
 
 ```json
 {
@@ -49,11 +65,14 @@ Actual: `{"rejected":"IllegalArgumentException: maxTime must be >= 0"}`
 
 ## Reproduce
 
-From a checkout of https://github.com/ErenTopaal/shapekit at tag `v0.2.0`:
+From a checkout of https://github.com/ErenTopaal/shapekit at tag `v0.2.0`, with the Rust toolchain of its `rust-toolchain.toml` and the toolchain `com.soneso.stellar:stellar-sdk-jvm` builds with (`shapekit doctor sdk --sdk kmp` lists what is missing):
 
 ```sh
-shapekit conformance run --sdk kmp --version 1.18.0 --entry explore.witnesses.f62d-r0000-l96
+cargo build --release --locked -p shapekit-cli
+target/release/shapekit conformance run --sdk kmp --version 1.18.0 --entry explore.witnesses.f62d-r0000-l96
 ```
+
+The run builds the SDK's testee at that version as `conformance/versions.toml` describes, then runs the entry's checks.
 
 ## Where the expected answers come from
 
@@ -66,6 +85,10 @@ How the corpus entry was built and checked: A classic recipe of the explorer's r
 
 ## Sibling issues
 
-None: of the SDKs tested, only this one diverges on this entry.
+- `stellar_flutter_sdk` (Soneso/stellar_flutter_sdk) diverges on 2 of these entries: shapekit's finding DART-MAXTIME, a transaction with max time 2^64-1 hashes to another value once the sdk rebuilds it (not filed yet); DART-OFFERU64, question: offer ids are generated as XdrUint64, so the XDR-JSON of a negative offer id is another number and the canonical form does not encode (not filed yet).
+- `network.lightsail:stellar-sdk` (lightsail-network/java-stellar-sdk) diverges on 2 of these entries: no finding takes it yet.
+- `soneso/stellar-php-sdk` (Soneso/stellar-php-sdk) diverges on 2 of these entries: shapekit's finding PHP-OFFERID, rebuilding a transaction with a manage sell offer of offer id -1 throws (not filed); PHP-UINT64, 64-bit values above 2^63-1 and negative int64 values lose their XDR-JSON form (not filed yet).
+- `stellar-sdk` (StellarCN/py-stellar-base) diverges on 2 of these entries: no finding takes it yet.
+- `stellar-cli` (stellar/stellar-cli) diverges on `explore.witnesses.f62d-r0004-l69`, one of these entries: shapekit's finding CLI-TXHASH-V1, stellar tx hash refuses v0 and fee bump envelopes the network applied (covered upstream by https://github.com/stellar/stellar-cli/issues/2769).
 
 shapekit vector: `explore.witnesses.f62d-r0000-l96`

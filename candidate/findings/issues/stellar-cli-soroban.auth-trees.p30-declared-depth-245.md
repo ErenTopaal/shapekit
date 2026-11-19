@@ -1,54 +1,35 @@
 <!-- repo: stellar/stellar-cli -->
-# stellar-cli 30.0.1: the sdk refused a value the network accepts: ❌ error: error decoding JSON: recursion limit exceeded at line 1 column 11224 (soroban.auth-trees.p30-declared-depth-245)
+# stellar-cli 30.0.1: question: stellar tx hash decodes with a depth limit of 500, below the 1000 stellar-core accepts from protocol 28
 
 ## What happens
 
-On the input below, `stellar-cli` 30.0.1 answers differently from the Stellar network in 6 checks.
+Question: stellar tx hash decodes with a depth limit of 500, below the 1000 stellar-core accepts from protocol 28.
+
+## Cause
+
+Tx_envelope_from_input reads the envelope with Limits::depth(XDR_DEPTH_LIMIT) (soroban-cli 30.0.1 src/commands/tx/xdr.rs L41), and XDR_DEPTH_LIMIT is 500 (src/utils.rs L21; utils.rs L60 re-encodes the signature payload under the same limit), so the hash of a transaction whose authorization tree or ScVal stellar-core accepted can be refused ("failed to decode XDR: depth limit exceeded"). PR #2675 set 500 on purpose against stack overflow; from protocol 28 core's limit is 1000 (TransactionUtils.cpp validateXDRForProtocol). The witnesses are local chains.
+
+## Affected versions
+
+`stellar-cli` 30.0.1 fail; shapekit ran 28.1.0, 30.0.1.
+
+## Entries
+
+shapekit's finding CLI-DEPTH takes 4 corpus entries on this CLI: `soroban.auth-trees.p30-declared-depth-245`, `soroban.auth-trees.p30-declared-depth-246`, `soroban.auth-trees.p30-declared-depth-492`, `soroban.scval-shapes.p30-map-depth-over`. The checks below are those of `soroban.auth-trees.p30-declared-depth-245`.
+
+## Checks on `soroban.auth-trees.p30-declared-depth-245`
+
+On this entry, `stellar-cli` 30.0.1 answers differently from the Stellar network in 2 checks on 1 version.
 
 A check is one call into the SDK with a known right answer. Each check below shows the call as a JSON request of the [shapekit testee protocol](https://github.com/ErenTopaal/shapekit/blob/v0.2.0/docs/testee-protocol.md) (`op` names the SDK operation), the expected answer and the answer the SDK gave.
 
-## Input
+A check named `mainnet/...` or `testnet/...` names the network passphrase it hashes or signs with. The data is a ledger stellar-core closed on a private network shapekit ran locally (chain `soroban.auth-trees.p30`), not a transaction or ledger of that network.
 
 Corpus entry `soroban.auth-trees.p30-declared-depth-245` (family `soroban.auth-trees`) of the [shapekit](https://github.com/ErenTopaal/shapekit) corpus 0.2.0.
 
-### `testnet/decode_encode` on 30.0.1
-
-the sdk refused a value the network accepts: ❌ error: error decoding JSON: recursion limit exceeded at line 1 column 11224
-
-```json
-{
-  "depth_limit": 1012,
-  "len_limit": 16704,
-  "op": "decode_encode",
-  "type": "LedgerCloseMeta",
-  "xdr": "AAAAAgAAAAD1Q1MP8YnUjblULzKgF6cQOlqr6MoRA4G8k8WH0zGu1gAAAB6PUKR5Nb8N8N2MVKuK7frToF+DtwP5cvvjbajNqYQvQV1t8I6BmYD78VG3fDizjVwXpv40Kr7Wps02CmkTdMR3AAAAAGnmvgAAAAAAAAAAAwAAAZ2tVjAAAAAAAHlj6rNCwXno1Bn4pGsg0Y2JLSmmAn8t/NLujlmhig5xAAAAQHkLiPYgmCIfgqC57QFuuk4XXJqK8MhM8dbN9Ni5XZiObrbjwJybIOAcjkosWQuPM5lDqrd9i3IMquqEWP+/4AYdz6c2od01/El+xLG3d55wKUiytYYPofhtiCLioJpI/XgSjRhq2SqUbwr3SIhJJSn7oKGcLGbmvlcsNqr16aLqAAAAbg3gtrOnZAAAAAAAAAAymLwAAAAAAAAAAAAAAAAAAABkBfXhAAAAAGSFV+f5x6r04qQKss+eUbjZYRaQUcH1/G/PXKGmEPOqLgAAAAAAAAAA... (22272 chars)"
-}
-```
-
-Expected: `{"xdr":"AAAAAgAAAAD1Q1MP8YnUjblULzKgF6cQOlqr6MoRA4G8k8WH0zGu1gAAAB6PUKR5Nb8N8N2MVKuK7frToF+DtwP5cvvjbajNqYQvQV1t8I6BmYD78VG3fDizjVwXpv40Kr7Wps02CmkTdMR3AAAAAGnmvgAAAAAAAAAAAwAAAZ2tVjAAAAAAAHlj6rNCwXno1Bn4pGsg0Y2JLSmmAn8t/NLujlmhig5xAAAAQHkLiPYgmCIfgqC57QFuuk4XXJqK8MhM8dbN9Ni5XZiObrbjwJybIOAcjkosWQuPM5lDqrd9i3IMquqEWP+/4AYdz6c2od01/El+xLG3d55wKUiytYYPofhtiCLioJpI/XgSjRhq2SqUbwr3SIhJJSn7oKGcLGbmvlcsNqr16aLqAAAAbg3gtrOnZAAAAAAAAAAymLwAAAAAAAAAAAAAAAAAAABkBfXhAAAAAGSFV+f5x6r04qQKss+eUbjZYRaQUcH1/G/PXKGmEPOqLgAAAAAAAAAA... (22272 chars)"}`
-
-Actual: `{"rejected":"❌ error: error decoding JSON: recursion limit exceeded at line 1 column 11224"}`
-
-### `testnet/encode_json` on 30.0.1
-
-the sdk refused a value the network accepts: ❌ error: error decoding JSON: recursion limit exceeded at line 1 column 16252
-
-```json
-{
-  "depth": 513,
-  "json_bytes": 48234,
-  "preview": "{\"json\":{\"v2\":{\"evicted_keys\":[],\"ext\":\"v0\",\"ledger_header\":{\"ext\":\"v0\",\"hash\":\"f543530ff189d48db9542f32a017a7103a5aabe8ca110381bc93c587d331aed6\",\"header\":{\"base_fee\":100,\"base_reserve\":100000000,\"bucket_list_hash\":\"78128d186ad92a946f0af74888492529fba0a19c2c66e6be572c36aaf5e9a2ea\",\"ext\":\"v0\",\"fee_pool\":\"3315900\",\"id_pool\":\"0\",\"inflation_seq\":0,\"ledger_seq\":110,\"ledger_version\":30,\"max_tx_set_size\":100,\"previous_ledger_hash\":\"8f50a47935bf0df0dd8c54ab8aedfad3a05f83b703f972fbe36da8cda9842f41\",\"scp_value\":{\"clo",
-  "sha256": "cecc489e86cd97708a2c4a061f8986476340a6d4facf6240341d475866c46f99"
-}
-```
-
-Expected: `{"xdr":"AAAAAgAAAAD1Q1MP8YnUjblULzKgF6cQOlqr6MoRA4G8k8WH0zGu1gAAAB6PUKR5Nb8N8N2MVKuK7frToF+DtwP5cvvjbajNqYQvQV1t8I6BmYD78VG3fDizjVwXpv40Kr7Wps02CmkTdMR3AAAAAGnmvgAAAAAAAAAAAwAAAZ2tVjAAAAAAAHlj6rNCwXno1Bn4pGsg0Y2JLSmmAn8t/NLujlmhig5xAAAAQHkLiPYgmCIfgqC57QFuuk4XXJqK8MhM8dbN9Ni5XZiObrbjwJybIOAcjkosWQuPM5lDqrd9i3IMquqEWP+/4AYdz6c2od01/El+xLG3d55wKUiytYYPofhtiCLioJpI/XgSjRhq2SqUbwr3SIhJJSn7oKGcLGbmvlcsNqr16aLqAAAAbg3gtrOnZAAAAAAAAAAymLwAAAAAAAAAAAAAAAAAAABkBfXhAAAAAGSFV+f5x6r04qQKss+eUbjZYRaQUcH1/G/PXKGmEPOqLgAAAAAAAAAA... (22272 chars)"}`
-
-Actual: `{"rejected":"❌ error: error decoding JSON: recursion limit exceeded at line 1 column 16252"}`
-
 ### `testnet/tx_hash 0` on 30.0.1
 
-the sdk refused a value the network accepts: ❌ error: failed to decode XDR: depth limit exceeded
+The CLI refused a value the network accepts: ❌ error: failed to decode XDR: depth limit exceeded
 
 ```json
 {
@@ -64,68 +45,54 @@ Expected: `{"hash":"890b530034908d74c3d5cb6f0275d12ad58cec409dc1dce5c6b212a8c955
 
 Actual: `{"rejected":"❌ error: failed to decode XDR: depth limit exceeded"}`
 
-### `mainnet/decode_encode` on 30.0.1
+### `mainnet/tx_hash 0` on 30.0.1
 
-the sdk refused a value the network accepts: ❌ error: error decoding JSON: recursion limit exceeded at line 1 column 11224
-
-```json
-{
-  "depth_limit": 1012,
-  "len_limit": 16704,
-  "op": "decode_encode",
-  "type": "LedgerCloseMeta",
-  "xdr": "AAAAAgAAAABE4ISxDnzFc91kw+NGP+uIwLScQif/O2Fr/kwWsocx2QAAAB6tpuXdwxaZYhwr+oFzU8REjrpDjA69JfoOSGB+uYYf91whLLQ0zKVfCZxz1BuDszAPG6PxCWQ33IjNfbMFjRqeAAAAAGnmvgAAAAAAAAAAAwAAAZ2tVjAAAAAAAPOxdkD8D/41P8MXoGRc+iOuhj9lK5bSxP/clfXQGNjxAAAAQC0gR/NjQU5VtOrkD09UUo+OEwMPry0EgOBn9CbYevIULuYG3YywUNMRBAGsHCxmFW1xAAkt50tMmCMqfCGewwGXQtLZcBo8/AbqmBkmrQJGfZfM1Fe06zztT1rMsRKbHu4lNR0XjpFJdmnghUiwlaDhJLQvpFQnVSTqi5Q9uY8yAAAAbg3gtrOnZAAAAAAAAAAymKMAAAAAAAAAAAAAAAAAAABkBfXhAAAAAGT+NAJiuIqaEIIhDzWrtobIFvaN4SBza3QNr/JzIxMEGwAAAAAAAAAA... (22272 chars)"
-}
-```
-
-Expected: `{"xdr":"AAAAAgAAAABE4ISxDnzFc91kw+NGP+uIwLScQif/O2Fr/kwWsocx2QAAAB6tpuXdwxaZYhwr+oFzU8REjrpDjA69JfoOSGB+uYYf91whLLQ0zKVfCZxz1BuDszAPG6PxCWQ33IjNfbMFjRqeAAAAAGnmvgAAAAAAAAAAAwAAAZ2tVjAAAAAAAPOxdkD8D/41P8MXoGRc+iOuhj9lK5bSxP/clfXQGNjxAAAAQC0gR/NjQU5VtOrkD09UUo+OEwMPry0EgOBn9CbYevIULuYG3YywUNMRBAGsHCxmFW1xAAkt50tMmCMqfCGewwGXQtLZcBo8/AbqmBkmrQJGfZfM1Fe06zztT1rMsRKbHu4lNR0XjpFJdmnghUiwlaDhJLQvpFQnVSTqi5Q9uY8yAAAAbg3gtrOnZAAAAAAAAAAymKMAAAAAAAAAAAAAAAAAAABkBfXhAAAAAGT+NAJiuIqaEIIhDzWrtobIFvaN4SBza3QNr/JzIxMEGwAAAAAAAAAA... (22272 chars)"}`
-
-Actual: `{"rejected":"❌ error: error decoding JSON: recursion limit exceeded at line 1 column 11224"}`
-
-### `mainnet/encode_json` on 30.0.1
-
-the sdk refused a value the network accepts: ❌ error: error decoding JSON: recursion limit exceeded at line 1 column 16252
+The CLI refused a value the network accepts: ❌ error: failed to decode XDR: depth limit exceeded
 
 ```json
 {
-  "depth": 513,
-  "json_bytes": 48234,
-  "preview": "{\"json\":{\"v2\":{\"evicted_keys\":[],\"ext\":\"v0\",\"ledger_header\":{\"ext\":\"v0\",\"hash\":\"44e084b10e7cc573dd64c3e3463feb88c0b49c4227ff3b616bfe4c16b28731d9\",\"header\":{\"base_fee\":100,\"base_reserve\":100000000,\"bucket_list_hash\":\"ee25351d178e91497669e08548b095a0e124b42fa454275524ea8b943db98f32\",\"ext\":\"v0\",\"fee_pool\":\"3315875\",\"id_pool\":\"0\",\"inflation_seq\":0,\"ledger_seq\":110,\"ledger_version\":30,\"max_tx_set_size\":100,\"previous_ledger_hash\":\"ada6e5ddc31699621c2bfa817353c4448eba438c0ebd25fa0e48607eb9861ff7\",\"scp_value\":{\"clo",
-  "sha256": "53438a2fa5f18b42def799ec4dbce738e9b306aee2e43d02117c67a0fb3f16c4"
+  "depth_limit": 1000,
+  "len_limit": 14672,
+  "network_passphrase": "Public Global Stellar Network ; September 2015",
+  "op": "tx_hash",
+  "xdr": "AAAAAgAAAAAc/FAM6LNIOWOzSip7lmPnQwHeXh1lk3Gb4TWhSysc6QACCwYAAABEAAAAKQAAAAAAAAAAAAAAAQAAAAAAAAAYAAAAAAAAAAFxd08LnGZurodrreWHhrpcj7t2sOvbiWLD+3BQqRx/8QAAAARub2RlAAAAAgAAABAAAAABAAAAAAAAABAAAAABAAAAAQAAABEAAAABAAAAAgAAAA8AAAAGZmFub3V0AAAAAAADAAAAAAAAAA8AAAAGc2lnbmVyAAAAAAASAAAAAAAAAADNa7/tKRGIRLOUq04ODAP1S9zA/M+7uK8ljxDTgjMgsAAAAAEAAAABAAAAAAAAAADNa7/tKRGIRLOUq04ODAP1S9zA/M+7uK8ljxDTgjMgsALCbZJzVbG2AAAA0QAAABAAAAABAAAAAQAAABEAAAABAAAAAgAAAA8AAAAKcHVibGljX2tleQAAAAAADQAAACDNa7/tKRGIRLOUq04ODAP1S9zA/M+7uK8ljxDT... (19564 chars)"
 }
 ```
 
-Expected: `{"xdr":"AAAAAgAAAABE4ISxDnzFc91kw+NGP+uIwLScQif/O2Fr/kwWsocx2QAAAB6tpuXdwxaZYhwr+oFzU8REjrpDjA69JfoOSGB+uYYf91whLLQ0zKVfCZxz1BuDszAPG6PxCWQ33IjNfbMFjRqeAAAAAGnmvgAAAAAAAAAAAwAAAZ2tVjAAAAAAAPOxdkD8D/41P8MXoGRc+iOuhj9lK5bSxP/clfXQGNjxAAAAQC0gR/NjQU5VtOrkD09UUo+OEwMPry0EgOBn9CbYevIULuYG3YywUNMRBAGsHCxmFW1xAAkt50tMmCMqfCGewwGXQtLZcBo8/AbqmBkmrQJGfZfM1Fe06zztT1rMsRKbHu4lNR0XjpFJdmnghUiwlaDhJLQvpFQnVSTqi5Q9uY8yAAAAbg3gtrOnZAAAAAAAAAAymKMAAAAAAAAAAAAAAAAAAABkBfXhAAAAAGT+NAJiuIqaEIIhDzWrtobIFvaN4SBza3QNr/JzIxMEGwAAAAAAAAAA... (22272 chars)"}`
+Expected: `{"hash":"52e24f8269ff968937afdff11a52d62194ae00e7b4921ea70d687d73de35de8f"}`
 
-Actual: `{"rejected":"❌ error: error decoding JSON: recursion limit exceeded at line 1 column 16252"}`
-
-1 more checks fail; the command below lists every one.
+Actual: `{"rejected":"❌ error: failed to decode XDR: depth limit exceeded"}`
 
 ## Reproduce
 
-From a checkout of https://github.com/ErenTopaal/shapekit at tag `v0.2.0`:
+From a checkout of https://github.com/ErenTopaal/shapekit at tag `v0.2.0`, with the Rust toolchain of its `rust-toolchain.toml` and the toolchain `stellar-cli` builds with (`shapekit doctor sdk --sdk stellar-cli` lists what is missing):
 
 ```sh
-shapekit conformance run --sdk stellar-cli --version 30.0.1 --entry soroban.auth-trees.p30-declared-depth-245
+cargo build --release --locked -p shapekit-cli
+target/release/shapekit conformance run --sdk stellar-cli --version 30.0.1 --entry soroban.auth-trees.p30-declared-depth-245
 ```
+
+The run builds the CLI's testee at that version as `conformance/versions.toml` describes, then runs the entry's checks.
 
 ## Where the expected answers come from
 
 The expected answers are recorded in:
 
-- [`corpus/entries/soroban.auth-trees/soroban.auth-trees.p30-declared-depth-245/mainnet.expected.json`](https://github.com/ErenTopaal/shapekit/blob/v0.2.0/corpus/entries/soroban.auth-trees/soroban.auth-trees.p30-declared-depth-245/mainnet.expected.json): SEP-51 rendering by stellar-xdr 30.0.0; must encode back to corpus/entries/soroban.auth-trees/soroban.auth-trees.p30-declared-depth-245/mainnet.xdr
 - [`corpus/entries/soroban.auth-trees/soroban.auth-trees.p30-declared-depth-245/mainnet.xdr`](https://github.com/ErenTopaal/shapekit/blob/v0.2.0/corpus/entries/soroban.auth-trees/soroban.auth-trees.p30-declared-depth-245/mainnet.xdr), envelope 0 of the transaction set: transactionHash of the envelope's result pair
-- [`corpus/entries/soroban.auth-trees/soroban.auth-trees.p30-declared-depth-245/mainnet.xdr`](https://github.com/ErenTopaal/shapekit/blob/v0.2.0/corpus/entries/soroban.auth-trees/soroban.auth-trees.p30-declared-depth-245/mainnet.xdr): decode = must-accept, roundtrip = true
-- [`corpus/entries/soroban.auth-trees/soroban.auth-trees.p30-declared-depth-245/testnet.expected.json`](https://github.com/ErenTopaal/shapekit/blob/v0.2.0/corpus/entries/soroban.auth-trees/soroban.auth-trees.p30-declared-depth-245/testnet.expected.json): SEP-51 rendering by stellar-xdr 30.0.0; must encode back to corpus/entries/soroban.auth-trees/soroban.auth-trees.p30-declared-depth-245/testnet.xdr
 - [`corpus/entries/soroban.auth-trees/soroban.auth-trees.p30-declared-depth-245/testnet.xdr`](https://github.com/ErenTopaal/shapekit/blob/v0.2.0/corpus/entries/soroban.auth-trees/soroban.auth-trees.p30-declared-depth-245/testnet.xdr), envelope 0 of the transaction set: transactionHash of the envelope's result pair
-- [`corpus/entries/soroban.auth-trees/soroban.auth-trees.p30-declared-depth-245/testnet.xdr`](https://github.com/ErenTopaal/shapekit/blob/v0.2.0/corpus/entries/soroban.auth-trees/soroban.auth-trees.p30-declared-depth-245/testnet.xdr): decode = must-accept, roundtrip = true
 
-How the corpus entry was built and checked: an address entry whose matched root declares a chain 245 invocations deep below it that no call reaches, the deepest the host still decodes; the transaction succeeds and the declared nodes are never checked
+How the corpus entry was built and checked: An address entry whose matched root declares a chain 245 invocations deep below it that no call reaches, the deepest the host still decodes; the transaction succeeds and the declared nodes are never checked
 
 Related: https://github.com/stellar/wallet-backend/issues/746
 
 ## Sibling issues
 
-None: of the SDKs tested, only this one diverges on this entry.
+- `stellar-dotnet-sdk` (Beans-BV/dotnet-stellar-sdk) diverges on 4 of these entries: shapekit's finding NET-DEPTH, XDR decoders stop at 200 nested types, below stellar-core's limit (not filed yet).
+- `network.lightsail:stellar-sdk` (lightsail-network/java-stellar-sdk) diverges on 4 of these entries: no finding takes it yet.
+- `@stellar/stellar-sdk` (stellar/js-stellar-sdk) diverges on 4 of these entries: shapekit's finding JS-16X, 16.x lacks six fixes that 17.x has: map key order and collisions, textual ids, W addresses, decode depth, StrKey checks (filed as https://github.com/stellar/js-stellar-sdk/issues/1907).
+- `com.soneso.stellar:stellar-sdk-jvm` (Soneso/kmp-stellar-sdk) diverges on 4 of these entries: shapekit's finding KMP-JSON-DEPTH, XDR-JSON the sdk writes for values nested past 128 containers is refused when the sdk reads it back (not filed yet).
+- `soneso/stellar-php-sdk` (Soneso/stellar-php-sdk) diverges on 3 of these entries: shapekit's finding PHP-JSON-DEPTH, XDR-JSON stops at 512 nested arrays, below stellar-core's limits (not filed yet).
+- `stellar-sdk` (StellarCN/py-stellar-base) diverges on 4 of these entries: no finding takes it yet.
+- `stellar-xdr` (stellar/rs-stellar-xdr) diverges on 4 of these entries: shapekit's finding RS-2, the XDR-JSON reader stops at serde_json's recursion limit of 128, so values the crate writes as JSON cannot be read back (filed as https://github.com/stellar/rs-stellar-xdr/issues/628).
 
 shapekit vector: `soroban.auth-trees.p30-declared-depth-245`

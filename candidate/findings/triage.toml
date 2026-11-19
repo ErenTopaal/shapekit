@@ -76,8 +76,9 @@ id = "ETL-1"
 title = "question: the effects table has no trustline_created for a trustline a Stellar asset contract trust() call opens"
 component = "stellar-etl"
 severity = "data-loss"
-status = "draft"
-draft = "candidate/findings/issues/stellar-etl-E1.md"
+status = "duplicate-of"
+reason = "#460 (2026-07-04, part of the effects audit epic #448) lists CAP-73 SAC trust() as trustline_created"
+link = "https://github.com/stellar/stellar-etl/issues/460"
 cause = "transformEffects derives the effects of an InvokeHostFunction operation only from Stellar asset contract events (addInvokeHostFunctionEffects, internal/transform/effects.go L1326-L1440 at 7e3fc9af), which turn transfer, mint, clawback and burn into credit and debit effects. A trustline the contract's trust() function opens (CAP-73) changes the ledger without such an event, so it gets no trustline_created effect, while a ChangeTrust operation that opens the same trustline does (addChangeTrustEffects, L647-L705). The source does not say whether this is intended."
 
 [[finding.harness]]
@@ -90,8 +91,9 @@ id = "ETL-2"
 title = "question: the effects table has no account_created for an account a Stellar asset contract transfer creates"
 component = "stellar-etl"
 severity = "data-loss"
-status = "draft"
-draft = "candidate/findings/issues/stellar-etl-E2.md"
+status = "duplicate-of"
+reason = "#460 (2026-07-04, part of the effects audit epic #448) lists XLM-SAC auto-account-creation as account_created and signer_created"
+link = "https://github.com/stellar/stellar-etl/issues/460"
 cause = "An XLM transfer through the native asset contract to an account that does not exist creates it (CAP-73). transformEffects writes account_debited and account_credited for the transfer event (addInvokeHostFunctionEffects, internal/transform/effects.go L1326-L1440 at 7e3fc9af) but account_created only for a CreateAccount operation (addAccountCreatedEffects, L411-L437), so the new account has no account_created effect. The source does not say whether this is intended."
 
 [[finding.harness]]
@@ -104,8 +106,8 @@ id = "ETL-3"
 title = "question: the effects table has no signer_removed for a pre-auth signer core removes when its transaction applies"
 component = "stellar-etl"
 severity = "data-loss"
-status = "draft"
-draft = "candidate/findings/issues/stellar-etl-E3.md"
+status = "wont-fix"
+reason = "by design: the removal is in export_ledger_entry_changes, whose signers table writes a Deleted row for a signer that disappears from an updated account, failed transactions included (internal/transform/account_signer.go L60-L91, PR #392), and horizon's effects processor emits no signer_removed for it either"
 cause = "Core removes a pre-auth signer in txChangesBefore whether its transaction succeeds or fails, and a fee bump's also from the fee source. effects() returns nothing for a failed transaction and builds effects per operation from the operation's own changes (internal/transform/effects.go L60-L176 at 7e3fc9af); signer_removed comes only from addSetOptionsEffects (L530-L645). The source does not say whether this is intended."
 
 [[finding.harness]]
@@ -132,8 +134,8 @@ id = "GO-TEXTID"
 title = "question: horizon.Offer reads an offer id given as \"+16\" or \"-0\""
 component = "go-stellar-sdk"
 severity = "divergence"
-status = "draft"
-draft = "candidate/findings/issues/go-cap03.offer-liabilities.synth-textual-offer-id-noncanonical.md"
+status = "wont-fix"
+reason = "the same \"+16\", \"-0\" and leading-zero acceptance was answered as reasonable and harmless on rs-stellar-xdr#627 (closed 2026-11-18), and horizon.Offer only reads horizon's own canonical ids"
 related = ["https://github.com/stellar/rs-stellar-xdr/issues/627"]
 cause = "horizon.Offer.ID is an int64 tagged `json:\"id,string\"`, so encoding/json unquotes the text and passes it to strconv.ParseInt, which takes an optional sign: \"+16\" reads as 16 and \"-0\" as 0, on every tested version (v0.7.1 to v0.9.0). The field reads horizon's own responses, which carry the canonical text, so the draft is a question. rs-stellar-xdr reads the same two strings the same way (RS-1, rs-stellar-xdr#627); the code is separate, so this is its own finding with RS-1 related."
 
@@ -149,13 +151,13 @@ command = "shapekit conformance run --sdk dart --all-versions --out target/confo
 
 [[finding]]
 id = "DART-BOUNDS"
-title = "XDR decoders accept arrays, strings and opaque values longer than the schema allows"
+title = "XDR decoders accept arrays, strings and opaque values longer than the schema allows, and nesting deeper than stellar-core accepts"
 component = "stellar_flutter_sdk"
 severity = "robustness"
 status = "draft"
 draft = "candidate/findings/issues/dart-classic.max-length.synth-tx-101-operations.md"
-related = ["https://github.com/stellar/rs-stellar-xdr/security/advisories/GHSA-3xhm-p452-9wjh"]
-cause = "The generated decoders read a variable-length array, string or opaque with XdrDataInputStream.readArrayLength or readBytes, which bound the count only by the bytes left in the input (lib/src/xdr/xdr_data_io.dart L380-L394), and never check the maximum the schema declares: XdrSCSpecFunctionV0 reads `outputs<1>` with no bound (lib/src/xdr/xdr_sc_spec_function_v0.dart L63), XdrPreconditionsV2 reads `extraSigners<2>` the same way (lib/src/xdr/xdr_preconditions_v2.dart L102). 3.12.0 reads 101 operations, 21 signatures, a 29-byte text memo, a 33-byte symbol, a 65-byte data value, payload and signature, 6 path assets, 11 claimants, 3 extra signers and 2 spec outputs, all of which stellar-core refuses."
+related = ["https://github.com/stellar/rs-stellar-xdr/security/advisories/GHSA-3xhm-p452-9wjh", "https://github.com/stellar/js-stellar-sdk/issues/1908"]
+cause = "The generated decoders read a variable-length array, string or opaque with XdrDataInputStream.readArrayLength or readBytes, which bound the count only by the bytes left in the input (lib/src/xdr/xdr_data_io.dart L380-L394), and never check the maximum the schema declares: XdrSCSpecFunctionV0 reads `outputs<1>` with no bound (lib/src/xdr/xdr_sc_spec_function_v0.dart L63), XdrPreconditionsV2 reads `extraSigners<2>` the same way (lib/src/xdr/xdr_preconditions_v2.dart L102). 3.12.0 reads 101 operations, 21 signatures, a 29-byte text memo, a 33-byte symbol, a 65-byte data value, payload and signature, 6 path assets, 11 claimants, 3 extra signers and 2 spec outputs, all of which stellar-core refuses. Nesting is bounded by XdrDataInputStream's own counters, 500 recursive type decodes and 128 nested delegate signatures (lib/src/xdr/xdr_data_io.dart L317-L340), where core counts every nested type, so ScVal maps and vectors and authorization trees past core's limit decode too; the maintainers chose that count on purpose (#248, #249). Every witness is synthetic or refused by core."
 
 [[finding.conformance]]
 sdk = "dart"
@@ -168,16 +170,7 @@ entries = [
   "soroban.invoke-basics.synth-ghsa-3xhm-spec-outputs-2",
 ]
 
-[[finding]]
-id = "DART-DEPTH"
-title = "XDR decoders read Soroban values and authorization trees nested deeper than stellar-core accepts"
-component = "stellar_flutter_sdk"
-severity = "robustness"
-status = "draft"
-draft = "candidate/findings/issues/dart-soroban.auth-trees.synth-auth-depth-494-over-cap.md"
-related = ["https://github.com/stellar/js-stellar-sdk/issues/1908"]
-cause = "XdrDataInputStream counts only recursive type decodes, up to maxXdrDecodeDepth (500), and nested delegate signatures, up to maxRecursiveDecodeDepth (128) (lib/src/xdr/xdr_data_io.dart L316-L340). Neither is stellar-core's limit, which counts every nested type, so ScVal maps and vectors and SorobanAuthorizedInvocation trees past core's limit decode and the sdk reads envelopes core refuses; in the other direction, the candidate lane's ledgers with claim predicates, quorum sets or delegate signatures nested to core's ledger limit are refused. The same class as JS-DEPTH in js-stellar-sdk; separate code."
-
+# the depth part, folded in from the former DART-DEPTH
 [[finding.conformance]]
 sdk = "dart"
 entries = [
@@ -195,7 +188,7 @@ severity = "data-loss"
 status = "draft"
 draft = "candidate/findings/issues/dart-classic.memo-bytes.p30-memo-ff.md"
 related = ["https://github.com/stellar/js-stellar-sdk/issues/1823"]
-cause = "XdrDataInputStream.readString returns utf8.decode of the bytes (lib/src/xdr/xdr_data_io.dart L365-L367), which throws a FormatException on bytes that are not UTF-8. The XDR string type is bytes, and stellar-core applied transactions whose text memo, InvokeContractArgs function name, ScString or ScSymbol holds bytes that are not UTF-8; those fail to decode, which also stops decode_json, encode_json and the transaction hash. js-stellar-sdk#1823 is the same class: there the bytes are mangled instead of refused."
+cause = "XdrDataInputStream.readString returns utf8.decode of the bytes (lib/src/xdr/xdr_data_io.dart L365-L366 at 3.12.0), which throws a FormatException on bytes that are not UTF-8. The XDR string type is bytes, and stellar-core applied transactions whose text memo, InvokeContractArgs function name, ScString or ScSymbol holds bytes that are not UTF-8; those fail to decode, which also stops decode_json, encode_json and the transaction hash. PR #177 kept memo, symbol and string as String on purpose, and documentation/sep/sep-51.md says such a value cannot reach the JSON path from a real envelope, which these core-applied transactions contradict. js-stellar-sdk#1823 is the same class: there the bytes are mangled instead of refused."
 
 [[finding.conformance]]
 sdk = "dart"
@@ -226,12 +219,12 @@ entries = ["cap03.offer-liabilities.synth-textual-offer-id-noncanonical"]
 
 [[finding]]
 id = "DART-OFFERU64"
-title = "manage offer ids are an unsigned 64-bit type, so a negative offer id renders as a different XDR-JSON value and its XDR-JSON does not encode"
+title = "question: offer ids are generated as XdrUint64, so the XDR-JSON of a negative offer id is another number and the canonical form does not encode"
 component = "stellar_flutter_sdk"
 severity = "divergence"
 status = "draft"
 draft = "candidate/findings/issues/dart-cap03.offer-liabilities.synth-negative-offer-id.md"
-cause = "XdrManageSellOfferOp.offerID is an XdrUint64 (lib/src/xdr/xdr_manage_sell_offer_op.dart L34), where the schema says int64. The bytes round trip, but XDR-JSON renders offer id -16 as \"18446744073709551600\" and refuses the canonical \"-16\" (\"XdrUint64 holds -16, outside the range of a uint64\")."
+cause = "The generator override tools/xdr-generator/generator/field_overrides.rb L76-L85 (\"offer IDs are always positive\") makes the int64 offer id an XdrUint64 in XdrManageSellOfferOp (lib/src/xdr/xdr_manage_sell_offer_op.dart L34 at 3.12.0), XdrManageBuyOfferOp, XdrOfferEntry, XdrLedgerKeyOffer, XdrClaimOfferAtom and XdrClaimOfferAtomV0. The bytes round trip, but XDR-JSON renders offer id -16 as \"18446744073709551600\" and refuses the canonical \"-16\" (\"XdrUint64 holds -16, outside the range of a uint64\"). A negative offer id reaches a ledger only in operations that failed before protocol 15."
 
 [[finding.conformance]]
 sdk = "dart"
@@ -246,12 +239,12 @@ entries = [
 
 [[finding]]
 id = "DART-SIGNEDPAYLOAD-JSON"
-title = "question: XDR-JSON rendering refuses a signed-payload signer with an empty payload"
+title = "XDR-JSON rendering refuses a signed-payload signer with an empty payload"
 component = "stellar_flutter_sdk"
 severity = "divergence"
-status = "draft"
-draft = "candidate/findings/issues/dart-cap40.signed-payload-signer.synth-empty-payload-signer.md"
-cause = "toXdrJsonValue renders a signed-payload signer as its P strkey, and StrKey refuses an empty payload (lib/src/key_pair.dart L433, \"carries an empty payload, which has no strkey rendering\"), so a transaction the network applied with such a signer has no XDR-JSON. SEP-51 gives the value no canonical form, so the question is whether refusing the whole document is the intended answer; stellar-xdr writes an <INVALID: marker instead."
+status = "wont-fix"
+reason = "documented choice before the cut-off: PR #171 (2026-08-10) and documentation/sep/sep-51.md L554-L580 refuse an empty signed payload in XDR-JSON on purpose; and no ledger holds the shape, because core refuses every witness at submit (txMALFORMED or SET_OPTIONS_BAD_SIGNER)"
+cause = "toXdrJsonValue renders a signed-payload signer as its P strkey, and StrKey refuses an empty payload (lib/src/key_pair.dart L433 at 3.12.0), so the XDR-JSON of an envelope with such a signer is refused. Every witness is synthetic or an envelope core refused at submit; no ledger holds the shape."
 
 [[finding.conformance]]
 sdk = "dart"
@@ -325,7 +318,7 @@ component = "soneso/stellar-php-sdk"
 severity = "divergence"
 status = "draft"
 draft = "candidate/findings/issues/php-cap27.muxed-accounts.p30-tx-source-and-payment-destination-id-2p64-1.md"
-cause = "uint64 fields are php ints, which hold 2^64-1 as -1, and XdrJsonHelper::uint64ToString refuses negative ints (Soneso/StellarSDK/Xdr/XdrJsonHelper.php L290-L300), so a muxed id or memo id at or above 2^63 has no XDR-JSON. In the other direction XdrSequenceNumber is read as an unsigned BigInteger (Xdr/XdrBuffer.php readBigInteger64), so a bump_to of -1 renders as \"18446744073709551615\" where the schema's int64 says -1."
+cause = "uint64 fields are php ints, which hold 2^64-1 as -1, and XdrJsonHelper::uint64ToString refuses negative ints (Soneso/StellarSDK/Xdr/XdrJsonHelper.php L290-L300), so a muxed id or memo id at or above 2^63 has no XDR-JSON. In the other direction XdrSequenceNumber is read as an unsigned BigInteger (Xdr/XdrBuffer.php readBigInteger64), so a bump_to of -1 renders as \"18446744073709551615\" where the schema's int64 says -1. Fixed on main by #229 (2026-11-18, closing #228), not in a release yet."
 
 [[finding.conformance]]
 sdk = "php"
@@ -418,7 +411,6 @@ entries = [
   "explore.witnesses.f62d-r0003-l73",
   "explore.witnesses.f62d-r0007-l72",
   "explore.witnesses.f62d-r0007-l74",
-  "explore.witnesses.f62d-r0007-l77",
   "explore.witnesses.f62d-r0008-l84",
   "explore.witnesses.f62d-r0008-l87",
   "explore.witnesses.f62d-r0022-l76",
@@ -443,6 +435,12 @@ entries = [
   "explore.witnesses.g2-r0021-l101",
   "explore.witnesses.g2-r0022-l171",
 ]
+
+# the set options rebuild of this ledger's transaction is PHP-SETOPTIONS
+[[finding.conformance]]
+sdk = "php"
+entries = ["explore.witnesses.f62d-r0007-l77"]
+checks = ["*/decode_json", "*/encode_json"]
 
 [[finding]]
 id = "PHP-CBKEY-JSON"
@@ -481,12 +479,12 @@ entries = [
 
 [[finding]]
 id = "PHP-JSON-DEPTH"
-title = "XDR-JSON stops at php's json nesting default of 512, below stellar-core's limits"
+title = "XDR-JSON stops at 512 nested arrays, below stellar-core's limits"
 component = "soneso/stellar-php-sdk"
 severity = "robustness"
 status = "draft"
 draft = "candidate/findings/issues/php-soroban.auth-trees.synth-auth-depth-493-deepest-accepted.md"
-cause = "toJson calls json_encode and fromJson json_decode without a depth (Soneso/StellarSDK/Xdr/XdrTransactionEnvelopeBase.php L123-L128 and the same in every generated class), so php's default of 512 nested arrays refuses the XDR-JSON of authorization trees and ScVal maps that stellar-core accepts (\"Maximum stack depth exceeded\")."
+cause = "toJson calls json_encode without a depth (Soneso/StellarSDK/Xdr/XdrTransactionEnvelopeBase.php L123-L128 at 1.18.0, and the same in every generated class), so php's default of 512 applies when the sdk writes XDR-JSON. Reading goes through XdrJsonHelper, which passes DECODE_MAX_DEPTH, set to the same 512 (Xdr/XdrJsonHelper.php L40 and L859). The XDR-JSON of authorization trees and ScVal maps that stellar-core accepts nests deeper, so both directions refuse it (\"Maximum stack depth exceeded\")."
 
 [[finding.conformance]]
 sdk = "php"
@@ -500,12 +498,12 @@ entries = [
 
 [[finding]]
 id = "PHP-SIGNEDPAYLOAD-JSON"
-title = "question: XDR-JSON rendering refuses a signed-payload signer with an empty payload"
+title = "XDR-JSON rendering refuses a signed-payload signer with an empty payload"
 component = "soneso/stellar-php-sdk"
 severity = "divergence"
-status = "draft"
-draft = "candidate/findings/issues/php-cap40.signed-payload-signer.synth-empty-payload-signer.md"
-cause = "The signed-payload signer renders as its P strkey and the encoder refuses an empty payload (\"Zero-length signed payload has no SEP-23 strkey representation\"), so a transaction the network applied with such a signer has no XDR-JSON. SEP-51 gives the value no canonical form; the same choice as DART-SIGNEDPAYLOAD-JSON in the Dart sdk from the same team."
+status = "wont-fix"
+reason = "no ledger holds the shape: every witness is an envelope core refused at submit (SET_OPTIONS_BAD_SIGNER, or the extra-signer form refused) or a synthetic value, and SEP-51 gives the value no form; the same documented choice as the Dart and KMP sdks"
+cause = "The signed-payload signer renders as its P strkey and the encoder refuses an empty payload (\"Zero-length signed payload has no SEP-23 strkey representation\"). Every witness is synthetic or an envelope core refused at submit; no ledger holds the shape."
 
 [[finding.conformance]]
 sdk = "php"
@@ -546,8 +544,8 @@ id = "PHP-MUXEDID"
 title = "MuxedAccount takes a negative id and writes it as the unsigned id it wraps to"
 component = "soneso/stellar-php-sdk"
 severity = "divergence"
-status = "draft"
-draft = "candidate/findings/issues/php-cap27.muxed-accounts.synth-textual-muxed-id-noncanonical.md"
+status = "wont-fix"
+reason = "not a defect: a php int cannot hold ids from 2^63 up, so a negative int is the sdk's representation of those ids and the only way to pass them to MuxedAccount::__construct; main documents it since #226 (getId, getIdAsString), after #220"
 related = ["https://github.com/stellar/js-stellar-sdk/issues/1785"]
 cause = "MuxedAccount::__construct takes ?int $id and checks only the account (Soneso/StellarSDK/MuxedAccount.php L67-L74), so -1 and -16 become the muxed ids 18446744073709551615 and 18446744073709551600 when the account is encoded: a value that encodes a different id, the class of js-stellar-sdk#1785."
 
@@ -565,13 +563,15 @@ command = "shapekit conformance run --sdk dotnet --all-versions --out target/con
 
 [[finding]]
 id = "NET-CREATECONTRACT"
-title = "Transaction.FromEnvelopeXdr crashes with a NullReferenceException on a create-contract operation of the first version or with an asset preimage"
+title = "Transaction.FromEnvelopeXdr crashes with a NullReferenceException on a create-contract host function of the first version or with a contract-address deployer"
 component = "stellar-dotnet-sdk"
 severity = "robustness"
-status = "draft"
-draft = "candidate/findings/issues/dotnet-cap73.sac-trust.golden-504393015a71bc7a-8.md"
-cause = "CreateContractOperation.FromXdr reads only HostFunction.CreateContractV2 (StellarDotnetSdk/Operations/InvokeHostFunctionOperation.cs L362-L375), which is null for HOST_FUNCTION_TYPE_CREATE_CONTRACT, and ContractIdAddressPreimage.FromContractIdPreimageXdr dereferences the address arm of a preimage that has none, so building the transaction object of envelopes core applied throws a NullReferenceException; no transaction hash can be taken."
+status = "duplicate-of"
+reason = "#248 covers the first-version host function and #249 the contract-address deployer, both opened 2026-10-01 with reproductions"
+link = "https://github.com/Beans-BV/dotnet-stellar-sdk/issues/248"
+cause = "CreateContractOperation.FromXdr reads only HostFunction.CreateContractV2 (StellarDotnetSdk/Operations/InvokeHostFunctionOperation.cs L362-L375 at 17.0.0), which is null for HOST_FUNCTION_TYPE_CREATE_CONTRACT, so every first-version create contract throws, the asset contract deploys included; and ContractIdAddressPreimage.FromContractIdPreimageXdr reads FromAddress.Address.AccountId (L1157-L1159), which is null when the deployer is a contract address. The asset preimage path itself is fine."
 
+related = ["https://github.com/Beans-BV/dotnet-stellar-sdk/issues/249"]
 [[finding.conformance]]
 sdk = "dotnet"
 entries = [
@@ -609,7 +609,7 @@ component = "stellar-dotnet-sdk"
 severity = "robustness"
 status = "draft"
 draft = "candidate/findings/issues/dotnet-cap18.maintain-liabilities.golden-3f24be68a9962089-4.md"
-cause = "Operation.FromXdr throws NotSupportedException for ALLOW_TRUST and INFLATION (StellarDotnetSdk/Operations/Operation.cs L101-L105), so the sdk builds no transaction object, nor hash, for envelopes core applied. Allow trust is still a valid operation in protocol 30; inflation was valid until protocol 12."
+cause = "Operation.FromXdr throws NotSupportedException for ALLOW_TRUST and INFLATION (StellarDotnetSdk/Operations/Operation.cs L101-L106 at 17.0.0, since PR #15 removed the builders), so the sdk builds no transaction object, nor hash, for envelopes core applied. Allow trust is still a valid operation in protocol 30; inflation was valid until protocol 12. Mainnet ledger 37466023 envelope 108 (allow trust) and testnet ledger 5521432 envelopes 2 and 8 cannot be hashed."
 
 [[finding.conformance]]
 sdk = "dotnet"
@@ -653,13 +653,20 @@ entries = [
   "explore.witnesses.g2-r0026-l107",
 ]
 
+# the allow trust transaction of this mainnet ledger; its other transactions are NET-PRICE
+[[finding.conformance]]
+sdk = "dotnet"
+entries = ["cap03.offer-liabilities.mainnet-37466023"]
+checks = ["mainnet/tx_hash 108"]
+
 [[finding]]
 id = "NET-ISSUER-ORDER"
 title = "asset ordering compares issuers as strkey text, so pool ids and change trust pool shares follow another order than the network"
 component = "stellar-dotnet-sdk"
 severity = "divergence"
-status = "draft"
-draft = "candidate/findings/issues/dotnet-cap38.liquidity-pools.p30-change-trust-pool-byte-order-envelope.md"
+status = "duplicate-of"
+reason = "#257 (2026-10-06) reports the cause and PR #272 fixes it; comment on #257 that Transaction.FromEnvelopeXdr also refuses applied change trust pool operations (\"Asset A must be < Asset B\")"
+link = "https://github.com/Beans-BV/dotnet-stellar-sdk/issues/257"
 related = ["https://github.com/Beans-BV/dotnet-stellar-sdk/issues/257", "https://github.com/stellar/js-stellar-sdk/pull/1766"]
 cause = "AssetTypeCreditAlphaNum4.CompareTo and AssetTypeCreditAlphaNum12.CompareTo compare issuers with string.Compare over the G strkey text (StellarDotnetSdk/Assets/AssetTypeCreditAlphaNum4.cs L57-L72), where core compares the raw key bytes; the base32 alphabet does not keep byte order. LiquidityPoolConstantProductParameters refuses pairs in the network's order (\"Asset A must be < Asset B\"), takes pairs in the wrong one, and Transaction.FromEnvelopeXdr refuses applied change trust operations on such a pool. This is Beans-BV/dotnet-stellar-sdk#257, open; js-stellar-sdk#1766 fixed the same class."
 
@@ -680,7 +687,7 @@ severity = "robustness"
 status = "draft"
 draft = "candidate/findings/issues/dotnet-soroban.auth-trees.p30-declared-depth-245.md"
 related = ["https://github.com/stellar/js-stellar-sdk/issues/1908"]
-cause = "XdrDataInputStream counts every nested decode against DefaultMaxDepth, 200 (StellarDotnetSdk.Xdr/XdrDataInputStream.cs L18), and the generated Decode methods throw \"Maximum decoding depth reached\" past it, so authorization trees and ScVal values core accepted at its own limit do not decode, nor hash."
+cause = "XdrDataInputStream counts every nested decode against DefaultMaxDepth, 200 (StellarDotnetSdk.Xdr/XdrDataInputStream.cs L17 at 17.0.0), and the generated Decode methods throw \"Maximum decoding depth reached\" past it, so authorization trees and ScVal values core accepted at its own limit do not decode, nor hash."
 
 [[finding.conformance]]
 sdk = "dotnet"
@@ -703,13 +710,14 @@ entries = [
 
 [[finding]]
 id = "NET-UTF8"
-title = "XDR strings are decoded to .NET strings, so memos, symbols and strings that are not UTF-8 change, and so does the transaction hash"
+title = "memo text and SDK ScString and ScSymbol values are decoded to .NET strings, so bytes that are not UTF-8 change, and so does the transaction hash"
 component = "stellar-dotnet-sdk"
 severity = "data-loss"
-status = "draft"
-draft = "candidate/findings/issues/dotnet-cap71.credentials.golden-e25799a2e2e9eea2-17.md"
-related = ["https://github.com/stellar/js-stellar-sdk/issues/1823"]
-cause = "The text memo, ScString, ScSymbol and function names are read with XdrDataInputStream.ReadString, Encoding.UTF8.GetString, which replaces bytes that are not UTF-8 (StellarDotnetSdk.Xdr/XdrDataInputStream.cs L88-L91, Memo.cs L72), and written back from the .NET string; the bytes the network applied are lost, decode and encode do not round trip, the transaction object hashes other bytes, and a 28-byte memo whose replacement characters take 29 bytes is refused (MemoTooLongException). js-stellar-sdk#1823 is the same class."
+status = "duplicate-of"
+reason = "#247 (inline strings, memo text, hash changes) and #246 (SCString, SCSymbol and names at the SDK layer), both 2026-10-01, cover it; comment on #247 with the MemoTooLongException a 28-byte memo with replacement characters causes in FromEnvelopeXdr, and the core golden witnesses"
+link = "https://github.com/Beans-BV/dotnet-stellar-sdk/issues/247"
+related = ["https://github.com/Beans-BV/dotnet-stellar-sdk/issues/246", "https://github.com/stellar/js-stellar-sdk/issues/1823"]
+cause = "On 17.0.0 the XDR typedefs SCString, SCSymbol, String32 and String64 keep the raw bytes (SCString.cs L54), but the text memo is read with XdrDataInputStream.ReadString, Encoding.UTF8.GetString, which replaces bytes that are not UTF-8 (StellarDotnetSdk.Xdr/XdrDataInputStream.cs L88-L91, Memo.cs L72), and the SDK's SCString and SCSymbol objects hold a .NET string (Soroban/SCVal.cs L1586, L1656). So memo text loses its bytes in decode and encode, the transaction object hashes other bytes for memos and ScVal strings and symbols, and a 28-byte memo whose replacement characters take more bytes is refused (MemoTooLongException). js-stellar-sdk#1823 is the same class."
 
 [[finding.conformance]]
 sdk = "dotnet"
@@ -729,20 +737,33 @@ entries = [
 
 [[finding]]
 id = "NET-STRKEY"
-title = "StrKey decoders accept claimable balance and signed payload strkeys SEP-23 refuses, and crash on a lone prefix letter"
+title = "StrKey decoders accept claimable balance and signed payload strkeys SEP-23 refuses"
 component = "stellar-dotnet-sdk"
 severity = "divergence"
 status = "draft"
 draft = "candidate/findings/issues/dotnet-cap23.claimable-balances.synth-strkey-b-invalid.md"
-cause = "DecodeClaimableBalanceId checks only the version byte and checksum (StellarDotnetSdk/StrKey.cs L447-L450), so a balance id with sub-version 1 decodes; DecodeSignedPayload reads the payload with the XDR decoder and does not check that it consumed the whole strkey (L405-L420), so a payload one byte long or a length prefix shorter than the bytes decodes; DecodeVersionByte indexes the first decoded byte without a length check (L311-L314) and throws IndexOutOfRangeException for \"M\"."
+cause = "DecodeClaimableBalanceId checks only the version byte and checksum (StellarDotnetSdk/StrKey.cs L447-L450 at 17.0.0), so a balance id with sub-version 1 decodes; DecodeSignedPayload reads the payload with the XDR decoder and does not check that it consumed the whole strkey (L405-L420), so a payload one byte long or a length prefix shorter than the bytes decodes."
 
 [[finding.conformance]]
 sdk = "dotnet"
 entries = [
   "cap23.claimable-balances.synth-strkey-b-invalid",
-  "cap27.muxed-accounts.synth-strkey-m-invalid",
   "cap40.signed-payload-signer.synth-strkey-p-invalid",
 ]
+
+[[finding]]
+id = "NET-STRKEY-LONE-M"
+title = "StrKey.DecodeVersionByte crashes with IndexOutOfRangeException on the lone prefix letter \"M\""
+component = "stellar-dotnet-sdk"
+severity = "robustness"
+status = "wont-fix"
+reason = "fixed in 17.0.0: its StrKey decoding change (CHANGELOG: an ArgumentException instead of IndexOutOfRangeException) refuses \"M\" before DecodeVersionByte, and the entry passes on 17.0.0"
+cause = "On 16.0.0 DecodeVersionByte indexes the first decoded byte without a length check (StellarDotnetSdk/StrKey.cs L311-L320) and throws IndexOutOfRangeException for \"M\"."
+
+[[finding.conformance]]
+sdk = "dotnet"
+entries = ["cap27.muxed-accounts.synth-strkey-m-invalid"]
+versions = ["16.0.0"]
 
 [[finding]]
 id = "NET-SCVEC"
@@ -764,8 +785,9 @@ id = "NET-BOUNDS"
 title = "the text memo decoder accepts 29 bytes"
 component = "stellar-dotnet-sdk"
 severity = "robustness"
-status = "draft"
-draft = "candidate/findings/issues/dotnet-classic.max-length.synth-memo-text-29-bytes.md"
+status = "duplicate-of"
+reason = "#250 (2026-10-01), item 1, names Memo's string text<28> decoded without its bound"
+link = "https://github.com/Beans-BV/dotnet-stellar-sdk/issues/250"
 cause = "Memo.Decode reads the text with ReadString, which takes ReadVarOpaque(uint.MaxValue) (StellarDotnetSdk.Xdr/Memo.cs L72, XdrDataInputStream.cs L88-L91), not the string<28> bound, so a 29-byte memo that core refuses decodes."
 
 [[finding.conformance]]
@@ -787,7 +809,7 @@ component = "kmp-stellar-sdk"
 severity = "data-loss"
 status = "draft"
 draft = "candidate/findings/issues/kmp-cap27.muxed-accounts.p28-claimable-balance-tx-source-id-1.md"
-cause = "Transaction.fromV1EnvelopeXdr keeps only MuxedAccount.fromXdr(tx.sourceAccount).accountId, the G account (commonMain/com/soneso/stellar/sdk/Transaction.kt L332), and toV1Xdr writes MuxedAccount(sourceAccount) back (L191), so a muxed source becomes a plain account: the rebuilt envelope is another transaction and AbstractTransaction.hash() is not the hash the network wrote."
+cause = "Transaction.fromV1EnvelopeXdr keeps only MuxedAccount.fromXdr(tx.sourceAccount).accountId, the G account (commonMain/kotlin/com/soneso/stellar/sdk/Transaction.kt L332 at 1.18.0), and toV1Xdr writes MuxedAccount(sourceAccount) back (L191), so a muxed source becomes a plain account: the rebuilt envelope is another transaction and AbstractTransaction.hash() is not the hash the network wrote. Mainnet transaction 17fee99b... (ledger 36196205) hashes to 0039d670... on 1.18.0."
 
 [[finding.conformance]]
 sdk = "kmp"
@@ -802,22 +824,12 @@ entries = [
   "cap27.muxed-accounts.p30-tx-source-and-payment-destination-id-1",
   "cap27.muxed-accounts.p30-tx-source-and-payment-destination-id-2p53",
   "cap27.muxed-accounts.p30-tx-source-and-payment-destination-id-2p64-1",
-  "cap71.credentials.golden-e25799a2e2e9eea2-17",
-  "classic.memo-bytes.p30-memo-above-max-code-point",
-  "classic.memo-bytes.p30-memo-ff",
-  "classic.memo-bytes.p30-memo-lone-continuation",
-  "classic.memo-bytes.p30-memo-overlong-nul",
-  "classic.memo-bytes.p30-memo-surrogate",
-  "soroban.auth-trees.golden-57a486abce28859d-17",
-  "soroban.auth-trees.golden-e0d0e3f38b2d55e0-17",
   "soroban.muxed-source.p28-muxed-and-base-source-one-ledger",
   "soroban.muxed-source.p28-restore-muxed-source",
   "soroban.muxed-source.p30-extend-ttl-muxed-source",
   "soroban.muxed-source.p30-extend-ttl-noop-muxed-source",
   "soroban.muxed-source.p30-restore-muxed-source",
   "soroban.muxed-source.p30-restore-noop-muxed-source",
-  "soroban.scval-shapes.p30-string-not-utf8-envelope",
-  "soroban.scval-shapes.p30-symbol-not-utf8",
 ]
 
 # the explorer entries and audit ledgers promoted into the corpus that fail the same way
@@ -845,11 +857,21 @@ severity = "data-loss"
 status = "draft"
 draft = "candidate/findings/issues/kmp-classic.memo-bytes.p30-memo-truncated-sequence-28.md"
 related = ["https://github.com/stellar/js-stellar-sdk/issues/1823"]
-cause = "XdrReader.readString returns bytes.decodeToString() (jvmMain/com/soneso/stellar/sdk/xdr/XdrReader.jvm.kt L59-L69), which replaces bytes that are not UTF-8, and the writer encodes the string back as UTF-8; text memos, ScString, ScSymbol and function names the network applied lose their bytes, decode and encode do not round trip, XDR-JSON shows other bytes, and the transaction object refuses a memo whose replacement characters take more than 28 bytes (Memo.kt L101). js-stellar-sdk#1823 is the same class."
+cause = "XdrReader.readString returns bytes.decodeToString() on every target (jvmMain XdrReader.jvm.kt, jsMain XdrReader.js.kt and nativeMain XdrReader.native.kt, L59-L69 at 1.18.0), which replaces bytes that are not UTF-8, and the writer encodes the string back as UTF-8; text memos, ScString, ScSymbol and function names the network applied lose their bytes, decode and encode do not round trip, the transaction hash differs, and the transaction object refuses a memo whose replacement characters take more than 28 bytes (Memo.kt L101). PR #57 and docs/sep/sep-51.md L448 document String members as lossy, and PR #61 kept SCString and the SCV_STRING and SCV_SYMBOL arms as String. js-stellar-sdk#1823 is the same class."
 
 [[finding.conformance]]
 sdk = "kmp"
 entries = [
+  "cap71.credentials.golden-e25799a2e2e9eea2-17",
+  "classic.memo-bytes.p30-memo-above-max-code-point",
+  "classic.memo-bytes.p30-memo-ff",
+  "classic.memo-bytes.p30-memo-lone-continuation",
+  "classic.memo-bytes.p30-memo-overlong-nul",
+  "classic.memo-bytes.p30-memo-surrogate",
+  "soroban.auth-trees.golden-57a486abce28859d-17",
+  "soroban.auth-trees.golden-e0d0e3f38b2d55e0-17",
+  "soroban.scval-shapes.p30-string-not-utf8-envelope",
+  "soroban.scval-shapes.p30-symbol-not-utf8",
   "classic.memo-bytes.p30-memo-truncated-sequence-28",
   "classic.memo-bytes.synth-memo-text-nonzero-padding",
   "soroban.scval-shapes.p30-errors-auth-crypto-events-meta",
@@ -864,7 +886,7 @@ severity = "robustness"
 status = "draft"
 draft = "candidate/findings/issues/kmp-cap21.preconditions.synth-extra-signers-3.md"
 related = ["https://github.com/stellar/rs-stellar-xdr/security/advisories/GHSA-3xhm-p452-9wjh"]
-cause = "The generated decoders read arrays with XdrReader.readArrayLength, bounded only by the bytes left (PreconditionsV2Xdr reads extraSigners<2> with it, commonMain/com/soneso/stellar/sdk/xdr/PreconditionsV2Xdr.kt L86), and XdrReader skips padding without reading it (jvmMain/com/soneso/stellar/sdk/xdr/XdrReader.jvm.kt L64-L67), so values over their bound and padding that is not zero decode where stellar-core refuses them."
+cause = "The generated decoders read arrays with XdrReader.readArrayLength, bounded only by the bytes left (PreconditionsV2Xdr reads extraSigners<2> with it, commonMain/kotlin/com/soneso/stellar/sdk/xdr/PreconditionsV2Xdr.kt L86), and XdrReader skips padding without reading it (jvmMain/kotlin/com/soneso/stellar/sdk/xdr/XdrReader.jvm.kt L64-L67), so values over their bound and padding that is not zero decode where stellar-core refuses them."
 
 [[finding.conformance]]
 sdk = "kmp"
@@ -891,12 +913,12 @@ entries = [
 
 [[finding]]
 id = "KMP-JSON-DEPTH"
-title = "XDR-JSON is refused past 128 nested containers, below stellar-core's limits"
+title = "XDR-JSON the sdk writes for values nested past 128 containers is refused when the sdk reads it back"
 component = "kmp-stellar-sdk"
 severity = "robustness"
 status = "draft"
 draft = "candidate/findings/issues/kmp-soroban.auth-trees.p30-declared-depth-245.md"
-cause = "XdrJson caps nesting at RECURSION_CAP, 128 (commonMain/com/soneso/stellar/sdk/xdr/XdrJson.kt L50), in both directions, so the XDR-JSON of authorization trees, ScVal maps and vectors and contract events that stellar-core accepted is refused (\"input nests deeper than the limit of 128\")."
+cause = "XdrJson caps nesting at RECURSION_CAP, 128 (commonMain/kotlin/com/soneso/stellar/sdk/xdr/XdrJson.kt L50 at 1.18.0, checked at L448 and L901). On the witnesses, writing XDR-JSON (decode_json) passes and only reading it back (encode_json) refuses (\"input nests deeper than the limit of 128\"), so the sdk writes XDR-JSON of authorization trees and ScVal vectors stellar-core accepted that its own reader refuses. PR #137 keeps the cap at 128 for JSON on purpose and docs/sep/sep-51.md L491 documents the limit."
 
 [[finding.conformance]]
 sdk = "kmp"
@@ -919,12 +941,12 @@ entries = [
 
 [[finding]]
 id = "KMP-SIGNEDPAYLOAD-JSON"
-title = "question: XDR-JSON rendering refuses a signed-payload signer with an empty payload"
+title = "XDR-JSON rendering refuses a signed-payload signer with an empty payload"
 component = "kmp-stellar-sdk"
 severity = "divergence"
-status = "draft"
-draft = "candidate/findings/issues/kmp-cap40.signed-payload-signer.p28-extra-signer-empty-payload.md"
-cause = "XdrJson renders a signed-payload signer as its P strkey and fails for an empty payload (commonMain/com/soneso/stellar/sdk/xdr/XdrJson.kt L536, \"has an empty signed payload, which has no strkey form\"), so a transaction the network applied with such a signer has no XDR-JSON. SEP-51 gives the value no canonical form; the same choice as the Dart and PHP sdks from the same team."
+status = "wont-fix"
+reason = "documented choice before the cut-off (PR #57, 2026-08-06; docs/sep/sep-51.md L454 and L504), and no ledger holds the shape: core refuses every witness at submit"
+cause = "XdrJson renders a signed-payload signer as its P strkey and fails for an empty payload (commonMain/kotlin/com/soneso/stellar/sdk/xdr/XdrJson.kt L536 at 1.18.0, \"has an empty signed payload, which has no strkey form\"). Every witness is synthetic or an envelope core refused at submit; no ledger holds the shape."
 
 [[finding.conformance]]
 sdk = "kmp"
@@ -944,12 +966,12 @@ command = "shapekit conformance run --sdk stellar-cli --all-versions --out targe
 
 [[finding]]
 id = "CLI-ALLOC"
-title = "stellar xdr decode allocates what a length prefix asks before reading it, so 12 bytes make it abort"
+title = "stellar xdr decode reserves 4 GiB for a 12-byte input whose length prefix asks for it, and aborts under an address-space limit"
 component = "stellar-cli"
 severity = "robustness"
 status = "draft"
 draft = "candidate/findings/issues/stellar-cli-soroban.scval-shapes.synth-bytes-length-overrun.md"
-cause = "stellar xdr decode is stellar-xdr's cli (stellar-xdr 30.0.0 src/cli/decode.rs L78-L100), which reads every input under Limits::none(): no length limit, so a variable-length opaque whose prefix is 0xffffffff is allocated in full before its bytes are read. Under a 4 GiB address space the process aborts (memory allocation of 4294967295 bytes failed, SIGABRT); without a limit it allocates 4 GiB for a 12-byte input before refusing it."
+cause = "stellar xdr decode is stellar-xdr's cli (stellar-xdr 30.0.0 src/cli/decode.rs L78-L100), which reads every input under Limits::none(), and BytesM::read_xdr allocates the length the prefix declares before reading the bytes (src/generated.rs L2003-L2026, vec![0u8; len] at L2016; VecM<u8> L1536 and StringM L2490 the same). For the 12-byte ScVal 00 00 00 0d ff ff ff ff 01 02 03 04 the process reserves 4,294,967,295 bytes of address space and returns a clean error (\"failed to fill whole buffer\"); resident memory stays near 22 MiB. Only with RLIMIT_AS below about 5 GB, or under strict overcommit (not tested), does the allocation fail, and the process then aborts with SIGABRT (\"memory allocation of 4294967295 bytes failed\"). rs-stellar-xdr#623 reports the crate-level cause."
 
 [[finding.conformance]]
 sdk = "stellar-cli"
@@ -962,8 +984,9 @@ id = "CLI-TXHASH-V1"
 title = "stellar tx hash refuses v0 and fee bump envelopes the network applied"
 component = "stellar-cli"
 severity = "divergence"
-status = "draft"
-draft = "candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md"
+status = "duplicate-of"
+reason = "#2769 (2026-10-01) covers fee bump envelopes; comment on #2769 with the v0 part: PR #2791 kept v0 refused, and utils::transaction_env_hash returns Unsupported for TxV0 (utils.rs L45), so every pre-protocol-13 mainnet envelope is refused"
+link = "https://github.com/stellar/stellar-cli/issues/2769"
 cause = "tx hash runs unwrap_envelope_v1 on the envelope (soroban-cli 30.0.1 src/commands/tx/hash.rs L31, src/commands/tx/xdr.rs L79-L84), which returns OnlyTransactionV1Supported (xdr.rs L18-L19) for a TransactionV0 or fee bump envelope, so the hash of those transactions, which stellar-core computes, cannot be had from the command."
 
 [[finding.conformance]]
@@ -1078,15 +1101,17 @@ entries = [
 
 [[finding]]
 id = "CLI-DEPTH"
-title = "stellar tx hash decodes with a depth limit of 500, below what stellar-core accepts"
+title = "question: stellar tx hash decodes with a depth limit of 500, below the 1000 stellar-core accepts from protocol 28"
 component = "stellar-cli"
 severity = "divergence"
 status = "draft"
 draft = "candidate/findings/issues/stellar-cli-soroban.auth-trees.p30-declared-depth-245.md"
-cause = "tx_envelope_from_input reads the envelope with Limits::depth(XDR_DEPTH_LIMIT) (soroban-cli 30.0.1 src/commands/tx/xdr.rs L41), and XDR_DEPTH_LIMIT is 500 (src/utils.rs L21), so the authorization trees and ScVal maps of transactions stellar-core applied are refused (failed to decode XDR: depth limit exceeded)."
+cause = "tx_envelope_from_input reads the envelope with Limits::depth(XDR_DEPTH_LIMIT) (soroban-cli 30.0.1 src/commands/tx/xdr.rs L41), and XDR_DEPTH_LIMIT is 500 (src/utils.rs L21; utils.rs L60 re-encodes the signature payload under the same limit), so the hash of a transaction whose authorization tree or ScVal stellar-core accepted can be refused (\"failed to decode XDR: depth limit exceeded\"). PR #2675 set 500 on purpose against stack overflow; from protocol 28 core's limit is 1000 (TransactionUtils.cpp validateXDRForProtocol). The witnesses are local chains."
 
 [[finding.conformance]]
 sdk = "stellar-cli"
+# the json checks of these entries are CLI-JSON-DEPTH
+checks = ["*/tx_hash *"]
 entries = [
   "soroban.auth-trees.p30-declared-depth-245",
   "soroban.auth-trees.p30-declared-depth-246",
@@ -1100,14 +1125,20 @@ id = "CLI-JSON-DEPTH"
 title = "stellar xdr encode stops reading XDR-JSON at serde_json's nesting default of 128"
 component = "stellar-cli"
 severity = "divergence"
-status = "draft"
-draft = "candidate/findings/issues/stellar-cli-soroban.auth-trees.synth-auth-depth-493-deepest-accepted.md"
-related = ["https://github.com/stellar/rs-stellar-xdr"]
+status = "duplicate-of"
+reason = "same root cause as rs-stellar-xdr#628, which is ours: stellar xdr encode is that crate's cli and picks the fix up when stellar-cli bumps stellar-xdr; comment on #628 with the stellar xdr encode command line"
+link = "https://github.com/stellar/rs-stellar-xdr/issues/628"
+related = []
 cause = "stellar xdr encode reads its input with Type::from_json_collecting_ignored_fields (stellar-xdr 30.0.0 src/cli/encode.rs L96), which builds serde_json::Deserializer::from_reader without disable_recursion_limit (src/generated/type_enum.rs L16183), so serde_json's default limit of 128 refuses the XDR-JSON of authorization trees, ScVal maps and vectors that the network accepted and that stellar xdr decode itself writes (recursion limit exceeded)."
 
 [[finding.conformance]]
 sdk = "stellar-cli"
 entries = [
+  "soroban.auth-trees.p30-declared-depth-245",
+  "soroban.auth-trees.p30-declared-depth-246",
+  "soroban.auth-trees.p30-declared-depth-492",
+  "soroban.scval-shapes.p30-map-depth-max-envelope",
+  "soroban.scval-shapes.p30-map-depth-over",
   "soroban.auth-trees.synth-auth-depth-493-deepest-accepted",
   "soroban.scval-shapes.p30-map-depth-max-meta",
   "soroban.scval-shapes.p30-map-mixed-keys-sorted-meta",
@@ -1124,9 +1155,9 @@ id = "CLI-SIGNEDPAYLOAD-JSON"
 title = "stellar xdr encode refuses the XDR-JSON of an empty signed payload signer that stellar xdr decode writes"
 component = "stellar-cli"
 severity = "divergence"
-status = "draft"
-draft = "candidate/findings/issues/stellar-cli-cap40.signed-payload-signer.p28-extra-signer-empty-payload.md"
-cause = "the XDR-JSON of a signed payload signer is its P strkey, read back with stellar-strkey 1.0.0 SignedPayload::new, which requires an inner payload of 1 to 64 bytes (src/ed25519.rs L458-L461); CAP-40 allows 0, so a transaction the network applied with an empty payload decodes to JSON that encode refuses (xdr value invalid). The Dart, PHP and KMP SDKs have the same gap."
+status = "wont-fix"
+reason = "documented exception: stellar-xdr src/_xdrjson.rs L1-L13 lists the empty payload as exception 1 of the XDR-JSON round trip (PR #547, 2026-09-24), and no ledger holds the shape: core refuses every witness at submit (tx_malformed, SET_OPTIONS_BAD_SIGNER)"
+cause = "The XDR-JSON of a signed payload signer is its P strkey, read back with stellar-strkey 1.0.0 SignedPayload::new, which requires an inner payload of 1 to 64 bytes (src/ed25519.rs L458-L461); stellar xdr decode writes an empty payload as <INVALID:G...:EMPTY_PAYLOAD>, which encode refuses. Every witness is synthetic or an envelope core refused at submit."
 
 [[finding.conformance]]
 sdk = "stellar-cli"
@@ -1143,8 +1174,8 @@ id = "CLI-STRKEY-TRIM"
 title = "stellar strkey decode trims whitespace around its input before decoding it"
 component = "stellar-cli"
 severity = "robustness"
-status = "draft"
-draft = "candidate/findings/issues/stellar-cli-cap23.claimable-balances.synth-strkey-b-invalid.md"
+status = "wont-fix"
+reason = "intended: stellar-strkey 1.0.0 src/cli/decode.rs L40-L43 says the trim accepts common trailing whitespace, stellar-cli copies it on purpose (strkey.rs L55, PR #2757, with a test keeping both paths in sync), and the library parser refuses the padded text"
 cause = "stellar strkey decode is stellar-strkey's cli (stellar-strkey 1.0.0 src/cli/decode.rs L57), which decodes buf.trim(), so a strkey with surrounding spaces, newlines or carriage returns decodes where SEP-23 and the decoders refuse it. A command line trimming stdin is a convenience; the finding is that the command does not tell a text with them from the strkey."
 
 [[finding.conformance]]
@@ -1172,7 +1203,7 @@ component = "stellar_flutter_sdk"
 severity = "divergence"
 status = "draft"
 draft = "candidate/findings/issues/dart-cap03.offer-liabilities.mainnet-37466023.md"
-cause = "AbstractTransaction.fromEnvelopeXdr(..).hash(network) rebuilds every operation before hashing. ManageSellOfferOperation builder() turns the XDR price into Price(n, d).toDecimalString() and toOperationBody reads it back with Price.fromString (lib/src/manage_sell_offer_operation.dart L109 and L135-L143 at 3.12.0), which writes the reduced or approximated fraction, so an offer or liquidity pool deposit bound such as 6836306/1144362402, 7/7 or 2147483647/2147483647 is hashed as another fraction (lib/src/transaction.dart L109)."
+cause = "AbstractTransaction.fromEnvelopeXdr(..).hash(network) rebuilds every operation before hashing. ManageSellOfferOperation builder() turns the XDR price into Price(n, d).toDecimalString() and toOperationBody reads it back with Price.fromString (lib/src/manage_sell_offer_operation.dart L109 and L135-L143 at 3.12.0), which since PR #196 recovers the fraction exactly but in lowest terms (lib/src/price.dart L185-L195), so it writes the reduced fraction and an offer or liquidity pool deposit bound such as 6836306/1144362402, 7/7 or 2147483647/2147483647 is hashed as another fraction (lib/src/transaction.dart L108-L110). ManageBuyOfferOperation (L110, L144), CreatePassiveSellOfferOperation (L94, L124) and LiquidityPoolDepositOperation (L135-L136, L165-L168) take the same round trip."
 
 [[finding.conformance]]
 sdk = "dart"
@@ -1192,7 +1223,7 @@ component = "stellar_flutter_sdk"
 severity = "divergence"
 status = "draft"
 draft = "candidate/findings/issues/dart-explore.witnesses.f62d-r0000-l96.md"
-cause = "TimeBounds.fromXdr reads the max time with BigInt.toInt (lib/src/transaction.dart L1087-L1092 at 3.12.0), which clamps 18446744073709551615 to 9223372036854775807, and toXdr writes the clamped value back (L1095-L1100), so a transaction core applied with max_time 2^64-1 hashes to another value."
+cause = "TimeBounds.fromXdr reads the max time with BigInt.toInt (lib/src/transaction.dart L1088-L1093 at 3.12.0, toInt at L1090-L1091), which clamps 18446744073709551615 to 9223372036854775807, and toXdr writes the clamped value back (L1096-L1101), so a transaction core applied with max_time 2^64-1 hashes to another value."
 
 [[finding.conformance]]
 sdk = "dart"
@@ -1207,12 +1238,11 @@ component = "stellar-dotnet-sdk"
 severity = "divergence"
 status = "draft"
 draft = "candidate/findings/issues/dotnet-cap03.offer-liabilities.mainnet-37466023.md"
-cause = "ManageSellOfferOperation.FromXdr turns the price into decimal.Divide(N, D) written as a string, and ToOperationBody reads it back with Price.FromString (StellarDotnetSdk/Operations/ManageSellOfferOperation.cs L83 and L95-L106, Price.cs L55-L96, a continued fraction bounded by int.MaxValue), which writes another fraction for prices not in lowest terms and turns 1/2147483647 into 0/1, so Transaction.FromEnvelopeXdr(..).Hash(network) is not the network hash."
+cause = "ManageSellOfferOperation.FromXdr turns the price into decimal.Divide(N, D) written as a string, and ToOperationBody reads it back with Price.FromString (StellarDotnetSdk/Operations/ManageSellOfferOperation.cs L83 and L95-L106, Price.cs L55-L96, a continued fraction bounded by int.MaxValue), which writes another fraction for prices not in lowest terms and turns 1/2147483647 into 0/1, so Transaction.FromEnvelopeXdr(..).Hash(network) is not the network hash. ManageBuyOfferOperation.cs (L85, L104) and CreatePassiveSellOfferOperation.cs (L74, L90) take the same round trip."
 
 [[finding.conformance]]
 sdk = "dotnet"
 entries = [
-  "cap03.offer-liabilities.mainnet-37466023",
   "cap15.fee-bump.mainnet-57369500",
   "explore.witnesses.g2-r0007-l69",
   "explore.witnesses.g2-r0010-l92",
@@ -1221,6 +1251,12 @@ entries = [
   "explore.witnesses.g2-r0038-l67",
 ]
 
+# transaction 108 of this ledger is an allow trust, NET-DEPRECATED-OPS
+[[finding.conformance]]
+sdk = "dotnet"
+entries = ["cap03.offer-liabilities.mainnet-37466023"]
+checks = ["mainnet/tx_hash 12", "mainnet/tx_hash 236", "mainnet/tx_hash 236 inner"]
+
 [[finding]]
 id = "KMP-TXOBJECT"
 title = "the transaction object refuses values the network applied: max time 2^64-1 and offer id -1"
@@ -1228,7 +1264,7 @@ component = "kmp-stellar-sdk"
 severity = "divergence"
 status = "draft"
 draft = "candidate/findings/issues/kmp-explore.witnesses.f62d-r0000-l96.md"
-cause = "AbstractTransaction.fromEnvelopeXdr refuses transactions core applied: TimeBounds reads the uint64 max time into a signed Long and requires it to be >= 0 (commonMain/com/soneso/stellar/sdk/TimeBounds.kt L26 at 1.18.0, \"maxTime must be >= 0\" for 2^64-1), and the manage offer operations refuse offer id -1 (\"Offer ID must be non-negative\"), so the transaction hash cannot be had; the class of the candidate lane's other transaction-object refusals."
+cause = "AbstractTransaction.fromEnvelopeXdr refuses transactions core applied: TimeBounds reads the uint64 max time into a signed Long and requires it to be >= 0 (commonMain/kotlin/com/soneso/stellar/sdk/TimeBounds.kt L25-L26 at 1.18.0, \"maxTime must be >= 0\" for 2^64-1), and the manage offer operations refuse offer id -1 (\"Offer ID must be non-negative\", Operation.kt L441 and L496), so the transaction hash cannot be had; the class of the candidate lane's other transaction-object refusals."
 
 [[finding.conformance]]
 sdk = "kmp"
@@ -1242,9 +1278,9 @@ id = "PHP-OFFERID"
 title = "rebuilding a transaction with a manage sell offer of offer id -1 throws"
 component = "soneso/stellar-php-sdk"
 severity = "divergence"
-status = "draft"
-draft = "candidate/findings/issues/php-explore.witnesses.f62d-r0004-l69.md"
-cause = "The offer id check of ManageSellOfferOperationBuilder::setOfferId (Soneso/StellarSDK/ManageSellOfferOperationBuilder.php L69-L72 at 1.18.0) throws \"Invalid offer id: -1\" for a value the int64 field holds and core applied in a failed transaction, so the transaction cannot be rebuilt and hashed."
+status = "wont-fix"
+reason = "only history before protocol 15 can hold a negative offer id: from protocol 15 core refuses it as malformed (ManageOfferOpFrameBase doCheckValid), so the sdk's check matches today's network; the only witness is a locally made protocol 9 chain and no public-network instance was found"
+cause = "ManageSellOfferOperation::__construct checks the offer id and throws \"Invalid offer id: -1\" (Soneso/StellarSDK/ManageSellOfferOperation.php L46-L47 at 1.18.0), reached from fromXdrOperation (L111) when the sdk rebuilds a transaction; ManageBuyOfferOperation.php L42-L43 has the same check. Core applied offer id -1 in a failed transaction on a protocol 9 chain."
 
 [[finding.conformance]]
 sdk = "php"
@@ -1254,15 +1290,21 @@ entries = [
 
 [[finding]]
 id = "PHP-SETOPTIONS"
-title = "a set options operation with clear_flags 0 or an empty home domain hashes to another value once the sdk rebuilds it"
+title = "a set options operation with clear_flags 0, set_flags 0 or a home domain of \"\" or \"0\" hashes to another value once the sdk rebuilds it"
 component = "soneso/stellar-php-sdk"
 severity = "divergence"
 status = "draft"
 draft = "candidate/findings/issues/php-explore.witnesses.g2-r0015-l71.md"
-cause = "AbstractTransaction::fromEnvelopeXdr(..)->hash(network) rebuilds the operation, and SetOptionsOperation::toOperationBody writes inflationDestination, clearFlags, setFlags and homeDomain only when they are truthy (Soneso/StellarSDK/SetOptionsOperation.php L200-L224 at 1.18.0, `if ($this->clearFlags)`), so a present 0 or empty home domain becomes absent and the sdk hashes other bytes than the network."
+cause = "AbstractTransaction::fromEnvelopeXdr(..)->hash(network) rebuilds the operation, and SetOptionsOperation::toOperationBody writes inflationDestination, clearFlags, setFlags and homeDomain only when they are truthy (Soneso/StellarSDK/SetOptionsOperation.php L200-L224 at 1.18.0, `if ($this->clearFlags)`), so a present 0, an empty home domain and the one-character home domain \"0\", which php also treats as false, become absent and the sdk hashes other bytes than the network. #15 fixed the same pattern for the weights and thresholds in 2022."
 
 [[finding.conformance]]
 sdk = "php"
 entries = [
   "explore.witnesses.g2-r0015-l71",
 ]
+
+[[finding.conformance]]
+sdk = "php"
+entries = ["explore.witnesses.f62d-r0007-l77"]
+checks = ["*/tx_hash *"]
+

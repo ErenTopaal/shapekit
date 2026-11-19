@@ -1,19 +1,35 @@
 <!-- repo: Soneso/stellar_flutter_sdk -->
-# stellar_flutter_sdk 3.12.0: the sdk refused a value the network accepts: FormatException: FormatException: Invalid UTF-8 byte (at offset 0) (classic.memo-bytes.p30-memo-ff)
+# stellar_flutter_sdk 3.12.0: XDR strings are decoded as UTF-8, so valid ledgers with other bytes in a memo, symbol or string do not decode
 
 ## What happens
 
-On the input below, `stellar_flutter_sdk` 3.12.0 answers differently from the Stellar network in 8 checks.
+XDR strings are decoded as UTF-8, so valid ledgers with other bytes in a memo, symbol or string do not decode.
+
+## Cause
+
+XdrDataInputStream.readString returns utf8.decode of the bytes (lib/src/xdr/xdr_data_io.dart L365-L366 at 3.12.0), which throws a FormatException on bytes that are not UTF-8. The XDR string type is bytes, and stellar-core applied transactions whose text memo, InvokeContractArgs function name, ScString or ScSymbol holds bytes that are not UTF-8; those fail to decode, which also stops decode_json, encode_json and the transaction hash. PR #177 kept memo, symbol and string as String on purpose, and documentation/sep/sep-51.md says such a value cannot reach the JSON path from a real envelope, which these core-applied transactions contradict. js-stellar-sdk#1823 is the same class: there the bytes are mangled instead of refused.
+
+## Affected versions
+
+`stellar_flutter_sdk` 3.12.0, every version shapekit ran.
+
+## Entries
+
+shapekit's finding DART-UTF8 takes 13 corpus entries on this SDK: `cap71.credentials.golden-e25799a2e2e9eea2-17`, `classic.memo-bytes.p30-memo-above-max-code-point`, `classic.memo-bytes.p30-memo-ff`, `classic.memo-bytes.p30-memo-lone-continuation`, `classic.memo-bytes.p30-memo-overlong-nul`, `classic.memo-bytes.p30-memo-surrogate`, `classic.memo-bytes.p30-memo-truncated-sequence-28`, `soroban.auth-trees.golden-57a486abce28859d-17`, `soroban.auth-trees.golden-e0d0e3f38b2d55e0-17`, `soroban.scval-shapes.p30-errors-auth-crypto-events-meta`, `soroban.scval-shapes.p30-string-not-utf8-envelope`, `soroban.scval-shapes.p30-string-not-utf8-meta`, and 1 more. The checks below are those of `classic.memo-bytes.p30-memo-ff`.
+
+## Checks on `classic.memo-bytes.p30-memo-ff`
+
+On this entry, `stellar_flutter_sdk` 3.12.0 answers differently from the Stellar network in 8 checks on 1 version.
 
 A check is one call into the SDK with a known right answer. Each check below shows the call as a JSON request of the [shapekit testee protocol](https://github.com/ErenTopaal/shapekit/blob/v0.2.0/docs/testee-protocol.md) (`op` names the SDK operation), the expected answer and the answer the SDK gave.
 
-## Input
+A check named `mainnet/...` or `testnet/...` names the network passphrase it hashes or signs with. The data is a ledger stellar-core closed on a private network shapekit ran locally (chain `classic.memo-bytes.p30`), not a transaction or ledger of that network.
 
 Corpus entry `classic.memo-bytes.p30-memo-ff` (family `classic.memo-bytes`) of the [shapekit](https://github.com/ErenTopaal/shapekit) corpus 0.2.0.
 
 ### `testnet/decode_encode` on 3.12.0
 
-the sdk refused a value the network accepts: FormatException: FormatException: Invalid UTF-8 byte (at offset 0)
+The SDK refused a value the network accepts: FormatException: FormatException: Invalid UTF-8 byte (at offset 0)
 
 ```json
 {
@@ -31,7 +47,7 @@ Actual: `{"rejected":"FormatException: FormatException: Invalid UTF-8 byte (at o
 
 ### `testnet/decode_json` on 3.12.0
 
-the sdk refused a value the network accepts: FormatException: FormatException: Invalid UTF-8 byte (at offset 0)
+The SDK refused a value the network accepts: FormatException: FormatException: Invalid UTF-8 byte (at offset 0)
 
 ```json
 {
@@ -49,7 +65,7 @@ Actual: `{"rejected":"FormatException: FormatException: Invalid UTF-8 byte (at o
 
 ### `testnet/encode_json` on 3.12.0
 
-the sdk refused a value the network accepts: FormatException: FormatException: XDR-JSON XdrMemo key "text" resolves to bytes that are not valid UTF-8: "\\xff"
+The SDK refused a value the network accepts: FormatException: FormatException: XDR-JSON XdrMemo key "text" resolves to bytes that are not valid UTF-8: "\\xff"
 
 ```json
 {"json":{"v2":{"evicted_keys":[],"ext":"v0","ledger_header":{"ext":"v0","hash":"ab99085bb40e0abda7f4462a052ab24bed7a635cce76d3f41a85f8f1c541e674","header":{"base_fee":100,"base_reserve":100000000,"bucket_list_hash":"824d006f5d44e40d5eb7eedc23b9fe47ac71fbbd790694b851f9ae361188c69a","ext":"v0","fee_pool":"300","id_pool":"0","inflation_seq":0,"ledger_seq":65,"ledger_version":30,"max_tx_set_size":100,"previous_ledger_hash":"9339d8109a010a767f7fd4ca341a8b4545a06d8e678f22237dfe4910015c6a53","scp_value":{"close_time":"1772841600","ext":{"signed_ms":{"close_time_ms":"1772841600000","lc_value_signature":{"node_id":"GB4WH2VTILAXT2GUDH4KI2ZA2GGYSLJJUYBH6LP42LXI4WNBRIHHDDVT","signature":"d082362eefd57de16d1600ada34eccd06ca1e0a3f67a314a3f9c884b63cfa0a8fd70da77cb77e2810b525a94355b9a01fe04b5d6bed1cea150b30fd2d0045c0b"}}},"tx_set_hash":"d03fa5d0202bf92c73977bd549fc9ee1cc651625325e20b0c7f1d5b093e42341","upgrades":[]},"skip_list":["6f42d9b2811a424402d95b3de26867b543c533c4b7bf0755b8d5743fbed56368","0000000000000000000000000000000000000000000000000000000000000000","0000000000000000000000000000000000000000000000000000000000000000","0000000000000000000000000000000000000000000000000000000000000000"],"total_coins":"1000000000000000000","tx_set_result_hash":"a19be609cf947ef334318ee32a20358f07ba7fcbb631e36575fb7deea04ccf49"}},"scp_info":[],"total_byte_size_of_live_soroban_state":"0","tx_processing":[{"ext":"v0","fee_processing":[{"state":{"data":{"account":{"account_id":"GDWC5XJM77XUV2YB2J4JB6I3MY3M7IJFWFMWDLD6P25JRDF2VMQBMQAG","balance":"100000000000","ext":"v0","flags":0,"home_domain":"","inflation_dest":null,"num_sub_entries":0,"seq_num":"274877906944","signers":[],"thresholds":"01000000"}},"ext":"v0","last_modified_ledger_seq":64}},{"updated":{"data":{"account":{"account_id":"GDWC5XJM77XUV2YB2J4JB6I3MY3M7IJFWFMWDLD6P25JRDF2VMQBMQAG","balance":"99999999900","ext":"v0","flags":0,"home_domain":"","inflation_dest":null,"num_sub_entries":0,"seq_num":"274877906944","signers":[],"thresholds":"0... (6484 chars; the corpus file holds the whole value)
@@ -61,7 +77,7 @@ Actual: `{"rejected":"FormatException: FormatException: XDR-JSON XdrMemo key \"t
 
 ### `testnet/tx_hash 0` on 3.12.0
 
-the sdk refused a value the network accepts: FormatException: FormatException: Invalid UTF-8 byte (at offset 0)
+The SDK refused a value the network accepts: FormatException: FormatException: Invalid UTF-8 byte (at offset 0)
 
 ```json
 {
@@ -79,7 +95,7 @@ Actual: `{"rejected":"FormatException: FormatException: Invalid UTF-8 byte (at o
 
 ### `mainnet/decode_encode` on 3.12.0
 
-the sdk refused a value the network accepts: FormatException: FormatException: Invalid UTF-8 byte (at offset 0)
+The SDK refused a value the network accepts: FormatException: FormatException: Invalid UTF-8 byte (at offset 0)
 
 ```json
 {
@@ -99,11 +115,14 @@ Actual: `{"rejected":"FormatException: FormatException: Invalid UTF-8 byte (at o
 
 ## Reproduce
 
-From a checkout of https://github.com/ErenTopaal/shapekit at tag `v0.2.0`:
+From a checkout of https://github.com/ErenTopaal/shapekit at tag `v0.2.0`, with the Rust toolchain of its `rust-toolchain.toml` and the toolchain `stellar_flutter_sdk` builds with (`shapekit doctor sdk --sdk dart` lists what is missing):
 
 ```sh
-shapekit conformance run --sdk dart --version 3.12.0 --entry classic.memo-bytes.p30-memo-ff
+cargo build --release --locked -p shapekit-cli
+target/release/shapekit conformance run --sdk dart --version 3.12.0 --entry classic.memo-bytes.p30-memo-ff
 ```
+
+The run builds the SDK's testee at that version as `conformance/versions.toml` describes, then runs the entry's checks.
 
 ## Where the expected answers come from
 
@@ -118,12 +137,16 @@ The expected answers are recorded in:
 - [`corpus/entries/classic.memo-bytes/classic.memo-bytes.p30-memo-ff/testnet.xdr`](https://github.com/ErenTopaal/shapekit/blob/v0.2.0/corpus/entries/classic.memo-bytes/classic.memo-bytes.p30-memo-ff/testnet.xdr), envelope 0 of the transaction set: transactionHash of the envelope's result pair
 - [`corpus/entries/classic.memo-bytes/classic.memo-bytes.p30-memo-ff/testnet.xdr`](https://github.com/ErenTopaal/shapekit/blob/v0.2.0/corpus/entries/classic.memo-bytes/classic.memo-bytes.p30-memo-ff/testnet.xdr): decode = must-accept, roundtrip = true
 
-How the corpus entry was built and checked: a payment whose 1 byte text memo is ff, not valid UTF-8, accepted by core
+How the corpus entry was built and checked: A payment whose 1 byte text memo is ff, not valid UTF-8, accepted by core
 
 Related: https://github.com/stellar/js-stellar-sdk/issues/1823
 
 ## Sibling issues
 
-None: of the SDKs tested, only this one diverges on this entry.
+- `stellar-dotnet-sdk` (Beans-BV/dotnet-stellar-sdk) diverges on 11 of these entries: shapekit's finding NET-UTF8, memo text and SDK ScString and ScSymbol values are decoded to .NET strings, so bytes that are not UTF-8 change, and so does the transaction hash (covered upstream by https://github.com/Beans-BV/dotnet-stellar-sdk/issues/247).
+- `network.lightsail:stellar-sdk` (lightsail-network/java-stellar-sdk) diverges on 12 of these entries: no finding takes it yet.
+- `com.soneso.stellar:stellar-sdk-jvm` (Soneso/kmp-stellar-sdk) diverges on 13 of these entries: shapekit's finding KMP-UTF8, XDR strings are decoded to Kotlin strings, so memos, symbols and strings that are not UTF-8 change (not filed yet).
+- `soneso/stellar-php-sdk` (Soneso/stellar-php-sdk) diverges on `soroban.scval-shapes.p30-string-not-utf8-meta`, one of these entries: shapekit's finding PHP-UINT64, 64-bit values above 2^63-1 and negative int64 values lose their XDR-JSON form (not filed yet).
+- `stellar-sdk` (StellarCN/py-stellar-base) diverges on 12 of these entries: no finding takes it yet.
 
 shapekit vector: `classic.memo-bytes.p30-memo-ff`

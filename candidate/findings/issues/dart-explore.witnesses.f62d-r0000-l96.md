@@ -1,19 +1,35 @@
 <!-- repo: Soneso/stellar_flutter_sdk -->
-# stellar_flutter_sdk 3.12.0: the sdk's hash differs from the one the network wrote (explore.witnesses.f62d-r0000-l96)
+# stellar_flutter_sdk 3.12.0: a transaction with max time 2^64-1 hashes to another value once the sdk rebuilds it
 
 ## What happens
 
-On the input below, `stellar_flutter_sdk` 3.12.0 answers differently from the Stellar network in 2 checks.
+A transaction with max time 2^64-1 hashes to another value once the sdk rebuilds it.
+
+## Cause
+
+TimeBounds.fromXdr reads the max time with BigInt.toInt (lib/src/transaction.dart L1088-L1093 at 3.12.0, toInt at L1090-L1091), which clamps 18446744073709551615 to 9223372036854775807, and toXdr writes the clamped value back (L1096-L1101), so a transaction core applied with max_time 2^64-1 hashes to another value.
+
+## Affected versions
+
+`stellar_flutter_sdk` 3.12.0, every version shapekit ran.
+
+## Entries
+
+shapekit's finding DART-MAXTIME takes 1 corpus entry on this SDK: `explore.witnesses.f62d-r0000-l96`. The checks below are those of `explore.witnesses.f62d-r0000-l96`.
+
+## Checks on `explore.witnesses.f62d-r0000-l96`
+
+On this entry, `stellar_flutter_sdk` 3.12.0 answers differently from the Stellar network in 2 checks on 1 version.
 
 A check is one call into the SDK with a known right answer. Each check below shows the call as a JSON request of the [shapekit testee protocol](https://github.com/ErenTopaal/shapekit/blob/v0.2.0/docs/testee-protocol.md) (`op` names the SDK operation), the expected answer and the answer the SDK gave.
 
-## Input
+A check named `mainnet/...` or `testnet/...` names the network passphrase it hashes or signs with. The data is a ledger stellar-core closed on a private network shapekit ran locally (chain `explore.f62d.r0000`), not a transaction or ledger of that network.
 
 Corpus entry `explore.witnesses.f62d-r0000-l96` (family `explore.witnesses`) of the [shapekit](https://github.com/ErenTopaal/shapekit) corpus 0.2.0.
 
 ### `testnet/tx_hash 0` on 3.12.0
 
-the sdk's hash differs from the one the network wrote
+The SDK's hash differs from the one the network wrote
 
 ```json
 {
@@ -31,7 +47,7 @@ Actual: `{"hash":"68ce6cb803b3c7f36c8ea520555a3111b6ed1876c3b68f0c2622cbbecde21d
 
 ### `mainnet/tx_hash 0` on 3.12.0
 
-the sdk's hash differs from the one the network wrote
+The SDK's hash differs from the one the network wrote
 
 ```json
 {
@@ -49,11 +65,14 @@ Actual: `{"hash":"f4a04fb30ef0f242d651027e67b1e3f61961d35976011a929bd4c290b79b56
 
 ## Reproduce
 
-From a checkout of https://github.com/ErenTopaal/shapekit at tag `v0.2.0`:
+From a checkout of https://github.com/ErenTopaal/shapekit at tag `v0.2.0`, with the Rust toolchain of its `rust-toolchain.toml` and the toolchain `stellar_flutter_sdk` builds with (`shapekit doctor sdk --sdk dart` lists what is missing):
 
 ```sh
-shapekit conformance run --sdk dart --version 3.12.0 --entry explore.witnesses.f62d-r0000-l96
+cargo build --release --locked -p shapekit-cli
+target/release/shapekit conformance run --sdk dart --version 3.12.0 --entry explore.witnesses.f62d-r0000-l96
 ```
+
+The run builds the SDK's testee at that version as `conformance/versions.toml` describes, then runs the entry's checks.
 
 ## Where the expected answers come from
 
@@ -66,6 +85,9 @@ How the corpus entry was built and checked: A classic recipe of the explorer's r
 
 ## Sibling issues
 
-None: of the SDKs tested, only this one diverges on this entry.
+- `network.lightsail:stellar-sdk` (lightsail-network/java-stellar-sdk) diverges on the same entry: no finding takes it yet.
+- `com.soneso.stellar:stellar-sdk-jvm` (Soneso/kmp-stellar-sdk) diverges on the same entry: shapekit's finding KMP-TXOBJECT, the transaction object refuses values the network applied: max time 2^64-1 and offer id -1 (not filed yet).
+- `soneso/stellar-php-sdk` (Soneso/stellar-php-sdk) diverges on the same entry: shapekit's finding PHP-UINT64, 64-bit values above 2^63-1 and negative int64 values lose their XDR-JSON form (not filed yet).
+- `stellar-sdk` (StellarCN/py-stellar-base) diverges on the same entry: no finding takes it yet.
 
 shapekit vector: `explore.witnesses.f62d-r0000-l96`

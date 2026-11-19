@@ -1,19 +1,35 @@
 <!-- repo: Soneso/kmp-stellar-sdk -->
-# com.soneso.stellar:stellar-sdk-jvm 1.18.0: the sdk refused a value the network accepts: IllegalArgumentException: LedgerCloseMetaXdr: input nests deeper than the limit of 128 (soroban.auth-trees.p30-declared-depth-245)
+# com.soneso.stellar:stellar-sdk-jvm 1.18.0: XDR-JSON the sdk writes for values nested past 128 containers is refused when the sdk reads it back
 
 ## What happens
 
-On the input below, `com.soneso.stellar:stellar-sdk-jvm` 1.18.0 answers differently from the Stellar network in 2 checks.
+XDR-JSON the sdk writes for values nested past 128 containers is refused when the sdk reads it back.
+
+## Cause
+
+XdrJson caps nesting at RECURSION_CAP, 128 (commonMain/kotlin/com/soneso/stellar/sdk/xdr/XdrJson.kt L50 at 1.18.0, checked at L448 and L901). On the witnesses, writing XDR-JSON (decode_json) passes and only reading it back (encode_json) refuses ("input nests deeper than the limit of 128"), so the sdk writes XDR-JSON of authorization trees and ScVal vectors stellar-core accepted that its own reader refuses. PR #137 keeps the cap at 128 for JSON on purpose and docs/sep/sep-51.md L491 documents the limit.
+
+## Affected versions
+
+`com.soneso.stellar:stellar-sdk-jvm` 1.18.0, every version shapekit ran.
+
+## Entries
+
+shapekit's finding KMP-JSON-DEPTH takes 14 corpus entries on this SDK: `soroban.auth-trees.p30-declared-depth-245`, `soroban.auth-trees.p30-declared-depth-246`, `soroban.auth-trees.p30-declared-depth-492`, `soroban.auth-trees.synth-auth-depth-493-deepest-accepted`, `soroban.scval-shapes.p30-map-depth-max-envelope`, `soroban.scval-shapes.p30-map-depth-max-meta`, `soroban.scval-shapes.p30-map-depth-over`, `soroban.scval-shapes.p30-map-mixed-keys-sorted-meta`, `soroban.scval-shapes.p30-vec-depth-max-envelope`, `soroban.scval-shapes.p30-vec-depth-max-meta`, `soroban.scval-shapes.p30-vec-depth-over`, `soroban.scval-shapes.synth-event-vec-depth-101`, and 2 more. The checks below are those of `soroban.auth-trees.p30-declared-depth-245`.
+
+## Checks on `soroban.auth-trees.p30-declared-depth-245`
+
+On this entry, `com.soneso.stellar:stellar-sdk-jvm` 1.18.0 answers differently from the Stellar network in 2 checks on 1 version.
 
 A check is one call into the SDK with a known right answer. Each check below shows the call as a JSON request of the [shapekit testee protocol](https://github.com/ErenTopaal/shapekit/blob/v0.2.0/docs/testee-protocol.md) (`op` names the SDK operation), the expected answer and the answer the SDK gave.
 
-## Input
+A check named `mainnet/...` or `testnet/...` names the network passphrase it hashes or signs with. The data is a ledger stellar-core closed on a private network shapekit ran locally (chain `soroban.auth-trees.p30`), not a transaction or ledger of that network.
 
 Corpus entry `soroban.auth-trees.p30-declared-depth-245` (family `soroban.auth-trees`) of the [shapekit](https://github.com/ErenTopaal/shapekit) corpus 0.2.0.
 
 ### `testnet/encode_json` on 1.18.0
 
-the sdk refused a value the network accepts: IllegalArgumentException: LedgerCloseMetaXdr: input nests deeper than the limit of 128
+The SDK refused a value the network accepts: IllegalArgumentException: LedgerCloseMetaXdr: input nests deeper than the limit of 128
 
 ```json
 {
@@ -30,7 +46,7 @@ Actual: `{"rejected":"IllegalArgumentException: LedgerCloseMetaXdr: input nests 
 
 ### `mainnet/encode_json` on 1.18.0
 
-the sdk refused a value the network accepts: IllegalArgumentException: LedgerCloseMetaXdr: input nests deeper than the limit of 128
+The SDK refused a value the network accepts: IllegalArgumentException: LedgerCloseMetaXdr: input nests deeper than the limit of 128
 
 ```json
 {
@@ -47,11 +63,14 @@ Actual: `{"rejected":"IllegalArgumentException: LedgerCloseMetaXdr: input nests 
 
 ## Reproduce
 
-From a checkout of https://github.com/ErenTopaal/shapekit at tag `v0.2.0`:
+From a checkout of https://github.com/ErenTopaal/shapekit at tag `v0.2.0`, with the Rust toolchain of its `rust-toolchain.toml` and the toolchain `com.soneso.stellar:stellar-sdk-jvm` builds with (`shapekit doctor sdk --sdk kmp` lists what is missing):
 
 ```sh
-shapekit conformance run --sdk kmp --version 1.18.0 --entry soroban.auth-trees.p30-declared-depth-245
+cargo build --release --locked -p shapekit-cli
+target/release/shapekit conformance run --sdk kmp --version 1.18.0 --entry soroban.auth-trees.p30-declared-depth-245
 ```
+
+The run builds the SDK's testee at that version as `conformance/versions.toml` describes, then runs the entry's checks.
 
 ## Where the expected answers come from
 
@@ -60,12 +79,18 @@ The expected answers are recorded in:
 - [`corpus/entries/soroban.auth-trees/soroban.auth-trees.p30-declared-depth-245/mainnet.expected.json`](https://github.com/ErenTopaal/shapekit/blob/v0.2.0/corpus/entries/soroban.auth-trees/soroban.auth-trees.p30-declared-depth-245/mainnet.expected.json): SEP-51 rendering by stellar-xdr 30.0.0; must encode back to corpus/entries/soroban.auth-trees/soroban.auth-trees.p30-declared-depth-245/mainnet.xdr
 - [`corpus/entries/soroban.auth-trees/soroban.auth-trees.p30-declared-depth-245/testnet.expected.json`](https://github.com/ErenTopaal/shapekit/blob/v0.2.0/corpus/entries/soroban.auth-trees/soroban.auth-trees.p30-declared-depth-245/testnet.expected.json): SEP-51 rendering by stellar-xdr 30.0.0; must encode back to corpus/entries/soroban.auth-trees/soroban.auth-trees.p30-declared-depth-245/testnet.xdr
 
-How the corpus entry was built and checked: an address entry whose matched root declares a chain 245 invocations deep below it that no call reaches, the deepest the host still decodes; the transaction succeeds and the declared nodes are never checked
+How the corpus entry was built and checked: An address entry whose matched root declares a chain 245 invocations deep below it that no call reaches, the deepest the host still decodes; the transaction succeeds and the declared nodes are never checked
 
 Related: https://github.com/stellar/wallet-backend/issues/746
 
 ## Sibling issues
 
-None: of the SDKs tested, only this one diverges on this entry.
+- `stellar-dotnet-sdk` (Beans-BV/dotnet-stellar-sdk) diverges on 14 of these entries: shapekit's finding NET-DEPTH, XDR decoders stop at 200 nested types, below stellar-core's limit (not filed yet).
+- `network.lightsail:stellar-sdk` (lightsail-network/java-stellar-sdk) diverges on 12 of these entries: no finding takes it yet.
+- `@stellar/stellar-sdk` (stellar/js-stellar-sdk) diverges on 14 of these entries: shapekit's finding JS-16X, 16.x lacks six fixes that 17.x has: map key order and collisions, textual ids, W addresses, decode depth, StrKey checks (filed as https://github.com/stellar/js-stellar-sdk/issues/1907).
+- `soneso/stellar-php-sdk` (Soneso/stellar-php-sdk) diverges on 5 of these entries: shapekit's finding PHP-JSON-DEPTH, XDR-JSON stops at 512 nested arrays, below stellar-core's limits (not filed yet).
+- `stellar-sdk` (StellarCN/py-stellar-base) diverges on 10 of these entries: no finding takes it yet.
+- `stellar-xdr` (stellar/rs-stellar-xdr) diverges on 14 of these entries: shapekit's finding RS-2, the XDR-JSON reader stops at serde_json's recursion limit of 128, so values the crate writes as JSON cannot be read back (filed as https://github.com/stellar/rs-stellar-xdr/issues/628).
+- `stellar-cli` (stellar/stellar-cli) diverges on 14 of these entries: shapekit's finding CLI-DEPTH, question: stellar tx hash decodes with a depth limit of 500, below the 1000 stellar-core accepts from protocol 28 (not filed yet); CLI-JSON-DEPTH, stellar xdr encode stops reading XDR-JSON at serde_json's nesting default of 128 (covered upstream by https://github.com/stellar/rs-stellar-xdr/issues/628).
 
 shapekit vector: `soroban.auth-trees.p30-declared-depth-245`
