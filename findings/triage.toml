@@ -568,9 +568,9 @@ title = "bool decodes any u32 and reads everything but 1 as false, where core re
 short = "A bool word other than 0 or 1 decodes as false."
 component = "rs-stellar-xdr"
 severity = "divergence"
-status = "duplicate-of"
-link = "https://github.com/stellar/rs-stellar-xdr/issues/622"
-related = ["https://github.com/stellar/rs-stellar-xdr/issues/629"]
+status = "filed"
+link = "https://github.com/stellar/rs-stellar-xdr/issues/629"
+reason = "closed upstream: rs-stellar-xdr#629 was closed on 2026-11-16 as a duplicate, and the crate's main branch refuses a bool word other than 0 or 1 since 2026-11-19; no release holds the fix yet (30.0.0 is the latest)"
 draft = "findings/issues/fuzz-rust-bool-non-canonical.md"
 siblings = ["CORE-1"]
 cause = "impl ReadXdr for bool returns i == 1 for any u32, so the word 2 decodes as false and re-encodes as 0, where go-stellar-sdk and js-stellar-sdk refuse it and core's xdrpp reads it as true. The differential fuzzer found the same class through every fuzzed type that carries a bool (findings/fuzz/known-classes.txt)."

@@ -89,8 +89,8 @@
       "wrong-data": 3
     },
     "by_status": {
-      "duplicate-of": 8,
-      "filed": 15,
+      "duplicate-of": 7,
+      "filed": 16,
       "wont-fix": 2
     }
   },
@@ -6060,16 +6060,15 @@
       ],
       "minimal_entry": "soroban.scval-shapes.synth-bool-value-2",
       "reproduce": "shapekit conformance run --sdk rust --version 30.0.0 --entry soroban.scval-shapes.synth-bool-value-2",
-      "status": "duplicate-of",
-      "link": "https://github.com/stellar/rs-stellar-xdr/issues/622",
+      "status": "filed",
+      "link": "https://github.com/stellar/rs-stellar-xdr/issues/629",
+      "reason": "closed upstream: rs-stellar-xdr#629 was closed on 2026-11-16 as a duplicate, and the crate's main branch refuses a bool word other than 0 or 1 since 2026-11-19; no release holds the fix yet (30.0.0 is the latest)",
       "draft": "findings/issues/fuzz-rust-bool-non-canonical.md",
       "cause": "impl ReadXdr for bool returns i == 1 for any u32, so the word 2 decodes as false and re-encodes as 0, where go-stellar-sdk and js-stellar-sdk refuse it and core's xdrpp reads it as true. The differential fuzzer found the same class through every fuzzed type that carries a bool (findings/fuzz/known-classes.txt).",
       "siblings": [
         "CORE-1"
       ],
-      "related": [
-        "https://github.com/stellar/rs-stellar-xdr/issues/629"
-      ],
+      "related": [],
       "entries": [
         "soroban.scval-shapes.synth-bool-value-2"
       ],
