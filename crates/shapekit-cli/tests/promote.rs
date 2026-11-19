@@ -274,9 +274,10 @@ fn other_sdk_failures_held_or_recorded_are_promoted() {
         "{}",
         known("python")
     );
+    // NET-STRKEY is filed, so its line names the upstream issue, not the draft
     assert!(
         known("dotnet").contains(&format!(
-            "{ENTRY} 17.0.0 diverges-from-network candidate/findings/issues/dotnet-{ENTRY}.md"
+            "{ENTRY} 17.0.0 diverges-from-network https://github.com/Beans-BV/dotnet-stellar-sdk/issues/278"
         )),
         "{}",
         known("dotnet")
