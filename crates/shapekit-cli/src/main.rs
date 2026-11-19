@@ -372,6 +372,10 @@ enum GenCommand {
         /// Only the recipes of this family; repeatable. All when absent.
         #[arg(long)]
         family: Vec<String>,
+        /// Only this chain, by its id (the directory under corpus/chains); repeatable. With
+        /// --family, the chains of those families and these chains.
+        #[arg(long)]
+        chain: Vec<String>,
         /// Chains recorded at once, each on its own core container.
         #[arg(long, default_value_t = 2, value_parser = clap::value_parser!(u16).range(1..=32))]
         jobs: u16,
@@ -729,6 +733,7 @@ fn main() -> ExitCode {
             command:
                 GenCommand::VerifyRepro {
                     family,
+                    chain,
                     jobs,
                     corpus,
                     registry,
@@ -736,6 +741,7 @@ fn main() -> ExitCode {
                 },
         } => gen_cmd::verify_repro(
             &family,
+            &chain,
             jobs,
             &gen_cmd::GenPaths {
                 corpus: &corpus,

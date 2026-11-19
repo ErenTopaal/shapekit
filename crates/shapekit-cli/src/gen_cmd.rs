@@ -173,12 +173,44 @@ pub fn chains(families: &[String], network: &str, jobs: u16, paths: &GenPaths<'_
     Ok(true)
 }
 
+/// The recipes of `families` and of the chains `chains` names, all when both are empty. pr.yml
+/// splits a large family over several shards by chain.
+fn selected_chains(
+    corpus: &Path,
+    families: &[String],
+    chains: &[String],
+) -> Result<Vec<Box<dyn recipe::Recipe>>> {
+    if chains.is_empty() {
+        return selected(corpus, families);
+    }
+    let all = registered(corpus)?;
+    for f in families {
+        if !all.iter().any(|r| r.family() == f) {
+            bail!("no recipe records family {f}");
+        }
+    }
+    for c in chains {
+        if !all.iter().any(|r| r.chain_id() == *c) {
+            bail!("no recipe records chain {c}");
+        }
+    }
+    Ok(all
+        .into_iter()
+        .filter(|r| families.iter().any(|f| f == r.family()) || chains.contains(&r.chain_id()))
+        .collect())
+}
+
 /// `shapekit gen verify-repro`: regenerates the selected chains under both
 /// passphrases in a temporary directory and compares them with the corpus.
-pub fn verify_repro(families: &[String], jobs: u16, paths: &GenPaths<'_>) -> Result<bool> {
+pub fn verify_repro(
+    families: &[String],
+    chains: &[String],
+    jobs: u16,
+    paths: &GenPaths<'_>,
+) -> Result<bool> {
     let registry = Registry::load(paths.registry)
         .with_context(|| format!("loading the registry in {}", paths.registry.display()))?;
-    let recipes = selected(paths.corpus, families)?;
+    let recipes = selected_chains(paths.corpus, families, chains)?;
     let refs: Vec<&dyn recipe::Recipe> = recipes.iter().map(|r| r.as_ref()).collect();
     let opts = options(paths, &registry, Network::BOTH.to_vec(), jobs)?;
     let repro = recipe::verify_repro(&refs, &opts)?;

@@ -140,3 +140,19 @@ fn cap01_ir_recipe_reproduces_the_committed_chain() {
         "{text}"
     );
 }
+
+#[test]
+fn verify_repro_refuses_a_chain_no_recipe_records() {
+    // pr.yml passes each shard's chains by id, so a stale id must fail before any recording
+    let out = Command::new(env!("CARGO_BIN_EXE_shapekit"))
+        .current_dir(repo(""))
+        .args(["gen", "verify-repro", "--chain", "cap40.no-such-chain.p30"])
+        .output()
+        .expect("running shapekit");
+    let text = String::from_utf8_lossy(&out.stderr);
+    assert_eq!(out.status.code(), Some(2), "{text}");
+    assert!(
+        text.contains("no recipe records chain cap40.no-such-chain.p30"),
+        "{text}"
+    );
+}
