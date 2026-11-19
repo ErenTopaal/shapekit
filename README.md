@@ -118,7 +118,8 @@ with CPython 3.15.2 for python, JDK 27 and Maven for java and kmp, Flutter for d
 Composer for php, and the .NET SDK for dotnet. `shapekit doctor sdk --sdk <sdk>` lists what is
 missing. For python, java and kmp, `export PATH="$(scripts/python-toolchain.sh):$PATH"` and
 `export PATH="$(scripts/java-toolchain.sh):$PATH"` fetch the pinned versions into
-`target/toolchains/` and check each download against its sha256; for dart,
+`target/toolchains/` and check each download against its sha256 (the java and kmp builds set
+`JAVA_HOME` to the pinned JDK themselves); for dart,
 `export PATH="$(scripts/flutter-toolchain.sh):$PATH"` does the same for Flutter.
 
 ```sh

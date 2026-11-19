@@ -837,8 +837,10 @@ packages the SDK uses for both in `components`.
 `target/testees/java/<version>/`, and the jars Maven resolved are checked against
 `testees/java/versions/<version>/lib.sha256` by `scripts/check-jars.sh`, so the SDK's own
 dependencies (Gson above all) are pinned too. A changed, missing or unlisted jar in `lib/` fails
-the build. The build needs `java` and `mvn` on `PATH`; `scripts/java-toolchain.sh` fetches the
-pinned JDK and Maven.
+the build. The build runs Maven through `scripts/with-java.sh`, which fetches the pinned JDK and
+Maven with `scripts/java-toolchain.sh` and sets `JAVA_HOME` to that JDK, so a `JAVA_HOME` naming
+another JDK does not change the build. The testee itself runs on the `java` on `PATH`; put the
+output of `scripts/java-toolchain.sh` in front of `PATH` for it.
 
 - `decode_limits` is `"honoured"`: the testee decodes with the generated `decode(stream,
   maxDepth)` on an `XdrDataInputStream` whose `setMaxInputLen` is the request's `len_limit`, and
