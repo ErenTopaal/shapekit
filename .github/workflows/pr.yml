@@ -361,7 +361,10 @@ jobs:
           echo "matrix=$matrix" >>"$GITHUB_OUTPUT"
 
   repro:
-    # regenerates the selected chains under both passphrases and compares them byte for byte
+    # regenerates the selected chains under both passphrases and compares them byte for byte.
+    # repro-select packs each shard to at most 360 s of recording by the measured seconds of
+    # scripts/repro-seconds.tsv; with checkout, download and the image pull a shard takes about
+    # 7 minutes, so 15 leaves twice that (docs/infrastructure.md, measured durations)
     needs: [build, repro-select]
     runs-on: ubuntu-24.04
     timeout-minutes: 15
@@ -379,12 +382,12 @@ jobs:
         run: docker pull --quiet "$(scripts/pin.sh image stellar-core)"
       - name: gen verify-repro
         env:
-          FAMILIES: ${{ matrix.families }}
+          CHAINS: ${{ matrix.chains }}
         run: |
           set -euo pipefail
           chmod +x "$RUNNER_TEMP/bin/shapekit"
           args=()
-          for f in $FAMILIES; do args+=(--family "$f"); done
+          for c in $CHAINS; do args+=(--chain "$c"); done
           "$RUNNER_TEMP/bin/shapekit" gen verify-repro --jobs 2 "${args[@]}"
 
   conformance:

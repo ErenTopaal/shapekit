@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # picks the families whose chains `shapekit gen verify-repro` regenerates on a pull request,
-# and splits them into shards for a github actions matrix.
+# and splits their chains into shards for a github actions matrix.
 #
-# usage: scripts/select-repro.sh <rotation> <changed-files> [rotating] [shards]
+# usage: scripts/select-repro.sh <rotation> <changed-files> [rotating] [budget]
 #        scripts/select-repro.sh --families
 #        scripts/select-repro.sh --check-chains
 #
@@ -10,7 +10,8 @@
 #                    or "all" for every family
 #   <changed-files>  file with one changed path per line (may be empty)
 #   [rotating]       families in the rotating window (default 4)
-#   [shards]         matrix width when every family is selected (default 4)
+#   [budget]         seconds of recording per shard (default 360), from the per-chain
+#                    seconds in scripts/repro-seconds.tsv
 #
 # the selection is the rotating window plus every family the change touches. a change to
 # code or data every recipe shares (the core driver, the generator framework, the oracle,
@@ -19,12 +20,17 @@
 # too; the corpus job in pr.yml also reruns it over the whole corpus, golden and synthetic
 # entries included, which the repro shards do not cover. the output is the matrix as json on one
 # line, {"include":[{"shard":"1","families":"a b"},...]}, plus a summary on stderr. the same
-# inputs always give the same output.
+# inputs always give the same output. a shard regenerates whole chains, so one family can
+# spread over several shards; each entry is {"shard":"1","seconds":300,"chains":"a b"}.
+#
+# scripts/repro-seconds.tsv holds the seconds `gen verify-repro --jobs 2` takes per chain on a
+# github ubuntu-24.04 runner (both passphrases at once, so the longer of the two).
 #
 # --families prints the family list the selection works from, one per line: the families of
 # the recipe files and those of the chains corpus/recipes/chains.toml lists. --check-chains
 # fails unless every directory under corpus/chains belongs to one of those families and every
-# family owns at least one chain. pr.yml runs both, and also passes the list to the cli, which
+# family owns at least one chain, and unless scripts/repro-seconds.tsv lists every chain
+# directory exactly once and nothing else. pr.yml runs both, and also passes the list to the cli, which
 # rejects a family no recipe records; together they keep this list equal to the recipes the
 # binary registers. nightly.yml does not use this script: it regenerates every chain.
 set -euo pipefail
@@ -36,21 +42,21 @@ case "${1:-}" in
 esac
 
 if [ "$mode" = select ]; then
-  rotation=${1:?usage: scripts/select-repro.sh <rotation> <changed-files> [rotating] [shards]}
-  changed_file=${2:?usage: scripts/select-repro.sh <rotation> <changed-files> [rotating] [shards]}
+  rotation=${1:?usage: scripts/select-repro.sh <rotation> <changed-files> [rotating] [budget]}
+  changed_file=${2:?usage: scripts/select-repro.sh <rotation> <changed-files> [rotating] [budget]}
   rotating=${3:-4}
-  shards=${4:-4}
+  budget=${4:-360}
 
   all=false
   if [ "$rotation" = all ]; then
     all=true
     rotation=0
   fi
-  case "$rotation$rotating$shards" in
-    *[!0-9]*) echo "rotation, rotating and shards must be whole numbers" >&2; exit 2 ;;
+  case "$rotation$rotating$budget" in
+    *[!0-9]*) echo "rotation, rotating and budget must be whole numbers" >&2; exit 2 ;;
   esac
-  if [ "$rotating" -lt 1 ] || [ "$shards" -lt 1 ]; then
-    echo "rotating and shards must be at least 1" >&2
+  if [ "$rotating" -lt 1 ] || [ "$budget" -lt 1 ]; then
+    echo "rotating and budget must be at least 1" >&2
     exit 2
   fi
 fi
@@ -117,6 +123,23 @@ family_of_chain() {
   echo "$best"
 }
 
+# seconds per chain, from scripts/repro-seconds.tsv: chain<tab>seconds, '#' starts a comment
+table=scripts/repro-seconds.tsv
+declare -A seconds=()
+table_bad=0
+while IFS=$'\t' read -r chain secs extra || [ -n "$chain" ]; do
+  case "$chain" in "" | "#"*) continue ;; esac
+  if [ -n "${extra:-}" ] || [ -z "${secs:-}" ] || [ -n "${secs//[0-9]/}" ] || [ "$secs" -lt 1 ]; then
+    echo "$table: '$chain' needs one whole number of seconds above 0" >&2
+    table_bad=1
+  elif [ -n "${seconds[$chain]:-}" ]; then
+    echo "$table: $chain is listed twice" >&2
+    table_bad=1
+  else
+    seconds[$chain]=$secs
+  fi
+done <"$table"
+
 if [ "$mode" = families ]; then
   printf '%s\n' "${families[@]}"
   exit 0
@@ -134,14 +157,25 @@ if [ "$mode" = check ]; then
     else
       owned[$f]=1
     fi
+    if [ -z "${seconds[$chain]:-}" ]; then
+      echo "chain $chain has no seconds in $table; add the seconds gen verify-repro prints for it" >&2
+      bad=1
+    fi
   done
+  for chain in "${!seconds[@]}"; do
+    if [ ! -d "corpus/chains/$chain" ]; then
+      echo "$table lists $chain, which is not under corpus/chains" >&2
+      bad=1
+    fi
+  done
+  [ "$table_bad" = 0 ] || bad=1
   for f in "${families[@]}"; do
     if [ -z "${owned[$f]:-}" ]; then
       echo "family $f has no chain under corpus/chains" >&2
       bad=1
     fi
   done
-  [ "$bad" = 0 ] && echo "${#families[@]} families, every chain under corpus/chains belongs to one" >&2
+  [ "$bad" = 0 ] && echo "${#families[@]} families, every chain under corpus/chains belongs to one and has its seconds" >&2
   exit "$bad"
 fi
 
@@ -217,21 +251,43 @@ else
   echo "rotation $rotation: ${#selected[@]} of $n families" >&2
 fi
 
-# round robin over the sorted selection, at most one shard per family. the rotating
-# window alone already spreads over several runners, which keeps the wall clock down
-width=$shards
-if [ "${#selected[@]}" -lt "$width" ]; then width=${#selected[@]}; fi
-declare -a shard_families=()
-for i in "${!selected[@]}"; do
-  s=$(( i % width ))
-  shard_families[s]="${shard_families[s]:+${shard_families[s]} }${selected[$i]}"
+# the chains of the selected families, each with its seconds from the durations table,
+# packed into shards: longest first, each onto the shard with the least seconds so far
+# (ties to the lower shard). a shard gets at most $budget seconds unless one chain alone is
+# longer, so the shard count follows the work, not the family count
+[ "$table_bad" = 0 ] || exit 1
+declare -A chosen=()
+for g in "${selected[@]}"; do chosen[$g]=1; done
+lines=()
+for dir in corpus/chains/*/; do
+  chain=$(basename "$dir")
+  f=$(family_of_chain "$chain")
+  [ -n "${chosen[$f]:-}" ] || continue
+  if [ -z "${seconds[$chain]:-}" ]; then
+    echo "chain $chain has no seconds in $table" >&2
+    exit 1
+  fi
+  lines+=("$chain"$'\t'"${seconds[$chain]}")
 done
-
-json='{"include":['
-for s in $(seq 0 $((width - 1))); do
-  [ "$s" -gt 0 ] && json+=','
-  json+="{\"shard\":\"$((s + 1))\",\"families\":\"${shard_families[s]}\"}"
-  echo "shard $((s + 1)): ${shard_families[s]}" >&2
-done
-json+=']}'
-echo "$json"
+python3 -I - "$budget" "${lines[@]}" <<'PY'
+import json, math, sys
+budget = int(sys.argv[1])
+chains = [(c, int(s)) for c, s in (a.split("\t") for a in sys.argv[2:])]
+total = sum(s for _, s in chains)
+width = max(1, min(len(chains), math.ceil(total / budget)))
+while True:
+    shards = [[0, []] for _ in range(width)]
+    for c, s in sorted(chains, key=lambda x: (-x[1], x[0])):
+        least = min(range(width), key=lambda i: (shards[i][0], i))
+        shards[least][0] += s
+        shards[least][1].append(c)
+    if width >= len(chains) or max(x[0] for x in shards) <= max(budget, max(s for _, s in chains)):
+        break
+    width += 1
+include = []
+for i, (s, cs) in enumerate(shards, 1):
+    include.append({"shard": str(i), "seconds": s, "chains": " ".join(sorted(cs))})
+    print(f"shard {i}: {len(cs)} chains, {s} s", file=sys.stderr)
+print(f"{len(chains)} chains, {total} s in {width} shards of at most {budget} s", file=sys.stderr)
+print(json.dumps({"include": include}, separators=(",", ":")))
+PY
