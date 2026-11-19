@@ -1,5 +1,6 @@
-# known failures of stellar-cli, one line per entry and version; the drafts are in the candidate
-# lane (candidate/findings/triage.toml), not filed
+# known failures of stellar-cli, one line per entry and version; the findings are in the
+# candidate lane (candidate/findings/triage.toml). an issue is the upstream issue once filed,
+# the drafted body under candidate/findings/issues/ until then
 cap03.offer-liabilities.mainnet-25000000 * diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, mainnet/tx_hash 1, mainnet/tx_hash 2, mainnet/tx_hash 3, mainnet/tx_hash 4, mainnet/tx_hash 5, mainnet/tx_hash 6, mainnet/tx_hash 7, mainnet/tx_hash 8, mainnet/tx_hash 9, mainnet/tx_hash 10, mainnet/tx_hash 11, mainnet/tx_hash 12, mainnet/tx_hash 13
 cap15.fee-bump.golden-f5fa0a4b15bfd9d9-12 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 any/tx_hash 0, any/tx_hash 1
 cap15.fee-bump.p30-fee-source-is-inner-source-envelope 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash, testnet/tx_hash
@@ -44,22 +45,22 @@ classic.failed-tx.p12-path-payment-strict-send-no-issuer * diverges-from-network
 classic.failed-tx.p12-payment-no-issuer * diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
 classic.failed-tx.p9-change-trust-native-internal-error-envelope * diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash, testnet/tx_hash
 soroban.auth-trees.p30-declared-depth-245 30.0.1 diverges-from-network https://github.com/stellar/rs-stellar-xdr/issues/628 mainnet/decode_encode, mainnet/encode_json, testnet/decode_encode, testnet/encode_json
-soroban.auth-trees.p30-declared-depth-245 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-soroban.auth-trees.p30-declared-depth-245.md mainnet/tx_hash 0, testnet/tx_hash 0
+soroban.auth-trees.p30-declared-depth-245 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2895 mainnet/tx_hash 0, testnet/tx_hash 0
 soroban.auth-trees.p30-declared-depth-246 30.0.1 diverges-from-network https://github.com/stellar/rs-stellar-xdr/issues/628 mainnet/decode_encode, mainnet/encode_json, testnet/decode_encode, testnet/encode_json
-soroban.auth-trees.p30-declared-depth-246 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-soroban.auth-trees.p30-declared-depth-245.md mainnet/tx_hash 0, testnet/tx_hash 0
+soroban.auth-trees.p30-declared-depth-246 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2895 mainnet/tx_hash 0, testnet/tx_hash 0
 soroban.auth-trees.p30-declared-depth-492 30.0.1 diverges-from-network https://github.com/stellar/rs-stellar-xdr/issues/628 mainnet/decode_encode, mainnet/encode_json, testnet/decode_encode, testnet/encode_json
-soroban.auth-trees.p30-declared-depth-492 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-soroban.auth-trees.p30-declared-depth-245.md mainnet/tx_hash 0, testnet/tx_hash 0
+soroban.auth-trees.p30-declared-depth-492 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2895 mainnet/tx_hash 0, testnet/tx_hash 0
 soroban.auth-trees.synth-auth-depth-493-deepest-accepted * diverges-from-network https://github.com/stellar/rs-stellar-xdr/issues/628 any/decode_encode, any/encode_json
 soroban.invoke-basics.synth-strkey-c-invalid * diverges-from-network candidate/findings/triage.toml case 7/strkey_decode
 soroban.scval-shapes.p30-map-depth-max-envelope 30.0.1 diverges-from-network https://github.com/stellar/rs-stellar-xdr/issues/628 mainnet/decode_encode, mainnet/encode_json, mainnet/tx_hash, testnet/decode_encode, testnet/encode_json, testnet/tx_hash
 soroban.scval-shapes.p30-map-depth-max-meta 30.0.1 diverges-from-network https://github.com/stellar/rs-stellar-xdr/issues/628 mainnet/decode_encode, mainnet/encode_json, testnet/decode_encode, testnet/encode_json
 soroban.scval-shapes.p30-map-depth-over 30.0.1 diverges-from-network https://github.com/stellar/rs-stellar-xdr/issues/628 mainnet/decode_encode, mainnet/encode_json, testnet/decode_encode, testnet/encode_json
-soroban.scval-shapes.p30-map-depth-over 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-soroban.auth-trees.p30-declared-depth-245.md mainnet/tx_hash 0, testnet/tx_hash 0
+soroban.scval-shapes.p30-map-depth-over 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2895 mainnet/tx_hash 0, testnet/tx_hash 0
 soroban.scval-shapes.p30-map-mixed-keys-sorted-meta 30.0.1 diverges-from-network https://github.com/stellar/rs-stellar-xdr/issues/628 mainnet/decode_encode, mainnet/encode_json, testnet/decode_encode, testnet/encode_json
 soroban.scval-shapes.p30-vec-depth-max-envelope 30.0.1 diverges-from-network https://github.com/stellar/rs-stellar-xdr/issues/628 mainnet/decode_encode, mainnet/encode_json, testnet/decode_encode, testnet/encode_json
 soroban.scval-shapes.p30-vec-depth-max-meta 30.0.1 diverges-from-network https://github.com/stellar/rs-stellar-xdr/issues/628 mainnet/decode_encode, mainnet/encode_json, testnet/decode_encode, testnet/encode_json
 soroban.scval-shapes.p30-vec-depth-over 30.0.1 diverges-from-network https://github.com/stellar/rs-stellar-xdr/issues/628 mainnet/decode_encode, mainnet/encode_json, testnet/decode_encode, testnet/encode_json
-soroban.scval-shapes.synth-bytes-length-overrun * diverges-from-network:panic candidate/findings/issues/stellar-cli-soroban.scval-shapes.synth-bytes-length-overrun.md any/decode_encode
+soroban.scval-shapes.synth-bytes-length-overrun * diverges-from-network:panic https://github.com/stellar/stellar-cli/issues/2894 any/decode_encode
 soroban.scval-shapes.synth-event-vec-depth-101 * diverges-from-network https://github.com/stellar/rs-stellar-xdr/issues/628 any/decode_encode, any/encode_json
 soroban.scval-shapes.synth-scmap-depth-197-deepest-accepted * diverges-from-network https://github.com/stellar/rs-stellar-xdr/issues/628 any/decode_encode, any/encode_json
 soroban.scval-shapes.synth-scvec-depth-246-deepest-accepted * diverges-from-network https://github.com/stellar/rs-stellar-xdr/issues/628 any/decode_encode, any/encode_json

@@ -1,55 +1,56 @@
-# known failures of stellar_flutter_sdk (dart testee), one line per entry; the drafts are in the
-# candidate lane (candidate/findings/triage.toml), not filed
-cap03.offer-liabilities.synth-negative-offer-id * diverges-from-network candidate/findings/issues/dart-cap03.offer-liabilities.synth-negative-offer-id.md any/decode_json, any/encode_json
-cap03.offer-liabilities.synth-textual-offer-id-noncanonical * diverges-from-network candidate/findings/issues/dart-cap03.offer-liabilities.synth-textual-offer-id-noncanonical.md case 0/id_parse, case 1/id_parse, case 3/id_parse, case 4/id_parse, case 7/id_parse, case 8/id_parse, case 9/id_parse, case 10/id_parse, case 12/id_parse, case 13/id_parse
-cap21.preconditions.synth-extra-signers-3 * diverges-from-network candidate/findings/issues/dart-classic.max-length.synth-tx-101-operations.md any/decode_encode
-cap23.claimable-balances.synth-claimants-11 * diverges-from-network candidate/findings/issues/dart-classic.max-length.synth-tx-101-operations.md any/decode_encode
-cap26.inflation.p11-inflation-not-time * diverges-from-network candidate/findings/issues/dart-cap26.inflation.p11-inflation-payout.md mainnet/tx_hash 0, testnet/tx_hash 0
-cap26.inflation.p11-inflation-payout * diverges-from-network candidate/findings/issues/dart-cap26.inflation.p11-inflation-payout.md mainnet/tx_hash 0, testnet/tx_hash 0
+# known failures of stellar_flutter_sdk (dart testee), one line per entry; the findings are in
+# the candidate lane (candidate/findings/triage.toml). an issue is the upstream issue once
+# filed, the drafted body under candidate/findings/issues/ until then
+cap03.offer-liabilities.synth-negative-offer-id * diverges-from-network https://github.com/Soneso/stellar_flutter_sdk/issues/295 any/decode_json, any/encode_json
+cap03.offer-liabilities.synth-textual-offer-id-noncanonical * diverges-from-network https://github.com/Soneso/stellar_flutter_sdk/issues/294 case 0/id_parse, case 1/id_parse, case 3/id_parse, case 4/id_parse, case 7/id_parse, case 8/id_parse, case 9/id_parse, case 10/id_parse, case 12/id_parse, case 13/id_parse
+cap21.preconditions.synth-extra-signers-3 * diverges-from-network https://github.com/Soneso/stellar_flutter_sdk/issues/291 any/decode_encode
+cap23.claimable-balances.synth-claimants-11 * diverges-from-network https://github.com/Soneso/stellar_flutter_sdk/issues/291 any/decode_encode
+cap26.inflation.p11-inflation-not-time * diverges-from-network https://github.com/Soneso/stellar_flutter_sdk/issues/292 mainnet/tx_hash 0, testnet/tx_hash 0
+cap26.inflation.p11-inflation-payout * diverges-from-network https://github.com/Soneso/stellar_flutter_sdk/issues/292 mainnet/tx_hash 0, testnet/tx_hash 0
 cap40.signed-payload-signer.p28-extra-signer-empty-payload * diverges-from-network candidate/findings/triage.toml mainnet/decode_json, testnet/decode_json
 cap40.signed-payload-signer.p28-set-options-empty-payload * diverges-from-network candidate/findings/triage.toml mainnet/decode_json, testnet/decode_json
 cap40.signed-payload-signer.p30-extra-signer-empty-payload * diverges-from-network candidate/findings/triage.toml mainnet/decode_json, testnet/decode_json
 cap40.signed-payload-signer.p30-set-options-empty-payload * diverges-from-network candidate/findings/triage.toml mainnet/decode_json, testnet/decode_json
 cap40.signed-payload-signer.synth-empty-payload-signer * diverges-from-network candidate/findings/triage.toml any/decode_json
-cap40.signed-payload-signer.synth-payload-65-bytes * diverges-from-network candidate/findings/issues/dart-classic.max-length.synth-tx-101-operations.md any/decode_encode
-cap71.credentials.golden-e25799a2e2e9eea2-17 * diverges-from-network candidate/findings/issues/dart-classic.memo-bytes.p30-memo-ff.md any/decode_encode, any/decode_json, any/encode_json, any/tx_hash 0
-classic.max-length.synth-data-value-65-bytes * diverges-from-network candidate/findings/issues/dart-classic.max-length.synth-tx-101-operations.md any/decode_encode
-classic.max-length.synth-memo-text-29-bytes * diverges-from-network candidate/findings/issues/dart-classic.max-length.synth-tx-101-operations.md any/decode_encode
-classic.max-length.synth-path-6-assets * diverges-from-network candidate/findings/issues/dart-classic.max-length.synth-tx-101-operations.md any/decode_encode
-classic.max-length.synth-signature-65-bytes * diverges-from-network candidate/findings/issues/dart-classic.max-length.synth-tx-101-operations.md any/decode_encode
-classic.max-length.synth-tx-101-operations * diverges-from-network candidate/findings/issues/dart-classic.max-length.synth-tx-101-operations.md any/decode_encode
-classic.max-length.synth-tx-21-signatures * diverges-from-network candidate/findings/issues/dart-classic.max-length.synth-tx-101-operations.md any/decode_encode
-classic.memo-bytes.p30-memo-above-max-code-point * diverges-from-network candidate/findings/issues/dart-classic.memo-bytes.p30-memo-ff.md mainnet/decode_encode, mainnet/decode_json, mainnet/encode_json, mainnet/tx_hash 0, testnet/decode_encode, testnet/decode_json, testnet/encode_json, testnet/tx_hash 0
-classic.memo-bytes.p30-memo-ff * diverges-from-network candidate/findings/issues/dart-classic.memo-bytes.p30-memo-ff.md mainnet/decode_encode, mainnet/decode_json, mainnet/encode_json, mainnet/tx_hash 0, testnet/decode_encode, testnet/decode_json, testnet/encode_json, testnet/tx_hash 0
-classic.memo-bytes.p30-memo-lone-continuation * diverges-from-network candidate/findings/issues/dart-classic.memo-bytes.p30-memo-ff.md mainnet/decode_encode, mainnet/decode_json, mainnet/encode_json, mainnet/tx_hash 0, testnet/decode_encode, testnet/decode_json, testnet/encode_json, testnet/tx_hash 0
-classic.memo-bytes.p30-memo-overlong-nul * diverges-from-network candidate/findings/issues/dart-classic.memo-bytes.p30-memo-ff.md mainnet/decode_encode, mainnet/decode_json, mainnet/encode_json, mainnet/tx_hash 0, testnet/decode_encode, testnet/decode_json, testnet/encode_json, testnet/tx_hash 0
-classic.memo-bytes.p30-memo-surrogate * diverges-from-network candidate/findings/issues/dart-classic.memo-bytes.p30-memo-ff.md mainnet/decode_encode, mainnet/decode_json, mainnet/encode_json, mainnet/tx_hash 0, testnet/decode_encode, testnet/decode_json, testnet/encode_json, testnet/tx_hash 0
-classic.memo-bytes.p30-memo-truncated-sequence-28 * diverges-from-network candidate/findings/issues/dart-classic.memo-bytes.p30-memo-ff.md mainnet/decode_encode, mainnet/decode_json, mainnet/encode_json, mainnet/tx_hash 0, testnet/decode_encode, testnet/decode_json, testnet/encode_json, testnet/tx_hash 0
-soroban.auth-trees.golden-57a486abce28859d-17 * diverges-from-network candidate/findings/issues/dart-classic.memo-bytes.p30-memo-ff.md any/decode_encode, any/decode_json, any/encode_json, any/tx_hash 0
-soroban.auth-trees.golden-e0d0e3f38b2d55e0-17 * diverges-from-network candidate/findings/issues/dart-classic.memo-bytes.p30-memo-ff.md any/decode_encode, any/decode_json, any/encode_json, any/tx_hash 0
-soroban.auth-trees.p30-declared-depth-493 * diverges-from-network candidate/findings/issues/dart-classic.max-length.synth-tx-101-operations.md mainnet/decode_encode, testnet/decode_encode
-soroban.auth-trees.synth-auth-depth-494-over-cap * diverges-from-network candidate/findings/issues/dart-classic.max-length.synth-tx-101-operations.md any/decode_encode
-soroban.invoke-basics.synth-ghsa-3xhm-spec-outputs-2 * diverges-from-network candidate/findings/issues/dart-classic.max-length.synth-tx-101-operations.md any/decode_encode
-soroban.scval-shapes.p30-errors-auth-crypto-events-meta * diverges-from-network candidate/findings/issues/dart-classic.memo-bytes.p30-memo-ff.md mainnet/decode_encode, mainnet/decode_json, mainnet/encode_json, testnet/decode_encode, testnet/decode_json, testnet/encode_json
-soroban.scval-shapes.p30-string-not-utf8-envelope * diverges-from-network candidate/findings/issues/dart-classic.memo-bytes.p30-memo-ff.md mainnet/decode_encode, mainnet/decode_json, mainnet/encode_json, mainnet/tx_hash, testnet/decode_encode, testnet/decode_json, testnet/encode_json, testnet/tx_hash
-soroban.scval-shapes.p30-string-not-utf8-meta * diverges-from-network candidate/findings/issues/dart-classic.memo-bytes.p30-memo-ff.md mainnet/decode_encode, mainnet/decode_json, mainnet/encode_json, testnet/decode_encode, testnet/decode_json, testnet/encode_json
-soroban.scval-shapes.p30-symbol-not-utf8 * diverges-from-network candidate/findings/issues/dart-classic.memo-bytes.p30-memo-ff.md mainnet/decode_encode, mainnet/decode_json, mainnet/encode_json, mainnet/tx_hash 0, testnet/decode_encode, testnet/decode_json, testnet/encode_json, testnet/tx_hash 0
-soroban.scval-shapes.synth-scmap-depth-198-over-cap * diverges-from-network candidate/findings/issues/dart-classic.max-length.synth-tx-101-operations.md any/decode_encode
-soroban.scval-shapes.synth-scvec-depth-247-over-cap * diverges-from-network candidate/findings/issues/dart-classic.max-length.synth-tx-101-operations.md any/decode_encode
-soroban.scval-shapes.synth-symbol-33-bytes * diverges-from-network candidate/findings/issues/dart-classic.max-length.synth-tx-101-operations.md any/decode_encode
+cap40.signed-payload-signer.synth-payload-65-bytes * diverges-from-network https://github.com/Soneso/stellar_flutter_sdk/issues/291 any/decode_encode
+cap71.credentials.golden-e25799a2e2e9eea2-17 * diverges-from-network https://github.com/Soneso/stellar_flutter_sdk/issues/297 any/decode_encode, any/decode_json, any/encode_json, any/tx_hash 0
+classic.max-length.synth-data-value-65-bytes * diverges-from-network https://github.com/Soneso/stellar_flutter_sdk/issues/291 any/decode_encode
+classic.max-length.synth-memo-text-29-bytes * diverges-from-network https://github.com/Soneso/stellar_flutter_sdk/issues/291 any/decode_encode
+classic.max-length.synth-path-6-assets * diverges-from-network https://github.com/Soneso/stellar_flutter_sdk/issues/291 any/decode_encode
+classic.max-length.synth-signature-65-bytes * diverges-from-network https://github.com/Soneso/stellar_flutter_sdk/issues/291 any/decode_encode
+classic.max-length.synth-tx-101-operations * diverges-from-network https://github.com/Soneso/stellar_flutter_sdk/issues/291 any/decode_encode
+classic.max-length.synth-tx-21-signatures * diverges-from-network https://github.com/Soneso/stellar_flutter_sdk/issues/291 any/decode_encode
+classic.memo-bytes.p30-memo-above-max-code-point * diverges-from-network https://github.com/Soneso/stellar_flutter_sdk/issues/297 mainnet/decode_encode, mainnet/decode_json, mainnet/encode_json, mainnet/tx_hash 0, testnet/decode_encode, testnet/decode_json, testnet/encode_json, testnet/tx_hash 0
+classic.memo-bytes.p30-memo-ff * diverges-from-network https://github.com/Soneso/stellar_flutter_sdk/issues/297 mainnet/decode_encode, mainnet/decode_json, mainnet/encode_json, mainnet/tx_hash 0, testnet/decode_encode, testnet/decode_json, testnet/encode_json, testnet/tx_hash 0
+classic.memo-bytes.p30-memo-lone-continuation * diverges-from-network https://github.com/Soneso/stellar_flutter_sdk/issues/297 mainnet/decode_encode, mainnet/decode_json, mainnet/encode_json, mainnet/tx_hash 0, testnet/decode_encode, testnet/decode_json, testnet/encode_json, testnet/tx_hash 0
+classic.memo-bytes.p30-memo-overlong-nul * diverges-from-network https://github.com/Soneso/stellar_flutter_sdk/issues/297 mainnet/decode_encode, mainnet/decode_json, mainnet/encode_json, mainnet/tx_hash 0, testnet/decode_encode, testnet/decode_json, testnet/encode_json, testnet/tx_hash 0
+classic.memo-bytes.p30-memo-surrogate * diverges-from-network https://github.com/Soneso/stellar_flutter_sdk/issues/297 mainnet/decode_encode, mainnet/decode_json, mainnet/encode_json, mainnet/tx_hash 0, testnet/decode_encode, testnet/decode_json, testnet/encode_json, testnet/tx_hash 0
+classic.memo-bytes.p30-memo-truncated-sequence-28 * diverges-from-network https://github.com/Soneso/stellar_flutter_sdk/issues/297 mainnet/decode_encode, mainnet/decode_json, mainnet/encode_json, mainnet/tx_hash 0, testnet/decode_encode, testnet/decode_json, testnet/encode_json, testnet/tx_hash 0
+soroban.auth-trees.golden-57a486abce28859d-17 * diverges-from-network https://github.com/Soneso/stellar_flutter_sdk/issues/297 any/decode_encode, any/decode_json, any/encode_json, any/tx_hash 0
+soroban.auth-trees.golden-e0d0e3f38b2d55e0-17 * diverges-from-network https://github.com/Soneso/stellar_flutter_sdk/issues/297 any/decode_encode, any/decode_json, any/encode_json, any/tx_hash 0
+soroban.auth-trees.p30-declared-depth-493 * diverges-from-network https://github.com/Soneso/stellar_flutter_sdk/issues/291 mainnet/decode_encode, testnet/decode_encode
+soroban.auth-trees.synth-auth-depth-494-over-cap * diverges-from-network https://github.com/Soneso/stellar_flutter_sdk/issues/291 any/decode_encode
+soroban.invoke-basics.synth-ghsa-3xhm-spec-outputs-2 * diverges-from-network https://github.com/Soneso/stellar_flutter_sdk/issues/291 any/decode_encode
+soroban.scval-shapes.p30-errors-auth-crypto-events-meta * diverges-from-network https://github.com/Soneso/stellar_flutter_sdk/issues/297 mainnet/decode_encode, mainnet/decode_json, mainnet/encode_json, testnet/decode_encode, testnet/decode_json, testnet/encode_json
+soroban.scval-shapes.p30-string-not-utf8-envelope * diverges-from-network https://github.com/Soneso/stellar_flutter_sdk/issues/297 mainnet/decode_encode, mainnet/decode_json, mainnet/encode_json, mainnet/tx_hash, testnet/decode_encode, testnet/decode_json, testnet/encode_json, testnet/tx_hash
+soroban.scval-shapes.p30-string-not-utf8-meta * diverges-from-network https://github.com/Soneso/stellar_flutter_sdk/issues/297 mainnet/decode_encode, mainnet/decode_json, mainnet/encode_json, testnet/decode_encode, testnet/decode_json, testnet/encode_json
+soroban.scval-shapes.p30-symbol-not-utf8 * diverges-from-network https://github.com/Soneso/stellar_flutter_sdk/issues/297 mainnet/decode_encode, mainnet/decode_json, mainnet/encode_json, mainnet/tx_hash 0, testnet/decode_encode, testnet/decode_json, testnet/encode_json, testnet/tx_hash 0
+soroban.scval-shapes.synth-scmap-depth-198-over-cap * diverges-from-network https://github.com/Soneso/stellar_flutter_sdk/issues/291 any/decode_encode
+soroban.scval-shapes.synth-scvec-depth-247-over-cap * diverges-from-network https://github.com/Soneso/stellar_flutter_sdk/issues/291 any/decode_encode
+soroban.scval-shapes.synth-symbol-33-bytes * diverges-from-network https://github.com/Soneso/stellar_flutter_sdk/issues/291 any/decode_encode
 # a candidate: AbstractTransaction.fromEnvelopeXdr(..).hash(network) is not the hash the network wrote for transactions whose offers carry a price fraction that is not in lowest terms: the sdk rebuilds the operation and writes 3418153/572181201 where the envelope holds 6836306/1144362402, so it hashes other bytes
-cap03.offer-liabilities.mainnet-37466023 3.12.0 diverges-from-network candidate/findings/issues/dart-cap03.offer-liabilities.mainnet-37466023.md mainnet/tx_hash 12, mainnet/tx_hash 236, mainnet/tx_hash 236 inner
+cap03.offer-liabilities.mainnet-37466023 3.12.0 diverges-from-network https://github.com/Soneso/stellar_flutter_sdk/issues/296 mainnet/tx_hash 12, mainnet/tx_hash 236, mainnet/tx_hash 236 inner
 # a candidate: TimeBounds.fromXdr reads the max time with BigInt.toInt (lib/src/transaction.dart L1087-L1092 at 3.12.0), which clamps 18446744073709551615 to 9223372036854775807, and toXdr writes the clamped value back (L1095-L1100), so a transaction core applied with max_time 2^64-1 hashes to another value
-explore.witnesses.f62d-r0000-l96 3.12.0 diverges-from-network candidate/findings/issues/dart-explore.witnesses.f62d-r0000-l96.md mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.f62d-r0000-l96 3.12.0 diverges-from-network https://github.com/Soneso/stellar_flutter_sdk/issues/293 mainnet/tx_hash 0, testnet/tx_hash 0
 # a candidate: the price candidate of the dart sdk above: offers and liquidity pool deposit bounds whose price is not in lowest terms (7/7, 3/3, 2147483647/2147483647) are rebuilt reduced, so the hash is another one
-explore.witnesses.g1-r0047-l69 3.12.0 diverges-from-network candidate/findings/issues/dart-cap03.offer-liabilities.mainnet-37466023.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.g2-r0007-l69 3.12.0 diverges-from-network candidate/findings/issues/dart-cap03.offer-liabilities.mainnet-37466023.md mainnet/tx_hash 1, testnet/tx_hash 1
-explore.witnesses.g2-r0010-l92 3.12.0 diverges-from-network candidate/findings/issues/dart-cap03.offer-liabilities.mainnet-37466023.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.g2-r0038-l67 3.12.0 diverges-from-network candidate/findings/issues/dart-cap03.offer-liabilities.mainnet-37466023.md mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.g1-r0047-l69 3.12.0 diverges-from-network https://github.com/Soneso/stellar_flutter_sdk/issues/296 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.g2-r0007-l69 3.12.0 diverges-from-network https://github.com/Soneso/stellar_flutter_sdk/issues/296 mainnet/tx_hash 1, testnet/tx_hash 1
+explore.witnesses.g2-r0010-l92 3.12.0 diverges-from-network https://github.com/Soneso/stellar_flutter_sdk/issues/296 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.g2-r0038-l67 3.12.0 diverges-from-network https://github.com/Soneso/stellar_flutter_sdk/issues/296 mainnet/tx_hash 0, testnet/tx_hash 0
 # a candidate: the price candidate of the dart sdk above: the eight transactions whose manage offer prices are not in lowest terms (the same eight the dotnet sdk hashes wrongly) are rebuilt with the reduced fraction, so the hash is another one
-cap15.fee-bump.mainnet-57369500 3.12.0 diverges-from-network candidate/findings/issues/dart-cap03.offer-liabilities.mainnet-37466023.md mainnet/tx_hash 104, mainnet/tx_hash 26, mainnet/tx_hash 29, mainnet/tx_hash 38, mainnet/tx_hash 52, mainnet/tx_hash 60, mainnet/tx_hash 75, mainnet/tx_hash 83
+cap15.fee-bump.mainnet-57369500 3.12.0 diverges-from-network https://github.com/Soneso/stellar_flutter_sdk/issues/296 mainnet/tx_hash 104, mainnet/tx_hash 26, mainnet/tx_hash 29, mainnet/tx_hash 38, mainnet/tx_hash 52, mainnet/tx_hash 60, mainnet/tx_hash 75, mainnet/tx_hash 83
 # as DART-INFLATION: an inflation operation (OperationType 9) has no transaction object
-explore.witnesses.f62d-r0004-l74 3.12.0 diverges-from-network candidate/findings/issues/dart-cap26.inflation.p11-inflation-payout.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.g2-r0010-l74 3.12.0 diverges-from-network candidate/findings/issues/dart-cap26.inflation.p11-inflation-payout.md mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.f62d-r0004-l74 3.12.0 diverges-from-network https://github.com/Soneso/stellar_flutter_sdk/issues/292 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.g2-r0010-l74 3.12.0 diverges-from-network https://github.com/Soneso/stellar_flutter_sdk/issues/292 mainnet/tx_hash 0, testnet/tx_hash 0
 # as DART-OFFERU64: the manage sell offer id -1 core applied in a failed transaction renders as 18446744073709551615 and the canonical "-1" is refused
-explore.witnesses.f62d-r0004-l69 3.12.0 diverges-from-network candidate/findings/issues/dart-cap03.offer-liabilities.synth-negative-offer-id.md mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0004-l69 3.12.0 diverges-from-network https://github.com/Soneso/stellar_flutter_sdk/issues/295 mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json

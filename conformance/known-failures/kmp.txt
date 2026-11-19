@@ -1,84 +1,85 @@
-# known failures of kmp-stellar-sdk (stellar-sdk-jvm), one line per entry and version; the drafts are in the candidate
-# lane (candidate/findings/triage.toml), not filed
-cap21.preconditions.synth-extra-signers-3 * diverges-from-network candidate/findings/issues/kmp-cap21.preconditions.synth-extra-signers-3.md any/decode_encode
-cap23.claimable-balances.synth-claimants-11 * diverges-from-network candidate/findings/issues/kmp-cap21.preconditions.synth-extra-signers-3.md any/decode_encode
-cap27.muxed-accounts.p28-claimable-balance-tx-source-id-1 * diverges-from-network candidate/findings/issues/kmp-cap27.muxed-accounts.p28-claimable-balance-tx-source-id-1.md mainnet/tx_hash 0, testnet/tx_hash 0
-cap27.muxed-accounts.p28-tx-source-and-payment-destination-id-0 * diverges-from-network candidate/findings/issues/kmp-cap27.muxed-accounts.p28-claimable-balance-tx-source-id-1.md mainnet/tx_hash 0, testnet/tx_hash 0
-cap27.muxed-accounts.p28-tx-source-and-payment-destination-id-1 * diverges-from-network candidate/findings/issues/kmp-cap27.muxed-accounts.p28-claimable-balance-tx-source-id-1.md mainnet/tx_hash 0, testnet/tx_hash 0
-cap27.muxed-accounts.p28-tx-source-and-payment-destination-id-2p53 * diverges-from-network candidate/findings/issues/kmp-cap27.muxed-accounts.p28-claimable-balance-tx-source-id-1.md mainnet/tx_hash 0, testnet/tx_hash 0
-cap27.muxed-accounts.p28-tx-source-and-payment-destination-id-2p64-1 * diverges-from-network candidate/findings/issues/kmp-cap27.muxed-accounts.p28-claimable-balance-tx-source-id-1.md mainnet/tx_hash 0, testnet/tx_hash 0
-cap27.muxed-accounts.p30-claimable-balance-tx-source-id-1 * diverges-from-network candidate/findings/issues/kmp-cap27.muxed-accounts.p28-claimable-balance-tx-source-id-1.md mainnet/tx_hash 0, testnet/tx_hash 0
-cap27.muxed-accounts.p30-tx-source-and-payment-destination-id-0 * diverges-from-network candidate/findings/issues/kmp-cap27.muxed-accounts.p28-claimable-balance-tx-source-id-1.md mainnet/tx_hash 0, testnet/tx_hash 0
-cap27.muxed-accounts.p30-tx-source-and-payment-destination-id-1 * diverges-from-network candidate/findings/issues/kmp-cap27.muxed-accounts.p28-claimable-balance-tx-source-id-1.md mainnet/tx_hash 0, testnet/tx_hash 0
-cap27.muxed-accounts.p30-tx-source-and-payment-destination-id-2p53 * diverges-from-network candidate/findings/issues/kmp-cap27.muxed-accounts.p28-claimable-balance-tx-source-id-1.md mainnet/tx_hash 0, testnet/tx_hash 0
-cap27.muxed-accounts.p30-tx-source-and-payment-destination-id-2p64-1 * diverges-from-network candidate/findings/issues/kmp-cap27.muxed-accounts.p28-claimable-balance-tx-source-id-1.md mainnet/tx_hash 0, testnet/tx_hash 0
+# known failures of kmp-stellar-sdk (stellar-sdk-jvm), one line per entry and version; the
+# findings are in the candidate lane (candidate/findings/triage.toml). an issue is the upstream
+# issue once filed, the drafted body under candidate/findings/issues/ until then
+cap21.preconditions.synth-extra-signers-3 * diverges-from-network https://github.com/Soneso/kmp-stellar-sdk/issues/168 any/decode_encode
+cap23.claimable-balances.synth-claimants-11 * diverges-from-network https://github.com/Soneso/kmp-stellar-sdk/issues/168 any/decode_encode
+cap27.muxed-accounts.p28-claimable-balance-tx-source-id-1 * diverges-from-network https://github.com/Soneso/kmp-stellar-sdk/issues/170 mainnet/tx_hash 0, testnet/tx_hash 0
+cap27.muxed-accounts.p28-tx-source-and-payment-destination-id-0 * diverges-from-network https://github.com/Soneso/kmp-stellar-sdk/issues/170 mainnet/tx_hash 0, testnet/tx_hash 0
+cap27.muxed-accounts.p28-tx-source-and-payment-destination-id-1 * diverges-from-network https://github.com/Soneso/kmp-stellar-sdk/issues/170 mainnet/tx_hash 0, testnet/tx_hash 0
+cap27.muxed-accounts.p28-tx-source-and-payment-destination-id-2p53 * diverges-from-network https://github.com/Soneso/kmp-stellar-sdk/issues/170 mainnet/tx_hash 0, testnet/tx_hash 0
+cap27.muxed-accounts.p28-tx-source-and-payment-destination-id-2p64-1 * diverges-from-network https://github.com/Soneso/kmp-stellar-sdk/issues/170 mainnet/tx_hash 0, testnet/tx_hash 0
+cap27.muxed-accounts.p30-claimable-balance-tx-source-id-1 * diverges-from-network https://github.com/Soneso/kmp-stellar-sdk/issues/170 mainnet/tx_hash 0, testnet/tx_hash 0
+cap27.muxed-accounts.p30-tx-source-and-payment-destination-id-0 * diverges-from-network https://github.com/Soneso/kmp-stellar-sdk/issues/170 mainnet/tx_hash 0, testnet/tx_hash 0
+cap27.muxed-accounts.p30-tx-source-and-payment-destination-id-1 * diverges-from-network https://github.com/Soneso/kmp-stellar-sdk/issues/170 mainnet/tx_hash 0, testnet/tx_hash 0
+cap27.muxed-accounts.p30-tx-source-and-payment-destination-id-2p53 * diverges-from-network https://github.com/Soneso/kmp-stellar-sdk/issues/170 mainnet/tx_hash 0, testnet/tx_hash 0
+cap27.muxed-accounts.p30-tx-source-and-payment-destination-id-2p64-1 * diverges-from-network https://github.com/Soneso/kmp-stellar-sdk/issues/170 mainnet/tx_hash 0, testnet/tx_hash 0
 cap40.signed-payload-signer.p28-extra-signer-empty-payload * diverges-from-network candidate/findings/triage.toml mainnet/decode_json, testnet/decode_json
 cap40.signed-payload-signer.p28-set-options-empty-payload * diverges-from-network candidate/findings/triage.toml mainnet/decode_json, testnet/decode_json
 cap40.signed-payload-signer.p30-extra-signer-empty-payload * diverges-from-network candidate/findings/triage.toml mainnet/decode_json, testnet/decode_json
 cap40.signed-payload-signer.p30-set-options-empty-payload * diverges-from-network candidate/findings/triage.toml mainnet/decode_json, testnet/decode_json
 cap40.signed-payload-signer.synth-empty-payload-signer * diverges-from-network candidate/findings/triage.toml any/decode_json
-cap40.signed-payload-signer.synth-payload-65-bytes * diverges-from-network candidate/findings/issues/kmp-cap21.preconditions.synth-extra-signers-3.md any/decode_encode
-cap40.signed-payload-signer.synth-signer-key-nonzero-padding * diverges-from-network candidate/findings/issues/kmp-cap21.preconditions.synth-extra-signers-3.md any/decode_encode
-cap71.credentials.golden-e25799a2e2e9eea2-17 * diverges-from-network candidate/findings/issues/kmp-classic.memo-bytes.p30-memo-truncated-sequence-28.md any/decode_encode, any/decode_json, any/encode_json, any/tx_hash 0
-classic.max-length.synth-data-value-65-bytes * diverges-from-network candidate/findings/issues/kmp-cap21.preconditions.synth-extra-signers-3.md any/decode_encode
-classic.max-length.synth-memo-text-29-bytes * diverges-from-network candidate/findings/issues/kmp-cap21.preconditions.synth-extra-signers-3.md any/decode_encode
-classic.max-length.synth-path-6-assets * diverges-from-network candidate/findings/issues/kmp-cap21.preconditions.synth-extra-signers-3.md any/decode_encode
-classic.max-length.synth-signature-65-bytes * diverges-from-network candidate/findings/issues/kmp-cap21.preconditions.synth-extra-signers-3.md any/decode_encode
-classic.max-length.synth-tx-101-operations * diverges-from-network candidate/findings/issues/kmp-cap21.preconditions.synth-extra-signers-3.md any/decode_encode
-classic.max-length.synth-tx-21-signatures * diverges-from-network candidate/findings/issues/kmp-cap21.preconditions.synth-extra-signers-3.md any/decode_encode
-classic.memo-bytes.p30-memo-above-max-code-point * diverges-from-network candidate/findings/issues/kmp-classic.memo-bytes.p30-memo-truncated-sequence-28.md mainnet/decode_encode, mainnet/decode_json, mainnet/encode_json, mainnet/tx_hash 0, testnet/decode_encode, testnet/decode_json, testnet/encode_json, testnet/tx_hash 0
-classic.memo-bytes.p30-memo-ff * diverges-from-network candidate/findings/issues/kmp-classic.memo-bytes.p30-memo-truncated-sequence-28.md mainnet/decode_encode, mainnet/decode_json, mainnet/encode_json, mainnet/tx_hash 0, testnet/decode_encode, testnet/decode_json, testnet/encode_json, testnet/tx_hash 0
-classic.memo-bytes.p30-memo-lone-continuation * diverges-from-network candidate/findings/issues/kmp-classic.memo-bytes.p30-memo-truncated-sequence-28.md mainnet/decode_encode, mainnet/decode_json, mainnet/encode_json, mainnet/tx_hash 0, testnet/decode_encode, testnet/decode_json, testnet/encode_json, testnet/tx_hash 0
-classic.memo-bytes.p30-memo-overlong-nul * diverges-from-network candidate/findings/issues/kmp-classic.memo-bytes.p30-memo-truncated-sequence-28.md mainnet/decode_encode, mainnet/decode_json, mainnet/encode_json, mainnet/tx_hash 0, testnet/decode_encode, testnet/decode_json, testnet/encode_json, testnet/tx_hash 0
-classic.memo-bytes.p30-memo-surrogate * diverges-from-network candidate/findings/issues/kmp-classic.memo-bytes.p30-memo-truncated-sequence-28.md mainnet/decode_encode, mainnet/decode_json, mainnet/encode_json, mainnet/tx_hash 0, testnet/decode_encode, testnet/decode_json, testnet/encode_json, testnet/tx_hash 0
-classic.memo-bytes.p30-memo-truncated-sequence-28 * diverges-from-network candidate/findings/issues/kmp-classic.memo-bytes.p30-memo-truncated-sequence-28.md mainnet/decode_encode, mainnet/decode_json, mainnet/encode_json, mainnet/tx_hash 0, testnet/decode_encode, testnet/decode_json, testnet/encode_json, testnet/tx_hash 0
-classic.memo-bytes.synth-memo-text-nonzero-padding * diverges-from-network candidate/findings/issues/kmp-classic.memo-bytes.p30-memo-truncated-sequence-28.md any/decode_encode
-soroban.auth-trees.golden-57a486abce28859d-17 * diverges-from-network candidate/findings/issues/kmp-classic.memo-bytes.p30-memo-truncated-sequence-28.md any/decode_encode, any/decode_json, any/encode_json, any/tx_hash 0
-soroban.auth-trees.golden-e0d0e3f38b2d55e0-17 * diverges-from-network candidate/findings/issues/kmp-classic.memo-bytes.p30-memo-truncated-sequence-28.md any/decode_encode, any/decode_json, any/encode_json, any/tx_hash 0
-soroban.auth-trees.p30-declared-depth-245 * diverges-from-network candidate/findings/issues/kmp-soroban.auth-trees.p30-declared-depth-245.md mainnet/encode_json, testnet/encode_json
-soroban.auth-trees.p30-declared-depth-246 * diverges-from-network candidate/findings/issues/kmp-soroban.auth-trees.p30-declared-depth-245.md mainnet/encode_json, testnet/encode_json
-soroban.auth-trees.p30-declared-depth-492 * diverges-from-network candidate/findings/issues/kmp-soroban.auth-trees.p30-declared-depth-245.md mainnet/encode_json, testnet/encode_json
-soroban.auth-trees.p30-declared-depth-493 * diverges-from-network candidate/findings/issues/kmp-cap21.preconditions.synth-extra-signers-3.md mainnet/decode_encode, testnet/decode_encode
-soroban.auth-trees.synth-auth-depth-493-deepest-accepted * diverges-from-network candidate/findings/issues/kmp-soroban.auth-trees.p30-declared-depth-245.md any/encode_json
-soroban.auth-trees.synth-auth-depth-494-over-cap * diverges-from-network candidate/findings/issues/kmp-cap21.preconditions.synth-extra-signers-3.md any/decode_encode
-soroban.invoke-basics.synth-ghsa-3xhm-spec-outputs-2 * diverges-from-network candidate/findings/issues/kmp-cap21.preconditions.synth-extra-signers-3.md any/decode_encode
-soroban.muxed-source.p28-muxed-and-base-source-one-ledger * diverges-from-network candidate/findings/issues/kmp-cap27.muxed-accounts.p28-claimable-balance-tx-source-id-1.md mainnet/tx_hash 1, testnet/tx_hash 1
-soroban.muxed-source.p28-restore-muxed-source * diverges-from-network candidate/findings/issues/kmp-cap27.muxed-accounts.p28-claimable-balance-tx-source-id-1.md mainnet/tx_hash 0, testnet/tx_hash 0
-soroban.muxed-source.p30-extend-ttl-muxed-source * diverges-from-network candidate/findings/issues/kmp-cap27.muxed-accounts.p28-claimable-balance-tx-source-id-1.md mainnet/tx_hash 0, testnet/tx_hash 0
-soroban.muxed-source.p30-extend-ttl-noop-muxed-source * diverges-from-network candidate/findings/issues/kmp-cap27.muxed-accounts.p28-claimable-balance-tx-source-id-1.md mainnet/tx_hash 0, testnet/tx_hash 0
-soroban.muxed-source.p30-restore-muxed-source * diverges-from-network candidate/findings/issues/kmp-cap27.muxed-accounts.p28-claimable-balance-tx-source-id-1.md mainnet/tx_hash 0, testnet/tx_hash 0
-soroban.muxed-source.p30-restore-noop-muxed-source * diverges-from-network candidate/findings/issues/kmp-cap27.muxed-accounts.p28-claimable-balance-tx-source-id-1.md mainnet/tx_hash 0, testnet/tx_hash 0
-soroban.scval-shapes.p30-errors-auth-crypto-events-meta * diverges-from-network candidate/findings/issues/kmp-classic.memo-bytes.p30-memo-truncated-sequence-28.md mainnet/decode_encode, mainnet/decode_json, mainnet/encode_json, testnet/decode_encode, testnet/decode_json, testnet/encode_json
-soroban.scval-shapes.p30-map-depth-max-envelope * diverges-from-network candidate/findings/issues/kmp-soroban.auth-trees.p30-declared-depth-245.md mainnet/encode_json, testnet/encode_json
-soroban.scval-shapes.p30-map-depth-max-meta * diverges-from-network candidate/findings/issues/kmp-soroban.auth-trees.p30-declared-depth-245.md mainnet/encode_json, testnet/encode_json
-soroban.scval-shapes.p30-map-depth-over * diverges-from-network candidate/findings/issues/kmp-soroban.auth-trees.p30-declared-depth-245.md mainnet/encode_json, testnet/encode_json
-soroban.scval-shapes.p30-map-mixed-keys-sorted-meta * diverges-from-network candidate/findings/issues/kmp-soroban.auth-trees.p30-declared-depth-245.md mainnet/encode_json, testnet/encode_json
-soroban.scval-shapes.p30-string-not-utf8-envelope * diverges-from-network candidate/findings/issues/kmp-classic.memo-bytes.p30-memo-truncated-sequence-28.md mainnet/decode_encode, mainnet/decode_json, mainnet/encode_json, mainnet/tx_hash, testnet/decode_encode, testnet/decode_json, testnet/encode_json, testnet/tx_hash
-soroban.scval-shapes.p30-string-not-utf8-meta * diverges-from-network candidate/findings/issues/kmp-classic.memo-bytes.p30-memo-truncated-sequence-28.md mainnet/decode_encode, mainnet/decode_json, mainnet/encode_json, testnet/decode_encode, testnet/decode_json, testnet/encode_json
-soroban.scval-shapes.p30-symbol-not-utf8 * diverges-from-network candidate/findings/issues/kmp-classic.memo-bytes.p30-memo-truncated-sequence-28.md mainnet/decode_encode, mainnet/decode_json, mainnet/encode_json, mainnet/tx_hash 0, testnet/decode_encode, testnet/decode_json, testnet/encode_json, testnet/tx_hash 0
-soroban.scval-shapes.p30-vec-depth-max-envelope * diverges-from-network candidate/findings/issues/kmp-soroban.auth-trees.p30-declared-depth-245.md mainnet/encode_json, testnet/encode_json
-soroban.scval-shapes.p30-vec-depth-max-meta * diverges-from-network candidate/findings/issues/kmp-soroban.auth-trees.p30-declared-depth-245.md mainnet/encode_json, testnet/encode_json
-soroban.scval-shapes.p30-vec-depth-over * diverges-from-network candidate/findings/issues/kmp-soroban.auth-trees.p30-declared-depth-245.md mainnet/encode_json, testnet/encode_json
-soroban.scval-shapes.synth-bytes-nonzero-padding * diverges-from-network candidate/findings/issues/kmp-cap21.preconditions.synth-extra-signers-3.md any/decode_encode
-soroban.scval-shapes.synth-event-vec-depth-101 * diverges-from-network candidate/findings/issues/kmp-soroban.auth-trees.p30-declared-depth-245.md any/encode_json
-soroban.scval-shapes.synth-scmap-depth-197-deepest-accepted * diverges-from-network candidate/findings/issues/kmp-soroban.auth-trees.p30-declared-depth-245.md any/encode_json
-soroban.scval-shapes.synth-scmap-depth-198-over-cap * diverges-from-network candidate/findings/issues/kmp-cap21.preconditions.synth-extra-signers-3.md any/decode_encode
-soroban.scval-shapes.synth-scvec-depth-246-deepest-accepted * diverges-from-network candidate/findings/issues/kmp-soroban.auth-trees.p30-declared-depth-245.md any/encode_json
-soroban.scval-shapes.synth-scvec-depth-247-over-cap * diverges-from-network candidate/findings/issues/kmp-cap21.preconditions.synth-extra-signers-3.md any/decode_encode
-soroban.scval-shapes.synth-string-nonzero-padding * diverges-from-network candidate/findings/issues/kmp-cap21.preconditions.synth-extra-signers-3.md any/decode_encode
-soroban.scval-shapes.synth-symbol-33-bytes * diverges-from-network candidate/findings/issues/kmp-cap21.preconditions.synth-extra-signers-3.md any/decode_encode
+cap40.signed-payload-signer.synth-payload-65-bytes * diverges-from-network https://github.com/Soneso/kmp-stellar-sdk/issues/168 any/decode_encode
+cap40.signed-payload-signer.synth-signer-key-nonzero-padding * diverges-from-network https://github.com/Soneso/kmp-stellar-sdk/issues/168 any/decode_encode
+cap71.credentials.golden-e25799a2e2e9eea2-17 * diverges-from-network https://github.com/Soneso/kmp-stellar-sdk/issues/172 any/decode_encode, any/decode_json, any/encode_json, any/tx_hash 0
+classic.max-length.synth-data-value-65-bytes * diverges-from-network https://github.com/Soneso/kmp-stellar-sdk/issues/168 any/decode_encode
+classic.max-length.synth-memo-text-29-bytes * diverges-from-network https://github.com/Soneso/kmp-stellar-sdk/issues/168 any/decode_encode
+classic.max-length.synth-path-6-assets * diverges-from-network https://github.com/Soneso/kmp-stellar-sdk/issues/168 any/decode_encode
+classic.max-length.synth-signature-65-bytes * diverges-from-network https://github.com/Soneso/kmp-stellar-sdk/issues/168 any/decode_encode
+classic.max-length.synth-tx-101-operations * diverges-from-network https://github.com/Soneso/kmp-stellar-sdk/issues/168 any/decode_encode
+classic.max-length.synth-tx-21-signatures * diverges-from-network https://github.com/Soneso/kmp-stellar-sdk/issues/168 any/decode_encode
+classic.memo-bytes.p30-memo-above-max-code-point * diverges-from-network https://github.com/Soneso/kmp-stellar-sdk/issues/172 mainnet/decode_encode, mainnet/decode_json, mainnet/encode_json, mainnet/tx_hash 0, testnet/decode_encode, testnet/decode_json, testnet/encode_json, testnet/tx_hash 0
+classic.memo-bytes.p30-memo-ff * diverges-from-network https://github.com/Soneso/kmp-stellar-sdk/issues/172 mainnet/decode_encode, mainnet/decode_json, mainnet/encode_json, mainnet/tx_hash 0, testnet/decode_encode, testnet/decode_json, testnet/encode_json, testnet/tx_hash 0
+classic.memo-bytes.p30-memo-lone-continuation * diverges-from-network https://github.com/Soneso/kmp-stellar-sdk/issues/172 mainnet/decode_encode, mainnet/decode_json, mainnet/encode_json, mainnet/tx_hash 0, testnet/decode_encode, testnet/decode_json, testnet/encode_json, testnet/tx_hash 0
+classic.memo-bytes.p30-memo-overlong-nul * diverges-from-network https://github.com/Soneso/kmp-stellar-sdk/issues/172 mainnet/decode_encode, mainnet/decode_json, mainnet/encode_json, mainnet/tx_hash 0, testnet/decode_encode, testnet/decode_json, testnet/encode_json, testnet/tx_hash 0
+classic.memo-bytes.p30-memo-surrogate * diverges-from-network https://github.com/Soneso/kmp-stellar-sdk/issues/172 mainnet/decode_encode, mainnet/decode_json, mainnet/encode_json, mainnet/tx_hash 0, testnet/decode_encode, testnet/decode_json, testnet/encode_json, testnet/tx_hash 0
+classic.memo-bytes.p30-memo-truncated-sequence-28 * diverges-from-network https://github.com/Soneso/kmp-stellar-sdk/issues/172 mainnet/decode_encode, mainnet/decode_json, mainnet/encode_json, mainnet/tx_hash 0, testnet/decode_encode, testnet/decode_json, testnet/encode_json, testnet/tx_hash 0
+classic.memo-bytes.synth-memo-text-nonzero-padding * diverges-from-network https://github.com/Soneso/kmp-stellar-sdk/issues/172 any/decode_encode
+soroban.auth-trees.golden-57a486abce28859d-17 * diverges-from-network https://github.com/Soneso/kmp-stellar-sdk/issues/172 any/decode_encode, any/decode_json, any/encode_json, any/tx_hash 0
+soroban.auth-trees.golden-e0d0e3f38b2d55e0-17 * diverges-from-network https://github.com/Soneso/kmp-stellar-sdk/issues/172 any/decode_encode, any/decode_json, any/encode_json, any/tx_hash 0
+soroban.auth-trees.p30-declared-depth-245 * diverges-from-network https://github.com/Soneso/kmp-stellar-sdk/issues/169 mainnet/encode_json, testnet/encode_json
+soroban.auth-trees.p30-declared-depth-246 * diverges-from-network https://github.com/Soneso/kmp-stellar-sdk/issues/169 mainnet/encode_json, testnet/encode_json
+soroban.auth-trees.p30-declared-depth-492 * diverges-from-network https://github.com/Soneso/kmp-stellar-sdk/issues/169 mainnet/encode_json, testnet/encode_json
+soroban.auth-trees.p30-declared-depth-493 * diverges-from-network https://github.com/Soneso/kmp-stellar-sdk/issues/168 mainnet/decode_encode, testnet/decode_encode
+soroban.auth-trees.synth-auth-depth-493-deepest-accepted * diverges-from-network https://github.com/Soneso/kmp-stellar-sdk/issues/169 any/encode_json
+soroban.auth-trees.synth-auth-depth-494-over-cap * diverges-from-network https://github.com/Soneso/kmp-stellar-sdk/issues/168 any/decode_encode
+soroban.invoke-basics.synth-ghsa-3xhm-spec-outputs-2 * diverges-from-network https://github.com/Soneso/kmp-stellar-sdk/issues/168 any/decode_encode
+soroban.muxed-source.p28-muxed-and-base-source-one-ledger * diverges-from-network https://github.com/Soneso/kmp-stellar-sdk/issues/170 mainnet/tx_hash 1, testnet/tx_hash 1
+soroban.muxed-source.p28-restore-muxed-source * diverges-from-network https://github.com/Soneso/kmp-stellar-sdk/issues/170 mainnet/tx_hash 0, testnet/tx_hash 0
+soroban.muxed-source.p30-extend-ttl-muxed-source * diverges-from-network https://github.com/Soneso/kmp-stellar-sdk/issues/170 mainnet/tx_hash 0, testnet/tx_hash 0
+soroban.muxed-source.p30-extend-ttl-noop-muxed-source * diverges-from-network https://github.com/Soneso/kmp-stellar-sdk/issues/170 mainnet/tx_hash 0, testnet/tx_hash 0
+soroban.muxed-source.p30-restore-muxed-source * diverges-from-network https://github.com/Soneso/kmp-stellar-sdk/issues/170 mainnet/tx_hash 0, testnet/tx_hash 0
+soroban.muxed-source.p30-restore-noop-muxed-source * diverges-from-network https://github.com/Soneso/kmp-stellar-sdk/issues/170 mainnet/tx_hash 0, testnet/tx_hash 0
+soroban.scval-shapes.p30-errors-auth-crypto-events-meta * diverges-from-network https://github.com/Soneso/kmp-stellar-sdk/issues/172 mainnet/decode_encode, mainnet/decode_json, mainnet/encode_json, testnet/decode_encode, testnet/decode_json, testnet/encode_json
+soroban.scval-shapes.p30-map-depth-max-envelope * diverges-from-network https://github.com/Soneso/kmp-stellar-sdk/issues/169 mainnet/encode_json, testnet/encode_json
+soroban.scval-shapes.p30-map-depth-max-meta * diverges-from-network https://github.com/Soneso/kmp-stellar-sdk/issues/169 mainnet/encode_json, testnet/encode_json
+soroban.scval-shapes.p30-map-depth-over * diverges-from-network https://github.com/Soneso/kmp-stellar-sdk/issues/169 mainnet/encode_json, testnet/encode_json
+soroban.scval-shapes.p30-map-mixed-keys-sorted-meta * diverges-from-network https://github.com/Soneso/kmp-stellar-sdk/issues/169 mainnet/encode_json, testnet/encode_json
+soroban.scval-shapes.p30-string-not-utf8-envelope * diverges-from-network https://github.com/Soneso/kmp-stellar-sdk/issues/172 mainnet/decode_encode, mainnet/decode_json, mainnet/encode_json, mainnet/tx_hash, testnet/decode_encode, testnet/decode_json, testnet/encode_json, testnet/tx_hash
+soroban.scval-shapes.p30-string-not-utf8-meta * diverges-from-network https://github.com/Soneso/kmp-stellar-sdk/issues/172 mainnet/decode_encode, mainnet/decode_json, mainnet/encode_json, testnet/decode_encode, testnet/decode_json, testnet/encode_json
+soroban.scval-shapes.p30-symbol-not-utf8 * diverges-from-network https://github.com/Soneso/kmp-stellar-sdk/issues/172 mainnet/decode_encode, mainnet/decode_json, mainnet/encode_json, mainnet/tx_hash 0, testnet/decode_encode, testnet/decode_json, testnet/encode_json, testnet/tx_hash 0
+soroban.scval-shapes.p30-vec-depth-max-envelope * diverges-from-network https://github.com/Soneso/kmp-stellar-sdk/issues/169 mainnet/encode_json, testnet/encode_json
+soroban.scval-shapes.p30-vec-depth-max-meta * diverges-from-network https://github.com/Soneso/kmp-stellar-sdk/issues/169 mainnet/encode_json, testnet/encode_json
+soroban.scval-shapes.p30-vec-depth-over * diverges-from-network https://github.com/Soneso/kmp-stellar-sdk/issues/169 mainnet/encode_json, testnet/encode_json
+soroban.scval-shapes.synth-bytes-nonzero-padding * diverges-from-network https://github.com/Soneso/kmp-stellar-sdk/issues/168 any/decode_encode
+soroban.scval-shapes.synth-event-vec-depth-101 * diverges-from-network https://github.com/Soneso/kmp-stellar-sdk/issues/169 any/encode_json
+soroban.scval-shapes.synth-scmap-depth-197-deepest-accepted * diverges-from-network https://github.com/Soneso/kmp-stellar-sdk/issues/169 any/encode_json
+soroban.scval-shapes.synth-scmap-depth-198-over-cap * diverges-from-network https://github.com/Soneso/kmp-stellar-sdk/issues/168 any/decode_encode
+soroban.scval-shapes.synth-scvec-depth-246-deepest-accepted * diverges-from-network https://github.com/Soneso/kmp-stellar-sdk/issues/169 any/encode_json
+soroban.scval-shapes.synth-scvec-depth-247-over-cap * diverges-from-network https://github.com/Soneso/kmp-stellar-sdk/issues/168 any/decode_encode
+soroban.scval-shapes.synth-string-nonzero-padding * diverges-from-network https://github.com/Soneso/kmp-stellar-sdk/issues/168 any/decode_encode
+soroban.scval-shapes.synth-symbol-33-bytes * diverges-from-network https://github.com/Soneso/kmp-stellar-sdk/issues/168 any/decode_encode
 # a candidate: the transaction-object refusals of the kmp candidate above: max time 2^64-1 ("maxTime must be >= 0") and offer id -1 ("Offer ID must be non-negative")
-explore.witnesses.f62d-r0000-l96 1.18.0 diverges-from-network candidate/findings/issues/kmp-explore.witnesses.f62d-r0000-l96.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.f62d-r0004-l69 1.18.0 diverges-from-network candidate/findings/issues/kmp-explore.witnesses.f62d-r0000-l96.md mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.f62d-r0000-l96 1.18.0 diverges-from-network https://github.com/Soneso/kmp-stellar-sdk/issues/171 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.f62d-r0004-l69 1.18.0 diverges-from-network https://github.com/Soneso/kmp-stellar-sdk/issues/171 mainnet/tx_hash 0, testnet/tx_hash 0
 # as KMP-MUXED-SOURCE: the muxed id of the transaction source dropped when the sdk rebuilds the transaction
-explore.witnesses.f62c-r0000-l69 1.18.0 diverges-from-network candidate/findings/issues/kmp-cap27.muxed-accounts.p28-claimable-balance-tx-source-id-1.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.f62c-r0000-l77 1.18.0 diverges-from-network candidate/findings/issues/kmp-cap27.muxed-accounts.p28-claimable-balance-tx-source-id-1.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.f62c-r0000-l86 1.18.0 diverges-from-network candidate/findings/issues/kmp-cap27.muxed-accounts.p28-claimable-balance-tx-source-id-1.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.f62c-r0017-l77 1.18.0 diverges-from-network candidate/findings/issues/kmp-cap27.muxed-accounts.p28-claimable-balance-tx-source-id-1.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.f62d-r0000-l85 1.18.0 diverges-from-network candidate/findings/issues/kmp-cap27.muxed-accounts.p28-claimable-balance-tx-source-id-1.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.f62d-r0003-l79 1.18.0 diverges-from-network candidate/findings/issues/kmp-cap27.muxed-accounts.p28-claimable-balance-tx-source-id-1.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.f62d-r0008-l75 1.18.0 diverges-from-network candidate/findings/issues/kmp-cap27.muxed-accounts.p28-claimable-balance-tx-source-id-1.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.g2-r0007-l77 1.18.0 diverges-from-network candidate/findings/issues/kmp-cap27.muxed-accounts.p28-claimable-balance-tx-source-id-1.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.g2-r0012-l78 1.18.0 diverges-from-network candidate/findings/issues/kmp-cap27.muxed-accounts.p28-claimable-balance-tx-source-id-1.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.g2-r0013-l93 1.18.0 diverges-from-network candidate/findings/issues/kmp-cap27.muxed-accounts.p28-claimable-balance-tx-source-id-1.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.g2-r0018-l122 1.18.0 diverges-from-network candidate/findings/issues/kmp-cap27.muxed-accounts.p28-claimable-balance-tx-source-id-1.md mainnet/tx_hash 0, mainnet/tx_hash 0 inner, testnet/tx_hash 0, testnet/tx_hash 0 inner
+explore.witnesses.f62c-r0000-l69 1.18.0 diverges-from-network https://github.com/Soneso/kmp-stellar-sdk/issues/170 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.f62c-r0000-l77 1.18.0 diverges-from-network https://github.com/Soneso/kmp-stellar-sdk/issues/170 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.f62c-r0000-l86 1.18.0 diverges-from-network https://github.com/Soneso/kmp-stellar-sdk/issues/170 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.f62c-r0017-l77 1.18.0 diverges-from-network https://github.com/Soneso/kmp-stellar-sdk/issues/170 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.f62d-r0000-l85 1.18.0 diverges-from-network https://github.com/Soneso/kmp-stellar-sdk/issues/170 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.f62d-r0003-l79 1.18.0 diverges-from-network https://github.com/Soneso/kmp-stellar-sdk/issues/170 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.f62d-r0008-l75 1.18.0 diverges-from-network https://github.com/Soneso/kmp-stellar-sdk/issues/170 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.g2-r0007-l77 1.18.0 diverges-from-network https://github.com/Soneso/kmp-stellar-sdk/issues/170 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.g2-r0012-l78 1.18.0 diverges-from-network https://github.com/Soneso/kmp-stellar-sdk/issues/170 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.g2-r0013-l93 1.18.0 diverges-from-network https://github.com/Soneso/kmp-stellar-sdk/issues/170 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.g2-r0018-l122 1.18.0 diverges-from-network https://github.com/Soneso/kmp-stellar-sdk/issues/170 mainnet/tx_hash 0, mainnet/tx_hash 0 inner, testnet/tx_hash 0, testnet/tx_hash 0 inner
