@@ -53,7 +53,6 @@ export interface IndexerRun {
   pass: number
   mishandled: number
   dropped: number
-  notEvaluated: number
   /** what the harness found, the text of foundText in src/lib/metrics.ts */
   found: string
   /** the reported findings of the indexer */
@@ -169,7 +168,6 @@ export async function loadLandingStats(): Promise<LandingStats> {
         pass: v["pass"] ?? 0,
         mishandled: v["mishandled"] ?? 0,
         dropped: v["dropped"] ?? 0,
-        notEvaluated: v["not-evaluated"] ?? 0,
         found: foundText(x),
         findings: componentFindings(findings, target),
       }

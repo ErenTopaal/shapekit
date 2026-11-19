@@ -383,10 +383,22 @@ fn site_data_matches_the_committed_files() {
             assert!(read(page).contains(func), "{page} does not call {func}");
         }
     }
-    // the landing page shows no out-of-scope count; the indexer page keeps it
+    // the landing page shows no out-of-scope and no not-evaluated count; the indexer page
+    // keeps both
     let home = read("routes/home.tsx");
-    assert!(!home.contains("out of scope") && !home.contains("out-of-scope"));
-    assert!(!read("landing/stats.ts").contains("out-of-scope"));
+    let stats = read("landing/stats.ts");
+    for group in [
+        "out of scope",
+        "out-of-scope",
+        "not evaluated",
+        "not-evaluated",
+        "notEvaluated",
+    ] {
+        assert!(
+            !home.contains(group) && !stats.contains(group),
+            "the landing page shows {group}"
+        );
+    }
     let mut stack = vec![site.clone()];
     while let Some(dir) = stack.pop() {
         for e in std::fs::read_dir(&dir).unwrap() {

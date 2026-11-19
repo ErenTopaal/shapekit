@@ -176,11 +176,10 @@ function SdkTable({ s }: { s: LandingStats }) {
 }
 
 function IndexerRuns({ s }: { s: LandingStats }) {
-  const replays = s.runs[0]?.replays ?? 0
   return (
     <>
       <div className="ix-head" data-r="">
-        <h3 className="h2" style={css({ fontSize: "var(--fs-2xl)" })}>{plural(s.runs.length, "indexer", "indexers")}. {f(replays)} replays <span className="acc">each.</span></h3>
+        <h3 className="h2" style={css({ fontSize: "var(--fs-2xl)" })}>{plural(s.runs.length, "indexer", "indexers")}. The same replays for <span className="acc">each.</span></h3>
         <a className="arrow-link" href="/dashboard/indexer">Indexer results</a>
       </div>
       {s.runs.map((r) => {
@@ -188,15 +187,15 @@ function IndexerRuns({ s }: { s: LandingStats }) {
           ["s-pass", r.pass, "pass"],
           ["s-mis", r.mishandled, "mishandled"],
           ["s-drop", r.dropped, "dropped"],
-          ["s-ne", r.notEvaluated, "not evaluated"],
         ]
         const shown = segs.filter((g) => g[1] > 0)
+        const shownTotal = shown.reduce((a, g) => a + g[1], 0)
         return (
           <div key={r.target} className="ix-row" data-r="">
             <div className="ix-top"><span className="ix-name">{r.target}<span>{r.note}</span></span><span className="ix-found"><b>{r.found}</b>{r.findings > 0 ? <a className="arrow-link" href={findingsPath({ component: r.target })}>{plural(r.findings, "reported finding", "reported findings")}</a> : null}</span></div>
             <p className="sr-only">{`${r.target}: ${shown.map((g) => `${f(g[1])} ${g[2]}`).join(", ")}`}</p>
             <div className="bar" aria-hidden="true">
-              {shown.map((g, i) => <span key={g[0]} className={`seg ${g[0]}`} style={css({ "--n": g[1], "--i": i })}>{g[0] === "s-pass" ? `${f(g[1])} pass` : g[1] / r.replays >= 0.03 || g[0] === "s-ne" ? f(g[1]) : ""}</span>)}
+              {shown.map((g, i) => <span key={g[0]} className={`seg ${g[0]}`} style={css({ "--n": g[1], "--i": i })}>{g[0] === "s-pass" ? `${f(g[1])} pass` : g[1] / shownTotal >= 0.03 ? f(g[1]) : ""}</span>)}
             </div>
           </div>
         )
@@ -607,7 +606,6 @@ export default function Home({ loaderData: s }: Route.ComponentProps) {
     <span><i className="s-pass" aria-hidden="true"></i>pass</span>
     <span><i className="s-mis" aria-hidden="true"></i>mishandled</span>
     <span><i className="s-drop" aria-hidden="true"></i>dropped</span>
-    <span><i className="s-ne" aria-hidden="true"></i>not evaluated</span>
     </div>
     </div>
     </div>
