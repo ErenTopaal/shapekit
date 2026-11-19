@@ -9,7 +9,7 @@ on:
   workflow_call:
     inputs:
       sdk:
-        description: "testee to run: rust, go or js"
+        description: "testee to run: rust, go, js, python, java, kmp, soroban, dart, php, dotnet or stellar-cli"
         required: true
         type: string
       shapekit-tag:
@@ -56,7 +56,8 @@ on:
 jobs:
   conformance:
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    # a release build of stellar-cli from the checkout takes longer than the other testees' builds
+    timeout-minutes: ${{ inputs.sdk == 'stellar-cli' && 60 || 30 }}
     permissions:
       contents: read
     outputs:
@@ -68,8 +69,8 @@ jobs:
           SDK: ${{ inputs.sdk }}
         run: |
           case "$SDK" in
-            rust|go|js) ;;
-            *) echo "::error::sdk must be rust, go or js, not $SDK"; exit 1 ;;
+            rust|go|js|python|java|kmp|soroban|dart|php|dotnet|stellar-cli) ;;
+            *) echo "::error::sdk must be rust, go, js, python, java, kmp, soroban, dart, php, dotnet or stellar-cli, not $SDK"; exit 1 ;;
           esac
           echo "artifact=shapekit-conformance-$SDK" >>"$GITHUB_OUTPUT"
       - name: check out the sdk under test
@@ -108,7 +109,8 @@ jobs:
           fi
           echo "SHAPEKIT=$dl/shapekit-linux-x86_64" >>"$GITHUB_ENV"
           echo "MANIFEST=$manifest" >>"$GITHUB_ENV"
-      - if: ${{ inputs.sdk == 'rust' }}
+      # only the chosen sdk's toolchain, at the versions shapekit's own ci pins (pins.toml)
+      - if: ${{ inputs.sdk == 'rust' || inputs.sdk == 'soroban' || inputs.sdk == 'stellar-cli' }}
         uses: dtolnay/rust-toolchain@1.99.1
       - if: ${{ inputs.sdk == 'go' }}
         uses: actions/setup-go@v7
@@ -134,6 +136,33 @@ jobs:
             npm@*) ;;
             *) echo "::warning::packageManager $pm is not installed by this workflow" ;;
           esac
+      - name: pinned uv and cpython
+        if: ${{ inputs.sdk == 'python' }}
+        working-directory: shapekit
+        run: scripts/python-toolchain.sh >>"$GITHUB_PATH"
+      - name: pinned jdk and maven for the testee, and jdk 21 for the sdk's gradle build
+        # the testee builds with mvn on the jdk on PATH (the versions files in docs/sdk-ci.md
+        # clear JAVA_HOME for those steps); gradlew runs on JAVA_HOME
+        if: ${{ inputs.sdk == 'java' || inputs.sdk == 'kmp' }}
+        working-directory: shapekit
+        run: |
+          set -euo pipefail
+          scripts/java-toolchain.sh >>"$GITHUB_PATH"
+          echo "JAVA_HOME=$(scripts/java-toolchain.sh --gradle-jdk)" >>"$GITHUB_ENV"
+      - name: pinned flutter for the dart testee
+        if: ${{ inputs.sdk == 'dart' }}
+        working-directory: shapekit
+        run: scripts/flutter-toolchain.sh >>"$GITHUB_PATH"
+      - if: ${{ inputs.sdk == 'php' }}
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.5"
+          extensions: bcmath, gmp, mbstring, sodium
+          tools: composer:2.11.2
+      - if: ${{ inputs.sdk == 'dotnet' }}
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 11.0.100
       - name: conformance run
         working-directory: shapekit
         env:
