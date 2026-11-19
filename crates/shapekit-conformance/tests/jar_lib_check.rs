@@ -20,7 +20,12 @@ fn check_targets() -> Vec<Target> {
         let s = file.sdk(sdk).unwrap();
         for v in &s.versions {
             let mut t = file.target(sdk, &v.version).unwrap();
-            let after = t.build.iter().position(|s| s.argv.iter().any(|a| a == "mvn")).unwrap() + 1;
+            let after = t
+                .build
+                .iter()
+                .position(|s| s.argv.iter().any(|a| a == "mvn"))
+                .unwrap()
+                + 1;
             t.build.drain(..after);
             assert!(!t.build.is_empty(), "{} has no step after mvn", t.key());
             out.push(t);
