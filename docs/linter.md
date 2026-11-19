@@ -44,7 +44,7 @@ Under `go vet`:
 go vet -vettool=$(command -v indexerlint) ./...
 ```
 
-Suppressions and the baseline apply in both modes. Under `go vet` the baseline is passed through the `INDEXERLINT_BASELINE` environment variable (an absolute path), and vet prints only the findings, not the suppressed and baselined counts. Test files (`_test.go`) are not checked in either mode.
+Suppressions and the baseline apply in both modes. Under `go vet` the baseline is passed through the `INDEXERLINT_BASELINE` environment variable (an absolute path), and vet prints only the findings, not the suppressed and baselined counts. `go vet` caches its results by the version the tool reports, and indexerlint's version covers the baseline path and the file's contents, so setting, changing or unsetting the baseline runs the analysis again instead of replaying a cached result. Test files (`_test.go`) are not checked in either mode.
 
 ## Suppressing a finding
 
@@ -77,7 +77,7 @@ A baseline accepts known findings that are tracked upstream:
 }
 ```
 
-Entries match by rule, package and function (`Name`, `(T).Name` or `(*T).Name`), not by line, so unrelated edits do not invalidate them. An optional `message` must match exactly. `package` and `function` are required, and every entry needs an `https://` issue link; a baseline that breaks either rule, has another `version` or has unknown fields is rejected. Entries that matched nothing are listed, so you can remove the entry of a fixed finding.
+Entries match by rule, package and function (`Name`, `(T).Name` or `(*T).Name`), not by line, so unrelated edits do not invalidate them. An optional `message` must match exactly. `package` is required, and every entry needs an `https://` issue link. `function` is required too, except for a finding outside any function (a package-level declaration): its entry leaves `function` out and carries the finding's `message` instead, so one entry cannot accept every package-level finding of a rule. A baseline that breaks these rules, has another `version` or has unknown fields is rejected. Entries that matched nothing are listed, so you can remove the entry of a fixed finding.
 
 ## IDX001: unvalidated field trusted
 
@@ -102,10 +102,10 @@ What it cannot see: flows through struct fields or interface maps between functi
 Three checks:
 
 1. Recursion. A function, or a closure assigned to a variable, that recurses directly or through other functions and closures of the same package, and takes one of `xdr.ScVal`, `xdr.ScVec`, `xdr.ScMap`, `xdr.ScMapEntry`, `xdr.SorobanAuthorizedInvocation`, `xdr.SorobanDelegateSignature` or `xdr.ClaimPredicate` (directly or behind pointers, slices or maps). It is reported unless some integer that survives from call to call (a parameter, a captured variable or a struct field) is both compared and stepped in the cycle: `walk(v, depth+1)` with `if depth > max`, `remaining-1` with `if remaining == 0`, or `n++` with `if n > max`. Locals of the recursive function, such as loop indexes, do not count.
-2. Allocation. `make` whose length or capacity comes from an integer of a named xdr type (`xdr.Uint32`, `xdr.Int64`, and so on, including values read through conversions and local variables) with no ordered comparison on it in the same function and no `min(...)` around it. Sizes from `len()` of something already decoded are not reported: the decoder already bounded them by the input.
+2. Allocation. `make` whose length or capacity comes from an integer of a named xdr type (`xdr.Uint32`, `xdr.Int64`, and so on, including values read through conversions and local variables) with no `min(...)` around it and no ordered comparison (`<`, `<=`, `>`, `>=`) of that same variable that runs before the `make` on its path. A comparison counts when it comes earlier in the function and every block it sits in also holds the `make`: a statement before the `make`, an `if` condition around it, or a `switch` case expression before it. A comparison after the `make`, in a branch the `make` is not part of, or of another variable with the same name does not count. Sizes from `len()` of something already decoded are not reported: the decoder already bounded them by the input.
 3. Decoding. go-stellar-sdk's `SafeUnmarshal`, `SafeUnmarshalBase64`, `UnmarshalBinary`, `Unmarshal` and go-xdr's `NewDecoder` all apply a default depth limit of 1500 and cap slice preallocation at 256 elements, and the base64, hex and byte-slice helpers set the input length. Decoding with the defaults is therefore not reported. What is reported is turning the depth limit off: any use of `xdr3.DecodeUnlimitedDepth`, a `DecodeOptions` with `MaxDepth` set to the largest `uint`, or `DecodeFrom(d, maxDepth)` called with it. A finite `MaxDepth` above the default is not reported.
 
-What it cannot see: recursion through interface methods, method values or function values passed as arguments; recursion across packages; a bound that is compared but never stops the recursion (the direction of the comparison is not checked); a node-count cap implemented through a slice length rather than an integer; allocations sized through a function call that does not bound its input (calls other than conversions stop the flow); `MaxMemoryBytes`, which go-xdr leaves unlimited by default (its preallocation cap keeps memory proportional to the input).
+What it cannot see: recursion through interface methods, method values or function values passed as arguments; recursion across packages; a bound that is compared but never stops the recursion or the allocation (the direction of the comparison and what the code does with its result are not checked); a node-count cap implemented through a slice length rather than an integer; allocations sized through a function call that does not bound its input (calls other than conversions stop the flow); `MaxMemoryBytes`, which go-xdr leaves unlimited by default (its preallocation cap keeps memory proportional to the input).
 
 ## IDX003: participants from envelope
 
@@ -149,7 +149,7 @@ Each rule has a testdata module under `lint/<rule>/testdata` that imports the re
 | Rule | Seeded violations | Detected | Unexpected findings |
 |---|---|---|---|
 | IDX001 | 15 | 15 | 0 |
-| IDX002 | 14 | 14 | 0 |
+| IDX002 | 17 | 17 | 0 |
 | IDX003 | 11 | 11 | 0 |
 
 On the seeded set, precision and recall are both 1.0. That shows the rules do what their tests specify; the wallet-backend runs above measure precision on real code.
