@@ -26,7 +26,11 @@ fn check_targets() -> Vec<Target> {
             out.push(t);
         }
     }
-    assert!(out.len() >= 3, "expected the java and kmp versions, got {}", out.len());
+    assert!(
+        out.len() >= 3,
+        "expected the java and kmp versions, got {}",
+        out.len()
+    );
     out
 }
 
@@ -42,7 +46,9 @@ fn scratch(t: &Target, jars: &[(&str, &[u8])], listed: &[(&str, &[u8])]) -> temp
             std::fs::copy(root().join(prog), &to).unwrap();
         }
     }
-    let build = dir.path().join(format!("target/testees/{}/{}", t.sdk, t.version));
+    let build = dir
+        .path()
+        .join(format!("target/testees/{}/{}", t.sdk, t.version));
     std::fs::create_dir_all(build.join("lib")).unwrap();
     std::fs::write(build.join("jacocoagent.jar"), b"agent").unwrap();
     for (name, body) in jars {
@@ -87,8 +93,16 @@ fn a_jar_lib_sha256_does_not_list_fails_the_build() {
 fn a_missing_or_changed_jar_fails_the_build() {
     for t in check_targets() {
         let dir = scratch(&t, &[A], &[A, B]);
-        assert!(versions::build(dir.path(), &t).is_err(), "{}: missing jar", t.key());
+        assert!(
+            versions::build(dir.path(), &t).is_err(),
+            "{}: missing jar",
+            t.key()
+        );
         let dir = scratch(&t, &[A, ("b-2.0.jar", b"changed")], &[A, B]);
-        assert!(versions::build(dir.path(), &t).is_err(), "{}: changed jar", t.key());
+        assert!(
+            versions::build(dir.path(), &t).is_err(),
+            "{}: changed jar",
+            t.key()
+        );
     }
 }
