@@ -374,6 +374,19 @@ export interface Findings {
     input_problems: string[]
     findings: Finding[]
   }
+  /** the one findings count of every page: the findings of both records whose status is one
+   * of `statuses`, with the breakdowns the pages show (site_cmd.rs, reported_json) */
+  reported: {
+    statuses: string[]
+    findings: number
+    ids: string[]
+    components: number
+    by_record: Counts
+    by_status: Counts
+    by_severity: Counts
+    by_component: Record<string, Counts>
+    not_reported: Counts
+  }
 }
 
 interface Files {

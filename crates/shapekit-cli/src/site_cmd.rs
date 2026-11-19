@@ -16,7 +16,7 @@ use shapekit_conformance::reproduce::ReproductionsFile;
 use shapekit_conformance::versions::VersionsFile;
 use shapekit_findings::collect::Collection;
 use shapekit_findings::inputs::{self, MatrixView};
-use shapekit_findings::triage::{self, Triage};
+use shapekit_findings::triage::{self, Status, Triage};
 use shapekit_manifest::Manifest;
 use shapekit_registry::Registry;
 
@@ -1157,7 +1157,55 @@ fn findings_json(c: &Collection, candidates: Option<&(String, Collection)>) -> V
             "findings": finding_rows(cand),
         });
     }
+    out["reported"] = reported_json(c, candidates.map(|(record, cand)| (record.as_str(), cand)));
     out
+}
+
+/// The statuses of a finding that has an upstream decision: an issue shapekit filed, an issue
+/// or fix that covered it before, or a private security report. Drafts and won't-fix records
+/// are not counted.
+const REPORTED: [Status; 3] = [Status::Filed, Status::DuplicateOf, Status::PrivateReport];
+
+/// The one findings count every page shows, the landing page and the dashboard alike: the
+/// findings of both records with a reported status, with the breakdowns the pages draw.
+fn reported_json(c: &Collection, candidates: Option<(&str, &Collection)>) -> Value {
+    let mut records: Vec<(&str, &Collection)> = vec![("findings/findings.json", c)];
+    records.extend(candidates);
+    let mut by_record: BTreeMap<&str, usize> = BTreeMap::new();
+    let mut by_status: BTreeMap<&str, usize> = BTreeMap::new();
+    let mut by_severity: BTreeMap<&str, usize> = BTreeMap::new();
+    let mut by_component: BTreeMap<&str, BTreeMap<&str, usize>> = BTreeMap::new();
+    let mut not_reported: BTreeMap<&str, usize> = BTreeMap::new();
+    let mut ids: Vec<&str> = Vec::new();
+    for (record, col) in &records {
+        let n = by_record.entry(record).or_default();
+        for f in &col.findings {
+            if !REPORTED.contains(&f.status) {
+                *not_reported.entry(f.status.name()).or_default() += 1;
+                continue;
+            }
+            *n += 1;
+            ids.push(&f.id);
+            *by_status.entry(f.status.name()).or_default() += 1;
+            *by_severity.entry(f.severity.name()).or_default() += 1;
+            *by_component
+                .entry(&f.component)
+                .or_default()
+                .entry(f.severity.name())
+                .or_default() += 1;
+        }
+    }
+    json!({
+        "statuses": REPORTED.iter().map(|s| s.name()).collect::<Vec<_>>(),
+        "findings": ids.len(),
+        "ids": ids,
+        "components": by_component.len(),
+        "by_record": by_record,
+        "by_status": by_status,
+        "by_severity": by_severity,
+        "by_component": by_component,
+        "not_reported": not_reported,
+    })
 }
 
 fn finding_rows(c: &Collection) -> Vec<Value> {
