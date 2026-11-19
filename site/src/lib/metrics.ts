@@ -66,14 +66,13 @@ export interface SdkSummary {
   known: number
   // the rest: these fail the sdk's CI
   notKnown: number
-  hasMatrix: boolean
 }
 
 export function sdkSummary(s: Sdk): SdkSummary {
   const cur = currentVersion(s)
   const diverging = divergingEntries(cur)
   const known = cur?.failing_cells_with_known_issue ?? 0
-  return { sdk: s.sdk, version: s.current, diverging, known, notKnown: diverging - known, hasMatrix: s.matrix !== null }
+  return { sdk: s.sdk, version: s.current, diverging, known, notKnown: diverging - known }
 }
 
 // ---- indexers

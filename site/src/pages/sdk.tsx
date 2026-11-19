@@ -149,14 +149,6 @@ function Totals({ sdk }: { sdk: Sdk }) {
           </TableRow>
         ))}
         <TableRow>
-          <TableCell className={sticky}>Unsupported checks in the diverging entries</TableCell>
-          {sdk.versions.map((v) => (
-            <TableCell key={v.version} className="text-right">
-              {count(v.checks_by_result.unsupported)}
-            </TableCell>
-          ))}
-        </TableRow>
-        <TableRow>
           <TableCell className={sticky}>Newest protocol the version reads</TableCell>
           {sdk.versions.map((v) => (
             <TableCell key={v.version} className="text-right">
@@ -196,7 +188,7 @@ function Matrix({ sdk, families, filter, op }: { sdk: Sdk; families: FamilyRow[]
           <EmptyTitle>No failing entry matches</EmptyTitle>
           <EmptyDescription>
             {sdk.entries.length === 0
-              ? `The committed ${sdkLabel(sdk.sdk)} matrix has no failing cells.`
+              ? `${sdkLabel(sdk.sdk)} fails no corpus entry at any version.`
               : "Clear the filter to see every failing entry."}
           </EmptyDescription>
         </EmptyHeader>
@@ -280,8 +272,8 @@ function Matrix({ sdk, families, filter, op }: { sdk: Sdk; families: FamilyRow[]
                 <SheetTitle className="font-mono text-sm break-all">{open.entry}</SheetTitle>
                 <SheetDescription>
                   {sdk.package} <Id>{open.version}</Id>:{" "}
-                  <GlossaryLink id={`check-${open.cell.result}`}>{termLabel(open.cell.result)}</GlossaryLink>, {failingChecks(open.cell).length} failing of{" "}
-                  {open.cell.checks.length} listed checks
+                  <GlossaryLink id={`check-${open.cell.result}`}>{termLabel(open.cell.result)}</GlossaryLink>, {failingChecks(open.cell).length} failing{" "}
+                  {failingChecks(open.cell).length === 1 ? "check" : "checks"}
                 </SheetDescription>
               </SheetHeader>
               <div className="flex flex-col gap-4 px-4 pb-6 text-sm">
@@ -303,6 +295,7 @@ function Matrix({ sdk, families, filter, op }: { sdk: Sdk; families: FamilyRow[]
                           <GlossaryLink id={`check-${k.result}`} className="decoration-current/40">
                             {termLabel(k.result)}
                           </GlossaryLink>
+                          {k.failure ? ` (${k.failure})` : null}
                         </span>
                       </span>
                       {k.detail ? <span className="break-words text-muted-foreground">{k.detail}</span> : null}
@@ -323,10 +316,10 @@ function Matrix({ sdk, families, filter, op }: { sdk: Sdk; families: FamilyRow[]
 }
 
 function observation(o: Observation, side: "fail" | "pass", r: Reproduction): { tone: Tone; text: string } {
-  if (o === "not-in-matrix")
+  if (o === "not-recorded")
     return {
       tone: "idle",
-      text: r.probes.length > 0 ? "runs as a probe, not in the matrix" : "version not in the committed matrix",
+      text: r.probes.length > 0 ? "runs as a probe, not in the committed results" : "version not in the versions file",
     }
   if (side === "fail") {
     return o === "named-checks-diverge"
@@ -347,8 +340,8 @@ function Reproductions() {
       description={
         <>
           Each row of <RepoLink path="conformance/reproductions.toml" /> names a bug that somebody reported upstream, the
-          corpus entries that show it, and SDK versions before and after its fix. The list shows the results of the
-          committed matrices for those entries and versions. <Id>shapekit conformance reproduce</Id> runs the same rows, probes included, in the
+          corpus entries that show it, and SDK versions before and after its fix. The list shows the committed results
+          for those entries and versions. <Id>shapekit conformance reproduce</Id> runs the same rows, probes included, in the
           nightly workflow.
         </>
       }
@@ -510,7 +503,7 @@ export function SdkPage() {
       <Section
         title="Summary"
         id="summary"
-        description="Select an SDK to see its matrix. The matrix columns count the runs of the first record. The second record has its own runs of the newer SDKs, and their defects show in the findings column."
+        description="Select an SDK to see its matrix."
       >
         <Summary sdks={conformance.sdks} findingsBy={findingsBy} select={select} />
       </Section>
@@ -540,16 +533,24 @@ export function SdkPage() {
           </div>
           <p className="text-sm text-muted-foreground">
             <Id className="text-foreground">{s.package}</Id>, {s.versions.length} {s.versions.length === 1 ? "version" : "versions"}, current{" "}
-            <Id>{s.current}</Id>. Issues go to <ExtLink href={`https://github.com/${s.issues_repo}`}>{s.issues_repo}</ExtLink>. Matrix:{" "}
-            {s.matrix ? <RepoLink path={s.matrix} /> : "none committed"}
-            {s.known_failures_file ? (
+            <Id>{s.current}</Id>. Issues go to <ExtLink href={`https://github.com/${s.issues_repo}`}>{s.issues_repo}</ExtLink>. Failing
+            checks:{" "}
+            {s.known_failures_file ? <RepoLink path={s.known_failures_file} /> : "none, every version passes every corpus entry"}.
+            {s.matrices.length > 0 ? (
               <>
-                . Known failures: <RepoLink path={s.known_failures_file} />
+                {" "}
+                Check details:{" "}
+                {s.matrices.map((m, i) => (
+                  <span key={m}>
+                    {i > 0 ? ", " : null}
+                    <RepoLink path={m} />
+                  </span>
+                ))}
+                .
               </>
             ) : null}
-            .
           </p>
-          {s.known_failure_problems && s.known_failure_problems.length > 0 ? (
+          {s.known_failure_problems.length > 0 ? (
             <ul className="text-sm text-diverge">
               {s.known_failure_problems.map((p) => (
                 <li key={p}>{p}</li>

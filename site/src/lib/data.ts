@@ -175,6 +175,8 @@ export interface Check {
   check: string
   op: string
   result: string
+  // how the check failed beyond its result (panic, timeout, ...), where it says more
+  failure: string | null
   detail: string | null
 }
 
@@ -189,13 +191,12 @@ export interface SdkVersion {
   key: string
   current: boolean
   max_protocol: number | null
-  in_matrix: boolean
   failing_cells_by_result: Counts
   failing_cells_with_known_issue: number
   // checks that failed (error, diverges-from-network, diverges-from-peers), by op
   failing_checks_by_op: Counts
-  // every check the failing cells hold, by result, including `unsupported` ones
-  checks_by_result: Counts
+  // the same checks by result
+  failing_checks_by_result: Counts
   known_failure_lines: number
 }
 
@@ -204,9 +205,9 @@ export interface Sdk {
   package: string
   current: string
   issues_repo: string
-  matrix: string | null
-  corpus_version: string | null
-  known_failure_problems: string[] | null
+  // the committed matrices that hold the sdk; they give the failing checks their detail
+  matrices: string[]
+  known_failure_problems: string[]
   known_failures_file: string | null
   known_failure_lines: number
   versions: SdkVersion[]
@@ -217,7 +218,7 @@ export type Observation =
   | "named-checks-diverge"
   | "no-counted-check-fails"
   | "diverges-elsewhere"
-  | "not-in-matrix"
+  | "not-recorded"
 
 export interface Reproduction {
   id: string
