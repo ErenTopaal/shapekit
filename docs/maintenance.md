@@ -194,7 +194,8 @@ from anywhere in the repository; it needs `cargo`, `go`, `golangci-lint`, `node`
 outputs under `target/acceptance/`. The Python testee's uv and CPython and the Java testee's JDK and
 Maven are fetched once from their pinned releases into `target/toolchains/` by
 `scripts/python-toolchain.sh` and `scripts/java-toolchain.sh`, which check each download
-against its sha256 in `pins.toml`. It stops at the first failing check and names it.
+against its sha256 in `pins.toml`. The workflows fetch Flutter the same way with
+`scripts/flutter-toolchain.sh`; locally you can put its output in front of `PATH` too. It stops at the first failing check and names it.
 
 - Quick mode, `scripts/acceptance.sh`, is the gate for every change: formatting, clippy and
   the workspace tests; `go vet`, `go test` and golangci-lint in every module of `go.work`, and

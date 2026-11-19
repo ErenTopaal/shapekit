@@ -7,12 +7,13 @@
 #        scripts/pin.sh release <name>  "<version> <commit> <asset url> <sha256>" of a [[release]]
 #        scripts/pin.sh maven <artifact> "<version> <file url> <sha256>" of the one [[maven]] pin
 #                                       of that artifact
+#        scripts/pin.sh toolchain <name> "<version> <artifact> <sha256>" of a [[toolchain]]
 #
 # needs python3 >= 3.11 for tomllib.
 set -euo pipefail
 
-kind=${1:?usage: scripts/pin.sh image|git|tag|release|maven <name>}
-name=${2:?usage: scripts/pin.sh image|git|tag|release|maven <name>}
+kind=${1:?usage: scripts/pin.sh image|git|tag|release|maven|toolchain <name>}
+name=${2:?usage: scripts/pin.sh image|git|tag|release|maven|toolchain <name>}
 
 python3 -I - "$(git rev-parse --show-toplevel)/pins.toml" "$kind" "$name" <<'PY'
 import sys, tomllib
@@ -21,9 +22,16 @@ path, kind, name = sys.argv[1:]
 with open(path, "rb") as f:
     pins = tomllib.load(f)
 
-table = {"image": "image", "git": "git", "tag": "git", "release": "release", "maven": "maven"}.get(kind)
+table = {
+    "image": "image",
+    "git": "git",
+    "tag": "git",
+    "release": "release",
+    "maven": "maven",
+    "toolchain": "toolchain",
+}.get(kind)
 if table is None:
-    sys.exit(f"unknown kind {kind}, expected image, git, tag, release or maven")
+    sys.exit(f"unknown kind {kind}, expected image, git, tag, release, maven or toolchain")
 key = "artifact" if kind == "maven" else "name"
 found = [e for e in pins.get(table, []) if e.get(key) == name]
 if len(found) != 1:
@@ -41,6 +49,8 @@ elif kind == "maven":
     group = e["group"].replace(".", "/")
     url = f'https://repo1.maven.org/maven2/{group}/{e["artifact"]}/{e["version"]}/{e["file"]}'
     print(e["version"], url, e["sha256"])
+elif kind == "toolchain":
+    print(e["version"], e["artifact"], e["sha256"])
 else:
     ref = e.get("ref", "")
     if not ref.startswith("refs/tags/"):

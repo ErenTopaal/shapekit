@@ -472,14 +472,8 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
-      - name: flutter 3.50.0, the archive pins.toml pins
-        run: |
-          set -euo pipefail
-          curl -fsSL --retry 3 -o "$RUNNER_TEMP/flutter.tar.xz" \
-            https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.50.0-stable.tar.xz
-          echo "6ea2d806fd57269ae783e6788e2a81fc26eaad782f1e0d0ff38623bb765ff9f5  $RUNNER_TEMP/flutter.tar.xz" | sha256sum -c
-          tar -xJf "$RUNNER_TEMP/flutter.tar.xz" -C "$RUNNER_TEMP"
-          echo "$RUNNER_TEMP/flutter/bin" >>"$GITHUB_PATH"
+      - name: pinned flutter for the dart testee
+        run: scripts/flutter-toolchain.sh >>"$GITHUB_PATH"
       - uses: actions/download-artifact@v8
         with:
           name: shapekit
