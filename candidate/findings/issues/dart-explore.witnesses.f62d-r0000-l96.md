@@ -86,7 +86,7 @@ How the corpus entry was built and checked: A classic recipe of the explorer's r
 ## Sibling issues
 
 - `network.lightsail:stellar-sdk` (lightsail-network/java-stellar-sdk) diverges on the same entry: no finding takes it yet.
-- `com.soneso.stellar:stellar-sdk-jvm` (Soneso/kmp-stellar-sdk) diverges on the same entry: shapekit's finding KMP-TXOBJECT, the transaction object refuses values the network applied: max time 2^64-1 and offer id -1 (not filed yet).
+- `com.soneso.stellar:stellar-sdk-jvm` (Soneso/kmp-stellar-sdk) diverges on the same entry: shapekit's finding KMP-TXOBJECT, the transaction object refuses values the network applied: max time 2^64-1 and offer id -1 (filed as https://github.com/Soneso/kmp-stellar-sdk/issues/171).
 - `soneso/stellar-php-sdk` (Soneso/stellar-php-sdk) diverges on the same entry: shapekit's finding PHP-UINT64, 64-bit values above 2^63-1 and negative int64 values lose their XDR-JSON form (not filed yet).
 - `stellar-sdk` (StellarCN/py-stellar-base) diverges on the same entry: no finding takes it yet.
 

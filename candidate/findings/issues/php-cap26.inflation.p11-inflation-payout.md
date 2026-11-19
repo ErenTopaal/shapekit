@@ -85,8 +85,8 @@ How the corpus entry was built and checked: An inflation operation at protocol 1
 
 ## Sibling issues
 
-- `stellar_flutter_sdk` (Soneso/stellar_flutter_sdk) diverges on 4 of these entries: shapekit's finding DART-INFLATION, AbstractTransaction.fromEnvelopeXdr refuses an envelope with an inflation operation (not filed yet).
-- `stellar-dotnet-sdk` (Beans-BV/dotnet-stellar-sdk) diverges on 4 of these entries: shapekit's finding NET-DEPRECATED-OPS, Transaction.FromEnvelopeXdr refuses envelopes with an allow trust or inflation operation (not filed yet).
+- `stellar_flutter_sdk` (Soneso/stellar_flutter_sdk) diverges on 4 of these entries: shapekit's finding DART-INFLATION, AbstractTransaction.fromEnvelopeXdr refuses an envelope with an inflation operation (filed as https://github.com/Soneso/stellar_flutter_sdk/issues/292).
+- `stellar-dotnet-sdk` (Beans-BV/dotnet-stellar-sdk) diverges on 4 of these entries: shapekit's finding NET-DEPRECATED-OPS, Transaction.FromEnvelopeXdr refuses envelopes with an allow trust or inflation operation (filed as https://github.com/Beans-BV/dotnet-stellar-sdk/issues/274).
 - `network.lightsail:stellar-sdk` (lightsail-network/java-stellar-sdk) diverges on 4 of these entries: no finding takes it yet.
 - `stellar-sdk` (StellarCN/py-stellar-base) diverges on 4 of these entries: no finding takes it yet.
 - `stellar-cli` (stellar/stellar-cli) diverges on 4 of these entries: shapekit's finding CLI-TXHASH-V1, stellar tx hash refuses v0 and fee bump envelopes the network applied (covered upstream by https://github.com/stellar/stellar-cli/issues/2769).

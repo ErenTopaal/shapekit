@@ -123,7 +123,7 @@ Related: https://github.com/stellar/js-stellar-sdk/issues/1785
 ## Sibling issues
 
 - `network.lightsail:stellar-sdk` (lightsail-network/java-stellar-sdk) diverges on `explore.witnesses.f62d-r0004-l69`, one of these entries: no finding takes it yet.
-- `com.soneso.stellar:stellar-sdk-jvm` (Soneso/kmp-stellar-sdk) diverges on `explore.witnesses.f62d-r0004-l69`, one of these entries: shapekit's finding KMP-TXOBJECT, the transaction object refuses values the network applied: max time 2^64-1 and offer id -1 (not filed yet).
+- `com.soneso.stellar:stellar-sdk-jvm` (Soneso/kmp-stellar-sdk) diverges on `explore.witnesses.f62d-r0004-l69`, one of these entries: shapekit's finding KMP-TXOBJECT, the transaction object refuses values the network applied: max time 2^64-1 and offer id -1 (filed as https://github.com/Soneso/kmp-stellar-sdk/issues/171).
 - `soneso/stellar-php-sdk` (Soneso/stellar-php-sdk) diverges on `explore.witnesses.f62d-r0004-l69`, one of these entries: shapekit's finding PHP-OFFERID, rebuilding a transaction with a manage sell offer of offer id -1 throws (not filed).
 - `stellar-sdk` (StellarCN/py-stellar-base) diverges on `explore.witnesses.f62d-r0004-l69`, one of these entries: no finding takes it yet.
 - `stellar-cli` (stellar/stellar-cli) diverges on `explore.witnesses.f62d-r0004-l69`, one of these entries: shapekit's finding CLI-TXHASH-V1, stellar tx hash refuses v0 and fee bump envelopes the network applied (covered upstream by https://github.com/stellar/stellar-cli/issues/2769).

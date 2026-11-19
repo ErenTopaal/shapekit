@@ -103,9 +103,9 @@ How the corpus entry was built and checked: Captured 2026-11-16 through the sep-
 
 ## Sibling issues
 
-- `stellar_flutter_sdk` (Soneso/stellar_flutter_sdk) diverges on 5 of these entries: shapekit's finding DART-PRICE, a transaction whose offer price is not in lowest terms hashes to another value once the sdk rebuilds it (not filed yet).
+- `stellar_flutter_sdk` (Soneso/stellar_flutter_sdk) diverges on 5 of these entries: shapekit's finding DART-PRICE, a transaction whose offer price is not in lowest terms hashes to another value once the sdk rebuilds it (filed as https://github.com/Soneso/stellar_flutter_sdk/issues/296).
 - `network.lightsail:stellar-sdk` (lightsail-network/java-stellar-sdk) diverges on 7 of these entries: no finding takes it yet.
-- `soneso/stellar-php-sdk` (Soneso/stellar-php-sdk) diverges on 2 of these entries: shapekit's finding PHP-CBKEY-JSON, a claimable balance ledger key renders without its balance_id member in XDR-JSON (not filed yet); PHP-HEXHASH, inner transaction hashes and config upgrade content hashes render as the hex of their hex in XDR-JSON, and their XDR-JSON does not encode (not filed yet).
+- `soneso/stellar-php-sdk` (Soneso/stellar-php-sdk) diverges on 2 of these entries: shapekit's finding PHP-CBKEY-JSON, a claimable balance ledger key renders without its balance_id member in XDR-JSON (filed as https://github.com/Soneso/stellar-php-sdk/issues/240); PHP-HEXHASH, inner transaction hashes and config upgrade content hashes render as the hex of their hex in XDR-JSON, and their XDR-JSON does not encode (filed as https://github.com/Soneso/stellar-php-sdk/issues/241).
 - `stellar-sdk` (StellarCN/py-stellar-base) diverges on 7 of these entries: no finding takes it yet.
 - `stellar-cli` (stellar/stellar-cli) diverges on 4 of these entries: shapekit's finding CLI-TXHASH-V1, stellar tx hash refuses v0 and fee bump envelopes the network applied (covered upstream by https://github.com/stellar/stellar-cli/issues/2769).
 

@@ -85,7 +85,7 @@ How the corpus entry was built and checked: A classic recipe of the explorer's r
 
 ## Sibling issues
 
-- `stellar-dotnet-sdk` (Beans-BV/dotnet-stellar-sdk) diverges on `explore.witnesses.g2-r0015-l71`, one of these entries: shapekit's finding NET-DEPRECATED-OPS, Transaction.FromEnvelopeXdr refuses envelopes with an allow trust or inflation operation (not filed yet).
+- `stellar-dotnet-sdk` (Beans-BV/dotnet-stellar-sdk) diverges on `explore.witnesses.g2-r0015-l71`, one of these entries: shapekit's finding NET-DEPRECATED-OPS, Transaction.FromEnvelopeXdr refuses envelopes with an allow trust or inflation operation (filed as https://github.com/Beans-BV/dotnet-stellar-sdk/issues/274).
 - `network.lightsail:stellar-sdk` (lightsail-network/java-stellar-sdk) diverges on 2 of these entries: no finding takes it yet.
 - `stellar-sdk` (StellarCN/py-stellar-base) diverges on 2 of these entries: no finding takes it yet.
 - `stellar-cli` (stellar/stellar-cli) diverges on 2 of these entries: shapekit's finding CLI-TXHASH-V1, stellar tx hash refuses v0 and fee bump envelopes the network applied (covered upstream by https://github.com/stellar/stellar-cli/issues/2769).

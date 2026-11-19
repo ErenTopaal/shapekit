@@ -64,12 +64,12 @@ How the corpus entry was built and checked: A v1 transaction envelope with 101 o
 
 ## Sibling issues
 
-- `stellar_flutter_sdk` (Soneso/stellar_flutter_sdk) diverges on 15 of these entries: shapekit's finding DART-BOUNDS, XDR decoders accept arrays, strings and opaque values longer than the schema allows, and nesting deeper than stellar-core accepts (not filed yet).
+- `stellar_flutter_sdk` (Soneso/stellar_flutter_sdk) diverges on 15 of these entries: shapekit's finding DART-BOUNDS, XDR decoders accept arrays, strings and opaque values longer than the schema allows, and nesting deeper than stellar-core accepts (filed as https://github.com/Soneso/stellar_flutter_sdk/issues/291).
 - `stellar-dotnet-sdk` (Beans-BV/dotnet-stellar-sdk) diverges on `classic.max-length.synth-memo-text-29-bytes`, one of these entries: shapekit's finding NET-BOUNDS, the text memo decoder accepts 29 bytes (covered upstream by https://github.com/Beans-BV/dotnet-stellar-sdk/issues/250).
 - `github.com/stellar/go-stellar-sdk` (stellar/go-stellar-sdk) diverges on 4 of these entries: shapekit's finding GO-4, xdr.DecodeOptions.MaxDepth counts fewer levels per nesting than stellar-xdr, so the sdk decodes envelopes nested deeper than core accepts (filed as https://github.com/stellar/go-stellar-sdk/issues/6047).
 - `network.lightsail:stellar-sdk` (lightsail-network/java-stellar-sdk) diverges on 4 of these entries: no finding takes it yet.
 - `@stellar/stellar-sdk` (stellar/js-stellar-sdk) diverges on 4 of these entries: shapekit's finding JS-DEPTH, fromXdr decodes envelopes nested deeper than stellar-core accepts, and no maxDepth value matches core's limit (filed as https://github.com/stellar/js-stellar-sdk/issues/1908).
-- `com.soneso.stellar:stellar-sdk-jvm` (Soneso/kmp-stellar-sdk) diverges on 19 of these entries: shapekit's finding KMP-BOUNDS, XDR decoders accept arrays, strings and opaques past their schema maximum and nonzero padding (not filed yet); KMP-UTF8, XDR strings are decoded to Kotlin strings, so memos, symbols and strings that are not UTF-8 change (not filed yet).
+- `com.soneso.stellar:stellar-sdk-jvm` (Soneso/kmp-stellar-sdk) diverges on 19 of these entries: shapekit's finding KMP-BOUNDS, XDR decoders accept arrays, strings and opaques past their schema maximum and nonzero padding (filed as https://github.com/Soneso/kmp-stellar-sdk/issues/168); KMP-UTF8, XDR strings are decoded to Kotlin strings, so memos, symbols and strings that are not UTF-8 change (filed as https://github.com/Soneso/kmp-stellar-sdk/issues/172).
 - `stellar-sdk` (StellarCN/py-stellar-base) diverges on 7 of these entries: no finding takes it yet.
 
 shapekit vector: `classic.max-length.synth-tx-101-operations`

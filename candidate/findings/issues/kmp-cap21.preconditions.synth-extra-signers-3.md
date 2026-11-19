@@ -64,12 +64,12 @@ How the corpus entry was built and checked: Preconditions v2 with 3 extra signer
 
 ## Sibling issues
 
-- `stellar_flutter_sdk` (Soneso/stellar_flutter_sdk) diverges on 15 of these entries: shapekit's finding DART-BOUNDS, XDR decoders accept arrays, strings and opaque values longer than the schema allows, and nesting deeper than stellar-core accepts (not filed yet).
+- `stellar_flutter_sdk` (Soneso/stellar_flutter_sdk) diverges on 15 of these entries: shapekit's finding DART-BOUNDS, XDR decoders accept arrays, strings and opaque values longer than the schema allows, and nesting deeper than stellar-core accepts (filed as https://github.com/Soneso/stellar_flutter_sdk/issues/291).
 - `stellar-dotnet-sdk` (Beans-BV/dotnet-stellar-sdk) diverges on `classic.max-length.synth-memo-text-29-bytes`, one of these entries: shapekit's finding NET-BOUNDS, the text memo decoder accepts 29 bytes (covered upstream by https://github.com/Beans-BV/dotnet-stellar-sdk/issues/250).
 - `github.com/stellar/go-stellar-sdk` (stellar/go-stellar-sdk) diverges on 4 of these entries: shapekit's finding GO-4, xdr.DecodeOptions.MaxDepth counts fewer levels per nesting than stellar-xdr, so the sdk decodes envelopes nested deeper than core accepts (filed as https://github.com/stellar/go-stellar-sdk/issues/6047).
 - `network.lightsail:stellar-sdk` (lightsail-network/java-stellar-sdk) diverges on 4 of these entries: no finding takes it yet.
 - `@stellar/stellar-sdk` (stellar/js-stellar-sdk) diverges on 4 of these entries: shapekit's finding JS-DEPTH, fromXdr decodes envelopes nested deeper than stellar-core accepts, and no maxDepth value matches core's limit (filed as https://github.com/stellar/js-stellar-sdk/issues/1908).
-- `soneso/stellar-php-sdk` (Soneso/stellar-php-sdk) diverges on 18 of these entries: shapekit's finding PHP-BOUNDS, XDR decoders accept values the schema forbids: arrays and strings past their maximum, nonzero padding, nesting past stellar-core's limit (not filed yet).
+- `soneso/stellar-php-sdk` (Soneso/stellar-php-sdk) diverges on 18 of these entries: shapekit's finding PHP-BOUNDS, XDR decoders accept values the schema forbids: arrays and strings past their maximum, nonzero padding, nesting past stellar-core's limit (filed as https://github.com/Soneso/stellar-php-sdk/issues/239).
 - `stellar-sdk` (StellarCN/py-stellar-base) diverges on 6 of these entries: no finding takes it yet.
 
 shapekit vector: `cap21.preconditions.synth-extra-signers-3`

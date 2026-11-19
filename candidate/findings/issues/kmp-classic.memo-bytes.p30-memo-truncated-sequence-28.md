@@ -143,10 +143,10 @@ Related: https://github.com/stellar/js-stellar-sdk/issues/1823
 
 ## Sibling issues
 
-- `stellar_flutter_sdk` (Soneso/stellar_flutter_sdk) diverges on 13 of these entries: shapekit's finding DART-UTF8, XDR strings are decoded as UTF-8, so valid ledgers with other bytes in a memo, symbol or string do not decode (not filed yet).
+- `stellar_flutter_sdk` (Soneso/stellar_flutter_sdk) diverges on 13 of these entries: shapekit's finding DART-UTF8, XDR strings are decoded as UTF-8, so valid ledgers with other bytes in a memo, symbol or string do not decode (filed as https://github.com/Soneso/stellar_flutter_sdk/issues/297).
 - `stellar-dotnet-sdk` (Beans-BV/dotnet-stellar-sdk) diverges on 11 of these entries: shapekit's finding NET-UTF8, memo text and SDK ScString and ScSymbol values are decoded to .NET strings, so bytes that are not UTF-8 change, and so does the transaction hash (covered upstream by https://github.com/Beans-BV/dotnet-stellar-sdk/issues/247).
 - `network.lightsail:stellar-sdk` (lightsail-network/java-stellar-sdk) diverges on 12 of these entries: no finding takes it yet.
-- `soneso/stellar-php-sdk` (Soneso/stellar-php-sdk) diverges on 2 of these entries: shapekit's finding PHP-BOUNDS, XDR decoders accept values the schema forbids: arrays and strings past their maximum, nonzero padding, nesting past stellar-core's limit (not filed yet); PHP-UINT64, 64-bit values above 2^63-1 and negative int64 values lose their XDR-JSON form (not filed yet).
+- `soneso/stellar-php-sdk` (Soneso/stellar-php-sdk) diverges on 2 of these entries: shapekit's finding PHP-BOUNDS, XDR decoders accept values the schema forbids: arrays and strings past their maximum, nonzero padding, nesting past stellar-core's limit (filed as https://github.com/Soneso/stellar-php-sdk/issues/239); PHP-UINT64, 64-bit values above 2^63-1 and negative int64 values lose their XDR-JSON form (not filed yet).
 - `stellar-sdk` (StellarCN/py-stellar-base) diverges on 13 of these entries: no finding takes it yet.
 
 shapekit vector: `classic.memo-bytes.p30-memo-truncated-sequence-28`

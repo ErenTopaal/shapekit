@@ -87,11 +87,11 @@ Related: https://github.com/stellar/wallet-backend/issues/746
 
 ## Sibling issues
 
-- `stellar-dotnet-sdk` (Beans-BV/dotnet-stellar-sdk) diverges on 4 of these entries: shapekit's finding NET-DEPTH, XDR decoders stop at 200 nested types, below stellar-core's limit (not filed yet).
+- `stellar-dotnet-sdk` (Beans-BV/dotnet-stellar-sdk) diverges on 4 of these entries: shapekit's finding NET-DEPTH, XDR decoders stop at 200 nested types, below stellar-core's limit (filed as https://github.com/Beans-BV/dotnet-stellar-sdk/issues/275).
 - `network.lightsail:stellar-sdk` (lightsail-network/java-stellar-sdk) diverges on 4 of these entries: no finding takes it yet.
 - `@stellar/stellar-sdk` (stellar/js-stellar-sdk) diverges on 4 of these entries: shapekit's finding JS-16X, 16.x lacks six fixes that 17.x has: map key order and collisions, textual ids, W addresses, decode depth, StrKey checks (filed as https://github.com/stellar/js-stellar-sdk/issues/1907).
-- `com.soneso.stellar:stellar-sdk-jvm` (Soneso/kmp-stellar-sdk) diverges on 4 of these entries: shapekit's finding KMP-JSON-DEPTH, XDR-JSON the sdk writes for values nested past 128 containers is refused when the sdk reads it back (not filed yet).
-- `soneso/stellar-php-sdk` (Soneso/stellar-php-sdk) diverges on 3 of these entries: shapekit's finding PHP-JSON-DEPTH, XDR-JSON stops at 512 nested arrays, below stellar-core's limits (not filed yet).
+- `com.soneso.stellar:stellar-sdk-jvm` (Soneso/kmp-stellar-sdk) diverges on 4 of these entries: shapekit's finding KMP-JSON-DEPTH, XDR-JSON the sdk writes for values nested past 128 containers is refused when the sdk reads it back (filed as https://github.com/Soneso/kmp-stellar-sdk/issues/169).
+- `soneso/stellar-php-sdk` (Soneso/stellar-php-sdk) diverges on 3 of these entries: shapekit's finding PHP-JSON-DEPTH, XDR-JSON stops at 512 nested arrays, below stellar-core's limits (filed as https://github.com/Soneso/stellar-php-sdk/issues/243).
 - `stellar-sdk` (StellarCN/py-stellar-base) diverges on 4 of these entries: no finding takes it yet.
 - `stellar-xdr` (stellar/rs-stellar-xdr) diverges on 4 of these entries: shapekit's finding RS-2, the XDR-JSON reader stops at serde_json's recursion limit of 128, so values the crate writes as JSON cannot be read back (filed as https://github.com/stellar/rs-stellar-xdr/issues/628).
 

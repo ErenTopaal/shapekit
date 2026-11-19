@@ -103,9 +103,9 @@ How the corpus entry was built and checked: Captured 2026-11-16 through the sep-
 
 ## Sibling issues
 
-- `stellar-dotnet-sdk` (Beans-BV/dotnet-stellar-sdk) diverges on 5 of these entries: shapekit's finding NET-DEPRECATED-OPS, Transaction.FromEnvelopeXdr refuses envelopes with an allow trust or inflation operation (not filed yet); NET-PRICE, a transaction whose offer price the sdk does not get back from a decimal hashes to another value (not filed yet).
+- `stellar-dotnet-sdk` (Beans-BV/dotnet-stellar-sdk) diverges on 5 of these entries: shapekit's finding NET-DEPRECATED-OPS, Transaction.FromEnvelopeXdr refuses envelopes with an allow trust or inflation operation (filed as https://github.com/Beans-BV/dotnet-stellar-sdk/issues/274); NET-PRICE, a transaction whose offer price the sdk does not get back from a decimal hashes to another value (filed as https://github.com/Beans-BV/dotnet-stellar-sdk/issues/276).
 - `network.lightsail:stellar-sdk` (lightsail-network/java-stellar-sdk) diverges on 6 of these entries: no finding takes it yet.
-- `soneso/stellar-php-sdk` (Soneso/stellar-php-sdk) diverges on 2 of these entries: shapekit's finding PHP-CBKEY-JSON, a claimable balance ledger key renders without its balance_id member in XDR-JSON (not filed yet); PHP-HEXHASH, inner transaction hashes and config upgrade content hashes render as the hex of their hex in XDR-JSON, and their XDR-JSON does not encode (not filed yet).
+- `soneso/stellar-php-sdk` (Soneso/stellar-php-sdk) diverges on 2 of these entries: shapekit's finding PHP-CBKEY-JSON, a claimable balance ledger key renders without its balance_id member in XDR-JSON (filed as https://github.com/Soneso/stellar-php-sdk/issues/240); PHP-HEXHASH, inner transaction hashes and config upgrade content hashes render as the hex of their hex in XDR-JSON, and their XDR-JSON does not encode (filed as https://github.com/Soneso/stellar-php-sdk/issues/241).
 - `stellar-sdk` (StellarCN/py-stellar-base) diverges on 6 of these entries: no finding takes it yet.
 - `stellar-cli` (stellar/stellar-cli) diverges on 4 of these entries: shapekit's finding CLI-TXHASH-V1, stellar tx hash refuses v0 and fee bump envelopes the network applied (covered upstream by https://github.com/stellar/stellar-cli/issues/2769).
 

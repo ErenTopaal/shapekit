@@ -88,7 +88,7 @@ Related: https://github.com/stellar/wallet-backend/issues/716
 ## Sibling issues
 
 - `network.lightsail:stellar-sdk` (lightsail-network/java-stellar-sdk) diverges on 27 of these entries: no finding takes it yet.
-- `soneso/stellar-php-sdk` (Soneso/stellar-php-sdk) diverges on 4 of these entries: shapekit's finding PHP-CBKEY-JSON, a claimable balance ledger key renders without its balance_id member in XDR-JSON (not filed yet); PHP-HEXHASH, inner transaction hashes and config upgrade content hashes render as the hex of their hex in XDR-JSON, and their XDR-JSON does not encode (not filed yet); PHP-UINT64, 64-bit values above 2^63-1 and negative int64 values lose their XDR-JSON form (not filed yet).
+- `soneso/stellar-php-sdk` (Soneso/stellar-php-sdk) diverges on 4 of these entries: shapekit's finding PHP-CBKEY-JSON, a claimable balance ledger key renders without its balance_id member in XDR-JSON (filed as https://github.com/Soneso/stellar-php-sdk/issues/240); PHP-HEXHASH, inner transaction hashes and config upgrade content hashes render as the hex of their hex in XDR-JSON, and their XDR-JSON does not encode (filed as https://github.com/Soneso/stellar-php-sdk/issues/241); PHP-UINT64, 64-bit values above 2^63-1 and negative int64 values lose their XDR-JSON form (not filed yet).
 - `stellar-sdk` (StellarCN/py-stellar-base) diverges on 27 of these entries: no finding takes it yet.
 - `stellar-cli` (stellar/stellar-cli) diverges on `explore.witnesses.g2-r0018-l122`, one of these entries: shapekit's finding CLI-TXHASH-V1, stellar tx hash refuses v0 and fee bump envelopes the network applied (covered upstream by https://github.com/stellar/stellar-cli/issues/2769).
 

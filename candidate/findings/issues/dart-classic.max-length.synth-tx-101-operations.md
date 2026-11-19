@@ -68,8 +68,8 @@ How the corpus entry was built and checked: A v1 transaction envelope with 101 o
 - `github.com/stellar/go-stellar-sdk` (stellar/go-stellar-sdk) diverges on 4 of these entries: shapekit's finding GO-4, xdr.DecodeOptions.MaxDepth counts fewer levels per nesting than stellar-xdr, so the sdk decodes envelopes nested deeper than core accepts (filed as https://github.com/stellar/go-stellar-sdk/issues/6047).
 - `network.lightsail:stellar-sdk` (lightsail-network/java-stellar-sdk) diverges on 4 of these entries: no finding takes it yet.
 - `@stellar/stellar-sdk` (stellar/js-stellar-sdk) diverges on 4 of these entries: shapekit's finding JS-DEPTH, fromXdr decodes envelopes nested deeper than stellar-core accepts, and no maxDepth value matches core's limit (filed as https://github.com/stellar/js-stellar-sdk/issues/1908).
-- `com.soneso.stellar:stellar-sdk-jvm` (Soneso/kmp-stellar-sdk) diverges on 15 of these entries: shapekit's finding KMP-BOUNDS, XDR decoders accept arrays, strings and opaques past their schema maximum and nonzero padding (not filed yet).
-- `soneso/stellar-php-sdk` (Soneso/stellar-php-sdk) diverges on 15 of these entries: shapekit's finding PHP-BOUNDS, XDR decoders accept values the schema forbids: arrays and strings past their maximum, nonzero padding, nesting past stellar-core's limit (not filed yet).
+- `com.soneso.stellar:stellar-sdk-jvm` (Soneso/kmp-stellar-sdk) diverges on 15 of these entries: shapekit's finding KMP-BOUNDS, XDR decoders accept arrays, strings and opaques past their schema maximum and nonzero padding (filed as https://github.com/Soneso/kmp-stellar-sdk/issues/168).
+- `soneso/stellar-php-sdk` (Soneso/stellar-php-sdk) diverges on 15 of these entries: shapekit's finding PHP-BOUNDS, XDR decoders accept values the schema forbids: arrays and strings past their maximum, nonzero padding, nesting past stellar-core's limit (filed as https://github.com/Soneso/stellar-php-sdk/issues/239).
 - `stellar-sdk` (StellarCN/py-stellar-base) diverges on 3 of these entries: no finding takes it yet.
 
 shapekit vector: `classic.max-length.synth-tx-101-operations`

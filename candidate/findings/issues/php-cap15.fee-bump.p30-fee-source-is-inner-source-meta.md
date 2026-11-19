@@ -113,10 +113,10 @@ Related: https://github.com/stellar/stellar-etl/issues/477
 
 ## Sibling issues
 
-- `stellar_flutter_sdk` (Soneso/stellar_flutter_sdk) diverges on `cap15.fee-bump.mainnet-57369500`, one of these entries: shapekit's finding DART-PRICE, a transaction whose offer price is not in lowest terms hashes to another value once the sdk rebuilds it (not filed yet).
-- `stellar-dotnet-sdk` (Beans-BV/dotnet-stellar-sdk) diverges on `cap15.fee-bump.mainnet-57369500`, one of these entries: shapekit's finding NET-PRICE, a transaction whose offer price the sdk does not get back from a decimal hashes to another value (not filed yet).
+- `stellar_flutter_sdk` (Soneso/stellar_flutter_sdk) diverges on `cap15.fee-bump.mainnet-57369500`, one of these entries: shapekit's finding DART-PRICE, a transaction whose offer price is not in lowest terms hashes to another value once the sdk rebuilds it (filed as https://github.com/Soneso/stellar_flutter_sdk/issues/296).
+- `stellar-dotnet-sdk` (Beans-BV/dotnet-stellar-sdk) diverges on `cap15.fee-bump.mainnet-57369500`, one of these entries: shapekit's finding NET-PRICE, a transaction whose offer price the sdk does not get back from a decimal hashes to another value (filed as https://github.com/Beans-BV/dotnet-stellar-sdk/issues/276).
 - `network.lightsail:stellar-sdk` (lightsail-network/java-stellar-sdk) diverges on 47 of these entries: no finding takes it yet.
-- `com.soneso.stellar:stellar-sdk-jvm` (Soneso/kmp-stellar-sdk) diverges on `explore.witnesses.g2-r0018-l122`, one of these entries: shapekit's finding KMP-MUXED-SOURCE, Transaction.fromEnvelopeXdr drops the muxed id of a transaction's source, so the transaction hash differs from the network's (not filed yet).
+- `com.soneso.stellar:stellar-sdk-jvm` (Soneso/kmp-stellar-sdk) diverges on `explore.witnesses.g2-r0018-l122`, one of these entries: shapekit's finding KMP-MUXED-SOURCE, Transaction.fromEnvelopeXdr drops the muxed id of a transaction's source, so the transaction hash differs from the network's (filed as https://github.com/Soneso/kmp-stellar-sdk/issues/170).
 - `stellar-sdk` (StellarCN/py-stellar-base) diverges on 60 of these entries: no finding takes it yet.
 - `stellar-cli` (stellar/stellar-cli) diverges on 38 of these entries: shapekit's finding CLI-TXHASH-V1, stellar tx hash refuses v0 and fee bump envelopes the network applied (covered upstream by https://github.com/stellar/stellar-cli/issues/2769).
 

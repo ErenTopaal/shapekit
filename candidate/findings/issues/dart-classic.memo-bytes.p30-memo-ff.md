@@ -145,7 +145,7 @@ Related: https://github.com/stellar/js-stellar-sdk/issues/1823
 
 - `stellar-dotnet-sdk` (Beans-BV/dotnet-stellar-sdk) diverges on 11 of these entries: shapekit's finding NET-UTF8, memo text and SDK ScString and ScSymbol values are decoded to .NET strings, so bytes that are not UTF-8 change, and so does the transaction hash (covered upstream by https://github.com/Beans-BV/dotnet-stellar-sdk/issues/247).
 - `network.lightsail:stellar-sdk` (lightsail-network/java-stellar-sdk) diverges on 12 of these entries: no finding takes it yet.
-- `com.soneso.stellar:stellar-sdk-jvm` (Soneso/kmp-stellar-sdk) diverges on 13 of these entries: shapekit's finding KMP-UTF8, XDR strings are decoded to Kotlin strings, so memos, symbols and strings that are not UTF-8 change (not filed yet).
+- `com.soneso.stellar:stellar-sdk-jvm` (Soneso/kmp-stellar-sdk) diverges on 13 of these entries: shapekit's finding KMP-UTF8, XDR strings are decoded to Kotlin strings, so memos, symbols and strings that are not UTF-8 change (filed as https://github.com/Soneso/kmp-stellar-sdk/issues/172).
 - `soneso/stellar-php-sdk` (Soneso/stellar-php-sdk) diverges on `soroban.scval-shapes.p30-string-not-utf8-meta`, one of these entries: shapekit's finding PHP-UINT64, 64-bit values above 2^63-1 and negative int64 values lose their XDR-JSON form (not filed yet).
 - `stellar-sdk` (StellarCN/py-stellar-base) diverges on 12 of these entries: no finding takes it yet.
 

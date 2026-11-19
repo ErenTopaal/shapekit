@@ -82,12 +82,12 @@ How the corpus entry was built and checked: A source-account authorization entry
 
 ## Sibling issues
 
-- `stellar-dotnet-sdk` (Beans-BV/dotnet-stellar-sdk) diverges on 5 of these entries: shapekit's finding NET-DEPTH, XDR decoders stop at 200 nested types, below stellar-core's limit (not filed yet).
+- `stellar-dotnet-sdk` (Beans-BV/dotnet-stellar-sdk) diverges on 5 of these entries: shapekit's finding NET-DEPTH, XDR decoders stop at 200 nested types, below stellar-core's limit (filed as https://github.com/Beans-BV/dotnet-stellar-sdk/issues/275).
 - `network.lightsail:stellar-sdk` (lightsail-network/java-stellar-sdk) diverges on 5 of these entries: no finding takes it yet.
 - `@stellar/stellar-sdk` (stellar/js-stellar-sdk) diverges on 5 of these entries: shapekit's finding JS-16X, 16.x lacks six fixes that 17.x has: map key order and collisions, textual ids, W addresses, decode depth, StrKey checks (filed as https://github.com/stellar/js-stellar-sdk/issues/1907).
-- `com.soneso.stellar:stellar-sdk-jvm` (Soneso/kmp-stellar-sdk) diverges on 5 of these entries: shapekit's finding KMP-JSON-DEPTH, XDR-JSON the sdk writes for values nested past 128 containers is refused when the sdk reads it back (not filed yet).
+- `com.soneso.stellar:stellar-sdk-jvm` (Soneso/kmp-stellar-sdk) diverges on 5 of these entries: shapekit's finding KMP-JSON-DEPTH, XDR-JSON the sdk writes for values nested past 128 containers is refused when the sdk reads it back (filed as https://github.com/Soneso/kmp-stellar-sdk/issues/169).
 - `stellar-sdk` (StellarCN/py-stellar-base) diverges on 4 of these entries: no finding takes it yet.
 - `stellar-xdr` (stellar/rs-stellar-xdr) diverges on 5 of these entries: shapekit's finding RS-2, the XDR-JSON reader stops at serde_json's recursion limit of 128, so values the crate writes as JSON cannot be read back (filed as https://github.com/stellar/rs-stellar-xdr/issues/628).
-- `stellar-cli` (stellar/stellar-cli) diverges on 5 of these entries: shapekit's finding CLI-DEPTH, question: stellar tx hash decodes with a depth limit of 500, below the 1000 stellar-core accepts from protocol 28 (not filed yet); CLI-JSON-DEPTH, stellar xdr encode stops reading XDR-JSON at serde_json's nesting default of 128 (covered upstream by https://github.com/stellar/rs-stellar-xdr/issues/628).
+- `stellar-cli` (stellar/stellar-cli) diverges on 5 of these entries: shapekit's finding CLI-DEPTH, question: stellar tx hash decodes with a depth limit of 500, below the 1000 stellar-core accepts from protocol 28 (filed as https://github.com/stellar/stellar-cli/issues/2895); CLI-JSON-DEPTH, stellar xdr encode stops reading XDR-JSON at serde_json's nesting default of 128 (covered upstream by https://github.com/stellar/rs-stellar-xdr/issues/628).
 
 shapekit vector: `soroban.auth-trees.synth-auth-depth-493-deepest-accepted`

@@ -85,7 +85,7 @@ How the corpus entry was built and checked: A classic recipe of the explorer's r
 
 ## Sibling issues
 
-- `stellar_flutter_sdk` (Soneso/stellar_flutter_sdk) diverges on 2 of these entries: shapekit's finding DART-MAXTIME, a transaction with max time 2^64-1 hashes to another value once the sdk rebuilds it (not filed yet); DART-OFFERU64, question: offer ids are generated as XdrUint64, so the XDR-JSON of a negative offer id is another number and the canonical form does not encode (not filed yet).
+- `stellar_flutter_sdk` (Soneso/stellar_flutter_sdk) diverges on 2 of these entries: shapekit's finding DART-MAXTIME, a transaction with max time 2^64-1 hashes to another value once the sdk rebuilds it (filed as https://github.com/Soneso/stellar_flutter_sdk/issues/293); DART-OFFERU64, question: offer ids are generated as XdrUint64, so the XDR-JSON of a negative offer id is another number and the canonical form does not encode (filed as https://github.com/Soneso/stellar_flutter_sdk/issues/295).
 - `network.lightsail:stellar-sdk` (lightsail-network/java-stellar-sdk) diverges on 2 of these entries: no finding takes it yet.
 - `soneso/stellar-php-sdk` (Soneso/stellar-php-sdk) diverges on 2 of these entries: shapekit's finding PHP-OFFERID, rebuilding a transaction with a manage sell offer of offer id -1 throws (not filed); PHP-UINT64, 64-bit values above 2^63-1 and negative int64 values lose their XDR-JSON form (not filed yet).
 - `stellar-sdk` (StellarCN/py-stellar-base) diverges on 2 of these entries: no finding takes it yet.
