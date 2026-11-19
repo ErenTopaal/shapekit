@@ -41,8 +41,8 @@ fetch() {
   mkdir -p "$dir"
   for url in "$@"; do
     if curl -fsSL --retry 3 -o "$dir.tar.gz" "$url"; then
-      echo "java-toolchain: $(basename "$dir") from $url" >&2
       echo "$sha256  $dir.tar.gz" | sha256sum --check --strict --quiet
+      echo "java-toolchain: $(basename "$dir") from $url, sha256 matches" >&2
       tar -xzf "$dir.tar.gz" -C "$dir" --strip-components=1
       rm "$dir.tar.gz"
       echo "$sha256" >"$dir/.sha256"
