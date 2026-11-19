@@ -8,7 +8,13 @@ use anyhow::{Context, Result, bail};
 use reqwest::blocking::{Client, Response};
 use reqwest::header::{ACCEPT, AUTHORIZATION};
 
-const USER_AGENT: &str = concat!("shapekit-pins-verify/", env!("CARGO_PKG_VERSION"));
+// maven central asks a tool to name itself, its version and a contact path
+// (central.sonatype.org/faq/429-tooling-provider)
+const USER_AGENT: &str = concat!(
+    "shapekit-pins-verify/",
+    env!("CARGO_PKG_VERSION"),
+    " (+https://github.com/ErenTopaal/shapekit)"
+);
 
 // multi-arch images answer with an index, single-arch ones with a manifest.
 // listing all four types makes the registry return the digest of whatever the
@@ -69,10 +75,23 @@ fn git_transient(err: &anyhow::Error) -> bool {
     .any(|m| msg.contains(m))
 }
 
+// a refusal names who answered: a cdn or a filter in front of a registry can answer a file that
+// exists with 403 or 404, and the status alone does not tell that from a missing file
+const ANSWERED_BY: [&str; 5] = ["server", "via", "x-served-by", "cf-ray", "cf-mitigated"];
+
 fn ensure_success(resp: Response, url: &str) -> Result<Response> {
     let status = resp.status();
     if !status.is_success() {
-        bail!("GET {url} returned {status}");
+        let mut by = Vec::new();
+        for name in ANSWERED_BY {
+            if let Some(v) = resp.headers().get(name).and_then(|v| v.to_str().ok()) {
+                by.push(format!("{name}: {v}"));
+            }
+        }
+        let body = resp.text().unwrap_or_default();
+        let body: String = body.split_whitespace().collect::<Vec<_>>().join(" ");
+        let body: String = body.chars().take(160).collect();
+        bail!("GET {url} returned {status} ({}); body: {body:?}", by.join(", "));
     }
     Ok(resp)
 }
