@@ -84,6 +84,8 @@ async function answer(req: Json): Promise<Json> {
 
 async function main(): Promise<void> {
   for await (const raw of createInterface({ input: process.stdin, crlfDelay: Infinity })) {
+    // an empty line gets no response
+    if (raw === "") continue;
     let req: unknown;
     try {
       req = JSON.parse(raw);

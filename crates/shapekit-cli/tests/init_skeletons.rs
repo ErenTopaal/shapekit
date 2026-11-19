@@ -258,8 +258,8 @@ fn init_refuses_a_directory_that_is_not_empty() {
 }
 
 /// Writes a testee skeleton, runs the build steps of its versions.toml as the runner does, and
-/// drives the testee with hello, an op it does not implement, an unknown op and lines that are
-/// not requests.
+/// drives the testee with hello, an op it does not implement, an unknown op, an empty line and
+/// lines that are not requests.
 fn testee(lang: &str) {
     let tmp = tempfile::tempdir().unwrap();
     shapekit(
@@ -294,6 +294,10 @@ fn testee(lang: &str) {
     let answer = peer.read();
     assert_valid(&v, &answer);
     assert_eq!(answer["error"]["class"], "bad-request");
+    // an empty line gets no answer, so the next answer is the next request's
+    peer.send("");
+    peer.send(r#"{"id": "4", "op": "hello"}"#);
+    assert_eq!(peer.read()["id"], "4");
     peer.send("not json");
     let answer = peer.read();
     assert_valid(&v, &answer);

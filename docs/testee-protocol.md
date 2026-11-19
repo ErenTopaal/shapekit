@@ -48,7 +48,7 @@ schema describe the same protocol; if they disagree, report it as a bug.
   Echo it back. Answer a line that is not a JSON object with a string `id` with `"id": ""`
   and a `bad-request` error.
 - Skip an empty line (a `\n` with nothing before it) without answering. The runner never sends
-  one, and every testee here skips it, so a stray newline does not shift the responses.
+  one, and every testee and skeleton here skips it, so a stray newline does not shift the responses.
 - `op`: one of the operation names below.
 - The other members depend on `op`. A testee must ignore members it does not know, so that
   later protocol versions can add optional members.
@@ -727,7 +727,7 @@ each SDK.
 `--package`, `--sdk-version` and `--issues-repo`; `--name` sets its key in the versions file.
 The skeleton answers `hello` with the SDK version read from the installed package or the build
 info, lists no ops yet, answers every op this page defines with `unsupported` until you add it
-to the skeleton's ops table, and answers malformed lines with `bad-request`. Its
+to the skeleton's ops table, skips empty lines, and answers malformed lines with `bad-request`. Its
 `versions.toml` holds the build steps that install the SDK, so a first run is:
 
 ```sh

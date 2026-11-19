@@ -133,6 +133,10 @@ func main() {
 	// requests can hold a whole LedgerCloseMeta; the protocol asks for at least 64 MiB lines
 	in.Buffer(make([]byte, 0, 1<<20), 64<<20+1)
 	for in.Scan() {
+		// an empty line gets no response
+		if len(in.Bytes()) == 0 {
+			continue
+		}
 		var req request
 		if err := json.Unmarshal(in.Bytes(), &req); err != nil {
 			send(out, map[string]any{"id": "", "status": "error", "error": map[string]any{"class": "bad-request", "message": "not a json object: " + err.Error()}})

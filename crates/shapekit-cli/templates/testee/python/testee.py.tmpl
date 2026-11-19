@@ -72,6 +72,9 @@ def answer(req):
 def main():
     sys.setrecursionlimit(10000)
     for raw in sys.stdin:
+        # an empty line gets no response
+        if raw == "\n":
+            continue
         try:
             req = json.loads(raw)
         except ValueError as e:
