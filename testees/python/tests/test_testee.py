@@ -3,11 +3,15 @@
 """
 
 import base64
+import hashlib
 import importlib.metadata
 import io
 import json
 import unittest
 
+import stellar_sdk
+
+from shapekit_testee import sdkapi
 from shapekit_testee.serve import serve
 from shapekit_testee.types import table
 
@@ -37,7 +41,9 @@ class Hello(unittest.TestCase):
         self.assertEqual(r["result"]["sdk_version"], VERSION)
         self.assertEqual(r["result"]["decode_limits"], "ignored")
         self.assertNotIn("coverage_snapshot", r["result"]["ops"])
-        self.assertIn("xdrlib3", r["result"]["components"])
+        components = r["result"]["components"]
+        self.assertIn("stellar-xdr" if sdkapi.STELLAR_XDR else "xdrlib3", components)
+        self.assertEqual("stellar-strkey" in components, sdkapi.STRKEY_CLASSES)
 
 
 class RequestErrors(unittest.TestCase):
@@ -100,6 +106,39 @@ class Strkey(unittest.TestCase):
         r = one({"id": "2", "op": "strkey_decode", "text_base64": base64.b64encode(b"G\xff").decode()})
         self.assertEqual(r["status"], "unsupported")
 
+    def test_every_kind_round_trips(self) -> None:
+        key = b":" * 32
+        payloads = {
+            "account": key,
+            "muxed_account": key + (7).to_bytes(8, "big"),
+            "seed": key,
+            "pre_auth_tx": key,
+            "hash_x": key,
+            "signed_payload": key + (5).to_bytes(4, "big") + b"hello" + bytes(3),
+            "contract": key,
+            "liquidity_pool": key,
+            "claimable_balance": b"\x00" + key,
+            "muxed_contract": key + (7).to_bytes(8, "big"),
+        }
+        for kind, payload in payloads.items():
+            b64 = base64.b64encode(payload).decode()
+            r = one({"id": "1", "op": "strkey_encode", "kind": kind, "payload": b64})
+            if kind == "muxed_contract" and not sdkapi.STRKEY_CLASSES and not hasattr(stellar_sdk.StrKey, "encode_muxed_contract"):
+                # W addresses came with 17.0.0
+                self.assertEqual(r["status"], "unsupported", r)
+                continue
+            self.assertEqual(r["status"], "ok", (kind, r))
+            r = one({"id": "2", "op": "strkey_decode", "text": r["result"]["text"]})
+            self.assertEqual(r["result"], {"kind": kind, "payload": b64})
+
+    def test_encode_of_a_short_payload(self) -> None:
+        r = one({"id": "1", "op": "strkey_encode", "kind": "account", "payload": base64.b64encode(b":" * 31).decode()})
+        if sdkapi.STRKEY_CLASSES:
+            self.assertEqual(r["error"]["class"], "rejected", r)
+        else:
+            # StrKey.encode_ed25519_public_key writes a payload of any length
+            self.assertEqual(r["status"], "ok", r)
+
 
 class Ids(unittest.TestCase):
     def test_numbers_reach_the_sdk_and_strings_have_no_api(self) -> None:
@@ -131,6 +170,25 @@ class Address(unittest.TestCase):
         self.assertEqual(r["result"], {"text": "GA5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DVTUJ"})
         r = one({"id": "2", "op": "address_from_scval", "xdr": U32_7})
         self.assertEqual(r["error"]["class"], "rejected")
+
+
+class ContractId(unittest.TestCase):
+    PASSPHRASE = "Test SDF Network ; September 2015"
+
+    def expected(self, preimage: bytes) -> str:
+        # HashIDPreimage: ENVELOPE_TYPE_CONTRACT_ID (8), the network id, the ContractIDPreimage
+        network_id = hashlib.sha256(self.PASSPHRASE.encode()).digest()
+        return hashlib.sha256((8).to_bytes(4, "big") + network_id + preimage).hexdigest()
+
+    def test_address_and_asset_preimages(self) -> None:
+        # CONTRACT_ID_PREIMAGE_FROM_ADDRESS of the account with key 32 bytes of 0x3a, salt 32 x 0x01
+        address = bytes(4) + bytes(4) + bytes(4) + b":" * 32 + b"\x01" * 32
+        # CONTRACT_ID_PREIMAGE_FROM_ASSET of the native asset
+        asset = (1).to_bytes(4, "big") + bytes(4)
+        for preimage in (address, asset):
+            r = one({"id": "1", "op": "contract_id", "preimage": base64.b64encode(preimage).decode(),
+                     "network_passphrase": self.PASSPHRASE, "depth_limit": 1000, "len_limit": len(preimage)})
+            self.assertEqual(r["result"], {"contract_id": self.expected(preimage)})
 
 
 class Ordering(unittest.TestCase):
