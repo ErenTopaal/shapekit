@@ -729,7 +729,7 @@ export default function Home({ loaderData: s }: Route.ComponentProps) {
     <div className="kp-grid">
     <article className="kp" data-r=""><span className="kp-when">Every Monday</span><h3>Upstream changes open an issue.</h3><p>A scheduled job checks stellar-core, the XDR definitions, every SDK and stellar-cli. A new release opens a tracking issue with the upgrade checklist and a first run against the new version.</p></article>
     <article className="kp" data-r="" style={css({ "--i": "1" })}><span className="kp-when">Before protocol 31</span><h3>The upgrade is already rehearsed.</h3><p>On the next-protocol build of stellar-core, all 144 transaction test cases pass at every protocol from 0 to 31, and 452,555 transaction metas convert with every hash matching.</p></article>
-    <article className="kp" data-r="" style={css({ "--i": "2" })}><span className="kp-when">Through protocol 31</span><h3>A named maintainer, then an open runbook.</h3><p>GitHub user ErenTopaal maintains shapekit through the protocol 31 upgrade. The runbook, the corpus format and the interfaces are documented, so anyone can continue.</p></article>
+    <article className="kp" data-r="" style={css({ "--i": "2" })}><span className="kp-when">Through protocol 31</span><h3>A named maintainer, then an open runbook.</h3><p>Eren Topal maintains shapekit through the protocol 31 upgrade. The runbook, the corpus format and the interfaces are documented, so anyone can continue.</p></article>
     </div>
     <div className="kp-foot" data-r=""><a className="arrow-link" href="/docs/operations/maintenance">Maintenance</a><a className="arrow-link" href="/docs/operations/protocol-upgrade-runbook">Protocol upgrade runbook</a></div>
     </div>
@@ -782,7 +782,7 @@ export default function Home({ loaderData: s }: Route.ComponentProps) {
     <div className="ft-col"><h3>Project</h3><ul><li><a href="https://github.com/ErenTopaal/shapekit">GitHub</a></li><li><a href="https://github.com/ErenTopaal/shapekit/releases">Releases</a></li><li><a href="https://github.com/ErenTopaal/shapekit/blob/main/STATUS.md">Status log</a></li><li><a href="https://github.com/ErenTopaal/shapekit/blob/main/SECURITY.md">Security policy</a></li></ul></div>
     </div>
     <div className="ft-mark" aria-hidden="true"><svg viewBox="0 0 16 16"><rect width="16" height="16" rx="3" fill="currentColor"></rect><rect x="3" y="3" width="4" height="4" rx="1" fill="var(--c-brand)"></rect><rect x="9" y="3" width="4" height="4" rx="1" fill="var(--c-brand)"></rect><rect x="3" y="9" width="4" height="4" rx="1" fill="var(--c-brand)"></rect><rect x="9.5" y="9.5" width="3" height="3" rx="0.6" fill="none" stroke="var(--c-brand)"></rect></svg>shapekit</div>
-    <div className="ft-base"><span>Apache License 2.0</span><span>Maintained by GitHub user ErenTopaal</span></div>
+    <div className="ft-base"><span>Apache License 2.0</span><span>Maintained by Eren Topal</span></div>
     </div>
     </footer>
 

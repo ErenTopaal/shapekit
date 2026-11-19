@@ -5,7 +5,7 @@ steps for a new protocol version are in [protocol-upgrade-runbook.md](protocol-u
 
 ## Maintainers and duration
 
-- Maintainer: GitHub user `ErenTopaal`.
+- Maintainer: [Eren Topal](https://github.com/ErenTopaal).
 - Duration: from the production release through the first protocol upgrade after delivery,
   protocol 31. CAP-89 and CAP-90 target protocol 31; both are in Draft status on 2026-11-18.
   The commitment ends when a shapekit release covering protocol 31 is published by following
