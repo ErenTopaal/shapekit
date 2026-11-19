@@ -45,11 +45,11 @@ const obligationKinds: Record<string, string> = {
 }
 
 // the states a cap row can be in; the terms block below explains each
-function state(c: CapRow): { tone: "pass" | "diverge" | "idle" | "known"; label: string } {
-  if (!c.indexer_visible) return { tone: "idle", label: "not indexer-visible" }
-  if (c.core_emitted_entries > 0) return { tone: "pass", label: "covered" }
-  if (c.uncovered) return { tone: "known", label: "gap, with a reason" }
-  if (c.entries > 0) return { tone: "known", label: "no entry from stellar-core" }
+function state(c: CapRow): { tone: "pass" | "diverge" | "idle" | "known"; label: string; term?: string } {
+  if (!c.indexer_visible) return { tone: "idle", label: "not indexer-visible", term: "indexer-visible" }
+  if (c.core_emitted_entries > 0) return { tone: "pass", label: "covered", term: "core-emitted" }
+  if (c.uncovered) return { tone: "known", label: "gap, with a reason", term: "blocker" }
+  if (c.entries > 0) return { tone: "known", label: "no entry from stellar-core", term: "core-emitted" }
   return { tone: "diverge", label: "no entries" }
 }
 
@@ -129,8 +129,12 @@ export function CorpusPage() {
           <TableHeader>
             <TableRow>
               <TableHead>Source</TableHead>
-              <TableHead className="text-right">Entries</TableHead>
-              <TableHead>Counts as coverage</TableHead>
+              <TableHead className="text-right">
+                <GlossaryLink id="entry">Entries</GlossaryLink>
+              </TableHead>
+              <TableHead>
+                <GlossaryLink id="core-emitted">Counts as coverage</GlossaryLink>
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -139,9 +143,9 @@ export function CorpusPage() {
               .map((c) => (
                 <TableRow key={c.id}>
                   <TableCell className="whitespace-normal">
-                    <TextLink to={`/dashboard/glossary#source-${c.id}`} className="font-mono text-[0.85em]">
+                    <GlossaryLink id={`source-${c.id}`} className="font-mono text-[0.85em]">
                       {c.id}
-                    </TextLink>
+                    </GlossaryLink>
                   </TableCell>
                   <TableCell className="num text-right">{fmt.format(s.entries_by_source_class[c.id] ?? 0)}</TableCell>
                   <TableCell>{c.core ? <Status tone="pass">yes</Status> : <Status tone="idle">no</Status>}</TableCell>
@@ -206,9 +210,11 @@ export function CorpusPage() {
                 <TableHead className="hidden min-w-44 md:table-cell">Title</TableHead>
                 <TableHead className="hidden text-right sm:table-cell">Protocol</TableHead>
                 <TableHead>State</TableHead>
-                <TableHead className="hidden text-right sm:table-cell">Entries</TableHead>
+                <TableHead className="hidden text-right sm:table-cell">
+                  <GlossaryLink id="entry">Entries</GlossaryLink>
+                </TableHead>
                 <TableHead className="text-right">
-                  From stellar-core
+                  <GlossaryLink id="core-emitted">From stellar-core</GlossaryLink>
                   <span className="block text-xs font-normal text-muted-foreground">higher is better</span>
                 </TableHead>
               </TableRow>
@@ -228,7 +234,7 @@ export function CorpusPage() {
                     <TableCell className="num hidden text-right sm:table-cell">{c.protocol ?? ""}</TableCell>
                     <TableCell className="whitespace-normal">
                       <Status tone={st.tone} wrap>
-                        {st.label}
+                        {st.term ? <GlossaryLink id={st.term}>{st.label}</GlossaryLink> : st.label}
                       </Status>
                     </TableCell>
                     <TableCell className="num hidden text-right sm:table-cell">{fmt.format(c.entries)}</TableCell>
@@ -272,7 +278,9 @@ export function CorpusPage() {
           <caption className="sr-only">Uncovered union arms by blocker</caption>
           <TableHeader>
             <TableRow>
-              <TableHead>Blocker</TableHead>
+              <TableHead>
+                <GlossaryLink id="blocker">Blocker</GlossaryLink>
+              </TableHead>
               <TableHead className="hidden md:table-cell">Meaning</TableHead>
               <TableHead className="text-right">Arms</TableHead>
             </TableRow>
@@ -295,7 +303,9 @@ export function CorpusPage() {
             <caption className="sr-only">Covered arms that only public network history holds</caption>
             <TableHeader>
               <TableRow>
-                <TableHead>Arm that only history holds</TableHead>
+                <TableHead>
+                  <GlossaryLink id="union-arm">Arm</GlossaryLink> that only history holds
+                </TableHead>
                 <TableHead className="hidden md:table-cell">Entries</TableHead>
                 <TableHead>Why a local stellar-core cannot write it</TableHead>
               </TableRow>
@@ -324,7 +334,9 @@ export function CorpusPage() {
             <caption className="sr-only">Every union arm without an entry from stellar-core, with its reason</caption>
             <TableHeader>
               <TableRow>
-                <TableHead>Arm</TableHead>
+                <TableHead>
+                  <GlossaryLink id="union-arm">Arm</GlossaryLink>
+                </TableHead>
                 <TableHead>Reason</TableHead>
               </TableRow>
             </TableHeader>
@@ -334,7 +346,7 @@ export function CorpusPage() {
                   <TableCell className="align-top whitespace-normal">
                     <Id>{a.arm}</Id>
                     <span className="block text-xs text-muted-foreground">
-                      blocker <Id>{a.uncovered?.blocker ?? ""}</Id>
+                      <GlossaryLink id="blocker">blocker</GlossaryLink> <Id>{a.uncovered?.blocker ?? ""}</Id>
                     </span>
                   </TableCell>
                   <TableCell className="text-sm whitespace-normal text-muted-foreground">{a.uncovered?.reason ?? ""}</TableCell>
@@ -411,11 +423,15 @@ export function CorpusPage() {
           <caption className="sr-only">Fields that stellar-core does not fully check, with their entries</caption>
           <TableHeader>
             <TableRow>
-              <TableHead>Field</TableHead>
+              <TableHead>
+                <GlossaryLink id="unvalidated-field">Field</GlossaryLink>
+              </TableHead>
               <TableHead className="hidden md:table-cell">XDR path</TableHead>
               <TableHead>Checked by stellar-core</TableHead>
               <TableHead className="hidden text-right sm:table-cell">Entries</TableHead>
-              <TableHead className="text-right">From stellar-core</TableHead>
+              <TableHead className="text-right">
+                <GlossaryLink id="core-emitted">From stellar-core</GlossaryLink>
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

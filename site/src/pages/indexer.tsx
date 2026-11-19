@@ -64,7 +64,7 @@ function Families({ run, networks, agree, families }: { run: HarnessRun; network
           </TableHead>
           {shown.map((n) => (
             <TableHead key={n} className="min-w-52">
-              {agree ? `Verdicts on each network` : `Verdicts on ${n}`}
+              <GlossaryLink id="verdict">Verdicts</GlossaryLink> on {agree ? "each network" : n}
             </TableHead>
           ))}
         </TableRow>
@@ -204,7 +204,9 @@ function Problems({ run }: { run: HarnessRun }) {
                   <TextLink to={href} className="font-mono text-sm [overflow-wrap:anywhere]">
                     {p.entry}
                   </TextLink>
-                  <Status tone={verdictTone(p.verdict)}>{label(p.verdict)}</Status>
+                  <Status tone={verdictTone(p.verdict)}>
+                    <GlossaryLink id={`verdict-${p.verdict}`}>{label(p.verdict)}</GlossaryLink>
+                  </Status>
                   {p.reason ? <span className="text-xs text-muted-foreground">{p.reason}</span> : null}
                   <span className="text-xs text-muted-foreground">
                     {p.network}, chain <Id>{p.chain}</Id>, ledger {p.ledger}
@@ -235,7 +237,12 @@ function Problems({ run }: { run: HarnessRun }) {
 }
 
 function verdictText(v: string, reason: string | null) {
-  return reason ? `${label(v)} (${reason})` : label(v)
+  return (
+    <span>
+      <GlossaryLink id={`verdict-${v}`}>{label(v)}</GlossaryLink>
+      {reason ? ` (${reason})` : null}
+    </span>
+  )
 }
 
 function Reproductions({ rows, table, repo }: { rows: HarnessReproduction[]; table: string; repo: string }) {
@@ -494,7 +501,7 @@ export function IndexerPage() {
             ))
           )}
           <p className="text-sm text-muted-foreground">
-            Reasons of the mishandled replays:{" "}
+            Reasons of the <GlossaryLink id="verdict-mishandled">mishandled</GlossaryLink> replays:{" "}
             {Object.entries(run.totals.by_reason)
               .map(([k, v]) => `${k} ${v}`)
               .join(", ") || "none"}

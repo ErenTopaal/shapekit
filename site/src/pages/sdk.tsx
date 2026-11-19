@@ -1,7 +1,7 @@
 import { use, useMemo, useState } from "react"
 import { useSearchParams } from "react-router"
 import { load, type Cell, type FamilyRow, type Observation, type Reproduction, type Sdk } from "@/lib/data"
-import { checkResults, docs, glossaryHref, label as termLabel } from "@/lib/terms"
+import { checkResults, docs, label as termLabel } from "@/lib/terms"
 import { bySdkOrder, sdkComponent, sdkLabel, sdkName } from "@/lib/sdks"
 import { findingRows, sdkSummary } from "@/lib/metrics"
 import { capPath, entryPath, findingsPath } from "@/lib/paths"
@@ -72,11 +72,11 @@ function Legend() {
       </li>
       <li className="flex items-center gap-2">
         <span aria-hidden className="inline-block h-4 w-6 shrink-0 rounded-sm border border-diverge bg-diverge/15" />
-        ! diverges, not a known failure (fails CI)
+        ! diverges, not a <GlossaryLink id="known-failure">known failure</GlossaryLink> (fails CI)
       </li>
       <li className="flex items-center gap-2">
         <span aria-hidden className="inline-block h-4 w-6 shrink-0 rounded-sm bg-muted/70" />
-        no failing check
+        no failing <GlossaryLink id="check">check</GlossaryLink>
       </li>
       <li>The number in a cell counts its failing checks. Select a cell to see them.</li>
     </ul>
@@ -109,7 +109,7 @@ function Totals({ sdk }: { sdk: Sdk }) {
         {results.map((r) => (
           <TableRow key={r}>
             <TableCell className={sticky}>
-              Entries with the result {termLabel(r)} <span className="text-xs text-muted-foreground">(lower is better)</span>
+              Entries with the result <GlossaryLink id={`check-${r}`}>{termLabel(r)}</GlossaryLink> <span className="text-xs text-muted-foreground">(lower is better)</span>
             </TableCell>
             {sdk.versions.map((v) => (
               <TableCell key={v.version} className="text-right">
@@ -119,7 +119,9 @@ function Totals({ sdk }: { sdk: Sdk }) {
           </TableRow>
         ))}
         <TableRow>
-          <TableCell className={sticky}>Of those, known failures</TableCell>
+          <TableCell className={sticky}>
+            Of those, <GlossaryLink id="known-failure">known failures</GlossaryLink>
+          </TableCell>
           {sdk.versions.map((v) => (
             <TableCell key={v.version} className="text-right">
               {count(v.failing_cells_with_known_issue)}
@@ -277,7 +279,8 @@ function Matrix({ sdk, families, filter, op }: { sdk: Sdk; families: FamilyRow[]
               <SheetHeader>
                 <SheetTitle className="font-mono text-sm break-all">{open.entry}</SheetTitle>
                 <SheetDescription>
-                  {sdk.package} <Id>{open.version}</Id>: {termLabel(open.cell.result)}, {failingChecks(open.cell).length} failing of{" "}
+                  {sdk.package} <Id>{open.version}</Id>:{" "}
+                  <GlossaryLink id={`check-${open.cell.result}`}>{termLabel(open.cell.result)}</GlossaryLink>, {failingChecks(open.cell).length} failing of{" "}
                   {open.cell.checks.length} listed checks
                 </SheetDescription>
               </SheetHeader>
@@ -297,9 +300,9 @@ function Matrix({ sdk, families, filter, op }: { sdk: Sdk; families: FamilyRow[]
                       <span className="flex flex-wrap items-baseline justify-between gap-2">
                         <Id>{k.check}</Id>
                         <span className={cn("text-xs", failing.has(k.result) ? "text-diverge" : "text-muted-foreground")}>
-                          <TextLink to={glossaryHref(`check-${k.result}`)} className="text-inherit decoration-current/40">
+                          <GlossaryLink id={`check-${k.result}`} className="decoration-current/40">
                             {termLabel(k.result)}
-                          </TextLink>
+                          </GlossaryLink>
                         </span>
                       </span>
                       {k.detail ? <span className="break-words text-muted-foreground">{k.detail}</span> : null}

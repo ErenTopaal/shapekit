@@ -1,7 +1,8 @@
 import type { ReactNode } from "react"
 import { Link } from "react-router"
 import { cn } from "@/lib/utils"
-import { label as termLabel, verdicts, verdictMeaning } from "@/lib/terms"
+import { label as termLabel, verdicts } from "@/lib/terms"
+import { Term } from "@/components/term"
 import type { Counts } from "@/lib/data"
 import { fmt } from "@/components/common"
 
@@ -39,15 +40,17 @@ export function VerdictBar({ counts, className }: { counts: Counts; className?: 
 }
 
 // the bar's legend, which is also its text equivalent: every verdict with its count
-export function VerdictLegend({ counts, className, describe = false }: { counts: Counts; className?: string; describe?: boolean }) {
+export function VerdictLegend({ counts, className }: { counts: Counts; className?: string }) {
   const parts = verdictOrder.filter((v) => (counts[v] ?? 0) > 0)
   return (
     <ul className={cn("flex flex-wrap gap-x-4 gap-y-1 text-sm", className)}>
       {parts.map((v) => (
-        <li key={v} className="flex items-center gap-1.5" title={describe ? undefined : verdictMeaning(v)}>
+        <li key={v} className="flex items-center gap-1.5">
           <VerdictSwatch verdict={v} />
           <span className="num font-medium">{fmt.format(counts[v] ?? 0)}</span>
-          <span className="text-muted-foreground">{termLabel(v)}</span>
+          <Term id={`verdict-${v}`} className="text-muted-foreground">
+            {termLabel(v)}
+          </Term>
         </li>
       ))}
     </ul>

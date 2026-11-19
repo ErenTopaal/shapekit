@@ -1,4 +1,4 @@
-import { use, useEffect, useMemo, useState } from "react"
+import { Fragment, use, useEffect, useMemo, useState } from "react"
 import { useLocation, useSearchParams } from "react-router"
 import { ChevronDownIcon } from "lucide-react"
 import { load, sum } from "@/lib/data"
@@ -38,11 +38,15 @@ export const statusTone: Record<string, Tone> = {
 }
 
 // the severities of some findings as one phrase, worst first: "3 data loss, 1 robustness"
-export function severityPhrase(counts: Record<string, number>): string {
-  return severities
-    .filter((s) => (counts[s.id] ?? 0) > 0)
-    .map((s) => `${counts[s.id]} ${s.label}`)
-    .join(", ")
+// the counts of a component by severity, worst first, each severity with its definition
+function SeverityCounts({ counts }: { counts: Record<string, number> }) {
+  const shown = severities.filter((s) => (counts[s.id] ?? 0) > 0)
+  return shown.map((s, i) => (
+    <Fragment key={s.id}>
+      {counts[s.id]} <GlossaryLink id={`severity-${s.id}`}>{s.label}</GlossaryLink>
+      {i < shown.length - 1 ? ", " : null}
+    </Fragment>
+  ))
 }
 
 // answers recorded on implementation-defined entries are evidence, not failures
@@ -190,10 +194,15 @@ function FindingItem({ f, open, onOpen }: { f: FindingRow; open: boolean; onOpen
           <span className="min-w-0">{f.short ?? f.title}</span>
           <div className="flex flex-col gap-1 text-sm">
             <span>
-              <span className="text-muted-foreground">Severity:</span> <span className="font-medium">{label(f.severity)}</span>
+              <span className="text-muted-foreground">Severity:</span>{" "}
+              <GlossaryLink id={`severity-${f.severity}`} className="font-medium">
+                {label(f.severity)}
+              </GlossaryLink>
             </span>
             <span className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
-              <Status tone={statusTone[f.status] ?? "idle"}>{label(f.status)}</Status>
+              <Status tone={statusTone[f.status] ?? "idle"}>
+                <GlossaryLink id={`status-${f.status}`}>{label(f.status)}</GlossaryLink>
+              </Status>
               {f.link ? (
                 <ExtLink href={f.link} className="text-sm">
                   <span className="sr-only">Open the upstream issue </span>
@@ -226,7 +235,7 @@ function ByComponent({ byComponent }: { byComponent: Record<string, Record<strin
             <GlossaryLink id="component">Component</GlossaryLink>
           </TableHead>
           <TableHead className="text-right">
-            Findings <span className="block text-xs font-normal text-muted-foreground">lower is better</span>
+            <GlossaryLink id="reported-finding">Findings</GlossaryLink> <span className="block text-xs font-normal text-muted-foreground">lower is better</span>
           </TableHead>
           <TableHead className="hidden sm:table-cell">By severity</TableHead>
         </TableRow>
@@ -238,10 +247,13 @@ function ByComponent({ byComponent }: { byComponent: Record<string, Record<strin
               <TextLink to={findingsPath({ component: c })} className="font-mono text-[0.85em] [overflow-wrap:anywhere]">
                 {c}
               </TextLink>
-              <span className="block text-xs text-muted-foreground sm:hidden">{severityPhrase(counts)}</span>
+              <span className="block text-xs text-muted-foreground sm:hidden"><SeverityCounts counts={counts} />
+              </span>
             </TableCell>
             <TableCell className="num text-right font-semibold">{sum(counts)}</TableCell>
-            <TableCell className="hidden text-sm whitespace-normal text-muted-foreground sm:table-cell">{severityPhrase(counts)}</TableCell>
+            <TableCell className="hidden text-sm whitespace-normal text-muted-foreground sm:table-cell">
+              <SeverityCounts counts={counts} />
+            </TableCell>
           </TableRow>
         ))}
       </TableBody>
@@ -370,9 +382,13 @@ export function FindingsPage() {
             <>
               {" "}
               The total does not include{" "}
-              {Object.entries(r.not_reported)
-                .map(([k, n]) => `${n} ${n === 1 ? "finding" : "findings"} with the status ${label(k)}`)
-                .join(" and ")}
+              {Object.entries(r.not_reported).map(([k, n], i) => (
+                <Fragment key={k}>
+                  {i > 0 ? " and " : null}
+                  {n} {n === 1 ? "finding" : "findings"} with the status{" "}
+                  <GlossaryLink id={`status-${k}`}>{label(k)}</GlossaryLink>
+                </Fragment>
+              ))}
               . Use the status filter below to see them.
             </>
           ) : null}
@@ -471,9 +487,15 @@ export function FindingsPage() {
           <caption className="sr-only">The two findings records</caption>
           <TableHeader>
             <TableRow>
-              <TableHead>Record</TableHead>
-              <TableHead className="text-right">Findings, all statuses</TableHead>
-              <TableHead className="text-right">Failures</TableHead>
+              <TableHead>
+                <GlossaryLink id="record">Record</GlossaryLink>
+              </TableHead>
+              <TableHead className="text-right">
+                <GlossaryLink id="finding">Findings</GlossaryLink>, all statuses
+              </TableHead>
+              <TableHead className="text-right">
+                <GlossaryLink id="failure">Failures</GlossaryLink>
+              </TableHead>
               <TableHead className="text-right">
                 <GlossaryLink id="unmapped">Unmapped</GlossaryLink>
                 <span className="block text-xs font-normal text-muted-foreground">lower is better</span>
