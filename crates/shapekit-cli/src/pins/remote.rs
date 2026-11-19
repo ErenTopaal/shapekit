@@ -88,10 +88,15 @@ fn ensure_success(resp: Response, url: &str) -> Result<Response> {
                 by.push(format!("{name}: {v}"));
             }
         }
-        let body = resp.text().unwrap_or_default();
-        let body: String = body.split_whitespace().collect::<Vec<_>>().join(" ");
+        let body = match resp.text() {
+            Ok(text) => text.split_whitespace().collect::<Vec<_>>().join(" "),
+            Err(e) => format!("unreadable: {e}"),
+        };
         let body: String = body.chars().take(160).collect();
-        bail!("GET {url} returned {status} ({}); body: {body:?}", by.join(", "));
+        bail!(
+            "GET {url} returned {status} ({}); body: {body:?}",
+            by.join(", ")
+        );
     }
     Ok(resp)
 }
