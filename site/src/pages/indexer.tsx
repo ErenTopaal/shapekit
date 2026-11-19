@@ -2,7 +2,7 @@ import { use, useMemo } from "react"
 import { Link, useSearchParams } from "react-router"
 import { load, type FamilyRow, type HarnessRun, type HarnessReproduction } from "@/lib/data"
 import { docs, label, lintRules } from "@/lib/terms"
-import { runSummary } from "@/lib/metrics"
+import { componentFindings, foundText, runSummary } from "@/lib/metrics"
 import { capPath, entryPath, findingsPath } from "@/lib/paths"
 import { useMeta } from "@/lib/meta"
 import { Input } from "@/components/ui/input"
@@ -392,6 +392,7 @@ export function IndexerPage() {
   const repoOf = (name: string) => meta.pins.git.find((g) => g.name === name)?.url.replace(/\.git$/, "") ?? `https://github.com/stellar/${name}`
   const harness = use(load("harness"))
   const coverage = use(load("coverage"))
+  const findings = use(load("findings"))
   const [params] = useSearchParams()
   useHashScroll()
   const wanted = params.get("target")
@@ -415,6 +416,7 @@ export function IndexerPage() {
   }
   const d = run.describe
   const sum = runSummary(run, index)
+  const found = componentFindings(findings, sum.target)
   const networks = sum.networks
   const agree = networks.length > 1 && networksAgree(run, networks)
   const families = coverage.families
@@ -450,6 +452,14 @@ export function IndexerPage() {
         <h2 id="run-h" className="text-xl font-semibold tracking-tight">
           {d?.target ?? "The run"} in detail
         </h2>
+        <p className="text-lg font-semibold">
+          {foundText(sum)}.{" "}
+          {found > 0 ? (
+            <TextLink to={findingsPath({ component: sum.target })} className="text-base font-normal">
+              {found} reported {found === 1 ? "finding" : "findings"}
+            </TextLink>
+          ) : null}
+        </p>
         <p className="max-w-[70ch] text-sm text-muted-foreground">
           The harness ran {d?.target ?? "the target"} at commit{" "}
           <ExtLink href={`${repoOf(d?.target ?? "")}/commit/${d?.target_version ?? ""}`}>

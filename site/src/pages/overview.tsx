@@ -3,7 +3,7 @@ import { Link } from "react-router"
 import { ArrowRightIcon } from "lucide-react"
 import { load } from "@/lib/data"
 import { bySdkOrder, sdkName } from "@/lib/sdks"
-import { coverageMetrics, reportedFindings, runSummary, sdkSummary } from "@/lib/metrics"
+import { capCoverage, entryComposition, foundText, reportedFindings, runSummary, sdkSummary } from "@/lib/metrics"
 import { docs, statuses } from "@/lib/terms"
 import { GlossaryLink, TextLink, fmt } from "@/components/common"
 
@@ -57,9 +57,9 @@ export function Overview() {
   const sdks = bySdkOrder(conformance.sdks, (x) => x.sdk).map(sdkSummary)
   const diverging = sdks.filter((x) => x.diverging > 0)
   const runs = harness.runs.map((run, i) => runSummary(run, i))
-  const corpus = coverageMetrics(coverage.summary, coverage.root_type)
   const s = coverage.summary
-  const caps = corpus.find((m) => m.id === "caps")
+  const caps = capCoverage(s)
+  const composition = entryComposition(s)
 
   return (
     <div className="flex flex-col gap-6">
@@ -117,13 +117,12 @@ export function Overview() {
         >
           <p>
             {runs.length} indexer runs. Each run has {fmt.format(runs[0]?.replays ?? 0)}{" "}
-            <GlossaryLink id="replay">replays</GlossaryLink>. Replays with the verdict pass (higher is better):
+            <GlossaryLink id="replay">replays</GlossaryLink>. What the harness found in each indexer:
           </p>
           <ul className="flex flex-col gap-0.5">
             {runs.map((x) => (
               <li key={x.target}>
-                {x.target} <span className="num font-semibold text-foreground">{fmt.format(x.pass)}</span> of{" "}
-                {fmt.format(x.replays)}
+                {x.target}: <span className="font-semibold text-foreground">{foundText(x)}</span>
               </li>
             ))}
           </ul>
@@ -161,17 +160,28 @@ export function Overview() {
           }
         >
           <p>
-            {fmt.format(s.entries)} corpus <GlossaryLink id="entry">entries</GlossaryLink>.{" "}
-            <GlossaryLink id="core-emitted">stellar-core emitted</GlossaryLink>{" "}
-            <span className="num font-semibold text-foreground">{fmt.format(s.core_emitted_entries)}</span> of them (higher
-            is better).
+            {fmt.format(s.entries)} corpus <GlossaryLink id="entry">entries</GlossaryLink>, by source:
           </p>
-          {caps ? (
-            <p>
-              <span className="num font-semibold text-foreground">{caps.value}</span> of {caps.total}{" "}
-              <GlossaryLink id="indexer-visible">indexer-visible CAPs</GlossaryLink> have an entry from stellar-core.
-            </p>
-          ) : null}
+          <ul className="flex flex-col gap-0.5">
+            {composition.map((p) => (
+              <li key={p.id}>
+                <span className="num font-semibold text-foreground">{fmt.format(p.entries)}</span> {p.label}
+              </li>
+            ))}
+          </ul>
+          <p>
+            {caps.covered === caps.total ? (
+              <>
+                <span className="num font-semibold text-foreground">{caps.covered}</span>{" "}
+                <GlossaryLink id="indexer-visible">indexer-visible CAPs</GlossaryLink>, each with an entry from stellar-core.
+              </>
+            ) : (
+              <>
+                <span className="num font-semibold text-foreground">{caps.covered}</span> of {caps.total}{" "}
+                <GlossaryLink id="indexer-visible">indexer-visible CAPs</GlossaryLink> have an entry from stellar-core.
+              </>
+            )}
+          </p>
         </Question>
       </div>
 

@@ -21,7 +21,7 @@ import {
   fmt,
   useHashScroll,
 } from "@/components/common"
-import { betterText, coverageMetrics, ledgerArms } from "@/lib/metrics"
+import { betterText, coverageMetrics, entryComposition, ledgerArms } from "@/lib/metrics"
 import { capPath, entriesPath } from "@/lib/paths"
 import { docs, sourceClasses, sources } from "@/lib/terms"
 
@@ -91,6 +91,7 @@ export function CorpusPage() {
   const s = coverage.summary
   const metrics = coverageMetrics(s, coverage.root_type)
   const arms = ledgerArms(s)
+  const composition = entryComposition(s)
   const families = coverage.families.toSorted((a, b) => a.priority - b.priority || a.id.localeCompare(b.id))
   return (
     <div className="flex flex-col gap-6">
@@ -113,6 +114,10 @@ export function CorpusPage() {
       </NextSteps>
 
       <Section title="Summary" id="summary" description="Each bar shows a share of a total. For each of these numbers, higher is better.">
+        <p className="text-sm">
+          {fmt.format(s.entries)} <GlossaryLink id="entry">entries</GlossaryLink>, by source:{" "}
+          {composition.map((p) => `${fmt.format(p.entries)} ${p.label}`).join(", ")}.
+        </p>
         <ul className="border-b">
           {metrics.map((m) => (
             <Meter key={m.id} label={m.label} value={m.value} total={m.total} to={`#${m.section}`}>
@@ -271,8 +276,7 @@ export function CorpusPage() {
             A <GlossaryLink id="union-arm">union arm</GlossaryLink> is one variant that an XDR union can take.{" "}
 <Id>{coverage.root_type}</Id> can reach {arms.all} arms under stellar-xdr {coverage.stellar_xdr}. {arms.covered}{" "}
             of the {arms.total} <GlossaryLink id="union-arm">arms that a ledger can hold</GlossaryLink> have an entry from
-            stellar-core. {arms.refused + arms.never} arms cannot occur in any ledger: stellar-core refuses {arms.refused}{" "}
-            before a ledger and never emits {arms.never}. Each of the {s.arms_uncovered} arms without an entry has a reason in{" "}
+            stellar-core. Each of the {s.arms_uncovered} arms without an entry has a reason in{" "}
             <RepoLink path={sources.uncovered} />, under one of these <GlossaryLink id="blocker">blockers</GlossaryLink>.
           </>
         }

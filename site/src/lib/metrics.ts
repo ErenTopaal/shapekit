@@ -93,6 +93,17 @@ export interface RunSummary {
   sameOnEveryNetwork: boolean
 }
 
+// what the replay harness found in one indexer run: the replays with the verdict mishandled or
+// dropped. the landing page, the start page and the indexer page show this text
+export function foundText(r: Pick<RunSummary, "wrong">): string {
+  return r.wrong === 0 ? "Found no wrong or missing rows" : `Found wrong or missing rows in ${r.wrong.toLocaleString("en-US")} replays`
+}
+
+// the reported findings of one component, for the link from an indexer's result to its findings
+export function componentFindings(f: Findings, component: string): number {
+  return reportedFindings(f).filter((x) => x.component === component).length
+}
+
 export function runSummary(run: HarnessRun, i = 0): RunSummary {
   const v = run.totals.by_verdict
   const networks = Object.keys(run.by_network).toSorted()
@@ -158,15 +169,58 @@ export function ledgerArms(s: CoverageSummary): LedgerArms {
   }
 }
 
+export interface CapCoverage {
+  // indexer-visible CAPs with an entry from stellar-core
+  covered: number
+  // indexer-visible CAPs with a written blocker; they are in no total
+  blocked: number
+  // indexer-visible CAPs without a blocker
+  total: number
+}
+
+export function capCoverage(s: CoverageSummary): CapCoverage {
+  const blocked = s.caps_indexer_visible_with_reason
+  return { covered: s.caps_indexer_visible_core_emitted, blocked, total: s.caps_indexer_visible - blocked }
+}
+
+export interface SourcePart {
+  id: string
+  label: string
+  // the source classes of the part, from the manifest
+  classes: string[]
+  entries: number
+}
+
+const sourceParts: Omit<SourcePart, "entries">[] = [
+  { id: "local-core", label: "recorded from a local stellar-core", classes: ["local-core"] },
+  { id: "core-golden", label: "from the stellar-core test goldens", classes: ["core-golden"] },
+  { id: "history", label: "from network history", classes: ["mainnet-history", "testnet-history"] },
+  { id: "synthetic", label: "synthetic inputs", classes: ["synthetic"] },
+  { id: "refused", label: "inputs that stellar-core refuses", classes: ["local-core-refused"] },
+]
+
+// the corpus entries by source: each source is a part of its own, and the parts add up to every
+// entry, or the build fails
+export function entryComposition(s: CoverageSummary): SourcePart[] {
+  const by = s.entries_by_source_class
+  for (const c of Object.keys(by)) {
+    if (!sourceParts.some((p) => p.classes.includes(c))) throw new Error(`coverage.json: source class ${c} is in no part of the corpus`)
+  }
+  const parts = sourceParts.map((p) => ({ ...p, entries: p.classes.reduce((a, c) => a + (by[c] ?? 0), 0) })).filter((p) => p.entries > 0)
+  const total = parts.reduce((a, p) => a + p.entries, 0)
+  if (total !== s.entries) throw new Error(`coverage.json: the parts of the corpus hold ${total} entries, but it has ${s.entries}`)
+  return parts
+}
+
 export function coverageMetrics(s: CoverageSummary, rootType: string): CoverageMetric[] {
   const arms = ledgerArms(s)
+  const caps = capCoverage(s)
   return [
-    { id: "core-emitted", label: "Entries emitted by stellar-core", value: s.core_emitted_entries, total: s.entries, better: "higher", section: "sources" },
     {
       id: "caps",
       label: "Indexer-visible CAPs with an entry from stellar-core",
-      value: s.caps_indexer_visible_core_emitted,
-      total: s.caps_indexer_visible,
+      value: caps.covered,
+      total: caps.total,
       better: "higher",
       section: "caps",
     },
