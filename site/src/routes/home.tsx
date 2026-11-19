@@ -1,4 +1,4 @@
-import { useEffect, useRef, type CSSProperties } from "react"
+import { Fragment, useEffect, useRef, type CSSProperties } from "react"
 import { useLocation, useNavigate } from "react-router"
 import "@fontsource-variable/plus-jakarta-sans"
 import "@fontsource/instrument-serif/400-italic.css"
@@ -6,6 +6,7 @@ import "@/landing/landing.css"
 import type { Route } from "./+types/home"
 import { loadLandingStats, type LandingFinding, type LandingStats } from "@/landing/stats"
 import { setupLanding } from "@/landing/setup"
+import { breakSegments, statement } from "@/landing/statement"
 import { sdkName } from "@/lib/sdks"
 
 // the landing page. every number on it is read at build time from the json files `shapekit site
@@ -93,7 +94,7 @@ function Kit({ s }: { s: LandingStats }) {
         <span className="kit-step"><b>3</b>Finds what breaks</span>
         <span className="kit-h"><span className="tnum" data-count="">{f(s.findings.length)}</span> findings</span>
         <span className="finds" style={css({ "--d": "1900ms" })}>
-          {finds.map((x, i) => <a key={x.id} className={`fi tip sev-${sevKey[x.severity] ?? "dv"}${x.filed ? "" : " o"}`} href="#findings" data-tip={`${x.id}: ${x.title}`} aria-label={x.id} style={css({ "--i": i })}></a>)}
+          {finds.map((x, i) => <a key={x.id} className={`fi tip sev-${sevKey[x.severity] ?? "dv"}${x.filed ? "" : " o"}`} href="#findings" data-tip={tipOf(x)} aria-label={x.id} style={css({ "--i": i })}></a>)}
         </span>
         <span className="kit-sev">{sevOrder.map((k) => <span key={k}><i className={`sev-${sevKey[k]}`}></i>{bySev(k)} {sevLabel[k]}</span>)}</span>
         <span className="kit-key"><span><i style={css({ "--sw": "var(--c-ink)" })}></i>{plural(s.issuesFiled, "issue", "issues")} filed</span><span><i style={css({ "--sw": "transparent", border: "var(--bw-strong) solid var(--c-ink)" })}></i>{s.issuesReported} reproduced</span></span>
@@ -117,6 +118,11 @@ function FindingsHead({ s }: { s: LandingStats }) {
 
 const defaultFinding = (s: LandingStats) => s.findings.find((x) => x.id === "RS-1") ?? s.findings[0]
 
+const tipOf = (x: LandingFinding) => {
+  const st = statement(x.title)
+  return `${x.id}${st.question ? " (question)" : ""}: ${st.text}`
+}
+
 function FindingRows({ s }: { s: LandingStats }) {
   const comps = [...new Set(s.findings.map((x) => x.component))].toSorted((a, b) => {
     const ia = componentOrder.indexOf(a)
@@ -128,8 +134,8 @@ function FindingRows({ s }: { s: LandingStats }) {
     <div className="fd-rows">
       {comps.map((c) => (
         <div key={c} className="fd-row"><span className="fd-comp">{c}<span>{componentKind[c] ?? ""}</span></span><div className="fd-tiles">
-          {s.findings.filter((x) => x.component === c).toSorted(bySeverity).map((x) => (
-            <button key={x.id} type="button" className={`tile sev-${sevKey[x.severity] ?? "dv"}${x.filed ? "" : " dup"}`} data-id={x.id} data-sev={sevLabel[x.severity] ?? x.severity} data-comp={x.component} data-st={x.filed ? "Filed by shapekit" : "Reported before, reproduced by shapekit"} data-link={x.link ?? undefined} data-ref={x.ref ?? undefined} data-title={x.title} aria-label={x.id} aria-pressed={x.id === first?.id ? "true" : "false"}></button>
+          {s.findings.filter((x) => x.component === c).toSorted(bySeverity).map((x) => ({ x, st: statement(x.title) })).map(({ x, st }) => (
+            <button key={x.id} type="button" className={`tile sev-${sevKey[x.severity] ?? "dv"}${x.filed ? "" : " dup"}`} data-id={x.id} data-sev={sevLabel[x.severity] ?? x.severity} data-comp={x.component} data-st={x.filed ? "Filed by shapekit" : "Reported before, reproduced by shapekit"} data-link={x.link ?? undefined} data-ref={x.ref ?? undefined} data-title={st.text} data-q={st.question ? "true" : undefined} aria-label={x.id} aria-pressed={x.id === first?.id ? "true" : "false"}></button>
           ))}
         </div></div>
       ))}
@@ -139,10 +145,11 @@ function FindingRows({ s }: { s: LandingStats }) {
 
 function Inspector({ s }: { s: LandingStats }) {
   const x = defaultFinding(s)
+  const st = statement(x?.title ?? "")
   return (
     <aside className="insp" aria-live="polite" data-r="" style={css({ "--i": "2" })}>
-      <div className="insp-top"><span className="insp-id" data-o="id">{x?.id}</span><span className={`insp-sev sev-${sevKey[x?.severity ?? ""] ?? "dv"}`} data-o="sev">{sevLabel[x?.severity ?? ""] ?? x?.severity}</span></div>
-      <p className="insp-title" data-o="title">{x?.title}</p>
+      <div className="insp-top"><span className="insp-id" data-o="id" style={css({ "--n": x?.id.length ?? 4 })}>{x?.id}</span><span className={`insp-sev sev-${sevKey[x?.severity ?? ""] ?? "dv"}`} data-o="sev">{sevLabel[x?.severity ?? ""] ?? x?.severity}</span></div>
+      <p className="insp-title"><span className="insp-q" data-o="q" hidden={!st.question}>Question</span><span data-o="title">{breakSegments(st.text).map((p, i) => <Fragment key={i}>{i > 0 && <wbr />}{p}</Fragment>)}</span></p>
       <dl className="insp-meta">
         <dt>Component</dt><dd data-o="comp">{x?.component}</dd>
         <dt>Status</dt><dd data-o="st">{x?.filed ? "Filed by shapekit" : "Reported before, reproduced by shapekit"}</dd>

@@ -1,6 +1,7 @@
 // the motion and the interactive parts of the landing page: canvases, reveals, tabs, autoplay and
 // count-ups. it runs once in the browser after the prerendered page hydrates and returns a cleanup.
 import type { Bug } from "./stats"
+import { breakSegments } from "./statement"
 
 export interface SetupData {
   kit: [number, number, number]
@@ -303,14 +304,20 @@ export function setupLanding(root: HTMLElement, data: SetupData): Off {
     if (!insp || t === current) return
     current = t
     tiles.forEach((x) => x.setAttribute("aria-pressed", x === t ? "true" : "false"))
-    setText('[data-o="id"]', t.getAttribute("data-id"))
+    const id = t.getAttribute("data-id") ?? ""
+    setText('[data-o="id"]', id)
+    // the display id is sized by its length, so the longest id still fits on one line
+    one<HTMLElement>('[data-o="id"]', insp)?.style.setProperty("--n", String(id.length))
+    const q = one('[data-o="q"]', insp)
+    if (q) q.hidden = t.getAttribute("data-q") !== "true"
     const sev = one('[data-o="sev"]', insp)
     const sv = t.getAttribute("data-sev") ?? ""
     if (sev) {
       sev.textContent = sv
       sev.className = `insp-sev ${sevClass[sv] ?? ""}`
     }
-    setText('[data-o="title"]', t.getAttribute("data-title"))
+    const title = one('[data-o="title"]', insp)
+    if (title) title.replaceChildren(...breakSegments(t.getAttribute("data-title") ?? "").flatMap((p, i) => (i > 0 ? [document.createElement("wbr"), p] : [p])))
     setText('[data-o="comp"]', t.getAttribute("data-comp"))
     setText('[data-o="st"]', t.getAttribute("data-st"))
     setText('[data-o="ref"]', t.getAttribute("data-ref"))
