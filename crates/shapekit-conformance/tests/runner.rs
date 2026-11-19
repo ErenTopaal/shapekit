@@ -1059,7 +1059,20 @@ fn draft_siblings_come_from_every_matrix_and_name_the_finding_that_takes_them() 
         shapekit_conformance::issues::drafts(&out.matrix, &manifest, &corpus_dir, &file, &context)
             .unwrap();
     assert!(before[0].body.contains("None: "), "{}", before[0].body);
-    context.add_matrix(&go_matrix);
+    // the sibling matrix is read from a file, here one reduced to what the findings keep
+    let reduced = json!({
+        "testees": go_matrix.testees.iter().map(|t| json!({"key": t.key, "sdk": t.sdk})).collect::<Vec<_>>(),
+        "entries": go_matrix.entries.iter().map(|r| json!({
+            "id": r.id,
+            "cells": r.cells.iter().map(|(k, c)| (k.clone(), json!({
+                "result": c.result,
+                "checks": c.checks.iter().map(|ch| json!({"check": ch.check, "result": ch.result})).collect::<Vec<_>>(),
+            }))).collect::<serde_json::Map<String, Value>>(),
+        })).collect::<Vec<_>>(),
+    });
+    let path = c.dir.path().join("conformance-go.json");
+    std::fs::write(&path, reduced.to_string()).unwrap();
+    context.add_matrix_file(&path).unwrap();
     let d =
         &shapekit_conformance::issues::drafts(&out.matrix, &manifest, &corpus_dir, &file, &context)
             .unwrap()[0];

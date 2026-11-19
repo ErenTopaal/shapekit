@@ -172,6 +172,48 @@ impl DraftContext {
     }
 }
 
+impl DraftContext {
+    /// Adds the sdks diverging on each entry of the matrix at `path`, a full matrix or one
+    /// reduced to what the findings read (`findings import-inputs`): only testees, entries,
+    /// cells and check results are read.
+    pub fn add_matrix_file(&mut self, path: &Path) -> Result<()> {
+        let text = std::fs::read(path).with_context(|| format!("reading {}", path.display()))?;
+        let mut de = serde_json::Deserializer::from_slice(&text);
+        de.disable_recursion_limit();
+        let v: Value = serde::Deserialize::deserialize(&mut de)
+            .with_context(|| format!("parsing {}", path.display()))?;
+        let mut sdk_of: BTreeMap<&str, &str> = BTreeMap::new();
+        for t in v["testees"].as_array().into_iter().flatten() {
+            if let (Some(k), Some(s)) = (t["key"].as_str(), t["sdk"].as_str()) {
+                sdk_of.insert(k, s);
+            }
+        }
+        for row in v["entries"].as_array().into_iter().flatten() {
+            let Some(id) = row["id"].as_str() else {
+                continue;
+            };
+            for (key, cell) in row["cells"].as_object().into_iter().flatten() {
+                let Some(sdk) = sdk_of.get(key.as_str()) else {
+                    continue;
+                };
+                let diverges = cell["checks"].as_array().into_iter().flatten().any(|c| {
+                    matches!(
+                        c["result"].as_str(),
+                        Some("diverges-from-network" | "diverges-from-peers")
+                    )
+                });
+                if diverges {
+                    self.diverging
+                        .entry(id.to_string())
+                        .or_default()
+                        .insert((*sdk).to_string());
+                }
+            }
+        }
+        Ok(())
+    }
+}
+
 // `*` matches any run of characters, as the findings triage's patterns do
 fn glob(pattern: &str, s: &str) -> bool {
     let parts: Vec<&str> = pattern.split('*').collect();
@@ -835,7 +877,7 @@ pub fn draft(opts: &DraftOptions) -> Result<DraftReport> {
     context.named_only = opts.named_only;
     context.add_matrix(&matrix);
     for m in &opts.sibling_matrices {
-        context.add_matrix(&runner::load_matrix(m)?);
+        context.add_matrix_file(m)?;
     }
     let drafts = drafts(&matrix, &manifest, &corpus, &versions, &context)?;
     std::fs::create_dir_all(&opts.out)

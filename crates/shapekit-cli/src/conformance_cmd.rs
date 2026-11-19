@@ -809,11 +809,23 @@ fn draft_triage(root: &Path, triages: &[PathBuf], out: &Path) -> Result<Triaged>
                 }
                 _ => Vec::new(),
             };
-            // a matcher of the sdk without check patterns takes every check
+            // the matchers of the draft's own entry; one without check patterns takes every
+            // check
+            let entry = sdk.and_then(|s| {
+                name.strip_prefix(&format!("{s}-"))
+                    .and_then(|n| n.strip_suffix(".md"))
+            });
             let own: Vec<_> = f
                 .conformance
                 .iter()
                 .filter(|m| Some(m.sdk.as_str()) == sdk)
+                .filter(|m| {
+                    entry.is_some_and(|e| {
+                        m.entries
+                            .iter()
+                            .any(|g| shapekit_findings::triage::glob(g, e))
+                    })
+                })
                 .collect();
             let checks: Vec<String> = if own.iter().any(|m| m.checks.is_empty()) {
                 Vec::new()
