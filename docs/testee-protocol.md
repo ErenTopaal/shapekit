@@ -363,7 +363,7 @@ build or mode does:
 | Rust | built with `RUSTFLAGS="-C instrument-coverage --cfg shapekit_coverage"`; the profiler runtime writes the counters on request and the toolchain's `llvm-profdata` and `llvm-cov export` (rustup's `llvm-tools` component) read them | a code region of a `stellar-xdr` source file, `src/<file>:<line>:<col>-<line>:<col>` |
 | Go | built with `-cover -covermode=atomic -coverpkg=github.com/stellar/go-stellar-sdk/...,.`; `runtime/coverage` writes the counters on request and `go tool covdata textfmt` reads them | a statement block of a go-stellar-sdk file, `<package path>/<file>:<line>.<col>,<line>.<col>` |
 | JavaScript | started with `SHAPEKIT_COVERAGE=1`; V8 precise block coverage through the inspector, started before the SDK is imported | a function or block range of a file of the installed package, `<path>:<start offset>-<end offset>` |
-| Python | started with `SHAPEKIT_COVERAGE=1`; coverage.py line coverage of the `stellar_sdk` package, started before the SDK is imported, read in the process with no data file | a line of a `stellar_sdk` source file that has run, `stellar_sdk/<path>.py:<line>` |
+| Python | started with `SHAPEKIT_COVERAGE=1`; coverage.py line coverage, started before the SDK is imported, read in the process with no data file, of the `stellar_sdk` package, and on the SDK's default branch also of `stellar_xdr` and `stellar_strkey`, which hold its XDR and strkey code there | a line of a measured package's source file that has run, `<package>/<path>.py:<line>`: `stellar_sdk/...` up to 17.x, and `stellar_sdk/...`, `stellar_xdr/...` or `stellar_strkey/...` on the default branch |
 | Java | started with `SHAPEKIT_COVERAGE=1` and the JaCoCo agent of its build (`-javaagent:.../jacocoagent.jar=output=none,includes=org.stellar.sdk.*`); the agent's execution data, analysed in the process with `org.jacoco.core` | a line of an SDK class where an instruction has run, `org/stellar/sdk/<path>.java:<line>` |
 | KMP | the same as Java, with `includes=com.soneso.stellar.sdk.*` | a line of an SDK class where an instruction has run, `com/soneso/stellar/sdk/<path>.kt:<line>` |
 | stellar-cli | started with `SHAPEKIT_COVERAGE=1` and a `stellar` binary built with `-C instrument-coverage` from the crate source of the version (`cargo install --locked --no-default-features`: the default feature only adds wasm-opt, the OS keyring and Ledger support, which the measured commands do not use, and the keyring needs the system's libdbus); every run of the binary adds its counters to the testee's profile files, which llvm-profdata merges and llvm-cov export reads | a code region of a `stellar-xdr`, `stellar-strkey` or `soroban-cli` source file, `<crate>-<version>/<path>:<line>:<col>-<line>:<col>` |
@@ -827,8 +827,11 @@ packages the SDK uses for both in `components`.
   class for the typedefs of integers (`Int32`, `Int64`, `Uint32`, `Uint64`) and for
   `SponsorshipDescriptor`, an optional: they are type aliases. The testee answers `unsupported`
   for them on the default branch.
-- Coverage counts lines of the `stellar_sdk` package only. On the default branch the XDR and
-  strkey code lives in `stellar_xdr` and `stellar_strkey`, which coverage does not count.
+- Coverage counts lines of `stellar_sdk` up to 17.x. On the default branch it also counts
+  `stellar_xdr` and `stellar_strkey`, where the SDK's XDR and strkey code lives. Coverage starts
+  before the SDK is imported, so the testee picks the packages from the dependencies the
+  installed `stellar-sdk` declares, and refuses to start when they disagree with the API the
+  import shows.
 
 ## The Java testee
 
