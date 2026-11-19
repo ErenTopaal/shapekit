@@ -7,7 +7,7 @@ XDR decoders stop at 200 nested types, below stellar-core's limit.
 
 ## Cause
 
-XdrDataInputStream counts every nested decode against DefaultMaxDepth, 200 (StellarDotnetSdk.Xdr/XdrDataInputStream.cs L17 at 17.0.0), and the generated Decode methods throw "Maximum decoding depth reached" past it, so authorization trees and ScVal values core accepted at its own limit do not decode, nor hash.
+XdrDataInputStream counts every nested decode against DefaultMaxDepth, 200 (StellarDotnetSdk.Xdr/XdrDataInputStream.cs L18 at 17.0.0), and the generated Decode methods throw "Maximum decoding depth reached" past it, so authorization trees and ScVal values core accepted at its own limit do not decode, nor hash.
 
 ## Affected versions
 

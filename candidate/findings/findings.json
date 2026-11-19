@@ -4961,7 +4961,7 @@
       "reproduce": "shapekit conformance run --sdk dotnet --version 17.0.0 --entry soroban.scval-shapes.synth-event-vec-depth-101",
       "status": "draft",
       "draft": "candidate/findings/issues/dotnet-soroban.auth-trees.p30-declared-depth-245.md",
-      "cause": "XdrDataInputStream counts every nested decode against DefaultMaxDepth, 200 (StellarDotnetSdk.Xdr/XdrDataInputStream.cs L17 at 17.0.0), and the generated Decode methods throw \"Maximum decoding depth reached\" past it, so authorization trees and ScVal values core accepted at its own limit do not decode, nor hash.",
+      "cause": "XdrDataInputStream counts every nested decode against DefaultMaxDepth, 200 (StellarDotnetSdk.Xdr/XdrDataInputStream.cs L18 at 17.0.0), and the generated Decode methods throw \"Maximum decoding depth reached\" past it, so authorization trees and ScVal values core accepted at its own limit do not decode, nor hash.",
       "siblings": [
         "CLI-DEPTH",
         "CLI-JSON-DEPTH",

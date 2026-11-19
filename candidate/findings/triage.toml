@@ -687,7 +687,7 @@ severity = "robustness"
 status = "draft"
 draft = "candidate/findings/issues/dotnet-soroban.auth-trees.p30-declared-depth-245.md"
 related = ["https://github.com/stellar/js-stellar-sdk/issues/1908"]
-cause = "XdrDataInputStream counts every nested decode against DefaultMaxDepth, 200 (StellarDotnetSdk.Xdr/XdrDataInputStream.cs L17 at 17.0.0), and the generated Decode methods throw \"Maximum decoding depth reached\" past it, so authorization trees and ScVal values core accepted at its own limit do not decode, nor hash."
+cause = "XdrDataInputStream counts every nested decode against DefaultMaxDepth, 200 (StellarDotnetSdk.Xdr/XdrDataInputStream.cs L18 at 17.0.0), and the generated Decode methods throw \"Maximum decoding depth reached\" past it, so authorization trees and ScVal values core accepted at its own limit do not decode, nor hash."
 
 [[finding.conformance]]
 sdk = "dotnet"
