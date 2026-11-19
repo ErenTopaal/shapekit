@@ -4,23 +4,23 @@ import (
 	"bufio"
 	"bytes"
 	"context"
-	"crypto/sha256"
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
 	"os"
 	"os/exec"
-	"sort"
 	"strings"
+
+	"github.com/ErenTopaal/shapekit/adapters/pinning"
 )
 
 // BaseImages maps every FROM reference in wallet-backend's Dockerfile, at the
 // commits this repository runs, to the same image by digest as pins.toml lists
 // it (checked by TestBaseImagesMatchPins). The build replaces each FROM with
 // the pinned digest through a buildx named context, so the tag a Dockerfile
-// names never decides which bytes are built on. A FROM missing here is an
-// error, not an unpinned build.
+// names never decides which bytes are built on. A FROM missing here is built
+// on the digest its tag resolves to at build time, which the run records
+// (pinning.Contexts).
 var BaseImages = map[string]string{
 	"golang:1.25.9-bookworm": "docker.io/library/golang@sha256:298734aec230b5f3e8cee450ce6d7eccc39f1797ba548ee90d57e9803030c6c3",
 	"debian:bookworm-slim":   "docker.io/library/debian@sha256:734a72b3d6142a71993b4bc580ca01d8ca687f77a2c422d96a961d3376b179bc",
@@ -74,20 +74,10 @@ func dockerfileBases(dockerfile []byte) ([]string, error) {
 }
 
 // pinnedContexts returns the --build-context flags that replace each base with
-// its pinned digest, and a stable digest of that set for the image label.
-func pinnedContexts(bases []string) ([]string, string, error) {
-	var flags, set []string
-	for _, b := range bases {
-		pinned, ok := BaseImages[b]
-		if !ok {
-			return nil, "", fmt.Errorf("base image %s has no pinned digest; add it to BaseImages and pins.toml", b)
-		}
-		flags = append(flags, "--build-context", b+"=docker-image://"+pinned)
-		set = append(set, b+"="+pinned)
-	}
-	sort.Strings(set)
-	sum := sha256.Sum256([]byte(strings.Join(set, "\n")))
-	return flags, hex.EncodeToString(sum[:]), nil
+// its digest, a stable digest of that set for the image label, and a note for
+// each base BaseImages does not list.
+func pinnedContexts(ctx context.Context, bases []string, resolve pinning.Resolver) ([]string, string, []string, error) {
+	return pinning.Contexts(ctx, BaseImages, "BaseImages in adapters/walletbackend/docker.go", bases, resolve)
 }
 
 // docker runs the docker cli. Errors carry the command's stderr so a failure

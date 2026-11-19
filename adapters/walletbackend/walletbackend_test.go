@@ -1,8 +1,10 @@
 package walletbackend
 
 import (
+	"context"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"maps"
 	"os"
 	"strings"
@@ -360,15 +362,37 @@ FROM scratch
 	if strings.Join(got, " ") != "golang:1.25.9-bookworm debian:bookworm-slim" {
 		t.Fatalf("bases %q", got)
 	}
-	flags, set, err := pinnedContexts(got)
+	noResolve := func(context.Context, string) (string, error) {
+		t.Fatal("a listed base was resolved")
+		return "", nil
+	}
+	flags, set, notes, err := pinnedContexts(context.Background(), got, noResolve)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(flags) != 4 || flags[1] != "golang:1.25.9-bookworm=docker-image://"+BaseImages["golang:1.25.9-bookworm"] || len(set) != 64 {
-		t.Fatalf("flags %q set %q", flags, set)
+	if len(flags) != 4 || flags[1] != "golang:1.25.9-bookworm=docker-image://"+BaseImages["golang:1.25.9-bookworm"] || len(set) != 64 || len(notes) != 0 {
+		t.Fatalf("flags %q set %q notes %q", flags, set, notes)
 	}
-	if _, _, err := pinnedContexts([]string{"alpine:3"}); err == nil {
-		t.Fatal("an unpinned base was accepted")
+	// a base the table does not list is built on the digest it resolves to, with a note
+	digest := "docker.io/library/alpine@sha256:" + strings.Repeat("ab", 32)
+	resolve := func(_ context.Context, ref string) (string, error) {
+		if ref != "alpine:3" {
+			t.Fatalf("resolved %s", ref)
+		}
+		return digest, nil
+	}
+	flags, _, notes, err = pinnedContexts(context.Background(), []string{"alpine:3"}, resolve)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(flags) != 2 || flags[1] != "alpine:3=docker-image://"+digest || len(notes) != 1 ||
+		!strings.Contains(notes[0], "BaseImages in adapters/walletbackend/docker.go") {
+		t.Fatalf("flags %q notes %q", flags, notes)
+	}
+	failing := func(context.Context, string) (string, error) { return "", errors.New("no registry") }
+	if _, _, _, err := pinnedContexts(context.Background(), []string{"alpine:3"}, failing); err == nil ||
+		!strings.Contains(err.Error(), "BaseImages in adapters/walletbackend/docker.go") {
+		t.Fatalf("an unresolvable base: %v", err)
 	}
 	if _, err := dockerfileBases([]byte("FROM golang:${GO}\n")); err == nil {
 		t.Fatal("a FROM with a build argument was accepted")

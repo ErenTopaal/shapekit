@@ -13,6 +13,7 @@ import (
 	"os"
 	"slices"
 	"sort"
+	"strings"
 	"sync"
 
 	"github.com/ErenTopaal/shapekit/adapters/protocol/wire"
@@ -98,9 +99,12 @@ func (a *Adapter) Describe(protocol int) (wire.DescribeResult, error) {
 	if err := a.src.ensure(a.ctx, a.cfg.Commit); err != nil {
 		return wire.DescribeResult{}, wire.Errorf(wire.ClassTarget, "%v", err)
 	}
-	_, maxProto, err := a.src.sdk(a.ctx, a.cfg.Commit)
+	_, maxProto, note, err := a.src.sdk(a.ctx, a.cfg.Commit)
 	if err != nil {
 		return wire.DescribeResult{}, wire.Errorf(wire.ClassTarget, "%v", err)
+	}
+	if note != "" {
+		fmt.Fprintf(os.Stderr, "etl-adapter: note: %s\n", note)
 	}
 	return wire.DescribeResult{
 		Protocol:        protocol,
@@ -128,16 +132,19 @@ func (a *Adapter) Start(p wire.StartParams) (wire.StartResult, error) {
 	if err := a.src.ensure(a.ctx, a.cfg.Commit); err != nil {
 		return wire.StartResult{}, wire.Errorf(wire.ClassTarget, "%v", err)
 	}
-	image, err := a.src.ensureImage(a.ctx, a.cfg.Commit, a.cfg.Builder)
+	image, baseNotes, err := a.src.ensureImage(a.ctx, a.cfg.Commit, a.cfg.Builder)
 	if err != nil {
 		return wire.StartResult{}, wire.Errorf(wire.ClassTarget, "%v", err)
+	}
+	for _, n := range baseNotes {
+		fmt.Fprintf(os.Stderr, "etl-adapter: note: %s\n", n)
 	}
 	t, err := startTarget(a.ctx, image, a.cfg.CPUs, p)
 	a.target = t
 	if err != nil {
 		return wire.StartResult{}, err
 	}
-	sdk, _, err := a.src.sdk(a.ctx, a.cfg.Commit)
+	sdk, _, sdkNote, err := a.src.sdk(a.ctx, a.cfg.Commit)
 	if err != nil {
 		return wire.StartResult{}, wire.Errorf(wire.ClassTarget, "%v", err)
 	}
@@ -145,12 +152,20 @@ func (a *Adapter) Start(p wire.StartParams) (wire.StartResult, error) {
 	if err != nil {
 		return wire.StartResult{}, wire.Errorf(wire.ClassTarget, "%v", err)
 	}
-	return wire.StartResult{Components: map[string]string{
+	comps := map[string]string{
 		"stellar-etl.commit": a.cfg.Commit,
 		"stellar-etl.image":  imageID,
 		"go-stellar-sdk":     sdk,
 		"fake-gcs-server":    GCSImage,
-	}}, nil
+	}
+	// a version or base the tables do not list is recorded with the run
+	if sdkNote != "" {
+		comps["go-stellar-sdk.note"] = sdkNote
+	}
+	if len(baseNotes) > 0 {
+		comps["base-images.note"] = strings.Join(baseNotes, "; ")
+	}
+	return wire.StartResult{Components: comps}, nil
 }
 
 // Advance answers advance: the batches up to head go into the bucket and the

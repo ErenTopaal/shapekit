@@ -4,8 +4,6 @@ import (
 	"bufio"
 	"bytes"
 	"context"
-	"crypto/sha256"
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -13,8 +11,9 @@ import (
 	"os/exec"
 	"path/filepath"
 	"regexp"
-	"sort"
 	"strings"
+
+	"github.com/ErenTopaal/shapekit/adapters/pinning"
 )
 
 // UpstreamURL is where stellar-etl's source is cloned from when no local clone
@@ -25,7 +24,9 @@ var fullSHA = regexp.MustCompile(`^[0-9a-f]{40}$`)
 
 // BaseImages maps every FROM reference in stellar-etl's docker/Dockerfile at
 // the pinned commit to the same image by digest as pins.toml lists it
-// (checked by TestBaseImagesMatchPins). A FROM missing here is an error.
+// (checked by TestBaseImagesMatchPins). A FROM missing here is built on the
+// digest its tag resolves to at build time, which the run records
+// (pinning.Contexts).
 var BaseImages = map[string]string{
 	"golang:1.27.3": "docker.io/library/golang@sha256:e519d3b0a5b285e5aa53ab9eef02bc6bbb9cb04608389b743a136a9ce75f0d1e",
 	"ubuntu:24.04":  "docker.io/library/ubuntu@sha256:73b999393d07f2bf65a40373778a44dc9a6d54ad7718d29247d8ff9413c4d6a8",
@@ -83,8 +84,9 @@ func (s source) show(ctx context.Context, commit, path string) ([]byte, error) {
 }
 
 // sdkProtocols is the newest ledger protocol the go-stellar-sdk version a
-// pinned stellar-etl commit requires can decode. An unknown version is an
-// error, not a guess.
+// pinned stellar-etl commit requires can decode. An unlisted version is held
+// to the protocol of the newest listed release before it
+// (pinning.SDKProtocol).
 var sdkProtocols = map[string]uint32{
 	// the protocol 30 sdk line (v0.8.x) at the commit stellar-etl v2.8.34 requires
 	"v0.8.1-0.20261106081502-e31e3b146d00": 30,
@@ -92,23 +94,25 @@ var sdkProtocols = map[string]uint32{
 	"v0.9.0": 30,
 }
 
-func (s source) sdk(ctx context.Context, commit string) (string, uint32, error) {
+// sdk returns the commit's go-stellar-sdk version, the newest ledger protocol
+// it decodes, and a note when the version is not listed.
+func (s source) sdk(ctx context.Context, commit string) (string, uint32, string, error) {
 	mod, err := s.show(ctx, commit, "go.mod")
 	if err != nil {
-		return "", 0, err
+		return "", 0, "", err
 	}
 	sc := bufio.NewScanner(bytes.NewReader(mod))
 	for sc.Scan() {
 		f := strings.Fields(sc.Text())
 		if len(f) >= 2 && f[0] == "github.com/stellar/go-stellar-sdk" {
-			p, ok := sdkProtocols[f[1]]
-			if !ok {
-				return f[1], 0, fmt.Errorf("go-stellar-sdk %s at %s has no known protocol; add it to sdkProtocols", f[1], commit)
+			p, note, err := pinning.SDKProtocol(sdkProtocols, f[1], "sdkProtocols in adapters/stellaretl/build.go")
+			if err != nil {
+				return f[1], 0, "", fmt.Errorf("go.mod at %s: %w", commit, err)
 			}
-			return f[1], p, nil
+			return f[1], p, note, nil
 		}
 	}
-	return "", 0, fmt.Errorf("go.mod at %s does not require go-stellar-sdk", commit)
+	return "", 0, "", fmt.Errorf("go.mod at %s does not require go-stellar-sdk", commit)
 }
 
 // dockerfileBases returns the external images a Dockerfile builds FROM, in
@@ -151,53 +155,46 @@ func dockerfileBases(dockerfile []byte) ([]string, error) {
 	return bases, nil
 }
 
-func pinnedContexts(bases []string) ([]string, string, error) {
-	var flags, set []string
-	for _, b := range bases {
-		pinned, ok := BaseImages[b]
-		if !ok {
-			return nil, "", fmt.Errorf("base image %s has no pinned digest; add it to BaseImages and pins.toml", b)
-		}
-		flags = append(flags, "--build-context", b+"=docker-image://"+pinned)
-		set = append(set, b+"="+pinned)
-	}
-	sort.Strings(set)
-	sum := sha256.Sum256([]byte(strings.Join(set, "\n")))
-	return flags, hex.EncodeToString(sum[:]), nil
+// pinnedContexts returns the --build-context flags that replace each base with
+// its digest, a stable digest of that set for the image label, and a note for
+// each base BaseImages does not list.
+func pinnedContexts(ctx context.Context, bases []string, resolve pinning.Resolver) ([]string, string, []string, error) {
+	return pinning.Contexts(ctx, BaseImages, "BaseImages in adapters/stellaretl/build.go", bases, resolve)
 }
 
 func imageTag(commit string) string { return "shapekit-stellar-etl:" + commit }
 
-// ensureImage builds the commit with its own docker/Dockerfile on the pinned
-// bases unless such an image exists. builder names a buildx builder (one of
-// the docker-container driver can carry memory and cpu limits); the default
-// builder when empty.
-func (s source) ensureImage(ctx context.Context, commit, builder string) (string, error) {
+// ensureImage builds the commit with its own docker/Dockerfile on fixed base
+// digests (pinnedContexts) unless such an image exists. builder names a buildx
+// builder (one of the docker-container driver can carry memory and cpu
+// limits); the default builder when empty. The notes name each base
+// BaseImages does not list.
+func (s source) ensureImage(ctx context.Context, commit, builder string) (string, []string, error) {
 	tag := imageTag(commit)
 	dockerfile, err := s.show(ctx, commit, "docker/Dockerfile")
 	if err != nil {
-		return "", err
+		return "", nil, err
 	}
 	bases, err := dockerfileBases(dockerfile)
 	if err != nil {
-		return "", fmt.Errorf("docker/Dockerfile at %s: %w", commit, err)
+		return "", nil, fmt.Errorf("docker/Dockerfile at %s: %w", commit, err)
 	}
-	contexts, baseSet, err := pinnedContexts(bases)
+	contexts, baseSet, notes, err := pinnedContexts(ctx, bases, pinning.RegistryDigest)
 	if err != nil {
-		return "", fmt.Errorf("docker/Dockerfile at %s: %w", commit, err)
+		return "", nil, fmt.Errorf("docker/Dockerfile at %s: %w", commit, err)
 	}
 	if got, err := docker(ctx, "image", "inspect", "--format", "{{index .Config.Labels \""+baseLabel+"\"}}", tag); err == nil && got == baseSet {
-		return tag, nil
+		return tag, notes, nil
 	}
 	archive := exec.CommandContext(ctx, "git", "-C", s.dir, "archive", "--format=tar", commit) //nolint:gosec // commit was checked to be 40 hex digits
 	out, err := archive.StdoutPipe()
 	if err != nil {
-		return "", fmt.Errorf("git archive: %w", err)
+		return "", nil, fmt.Errorf("git archive: %w", err)
 	}
 	var archErr bytes.Buffer
 	archive.Stderr = &archErr
 	if err := archive.Start(); err != nil {
-		return "", fmt.Errorf("git archive: %w", err)
+		return "", nil, fmt.Errorf("git archive: %w", err)
 	}
 	args := []string{"buildx", "build", "--load", "-f", "docker/Dockerfile"}
 	if builder != "" {
@@ -212,15 +209,15 @@ func (s source) ensureImage(ctx context.Context, commit, builder string) (string
 	_, drainErr := io.Copy(io.Discard, out)
 	waitErr := archive.Wait()
 	if buildErr != nil {
-		return "", fmt.Errorf("building %s: %w", commit, buildErr)
+		return "", nil, fmt.Errorf("building %s: %w", commit, buildErr)
 	}
 	if waitErr != nil {
-		return "", fmt.Errorf("git archive %s: %w: %s", commit, waitErr, strings.TrimSpace(archErr.String()))
+		return "", nil, fmt.Errorf("git archive %s: %w: %s", commit, waitErr, strings.TrimSpace(archErr.String()))
 	}
 	if drainErr != nil {
-		return "", fmt.Errorf("git archive %s: %w", commit, drainErr)
+		return "", nil, fmt.Errorf("git archive %s: %w", commit, drainErr)
 	}
-	return tag, nil
+	return tag, notes, nil
 }
 
 func docker(ctx context.Context, args ...string) (string, error) {

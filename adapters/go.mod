@@ -5,6 +5,7 @@ go 1.27.4
 require (
 	github.com/jackc/pgx/v5 v5.12.0
 	github.com/stellar/go-stellar-sdk v0.8.0
+	golang.org/x/mod v0.43.0
 )
 
 require (

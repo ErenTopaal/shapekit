@@ -41,18 +41,20 @@ const (
 // target is one running wallet-backend: database, optional object store and
 // the ingest process.
 type target struct {
-	commit  string
-	image   string
-	params  wire.StartParams
-	prefix  string
-	cpus    string
-	db      string
-	ingest  string
-	s3      string
-	started time.Time
-	store   *store
-	s3url   string
-	lake    *lakeCopier
+	commit string
+	image  string
+	// notes on the bases BaseImages does not list (pinning.Contexts)
+	baseNotes []string
+	params    wire.StartParams
+	prefix    string
+	cpus      string
+	db        string
+	ingest    string
+	s3        string
+	started   time.Time
+	store     *store
+	s3url     string
+	lake      *lakeCopier
 
 	mu         sync.Mutex
 	peak       uint64
@@ -97,9 +99,12 @@ func startTarget(ctx context.Context, src source, commit string, p wire.StartPar
 	if err := src.ensure(ctx, commit); err != nil {
 		return nil, wire.Errorf(wire.ClassTarget, "%v", err)
 	}
-	image, err := src.ensureImage(ctx, commit, builder)
+	image, baseNotes, err := src.ensureImage(ctx, commit, builder)
 	if err != nil {
 		return nil, wire.Errorf(wire.ClassTarget, "%v", err)
+	}
+	for _, n := range baseNotes {
+		fmt.Fprintf(os.Stderr, "wb-adapter: note: %s\n", n)
 	}
 	needsEnv, err := src.needsStellarEnvironment(ctx, commit)
 	if err != nil {
@@ -109,7 +114,7 @@ func startTarget(ctx context.Context, src source, commit string, p wire.StartPar
 	if err != nil {
 		return nil, err
 	}
-	t := &target{commit: commit, image: image, params: p, prefix: "skwb-" + suffix, cpus: cpus}
+	t := &target{commit: commit, image: image, baseNotes: baseNotes, params: p, prefix: "skwb-" + suffix, cpus: cpus}
 	t.db, t.ingest, t.s3 = t.prefix+"-db", t.prefix+"-ingest", t.prefix+"-s3"
 	if err := t.startDB(ctx, dbMemory); err != nil {
 		return t, err

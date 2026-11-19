@@ -9,6 +9,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strings"
 	"sync"
 
 	"github.com/ErenTopaal/shapekit/adapters/protocol/wire"
@@ -114,9 +115,12 @@ func (a *Adapter) Describe(protocol int) (wire.DescribeResult, error) {
 	if err := a.src.ensure(a.ctx, a.cfg.Commit); err != nil {
 		return wire.DescribeResult{}, wire.Errorf(wire.ClassTarget, "%v", err)
 	}
-	maxProto, _, err := a.src.maxProtocol(a.ctx, a.cfg.Commit)
+	maxProto, _, note, err := a.src.maxProtocol(a.ctx, a.cfg.Commit)
 	if err != nil {
 		return wire.DescribeResult{}, wire.Errorf(wire.ClassTarget, "%v", err)
+	}
+	if note != "" {
+		fmt.Fprintf(os.Stderr, "wb-adapter: note: %s\n", note)
 	}
 	var caps []string
 	if protocol >= 2 {
@@ -152,7 +156,7 @@ func (a *Adapter) Start(p wire.StartParams) (wire.StartResult, error) {
 	if err != nil {
 		return wire.StartResult{}, err
 	}
-	_, sdk, err := a.src.maxProtocol(a.ctx, a.cfg.Commit)
+	_, sdk, sdkNote, err := a.src.maxProtocol(a.ctx, a.cfg.Commit)
 	if err != nil {
 		return wire.StartResult{}, wire.Errorf(wire.ClassTarget, "%v", err)
 	}
@@ -165,6 +169,13 @@ func (a *Adapter) Start(p wire.StartParams) (wire.StartResult, error) {
 		"wallet-backend.image":  imageID,
 		"go-stellar-sdk":        sdk,
 		"timescaledb":           TimescaleImage,
+	}
+	// a version or base the tables do not list is recorded with the run
+	if sdkNote != "" {
+		comps["go-stellar-sdk.note"] = sdkNote
+	}
+	if len(t.baseNotes) > 0 {
+		comps["base-images.note"] = strings.Join(t.baseNotes, "; ")
 	}
 	if p.Delivery.Mode == wire.DeliverySep54S3 {
 		comps["seaweedfs"] = SeaweedImage
