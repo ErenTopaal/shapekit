@@ -641,6 +641,15 @@ corpus, memory limit or round count) and a set with a shard missing or given twi
 `--expect` checks the merged report. `shapekit findings` refuses a single shard's report as an
 input.
 
+`--expect <file>` holds a run (or a merged report, or with `harness expect --check` a report
+already written) to an expectations file that `shapekit harness expect --write` wrote from a
+reviewed run. `--expect-mode exact`, the default, fails on any difference: a verdict or
+reason, an entry missing or not listed, or another target build. `--expect-mode regressions`
+(`--mode` for `harness expect --check`) accepts any build of the same target and fails only on
+a new or changed `mishandled`, `dropped` or `not-evaluated` verdict, or a listed entry the run
+did not judge; a fixed failure is printed as a note. [Running the corpus in an indexer's
+CI](indexer-ci.md#failing-a-pull-request-on-a-worse-verdict) shows the rules as a table.
+
 ## Reproductions
 
 `shapekit harness reproduce --table <toml>` runs pairs of target builds over named chains and
