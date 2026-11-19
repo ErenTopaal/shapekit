@@ -69,6 +69,16 @@ on:
         required: false
         type: string
         default: ""
+      expect-mode:
+        description: "how the expect file holds the run: exact (any difference fails, and the build must be the one the file was written at) or regressions (any build; a new or changed mishandled, dropped or not-evaluated verdict, or a missing entry, fails), for pull requests"
+        required: false
+        type: string
+        default: exact
+      shards:
+        description: "jobs to split the replay across, each replaying a share of the chains, put together by a merge job before the report; one job when 1"
+        required: false
+        type: number
+        default: 1
       go-version:
         description: "go version to install before setup; none when empty"
         required: false
@@ -107,12 +117,14 @@ on:
     outputs:
       report-artifact:
         description: "name of the uploaded artifact with harness-report.json, HARNESS.md and the logs"
-        value: ${{ jobs.harness.outputs.artifact }}
+        value: ${{ jobs.harness.outputs.artifact || jobs.merge.outputs.artifact }}
 
 # no workflow-wide permissions: the harness job reads only, and the comment job runs with
 # what the calling job grants, so a caller that does not ask for comments grants nothing more
 jobs:
   harness:
+    # the whole replay in one job; with shards above 1 the plan, shard and merge jobs run instead
+    if: ${{ inputs.shards <= 1 }}
     runs-on: ubuntu-24.04
     timeout-minutes: ${{ inputs.timeout-minutes }}
     permissions:
@@ -125,6 +137,8 @@ jobs:
         env:
           NETWORK: ${{ inputs.network }}
           DELIVERY: ${{ inputs.delivery }}
+          EXPECT_MODE: ${{ inputs.expect-mode }}
+          SHARDS: ${{ inputs.shards }}
         run: |
           case "$NETWORK" in
             testnet|mainnet|both) ;;
@@ -134,6 +148,14 @@ jobs:
             ""|sep54-filesystem|sep54-s3|sep54-gcs|rpc) ;;
             *) echo "::error::delivery must be sep54-filesystem, sep54-s3, sep54-gcs or rpc, not $DELIVERY"; exit 1 ;;
           esac
+          case "$EXPECT_MODE" in
+            exact|regressions) ;;
+            *) echo "::error::expect-mode must be exact or regressions, not $EXPECT_MODE"; exit 1 ;;
+          esac
+          if [ "$SHARDS" != 1 ]; then
+            echo "::error::shards must be a whole number from 1 up, not $SHARDS"
+            exit 1
+          fi
           echo "artifact=shapekit-harness" >>"$GITHUB_OUTPUT"
       - name: check out the indexer under test
         uses: actions/checkout@v7
@@ -204,6 +226,7 @@ jobs:
           NETWORK: ${{ inputs.network }}
           DELIVERY: ${{ inputs.delivery }}
           EXPECT: ${{ inputs.expect }}
+          EXPECT_MODE: ${{ inputs.expect-mode }}
         run: |
           set -euo pipefail
           if [ -n "$ADAPTER" ] && [ -z "$MAPPING" ]; then
@@ -219,8 +242,258 @@ jobs:
           for c in $CHAINS; do args+=(--chain "$c"); done
           for f in $FAMILIES; do args+=(--family "$f"); done
           if [ -n "$DELIVERY" ]; then args+=(--delivery "$DELIVERY"); fi
-          if [ -n "$EXPECT" ]; then args+=(--expect "$EXPECT"); fi
+          if [ -n "$EXPECT" ]; then args+=(--expect "$EXPECT" --expect-mode "$EXPECT_MODE"); fi
           "$SHAPEKIT" check indexer "${args[@]}"
+      - name: report
+        # the html report and the pull request summary, grouped by finding; with a baseline,
+        # failures are classed as new, changed, fixed or unchanged
+        id: report
+        if: ${{ !cancelled() }}
+        working-directory: shapekit
+        env:
+          BASELINE: ${{ inputs.baseline != '' && inputs.baseline || inputs.expect }}
+        run: |
+          set -euo pipefail
+          out="$RUNNER_TEMP/harness"
+          if [ ! -f "$out/harness-report.json" ]; then
+            echo "the run wrote no harness report, so there is nothing to report" >>"$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          args=(--manifest "$MANIFEST" --out "$out/report.html" --summary "$out/summary.md")
+          if [ -n "$BASELINE" ]; then args+=(--baseline "$GITHUB_WORKSPACE/indexer/$BASELINE"); fi
+          "$SHAPEKIT" report "$out" "${args[@]}"
+          cat "$out/summary.md" >>"$GITHUB_STEP_SUMMARY"
+          echo "summary=summary.md" >>"$GITHUB_OUTPUT"
+      - name: harness report to the job summary
+        if: ${{ !cancelled() }}
+        run: |
+          if [ -f "$RUNNER_TEMP/harness/HARNESS.md" ]; then
+            cat "$RUNNER_TEMP/harness/HARNESS.md" >>"$GITHUB_STEP_SUMMARY"
+          fi
+      - uses: actions/upload-artifact@v7
+        if: ${{ !cancelled() }}
+        with:
+          name: ${{ steps.names.outputs.artifact }}
+          path: ${{ runner.temp }}/harness/
+          retention-days: 30
+
+  plan:
+    # with shards above 1: checks the inputs and lists the shard indices for the matrix
+    if: ${{ inputs.shards > 1 }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions: {}
+    outputs:
+      shards: ${{ steps.plan.outputs.shards }}
+    steps:
+      - id: plan
+        env:
+          NETWORK: ${{ inputs.network }}
+          DELIVERY: ${{ inputs.delivery }}
+          EXPECT_MODE: ${{ inputs.expect-mode }}
+          SHARDS: ${{ inputs.shards }}
+        run: |
+          case "$NETWORK" in
+            testnet|mainnet|both) ;;
+            *) echo "::error::network must be testnet, mainnet or both, not $NETWORK"; exit 1 ;;
+          esac
+          case "$DELIVERY" in
+            ""|sep54-filesystem|sep54-s3|sep54-gcs|rpc) ;;
+            *) echo "::error::delivery must be sep54-filesystem, sep54-s3, sep54-gcs or rpc, not $DELIVERY"; exit 1 ;;
+          esac
+          case "$EXPECT_MODE" in
+            exact|regressions) ;;
+            *) echo "::error::expect-mode must be exact or regressions, not $EXPECT_MODE"; exit 1 ;;
+          esac
+          if ! [[ "$SHARDS" =~ ^[0-9]+$ ]] || [ "$SHARDS" -gt 64 ]; then
+            echo "::error::shards must be a whole number from 1 to 64, not $SHARDS"
+            exit 1
+          fi
+          echo "shards=$(jq -cn --argjson n "$SHARDS" '[range(1; $n + 1)]')" >>"$GITHUB_OUTPUT"
+
+  shard:
+    # one share of the chains (harness run --shard): the chains, sorted by name, dealt out in
+    # turn, both networks of a chain in the same shard
+    needs: plan
+    name: harness (${{ matrix.shard }}/${{ inputs.shards }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: ${{ inputs.timeout-minutes }}
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: ${{ fromJSON(needs.plan.outputs.shards) }}
+    steps:
+      - name: check out the indexer under test
+        uses: actions/checkout@v7
+        with:
+          path: indexer
+      - name: check out shapekit at the release tag (the findings triage the report links)
+        uses: actions/checkout@v7
+        with:
+          repository: ${{ inputs.shapekit-repository }}
+          ref: ${{ inputs.shapekit-tag }}
+          path: shapekit
+      - name: download and verify the release assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ inputs.shapekit-repository }}
+          TAG: ${{ inputs.shapekit-tag }}
+          CORPUS: ${{ inputs.corpus-asset }}
+          CORPUS_SHA256: ${{ inputs.corpus-sha256 }}
+          SHAPEKIT_SHA256: ${{ inputs.shapekit-sha256 }}
+        run: |
+          set -euo pipefail
+          dl="$RUNNER_TEMP/shapekit-release"
+          mkdir -p "$dl"
+          gh release download "$TAG" --repo "$REPO" --dir "$dl" \
+            --pattern "$CORPUS" --pattern shapekit-linux-x86_64
+          (cd "$dl" && printf '%s  %s\n%s  %s\n' \
+            "$CORPUS_SHA256" "$CORPUS" "$SHAPEKIT_SHA256" shapekit-linux-x86_64 | sha256sum -c -)
+          chmod +x "$dl/shapekit-linux-x86_64"
+          mkdir -p "$dl/corpus"
+          tar --zstd -xf "$dl/$CORPUS" -C "$dl/corpus"
+          manifest=$(find "$dl/corpus" -mindepth 2 -maxdepth 2 -name manifest.json)
+          if [ "$(printf '%s\n' "$manifest" | grep -c .)" -ne 1 ]; then
+            echo "::error::the archive must hold exactly one <dir>/manifest.json"
+            exit 1
+          fi
+          {
+            echo "SHAPEKIT=$dl/shapekit-linux-x86_64"
+            echo "CORPUS_DIR=$(dirname "$manifest")"
+            echo "MANIFEST=$manifest"
+          } >>"$GITHUB_ENV"
+      - if: ${{ inputs.go-version != '' }}
+        uses: actions/setup-go@v7
+        with:
+          go-version: ${{ inputs.go-version }}
+          cache: false
+      - if: ${{ inputs.node-version != '' }}
+        uses: actions/setup-node@v7
+        with:
+          node-version: ${{ inputs.node-version }}
+      - if: ${{ inputs.python-version != '' }}
+        uses: actions/setup-python@v7
+        with:
+          python-version: ${{ inputs.python-version }}
+      - name: setup
+        if: ${{ inputs.setup != '' }}
+        working-directory: indexer
+        env:
+          SETUP: ${{ inputs.setup }}
+        run: bash -euo pipefail -c "$SETUP"
+      - name: replay
+        working-directory: indexer
+        env:
+          ADAPTER: ${{ inputs.adapter }}
+          MAPPING: ${{ inputs.mapping }}
+          VARS: ${{ inputs.vars }}
+          CHAINS: ${{ inputs.chains }}
+          FAMILIES: ${{ inputs.families }}
+          NETWORK: ${{ inputs.network }}
+          DELIVERY: ${{ inputs.delivery }}
+          SHARD: ${{ matrix.shard }}/${{ inputs.shards }}
+        run: |
+          set -euo pipefail
+          if [ -n "$ADAPTER" ] && [ -z "$MAPPING" ]; then
+            args=(--adapter "$ADAPTER")
+          elif [ -z "$ADAPTER" ] && [ -n "$MAPPING" ]; then
+            args=(--mapping "$MAPPING")
+            for v in $VARS; do args+=(--var "$v"); done
+          else
+            echo "set exactly one of the adapter and mapping inputs" >&2
+            exit 1
+          fi
+          args+=(--corpus "$CORPUS_DIR" --network "$NETWORK" --out "$RUNNER_TEMP/harness")
+          for c in $CHAINS; do args+=(--chain "$c"); done
+          for f in $FAMILIES; do args+=(--family "$f"); done
+          if [ -n "$DELIVERY" ]; then args+=(--delivery "$DELIVERY"); fi
+          # the expectations hold the whole run, so the merge job checks them
+          args+=(--shard "$SHARD")
+          "$SHAPEKIT" check indexer "${args[@]}"
+      - uses: actions/upload-artifact@v7
+        if: ${{ !cancelled() }}
+        with:
+          name: shapekit-harness-shard-${{ matrix.shard }}
+          path: ${{ runner.temp }}/harness/
+          # the merged artifact holds every shard's logs
+          retention-days: 1
+
+  merge:
+    # the shards' reports put together into the report one job would have written (harness
+    # merge), held to the expect file, then reported and uploaded as the unsharded job does
+    needs: [plan, shard]
+    if: ${{ !cancelled() && needs.plan.result == 'success' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    outputs:
+      artifact: ${{ steps.names.outputs.artifact }}
+      summary: ${{ steps.report.outputs.summary }}
+    steps:
+      - id: names
+        run: echo "artifact=shapekit-harness" >>"$GITHUB_OUTPUT"
+      - name: check out the indexer under test
+        uses: actions/checkout@v7
+        with:
+          path: indexer
+      - name: check out shapekit at the release tag (the findings triage the report links)
+        uses: actions/checkout@v7
+        with:
+          repository: ${{ inputs.shapekit-repository }}
+          ref: ${{ inputs.shapekit-tag }}
+          path: shapekit
+      - name: download and verify the release assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ inputs.shapekit-repository }}
+          TAG: ${{ inputs.shapekit-tag }}
+          CORPUS: ${{ inputs.corpus-asset }}
+          CORPUS_SHA256: ${{ inputs.corpus-sha256 }}
+          SHAPEKIT_SHA256: ${{ inputs.shapekit-sha256 }}
+        run: |
+          set -euo pipefail
+          dl="$RUNNER_TEMP/shapekit-release"
+          mkdir -p "$dl"
+          gh release download "$TAG" --repo "$REPO" --dir "$dl" \
+            --pattern "$CORPUS" --pattern shapekit-linux-x86_64
+          (cd "$dl" && printf '%s  %s\n%s  %s\n' \
+            "$CORPUS_SHA256" "$CORPUS" "$SHAPEKIT_SHA256" shapekit-linux-x86_64 | sha256sum -c -)
+          chmod +x "$dl/shapekit-linux-x86_64"
+          mkdir -p "$dl/corpus"
+          tar --zstd -xf "$dl/$CORPUS" -C "$dl/corpus"
+          manifest=$(find "$dl/corpus" -mindepth 2 -maxdepth 2 -name manifest.json)
+          if [ "$(printf '%s\n' "$manifest" | grep -c .)" -ne 1 ]; then
+            echo "::error::the archive must hold exactly one <dir>/manifest.json"
+            exit 1
+          fi
+          {
+            echo "SHAPEKIT=$dl/shapekit-linux-x86_64"
+            echo "CORPUS_DIR=$(dirname "$manifest")"
+            echo "MANIFEST=$manifest"
+          } >>"$GITHUB_ENV"
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: shapekit-harness-shard-*
+          path: ${{ runner.temp }}/shards
+      - name: merge the shards
+        working-directory: indexer
+        env:
+          EXPECT: ${{ inputs.expect }}
+          EXPECT_MODE: ${{ inputs.expect-mode }}
+        run: |
+          set -euo pipefail
+          out="$RUNNER_TEMP/harness"
+          # every shard's logs, so the artifact holds what one job's would
+          mkdir -p "$out/logs"
+          for d in "$RUNNER_TEMP"/shards/*/; do
+            if [ -d "$d/logs" ]; then cp -R "$d/logs/." "$out/logs/"; fi
+          done
+          args=(--out "$out")
+          if [ -n "$EXPECT" ]; then args+=(--expect "$EXPECT" --expect-mode "$EXPECT_MODE"); fi
+          "$SHAPEKIT" harness merge "${args[@]}" "$RUNNER_TEMP"/shards/*/
       - name: report
         # the html report and the pull request summary, grouped by finding; with a baseline,
         # failures are classed as new, changed, fixed or unchanged
@@ -257,24 +530,24 @@ jobs:
   comment:
     # a pull request from a fork gets a read-only token, so it keeps the job summary and the
     # artifact and gets no comment
-    needs: harness
+    needs: [harness, merge]
     if: >-
       ${{ !cancelled() && inputs.comment && github.event_name == 'pull_request'
       && github.event.pull_request.head.repo.full_name == github.repository
-      && needs.harness.outputs.summary != '' }}
+      && (needs.harness.outputs.summary != '' || needs.merge.outputs.summary != '') }}
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
       - uses: actions/download-artifact@v8
         with:
-          name: ${{ needs.harness.outputs.artifact }}
+          name: ${{ needs.harness.outputs.artifact || needs.merge.outputs.artifact }}
           path: report
       - name: post or update the summary comment
         env:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
           PR: ${{ github.event.pull_request.number }}
-          SUMMARY: report/${{ needs.harness.outputs.summary }}
+          SUMMARY: report/${{ needs.harness.outputs.summary || needs.merge.outputs.summary }}
         run: |
           set -euo pipefail
           # the summary's first line names it: the shapekit-report marker and the run kind
