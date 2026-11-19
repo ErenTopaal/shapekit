@@ -168,11 +168,12 @@ Every number the dashboard shows is read from JSON that `shapekit site data` wri
 | `registry/*.toml` | CAP texts (linked at the pinned stellar-protocol commit), XDR additions, family priority and protocol range |
 | `findings/triage.toml` | the paths of the committed harness reports, conformance matrices and linter result |
 | `findings/inputs/*` | those reduced run outputs, as `findings/triage.toml` names them |
+| `candidate/findings/triage.toml`, `candidate/findings/inputs/conformance-*.json` | the candidate lane's committed conformance matrices, read for the detail of each failing check |
 | `adapters/walletbackend/reproductions.toml` | the wallet-backend sightings `shapekit harness reproduce` checks, with their commits and expected verdicts |
 | `findings/findings.json` | the findings record and its summary |
 | `candidate/findings/findings.json` | the candidate lane's findings record and its summary, beside the main one (the record next to the triage `findings/triage.toml` names as `candidates`) |
 | `conformance/versions.toml` | the SDK version matrix and the current version of each SDK |
-| `conformance/known-failures/*.txt` | known-failure lines per SDK and version |
+| `conformance/known-failures/*.txt` | known-failure lines per SDK and version: the failing checks the SDK results show |
 | `conformance/reproductions.toml` | the upstream sightings the runner must reproduce |
 | `pins.toml` | pinned upstream versions shown on the data sources page |
 
@@ -185,17 +186,20 @@ the same bytes.
 Three things the site shows are derived rather than copied, and all are plain counts over the
 committed files:
 
-- SDK totals per version: failing cells by result, cells with a known issue, every check of
-  those cells by result, and failing checks by operation, counted over the committed matrix. A
-  failing check is one whose result is `error`, `diverges-from-network` or
-  `diverges-from-peers`; a failing cell also lists the checks its version could not answer
-  (`unsupported`), which are counted by result only. The committed matrices keep failing cells
-  only (see the `reduction` field of `findings/inputs/provenance.json`), so an entry that passed
-  or was unsupported at every version is not listed.
-- Reproduction rows: for each version a row names, whether the committed matrix has every named
-  check of the row failing (before the fix) or no counted check failing (after it). Rows built
-  from probes are not in the matrix and say so. `shapekit conformance reproduce` remains the
-  check that actually runs them.
+- SDK results per version, for every SDK and version of `conformance/versions.toml`: the
+  failing cells and their checks are the lines of the SDK's known-failures file for that
+  version. `shapekit conformance run` fails on a failing check the file does not list with its
+  result and on a listed check that does not fail so, so the file of a run without
+  known-failures problems is that run's failing checks; an SDK without a file fails none. The
+  committed matrices of both lanes (`findings/triage.toml` and the candidate triage it names)
+  give each check its detail; where one holds a failing cell of an SDK version, its failing
+  checks must be the listed ones, or the command fails and names the cell. The totals count
+  the cells by result, the cells with a known issue and the failing checks by operation and by
+  result. A failing check is one whose result is `error` or `diverges-from-network`.
+- Reproduction rows: for each version a row names, whether the committed results have every
+  named check of the row failing (before the fix) or no counted check failing (after it). Rows
+  built from probes are not in the committed results and say so. `shapekit conformance
+  reproduce` remains the check that actually runs them.
 - Harness verdicts per entry and network, the distinct entries replayed and the chains per
   network, from each committed report. The wallet-backend reproduction rows carry, for each
   expected verdict, the verdict the committed run gave the same entry at the pinned commit; the
