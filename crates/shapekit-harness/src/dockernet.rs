@@ -37,6 +37,25 @@ fn owner_pid(name: &str) -> Option<i32> {
     pid.parse().ok()
 }
 
+/// The pid namespace the pid in a network name counts in, as the number in
+/// `/proc/self/ns/pid` (`pid:[<n>]`). Runs in different namespaces can share one docker daemon
+/// (a CI job in a container, another run on the host), and a pid from another namespace says
+/// nothing about whether its run is alive here, so each run sweeps only its own namespace's
+/// networks. "none" where there is no such file (macOS, which runs no indexer checks).
+fn pid_namespace() -> String {
+    std::fs::read_link("/proc/self/ns/pid")
+        .ok()
+        .and_then(|p| namespace_number(&p.to_string_lossy()))
+        .unwrap_or_else(|| "none".to_owned())
+}
+
+fn namespace_number(link: &str) -> Option<String> {
+    let n = link.strip_prefix("pid:[")?.strip_suffix(']')?;
+    (!n.is_empty() && n.bytes().all(|b| b.is_ascii_digit())).then(|| n.to_owned())
+}
+
+const PIDNS_LABEL: &str = "shapekit.harness.pidns";
+
 #[cfg(unix)]
 fn alive(pid: i32) -> bool {
     // SAFETY: signal 0 only checks that the process exists and may be signalled
@@ -51,13 +70,18 @@ fn alive(_pid: i32) -> bool {
 
 /// Removes the networks, with what is attached, of harness runs whose process is gone. A run
 /// stopped by a signal removes its own (shapekit_process::cleanup); one killed with SIGKILL
-/// cannot, and the next run on the host removes what it left. Returns the names removed.
+/// cannot, and the next run in the same pid namespace removes what it left. Networks of
+/// another namespace, or made before the namespace label, are left alone: their owner's pid
+/// cannot be checked from here. Returns the names removed.
 pub fn sweep_stale() -> Result<Vec<String>> {
+    let ns = format!("label={PIDNS_LABEL}={}", pid_namespace());
     let names = docker(&[
         "network",
         "ls",
         "--filter",
         "label=shapekit.harness=1",
+        "--filter",
+        &ns,
         "--format",
         "{{.Name}}",
     ])?;
@@ -96,12 +120,15 @@ impl Network {
         // recorded before the create: a signal removes the network with what is attached,
         // and one that was never created is no error to remove
         shapekit_process::cleanup::network_created(name);
+        let ns = format!("{PIDNS_LABEL}={}", pid_namespace());
         docker(&[
             "network",
             "create",
             "--internal",
             "--label",
             "shapekit.harness=1",
+            "--label",
+            &ns,
             name,
         ])?;
         let mut net = Network {
@@ -168,7 +195,18 @@ impl Drop for Network {
 
 #[cfg(test)]
 mod tests {
-    use super::owner_pid;
+    use super::{namespace_number, owner_pid};
+
+    #[test]
+    fn the_namespace_is_the_number_of_the_link() {
+        assert_eq!(
+            namespace_number("pid:[4026531836]").as_deref(),
+            Some("4026531836")
+        );
+        assert_eq!(namespace_number("pid:[]"), None);
+        assert_eq!(namespace_number("net:[4026531836]"), None);
+        assert_eq!(namespace_number("pid:[12a]"), None);
+    }
 
     #[test]
     fn the_owner_pid_is_read_only_from_harness_names() {
