@@ -131,7 +131,7 @@ tracking issues), `contents: write` for the `watch` job of `sentinel.yml`, used 
 its cursor to the `sentinel-state` branch as `github-actions[bot]`, and, in the release job
 only, `contents: write`, `id-token: write`, `attestations: write` and `artifact-metadata: write`
 (publishing and attestations). The only
-token used is the built-in `GITHUB_TOKEN`. No other secrets exist.
+token used is the built-in `GITHUB_TOKEN`. The one other secret, `SHAPEKIT_TEXT_PATTERNS`, holds the private patterns of the public text check in `pr.yml` and is not a credential; see [maintenance](maintenance.md#the-public-text-check-in-ci).
 
 ### Measured durations
 

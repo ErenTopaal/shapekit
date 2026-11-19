@@ -307,6 +307,22 @@ jobs:
       - name: findings check, no drafts tolerated
         run: shapekit findings check
       - run: scripts/check-no-em-dash.sh
+      # the private patterns name people and machines, so they come from a repository secret,
+      # never from the tree. github gives no secrets to a pull request from a fork, so there the
+      # step checks the generic patterns only and says the private ones were skipped
+      - name: no machine-specific or personal text in tracked files
+        env:
+          TEXT_PATTERNS: ${{ secrets.SHAPEKIT_TEXT_PATTERNS }}
+        run: |
+          set -euo pipefail
+          if [ -z "$TEXT_PATTERNS" ]; then
+            echo "::notice title=public text check::the SHAPEKIT_TEXT_PATTERNS secret is not available to this run (a pull request from a fork, or a repository without the secret), so only the home directory and address patterns are checked; the private patterns are skipped"
+            scripts/check-public-text.sh --locations
+            exit 0
+          fi
+          umask 077
+          printf '%s\n' "$TEXT_PATTERNS" >"$RUNNER_TEMP/text-patterns"
+          SHAPEKIT_TEXT_PATTERNS="$RUNNER_TEMP/text-patterns" scripts/check-public-text.sh --locations
       - uses: actions/setup-node@v7
         with:
           node-version: 26.13.1

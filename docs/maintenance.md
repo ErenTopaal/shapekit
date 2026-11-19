@@ -186,6 +186,30 @@ Repository administrators can bypass the ruleset.
 Private vulnerability reporting (Settings, Code security) is on, for the reports `SECURITY.md`
 describes.
 
+### The public text check in CI
+
+The `corpus` job of `pr.yml` runs `scripts/check-public-text.sh --locations` (see
+[Acceptance gate](#acceptance-gate)). Its private patterns name people, machines and local
+directories, so they are never committed. A maintainer provides them as a repository secret:
+
+1. Write the pattern file: one perl regex per line, `#` starts a comment. It is the same file
+   the script reads locally from `info/text-patterns` in the clone's git directory.
+2. In Settings, Secrets and variables, Actions, add a repository secret named
+   `SHAPEKIT_TEXT_PATTERNS` whose value is the whole file. With the GitHub CLI:
+   `gh secret set SHAPEKIT_TEXT_PATTERNS < path/to/text-patterns`.
+3. To change a pattern, set the secret again with the new file. GitHub never shows the value
+   once it is saved, so keep the file itself where the maintainers can reach it.
+
+The step writes the secret to a file only the runner user can read and passes it to the script
+through `SHAPEKIT_TEXT_PATTERNS`. With `--locations` a hit prints only the file and line, never
+the matched text, so a private name does not appear in a log anyone can read.
+
+GitHub passes no secrets to a `pull_request` run from a fork. There, and in a fork's own runs
+without the secret, the step checks the generic patterns only (absolute home directories,
+private and tailnet addresses), writes a notice that the private patterns were skipped, and
+passes unless a generic pattern matches. The private patterns are checked again on the push to
+`main` after the merge, where the secret is available.
+
 ## Acceptance gate
 
 `scripts/acceptance.sh` runs the checks every change to `main` passes, in two modes. Run it

@@ -9,7 +9,22 @@
 # shares. a clone without that file, such as a fresh one, is checked against the generic
 # patterns only, and the script says so; a pattern file that is named but missing, or that
 # holds no pattern, is an error.
+#
+#   scripts/check-public-text.sh [--locations]
+#
+# --locations prints only the file and line of each hit, not the text, for logs others can read
+# (ci): a hit of a private pattern would otherwise print the private text it matched.
 set -euo pipefail
+
+locations=0
+case "${1:-}" in
+  "") ;;
+  --locations) locations=1 ;;
+  *)
+    echo "usage: $0 [--locations]" >&2
+    exit 2
+    ;;
+esac
 
 cd "$(git rev-parse --show-toplevel)"
 
@@ -55,8 +70,12 @@ if [ "$status" -gt 1 ]; then
 fi
 if [ -n "$hits" ]; then
   echo "machine-specific or personal text in tracked files:" >&2
-  # the matching line is cut short so a private name in it is shown once, not in full context
-  echo "$hits" | cut -c1-200 >&2
+  if [ "$locations" -eq 1 ]; then
+    echo "$hits" | cut -d: -f1,2 >&2
+  else
+    # the matching line is cut short so a private name in it is shown once, not in full context
+    echo "$hits" | cut -c1-200 >&2
+  fi
   exit 1
 fi
 files=$(git ls-files | wc -l)
