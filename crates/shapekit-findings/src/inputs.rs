@@ -105,6 +105,11 @@ impl CheckView {
                 .is_some_and(|d| d.starts_with(IMPLEMENTATION_DEFINED))
     }
 
+    /// A check a run has to account for, as [`CellView::is_failure`] for a cell.
+    pub fn is_failure(&self) -> bool {
+        !matches!(self.result.as_str(), "pass" | "unsupported")
+    }
+
     /// The recorded answer in one line: a string answer (`rejected`) as itself, anything else
     /// as compact JSON. Empty when no answer was recorded.
     pub fn answer(&self) -> String {

@@ -114,6 +114,10 @@ pub struct ConformanceMatch {
     /// Exact versions; every version when empty.
     #[serde(default)]
     pub versions: Vec<String>,
+    /// Check name patterns (`*/tx_hash *`); every failing check of a matched cell when empty.
+    /// Two findings can split one cell's failing checks: each takes the checks it names.
+    #[serde(default)]
+    pub checks: Vec<String>,
 }
 
 /// Evidence from the answers SDKs give on implementation-defined entries. Those answers are
@@ -496,7 +500,7 @@ mod tests {
         let all = ConformanceMatch {
             sdk: "go".into(),
             entries: vec!["**".into()],
-            versions: vec![],
+            ..ConformanceMatch::default()
         };
         assert!(conformance_unconstrained(&all).is_some());
         let none = ConformanceMatch {

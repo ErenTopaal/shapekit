@@ -271,6 +271,55 @@ pub fn conformance_matches(m: &ConformanceMatch, sdk: &str, version: &str, entry
     m.sdk == sdk && any_or(&m.versions, version) && m.entries.iter().any(|g| glob(g, entry))
 }
 
+/// Whether `m` takes the failing check `check` of a cell it matches.
+pub fn conformance_takes_check(m: &ConformanceMatch, check: &str) -> bool {
+    m.checks.is_empty() || m.checks.iter().any(|g| glob(g, check))
+}
+
+/// Splits a failing cell's failing checks among the findings that take them, in triage order:
+/// each finding takes the checks one of its matchers names (all of them for a matcher without
+/// check patterns) that no earlier finding took. Returns the groups as (index into `defs`,
+/// checks) and the checks no finding took. A cell without failing checks (one that errored as a
+/// whole) goes whole to the first finding whose entry matches.
+pub fn split_cell<'a>(
+    defs: &[&FindingDef],
+    sdk: &str,
+    version: &str,
+    entry: &str,
+    failing: &[&'a str],
+) -> (Vec<(usize, Vec<&'a str>)>, Vec<&'a str>) {
+    let matchers = |d: &FindingDef| -> Vec<ConformanceMatch> {
+        d.conformance
+            .iter()
+            .filter(|cm| conformance_matches(cm, sdk, version, entry))
+            .cloned()
+            .collect()
+    };
+    if failing.is_empty() {
+        let first = defs.iter().position(|d| !matchers(d).is_empty());
+        return (
+            first.map(|i| (i, Vec::new())).into_iter().collect(),
+            Vec::new(),
+        );
+    }
+    let mut left: Vec<&str> = failing.to_vec();
+    let mut groups = Vec::new();
+    for (i, d) in defs.iter().enumerate() {
+        let ms = matchers(d);
+        if ms.is_empty() || left.is_empty() {
+            continue;
+        }
+        let (took, rest): (Vec<&str>, Vec<&str>) = left
+            .iter()
+            .partition(|c| ms.iter().any(|m| conformance_takes_check(m, c)));
+        if !took.is_empty() {
+            groups.push((i, took));
+            left = rest;
+        }
+    }
+    (groups, left)
+}
+
 pub fn lint_matches(m: &LintMatch, target: &str, f: &LintFinding) -> bool {
     m.target == target
         && m.rule == f.rule
@@ -655,7 +704,13 @@ pub fn collect(root: &Path, triage: &Triage) -> Result<Collection> {
                     .filter(|c| c.result != "pass")
                     .map(|c| c.check.as_str())
                     .collect();
-                let occ = Occurrence {
+                let failing: Vec<&str> = cell
+                    .checks
+                    .iter()
+                    .filter(|c| c.is_failure())
+                    .map(|c| c.check.as_str())
+                    .collect();
+                let occ = |checks: &[&str]| Occurrence {
                     source: "conformance".into(),
                     on: key.clone(),
                     entry: Some(e.id.clone()),
@@ -663,8 +718,8 @@ pub fn collect(root: &Path, triage: &Triage) -> Result<Collection> {
                     what: format!(
                         "{} ({} check(s): {})",
                         cell.result,
-                        failed.len(),
-                        failed
+                        checks.len(),
+                        checks
                             .iter()
                             .take(4)
                             .copied()
@@ -672,31 +727,33 @@ pub fn collect(root: &Path, triage: &Triage) -> Result<Collection> {
                             .join(", ")
                     ),
                 };
-                let hit = matched.iter_mut().find(|mm| {
-                    mm.def
-                        .conformance
-                        .iter()
-                        .any(|cm| conformance_matches(cm, sdk, version, &e.id))
-                });
-                match hit {
-                    Some(mm) => {
-                        mm.sdk_runs
-                            .entry((e.id.clone(), sdk.to_owned()))
-                            .or_default()
-                            .push(version.to_owned());
-                        mm.occurrences.push(occ);
-                    }
-                    None => hold_or_unmap(
+                let defs: Vec<&FindingDef> = matched.iter().map(|mm| mm.def).collect();
+                let (groups, left) = split_cell(&defs, sdk, version, &e.id, &failing);
+                // a cell one finding takes whole reads as before: every check that did not pass
+                let whole = groups.len() == 1 && left.is_empty();
+                for (i, checks) in &groups {
+                    let mm = &mut matched[*i];
+                    mm.sdk_runs
+                        .entry((e.id.clone(), sdk.to_owned()))
+                        .or_default()
+                        .push(version.to_owned());
+                    mm.occurrences.push(occ(if whole || checks.is_empty() {
+                        &failed
+                    } else {
+                        checks
+                    }));
+                }
+                if groups.is_empty() || !left.is_empty() {
+                    let rest: &[&str] = if groups.is_empty() { &failed } else { &left };
+                    let cands: Vec<&FindingDef> = candidates.iter().collect();
+                    let (held_by, _) = split_cell(&cands, sdk, version, &e.id, &left);
+                    hold_or_unmap(
                         &candidates,
-                        |d| {
-                            d.conformance
-                                .iter()
-                                .any(|cm| conformance_matches(cm, sdk, version, &e.id))
-                        },
-                        occ,
+                        |d| held_by.first().is_some_and(|(i, _)| cands[*i].id == d.id),
+                        occ(rest),
                         &mut held,
                         &mut unmapped,
-                    ),
+                    );
                 }
             }
         }
@@ -1141,7 +1198,7 @@ mod tests {
         let m = ConformanceMatch {
             sdk: "go".into(),
             entries: vec!["*.synth-strkey-*-invalid".into()],
-            versions: vec![],
+            ..ConformanceMatch::default()
         };
         assert!(conformance_matches(
             &m,
@@ -1238,6 +1295,47 @@ mod tests {
         assert_eq!(
             sdk_reproduce(&runs, "e").unwrap(),
             "shapekit conformance run --sdk go --version v0.10.0 --entry e"
+        );
+    }
+
+    #[test]
+    fn findings_split_a_cell_by_the_checks_they_name() {
+        let def = |id: &str, checks: &str| -> FindingDef {
+            toml::from_str(&format!(
+                "id = \"{id}\"\ntitle = \"t\"\ncomponent = \"stellar-cli\"\nseverity = \"divergence\"\nstatus = \"draft\"\ncause = \"c\"\n[[conformance]]\nsdk = \"stellar-cli\"\nentries = [\"e.*\"]\n{checks}"
+            ))
+            .unwrap()
+        };
+        let depth = def("CLI-DEPTH", "checks = [\"*/tx_hash *\"]");
+        let json = def("CLI-JSON-DEPTH", "");
+        let failing = [
+            "testnet/tx_hash 0",
+            "testnet/encode_json",
+            "mainnet/tx_hash 0",
+        ];
+        let (groups, left) = split_cell(&[&depth, &json], "stellar-cli", "30.0.1", "e.a", &failing);
+        assert_eq!(
+            groups,
+            vec![
+                (0, vec!["testnet/tx_hash 0", "mainnet/tx_hash 0"]),
+                (1, vec!["testnet/encode_json"])
+            ]
+        );
+        assert!(left.is_empty());
+        // alone, the narrowed finding leaves the other checks to the next lane
+        let (groups, left) = split_cell(&[&depth], "stellar-cli", "30.0.1", "e.a", &failing);
+        assert_eq!(groups.len(), 1);
+        assert_eq!(left, vec!["testnet/encode_json"]);
+        // a matcher without check patterns takes the cell whole, as before
+        let (groups, _) = split_cell(&[&json, &depth], "stellar-cli", "30.0.1", "e.a", &failing);
+        assert_eq!(groups, vec![(0, failing.to_vec())]);
+        // a cell that failed as a whole goes to the first finding of its entry
+        let (groups, _) = split_cell(&[&depth, &json], "stellar-cli", "30.0.1", "e.a", &[]);
+        assert_eq!(groups, vec![(0, vec![])]);
+        assert!(
+            split_cell(&[&depth], "stellar-cli", "30.0.1", "f.a", &failing)
+                .0
+                .is_empty()
         );
     }
 
