@@ -7,13 +7,14 @@ import type { Meta } from "@/lib/data"
 import { baseOptions, homeStyle } from "@/lib/site"
 import { ExtLink, Id, short } from "@/components/common"
 
+// one page for each question a reader asks, then the glossary
 const nav = [
-  { to: "/dashboard", label: "Overview", end: true },
-  { to: "/dashboard/coverage", label: "CAP coverage", end: false },
-  { to: "/dashboard/sdk", label: "SDK matrix", end: false },
-  { to: "/dashboard/indexer", label: "Indexer runs", end: false },
+  { to: "/dashboard", label: "Start", end: true },
+  { to: "/dashboard/sdk", label: "SDKs", end: false },
+  { to: "/dashboard/indexer", label: "Indexers", end: false },
   { to: "/dashboard/findings", label: "Findings", end: false },
-  { to: "/dashboard/corpus", label: "Corpus explorer", end: false },
+  { to: "/dashboard/corpus", label: "Corpus", end: false },
+  { to: "/dashboard/glossary", label: "Glossary", end: false },
 ]
 
 // the dashboard keeps the site navigation on top and its own pages in a second row, which
@@ -59,8 +60,11 @@ export function DashboardShell({ meta, children }: { meta: Meta | null; children
             </span>
           ) : null}
           <span>No analytics, no cookies, no third-party requests.</span>
+          <NavLink to="/dashboard/sources" className="text-primary underline decoration-primary/40 hover:decoration-primary">
+            Data sources and pinned versions
+          </NavLink>
           <a href="/docs/operations/site" className="text-primary underline decoration-primary/40 hover:decoration-primary">
-            How this data is made
+            How shapekit makes this data
           </a>
         </div>
       </footer>

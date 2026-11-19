@@ -11,14 +11,20 @@ export default [
   route("llms.mdx/docs/*", "routes/llms.mdx.docs.ts"),
   ...prefix("dashboard", [
     layout("routes/dashboard/layout.tsx", [
+      // the start page: one question for each reader, each answered by one page below
       index("routes/dashboard/overview.tsx"),
-      route("coverage", "routes/dashboard/coverage.tsx"),
-      route("coverage/:cap", "routes/dashboard/cap.tsx"),
       route("sdk", "routes/dashboard/sdk.tsx"),
       route("indexer", "routes/dashboard/indexer.tsx"),
       route("findings", "routes/dashboard/findings.tsx"),
       route("corpus", "routes/dashboard/corpus.tsx"),
+      route("corpus/entries", "routes/dashboard/entries.tsx"),
+      route("corpus/cap/:cap", "routes/dashboard/cap.tsx"),
       route("corpus/:entry", "routes/dashboard/entry.tsx"),
+      route("glossary", "routes/dashboard/glossary.tsx"),
+      route("sources", "routes/dashboard/sources.tsx"),
+      // the coverage pages moved under the corpus page; their old addresses forward
+      route("coverage", "routes/dashboard/moved.tsx", { id: "moved-coverage" }),
+      route("coverage/:cap", "routes/dashboard/moved.tsx", { id: "moved-cap" }),
       route("*", "routes/dashboard/not-found.tsx"),
     ]),
   ]),

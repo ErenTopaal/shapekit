@@ -1,289 +1,238 @@
-import { use, useEffect, useMemo, useState } from "react"
-import { Link, useParams, useSearchParams } from "react-router"
-import { load, type Conformance, type Entry, type HarnessRun } from "@/lib/data"
-import { bySdkOrder, sdkName } from "@/lib/sdks"
-import { checkResults, docs, expectations, sourceClasses, verdictMeaning } from "@/lib/terms"
+import { use, useEffect, useMemo } from "react"
+import { Link, useNavigate, useSearchParams } from "react-router"
+import { load, type CapRow } from "@/lib/data"
 import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@/components/ui/empty"
+import { Meter } from "@/components/charts"
+import { FamilyStrip } from "@/components/fragments"
 import {
-  ExtLink,
+  GlossaryLink,
   Id,
-  IssueRef,
+  More,
+  NextSteps,
   PageHeader,
+  PageTerms,
   RepoLink,
   Section,
   Status,
-  Term,
-  Terms,
   TextLink,
-  bytes,
   fmt,
-  indexerHref,
-  indexerResults,
-  issueLabel,
-  verdictTone,
+  useHashScroll,
 } from "@/components/common"
-import { NotFound } from "./not-found"
+import { betterText, coverageMetrics } from "@/lib/metrics"
+import { capPath, entriesPath } from "@/lib/paths"
+import { docs, sourceClasses, sources } from "@/lib/terms"
 
-const failing = new Set(checkResults.filter((c) => c.id !== "unsupported").map((c) => c.id))
-// the decoded XDR-JSON of a file larger than this is offered as a download, not shown inline
-const INLINE_JSON_BYTES = 512 * 1024
+// the filters of the entry list; an old link to the entry list at this address carries them
+const entryFilters = ["q", "cap", "shape", "sdk", "version"]
 
-export const entryPath = (id: string) => `/dashboard/corpus/${encodeURIComponent(id)}`
+type Scope = "visible" | "all" | "gaps"
 
-// per entry, sdk and version: the failing checks of the committed matrices
-function sdkFailures(conformance: Conformance) {
-  const m = new Map<string, { sdk: string; version: string; result: string; known: string | null; checks: string[] }[]>()
-  for (const s of conformance.sdks)
-    for (const e of s.entries)
-      for (const v of s.versions) {
-        const cell = e.cells[v.key]
-        if (!cell) continue
-        const list = m.get(e.id) ?? []
-        list.push({
-          sdk: s.sdk,
-          version: v.version,
-          result: cell.result,
-          known: cell.known_issue,
-          checks: cell.checks.filter((k) => failing.has(k.result)).map((k) => k.check),
-        })
-        m.set(e.id, list)
-      }
-  return m
+// registry/fields.toml's validated_by_core values, in words
+const checked: Record<string, string> = { partial: "in part", no: "never" }
+
+// what one obligation of each kind of the ledger is
+const obligationKinds: Record<string, string> = {
+  format: "A decision point of the XDR schema, in the accept or the reject direction.",
+  gap: "A point where the native types of a language lose information that an XDR value holds.",
+  "core-test-section": "A test section of the transaction tests of stellar-core.",
+  "gate-side": "One side of a protocol version gate in the source code of stellar-core.",
+  field: "An envelope field that shapekit tested on a standalone stellar-core node.",
+  "sdk-version": "A published SDK version that the corpus runs against.",
+  seed: "A fault that the mutation tool of a language put into an SDK.",
 }
 
-// every committed indexer run's verdict on the entry, per network
-function indexerVerdicts(runs: HarnessRun[], id: string) {
-  return runs.flatMap((run, i) =>
-    Object.entries(run.verdicts[id] ?? {})
-      .toSorted(([a], [b]) => a.localeCompare(b))
-      .map(([network, r]) => ({ target: run.describe?.target ?? `run ${i + 1}`, network, verdict: r.verdict, reason: r.reason })),
-  )
-}
-
-const verdictText = (r: { verdict: string; reason: string | null }) => (r.reason ? `${r.verdict} (${r.reason})` : r.verdict)
-
-function FilterSelect({
-  label,
-  value,
-  any,
-  options,
-  onChange,
-}: {
-  label: string
-  value: string
-  any: string
-  options: { value: string; label: string }[]
-  onChange: (v: string) => void
-}) {
-  return (
-    <Select value={value} onValueChange={onChange}>
-      <SelectTrigger className="w-full sm:w-52" aria-label={label}>
-        <SelectValue placeholder={any} />
-      </SelectTrigger>
-      <SelectContent>
-        <SelectGroup>
-          <SelectItem value="all">{any}</SelectItem>
-          {options.map((o) => (
-            <SelectItem key={o.value} value={o.value}>
-              {o.label}
-            </SelectItem>
-          ))}
-        </SelectGroup>
-      </SelectContent>
-    </Select>
-  )
-}
-
-function CorpusTerms({ targets }: { targets: string[] }) {
-  return (
-    <Terms>
-      <Term name="shape">
-        The family an entry belongs to: one shape of XDR, such as a muxed payment destination, described in the
-        registry. <TextLink to={docs.addingShape}>Adding a shape</TextLink>.
-      </Term>
-      <Term name="source">
-        Where an entry&apos;s bytes come from:{" "}
-        {sourceClasses.map((c, i) => (
-          <span key={c.id}>
-            <Id>{c.id}</Id> {c.meaning}
-            {i < sourceClasses.length - 1 ? "; " : "."}
-          </span>
-        ))}
-      </Term>
-      <Term name="failing version">
-        An SDK version whose committed matrix holds a failing check for the entry (
-        {checkResults
-          .filter((c) => c.id !== "unsupported")
-          .map((c) => c.id)
-          .join(", ")}
-        ). The committed matrices keep failing cells only, so an entry with no failing version passed or could not be
-        answered at every version. <TextLink to={docs.checks}>How the runner checks an entry</TextLink>.
-      </Term>
-      <Term name="indexer">
-        The verdict of each committed indexer run, {targets.join(" and ")}, per network (
-        <TextLink to={docs.verdicts}>verdicts</TextLink>). Entries that are not on a ledger chain (synthetic, refused,
-        vectors) are not replayed.
-      </Term>
-    </Terms>
-  )
+// the states a cap row can be in; the terms block below explains each
+function state(c: CapRow): { tone: "pass" | "diverge" | "idle" | "known"; label: string } {
+  if (!c.indexer_visible) return { tone: "idle", label: "not indexer-visible" }
+  if (c.core_emitted_entries > 0) return { tone: "pass", label: "covered" }
+  if (c.uncovered) return { tone: "known", label: "gap, with a reason" }
+  if (c.entries > 0) return { tone: "known", label: "no entry from stellar-core" }
+  return { tone: "diverge", label: "no entries" }
 }
 
 export function CorpusPage() {
-  const entries = use(load("entries"))
-  const conformance = use(load("conformance"))
-  const harness = use(load("harness"))
+  const coverage = use(load("coverage"))
   const [params, setParams] = useSearchParams()
-  const q = params.get("q") ?? ""
-  const cap = params.get("cap") ?? "all"
-  const family = params.get("shape") ?? "all"
-  const sdk = params.get("sdk") ?? "all"
-  const version = params.get("version") ?? "all"
+  const navigate = useNavigate()
+  useHashScroll()
+  // this address was the entry list before the coverage page moved here; a filtered link
+  // to the entry list goes on to its new address
+  const old = entryFilters.some((k) => params.has(k))
+  useEffect(() => {
+    if (old) void navigate(`/dashboard/corpus/entries?${params.toString()}`, { replace: true })
+  }, [old, params, navigate])
+  const q = params.get("capq") ?? ""
+  const scope = (params.get("scope") as Scope | null) ?? "visible"
   const set = (k: string, v: string, dflt: string) => {
     const next = new URLSearchParams(params)
     if (v === dflt) next.delete(k)
     else next.set(k, v)
-    // a version belongs to one sdk
-    if (k === "sdk") next.delete("version")
-    setParams(next, { replace: true })
+    setParams(next, { replace: true, preventScrollReset: true })
   }
 
-  const fails = useMemo(() => sdkFailures(conformance), [conformance])
-  const caps = useMemo(() => [...new Set(entries.entries.flatMap((e) => e.caps))].toSorted(), [entries])
-  const families = useMemo(() => [...new Set(entries.entries.map((e) => e.family))].toSorted(), [entries])
-  const versions = conformance.sdks.find((s) => s.sdk === sdk)?.versions.map((v) => v.version) ?? []
-
-  const shown = useMemo(() => {
+  const rows = useMemo(() => {
     const needle = q.trim().toLowerCase()
-    return entries.entries.filter((e) => {
-      if (needle && !e.id.toLowerCase().includes(needle)) return false
-      if (cap !== "all" && !e.caps.includes(cap)) return false
-      if (family !== "all" && e.family !== family) return false
-      if (sdk !== "all") {
-        const f = (fails.get(e.id) ?? []).filter((x) => x.sdk === sdk)
-        if (f.length === 0) return false
-        if (version !== "all" && !f.some((x) => x.version === version)) return false
-      }
-      return true
+    return coverage.caps.filter((c) => {
+      if (scope === "visible" && !c.indexer_visible) return false
+      if (scope === "gaps" && !(c.indexer_visible && c.core_emitted_entries === 0)) return false
+      if (!needle) return true
+      return (
+        c.id.toLowerCase().includes(needle) ||
+        c.title.toLowerCase().includes(needle) ||
+        c.families.some((f) => f.includes(needle)) ||
+        c.xdr_additions.some((x) => x.toLowerCase().includes(needle))
+      )
     })
-  }, [entries, fails, q, cap, family, sdk, version])
+  }, [coverage.caps, q, scope])
 
+  const s = coverage.summary
+  const metrics = coverageMetrics(s, coverage.root_type)
+  const families = coverage.families.toSorted((a, b) => a.priority - b.priority || a.id.localeCompare(b.id))
   return (
-    <div className="flex flex-col">
-      <PageHeader title="Corpus explorer">
+    <div className="flex flex-col gap-6">
+      <PageHeader title="Corpus coverage">
         <p>
-          Every corpus entry, with its decoded XDR-JSON, where its bytes come from, what each SDK version and the
-          indexers did with it, and how to run it again. Filter by CAP, by shape, or by an SDK and the version
-          that fails on it; the filters are kept in the address, so a filtered list can be linked.
+          The corpus holds {fmt.format(s.entries)} <GlossaryLink id="entry">entries</GlossaryLink> in {s.families}{" "}
+          <GlossaryLink id="family">shape families</GlossaryLink>. An entry counts as coverage only when{" "}
+          <GlossaryLink id="core-emitted">stellar-core emitted</GlossaryLink> its bytes. This page shows what the corpus
+          covers and gives the reason for each gap. The readable report is <RepoLink path={sources.coverageReport} />.
         </p>
       </PageHeader>
-      <CorpusTerms targets={harness.runs.map((r) => r.describe?.target ?? "").filter(Boolean)} />
+
+      <NextSteps>
+        <li>
+          <TextLink to="/dashboard/corpus/entries">Find an entry</TextLink> and get its bytes and the commands that run it.
+        </li>
+        <li>
+          <TextLink to={docs.addingShape}>Add a shape to the corpus</TextLink> to close a gap.
+        </li>
+      </NextSteps>
+
+      <Section title="Summary" id="summary" description="Each bar shows a share of a total. For each of these numbers, higher is better.">
+        <ul className="border-b">
+          {metrics.map((m) => (
+            <Meter key={m.id} label={m.label} value={m.value} total={m.total} to={`#${m.section}`}>
+              {betterText[m.better]}
+            </Meter>
+          ))}
+        </ul>
+      </Section>
+
+      <PageTerms ids={["entry", "core-emitted", "indexer-visible", "union-arm", "fragment", "blocker", "obligation", "unvalidated-field"]} />
+
+      <Section title="Entries by source" id="sources" description="Where the bytes of each entry come from. Only the sources from stellar-core count as coverage.">
+        <Table>
+          <caption className="sr-only">Corpus entries by source</caption>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Source</TableHead>
+              <TableHead className="text-right">Entries</TableHead>
+              <TableHead>Counts as coverage</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {sourceClasses
+              .filter((c) => (s.entries_by_source_class[c.id] ?? 0) > 0)
+              .map((c) => (
+                <TableRow key={c.id}>
+                  <TableCell className="whitespace-normal">
+                    <TextLink to={`/dashboard/glossary#source-${c.id}`} className="font-mono text-[0.85em]">
+                      {c.id}
+                    </TextLink>
+                  </TableCell>
+                  <TableCell className="num text-right">{fmt.format(s.entries_by_source_class[c.id] ?? 0)}</TableCell>
+                  <TableCell>{c.core ? <Status tone="pass">yes</Status> : <Status tone="idle">no</Status>}</TableCell>
+                </TableRow>
+              ))}
+          </TableBody>
+        </Table>
+        <p className="text-sm text-muted-foreground">
+          <TextLink to={entriesPath()}>Browse all {fmt.format(s.entries)} entries</TextLink>.
+        </p>
+      </Section>
+
       <Section
-        title="Entries"
-        id="entries"
-        description={`${fmt.format(shown.length)} of ${fmt.format(entries.entries.length)} entries of corpus ${entries.corpus_version}.`}
+        title="CAPs"
+        id="caps"
+        description="Each CAP (Core Advancement Proposal) of the registry, with the entries that show its shapes. Select a CAP to see its families, entries and results."
       >
-        <div className="flex flex-col flex-wrap gap-3 sm:flex-row sm:items-center">
-          <label className="sr-only" htmlFor="corpus-q">
-            Filter by entry id
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+          <label className="sr-only" htmlFor="cap-filter">
+            Filter the CAPs
           </label>
           <Input
-            id="corpus-q"
+            id="cap-filter"
             type="search"
-            placeholder="Filter by entry id"
+            placeholder="Filter by CAP, title, family or XDR name"
             value={q}
-            onChange={(e) => set("q", e.target.value, "")}
-            className="sm:max-w-xs"
+            onChange={(e) => set("capq", e.target.value, "")}
+            className="sm:max-w-sm"
           />
-          <FilterSelect
-            label="Filter by CAP"
-            value={cap}
-            any="Any CAP"
-            options={caps.map((c) => ({ value: c, label: c }))}
-            onChange={(v) => set("cap", v, "all")}
-          />
-          <FilterSelect
-            label="Filter by shape"
-            value={family}
-            any="Any shape"
-            options={families.map((f) => ({ value: f, label: f }))}
-            onChange={(v) => set("shape", v, "all")}
-          />
-          <FilterSelect
-            label="Filter by an SDK that fails"
-            value={sdk}
-            any="Any SDK result"
-            options={bySdkOrder(conformance.sdks, (s) => s.sdk).map((s) => ({ value: s.sdk, label: `${sdkName(s.sdk)} fails` }))}
-            onChange={(v) => set("sdk", v, "all")}
-          />
-          {sdk !== "all" ? (
-            <FilterSelect
-              label="Filter by failing version"
-              value={version}
-              any="At any version"
-              options={versions.map((v) => ({ value: v, label: `at ${v}` }))}
-              onChange={(v) => set("version", v, "all")}
-            />
-          ) : null}
+          <ToggleGroup
+            type="single"
+            variant="outline"
+            size="sm"
+            className="flex-wrap"
+            value={scope}
+            onValueChange={(v) => v && set("scope", v, "visible")}
+            aria-label="Which CAPs to list"
+          >
+            <ToggleGroupItem value="visible">Indexer-visible ({s.caps_indexer_visible})</ToggleGroupItem>
+            <ToggleGroupItem value="gaps">Gaps ({s.caps_indexer_visible - s.caps_indexer_visible_core_emitted})</ToggleGroupItem>
+            <ToggleGroupItem value="all">All ({s.caps})</ToggleGroupItem>
+          </ToggleGroup>
         </div>
-        {shown.length === 0 ? (
+
+        <p className="text-sm text-muted-foreground" aria-live="polite">
+          {rows.length} of {coverage.caps.length} CAPs shown.
+        </p>
+
+        {rows.length === 0 ? (
           <Empty className="border">
             <EmptyHeader>
-              <EmptyTitle>No entry matches</EmptyTitle>
-              <EmptyDescription>Clear a filter to see more entries.</EmptyDescription>
+              <EmptyTitle>No CAP matches</EmptyTitle>
+              <EmptyDescription>Clear the filter or list all CAPs.</EmptyDescription>
             </EmptyHeader>
           </Empty>
         ) : (
           <Table>
-            <caption className="sr-only">Corpus entries with their CAPs, source and results</caption>
+            <caption className="sr-only">CAPs with their coverage state and entry counts</caption>
             <TableHeader>
               <TableRow>
-                <TableHead>Entry</TableHead>
-                <TableHead>CAPs</TableHead>
-                <TableHead>Source</TableHead>
-                <TableHead>Failing SDK versions</TableHead>
-                <TableHead>Indexer</TableHead>
+                <TableHead>CAP</TableHead>
+                <TableHead className="hidden min-w-44 md:table-cell">Title</TableHead>
+                <TableHead className="hidden text-right sm:table-cell">Protocol</TableHead>
+                <TableHead>State</TableHead>
+                <TableHead className="hidden text-right sm:table-cell">Entries</TableHead>
+                <TableHead className="text-right">
+                  From stellar-core
+                  <span className="block text-xs font-normal text-muted-foreground">higher is better</span>
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {shown.map((e) => {
-                const f = fails.get(e.id) ?? []
-                const hx = indexerResults(harness.runs, e.id)
-                const short = e.id.startsWith(`${e.family}.`) ? e.id.slice(e.family.length + 1) : e.id
+              {rows.map((c) => {
+                const st = state(c)
                 return (
-                  <TableRow key={e.id}>
-                    <TableCell className="max-w-[26rem] align-top whitespace-normal">
-                      <Link to={entryPath(e.id)} className="text-primary underline decoration-primary/40 hover:decoration-primary">
-                        <Id title={e.id}>
-                          <span className="text-muted-foreground">{e.family}.</span>
-                          {short}
-                        </Id>
+                  <TableRow key={c.id}>
+                    <TableCell className="whitespace-normal">
+                      <Link to={capPath(c.id)} className="font-mono text-primary underline decoration-primary/40 hover:decoration-primary">
+                        {c.id}
                       </Link>
+                      <span className="block text-xs text-muted-foreground md:hidden">{c.title}</span>
                     </TableCell>
-                    <TableCell className="align-top text-xs whitespace-normal">{e.caps.join(", ") || "none"}</TableCell>
-                    <TableCell className="align-top text-xs">{e.source}</TableCell>
-                    <TableCell className="align-top text-xs whitespace-normal">
-                      {f.length === 0 ? (
-                        <span className="text-muted-foreground">none</span>
-                      ) : (
-                        <span className="text-diverge">{f.map((x) => `${sdkName(x.sdk)} ${x.version}`).join(", ")}</span>
-                      )}
+                    <TableCell className="hidden whitespace-normal md:table-cell">{c.title}</TableCell>
+                    <TableCell className="num hidden text-right sm:table-cell">{c.protocol ?? ""}</TableCell>
+                    <TableCell className="whitespace-normal">
+                      <Status tone={st.tone} wrap>
+                        {st.label}
+                      </Status>
                     </TableCell>
-                    <TableCell className="align-top text-xs whitespace-normal">
-                      {hx.length === 0 ? (
-                        <span className="text-muted-foreground">not replayed</span>
-                      ) : (
-                        hx.map((r) => (
-                          <span key={r.target} className="block" title={verdictMeaning(r.verdict)}>
-                            <Status tone={r.tone}>
-                              {r.target}: {r.text}
-                            </Status>
-                          </span>
-                        ))
-                      )}
-                    </TableCell>
+                    <TableCell className="num hidden text-right sm:table-cell">{fmt.format(c.entries)}</TableCell>
+                    <TableCell className="num text-right">{fmt.format(c.core_emitted_entries)}</TableCell>
                   </TableRow>
                 )
               })}
@@ -291,388 +240,200 @@ export function CorpusPage() {
           </Table>
         )}
       </Section>
-    </div>
-  )
-}
 
-// fetches one file's decoded XDR-JSON from the site's own copy of the corpus
-function DecodedJson({ path, size }: { path: string; size: number }) {
-  const [text, setText] = useState<string | null>(null)
-  const [error, setError] = useState<string | null>(null)
-  const inline = size <= INLINE_JSON_BYTES
-  useEffect(() => {
-    if (!inline) return
-    let live = true
-    fetch(`/${path}`)
-      .then((r) => {
-        if (!r.ok) throw new Error(`${path}: HTTP ${r.status}`)
-        return r.text()
-      })
-      .then((t) => live && setText(t))
-      .catch((e: unknown) => live && setError(e instanceof Error ? e.message : String(e)))
-    return () => {
-      live = false
-    }
-  }, [path, inline])
-  if (!inline)
-    return (
-      <p className="text-sm text-muted-foreground">
-        The XDR-JSON is {bytes(size)}, too large to show here.{" "}
-        <a href={`/${path}`} download className="text-primary underline decoration-primary/40">
-          Download it
-        </a>
-        .
-      </p>
-    )
-  if (error) return <p className="text-sm text-diverge">{error}</p>
-  if (text === null) return <p className="text-sm text-muted-foreground">Loading the XDR-JSON.</p>
-  return (
-    <pre className="max-h-[32rem] overflow-auto rounded-md border bg-muted/40 p-3 font-mono text-xs leading-relaxed">
-      {text}
-    </pre>
-  )
-}
+      <Section
+        title="Shape families"
+        id="families"
+        description={
+          <>
+            <RepoLink path={sources.families} /> defines each family by the{" "}
+            <GlossaryLink id="fragment">fragments</GlossaryLink> that its entries must contain. Each square is one
+            fragment. A filled square has an entry from stellar-core. An outlined square has none. The list starts with
+            the family of the highest known damage. Select a family to see its CAP page.
+          </>
+        }
+      >
+        <FamilyStrip families={families} />
+      </Section>
 
-function Command({ children }: { children: string }) {
-  return <pre className="overflow-x-auto rounded-md border bg-muted/40 px-3 py-2 font-mono text-xs whitespace-pre-wrap [overflow-wrap:anywhere]">{children}</pre>
-}
-
-const quote = (s: string) => (/^[A-Za-z0-9_./=:@,+%-]+$/.test(s) ? s : `'${s.replaceAll("'", "'\\''")}'`)
-
-export function EntryPage() {
-  const { entry = "" } = useParams()
-  const entries = use(load("entries"))
-  const conformance = use(load("conformance"))
-  const harness = use(load("harness"))
-  const findings = use(load("findings"))
-  const coverage = use(load("coverage"))
-  const fails = useMemo(() => sdkFailures(conformance), [conformance])
-
-  const e: Entry | undefined = entries.entries.find((x) => x.id === entry)
-  if (!e) return <NotFound />
-
-  const f = fails.get(e.id) ?? []
-  const hx = indexerVerdicts(harness.runs, e.id)
-  const onEntry = findings.findings.filter((x) => x.entries.includes(e.id))
-  const fieldRows = e.fields.map((id) => entries.guide.fields.find((r) => r.id === id) ?? { id, validated_by_core: "not in the field table", risk: "", handling: "" })
-  const checklist = entries.guide.checklist.filter((c) => c.fields.some((x) => e.fields.includes(x)))
-  const capRows = coverage.caps.filter((c) => e.caps.includes(c.id))
-  const expectation = expectations.find((x) => x.id === e.expected.decode)
-
-  return (
-    <div className="flex flex-col">
-      <nav aria-label="Breadcrumb" className="pb-3 text-sm">
-        <ol className="flex flex-wrap items-center gap-1.5 text-muted-foreground">
-          <li>
-            <TextLink to="/dashboard">Dashboard</TextLink>
-          </li>
-          <li aria-hidden>/</li>
-          <li>
-            <TextLink to="/dashboard/corpus">Corpus explorer</TextLink>
-          </li>
-          <li aria-hidden>/</li>
-          <li aria-current="page" className="font-mono [overflow-wrap:anywhere]">
-            {e.id}
-          </li>
-        </ol>
-      </nav>
-      <PageHeader title={e.id}>
-        {e.notes ? <p>{e.notes}</p> : null}
-      </PageHeader>
-
-      <dl className="grid gap-x-8 gap-y-3 border-y py-4 text-sm sm:grid-cols-2 [&_dd]:[overflow-wrap:anywhere]">
-        <div>
-          <dt className="font-medium">Shape</dt>
-          <dd className="text-muted-foreground">
-            <TextLink to={`/dashboard/corpus?shape=${encodeURIComponent(e.family)}`}>
-              <Id>{e.family}</Id>
-            </TextLink>
-            , {e.kind}
-            {e.xdr_type ? (
-              <>
-                , <Id>{e.xdr_type}</Id>
-              </>
-            ) : null}
-          </dd>
-        </div>
-        <div>
-          <dt className="font-medium">CAPs</dt>
-          <dd className="text-muted-foreground">
-            {capRows.length === 0
-              ? "none"
-              : capRows.map((c, i) => (
-                  <span key={c.id}>
-                    <TextLink to={`/dashboard/coverage/${c.id}#${e.family}`}>{c.id}</TextLink> {c.title}
-                    {i < capRows.length - 1 ? "; " : ""}
-                  </span>
-                ))}
-          </dd>
-        </div>
-        <div>
-          <dt className="font-medium">Protocol</dt>
-          <dd className="num text-muted-foreground">
-            introduced {e.protocol.introduced}, valid from {e.protocol.valid_min}
-            {e.protocol.valid_max ? ` to ${e.protocol.valid_max}` : ""}
-            {e.protocol.generated_at ? `, recorded at ${e.protocol.generated_at}` : ""}
-          </dd>
-        </div>
-        <div>
-          <dt className="font-medium">Expected</dt>
-          <dd className="text-muted-foreground">
-            <Id>{e.expected.decode}</Id>, {e.expected.validity}
-            {e.expected.roundtrip ? ", round-trips" : ""}
-            {expectation ? `: ${expectation.meaning}` : ""}
-          </dd>
-        </div>
-        <div>
-          <dt className="font-medium">Source</dt>
-          <dd className="text-muted-foreground">
-            <Id>{e.source}</Id>
-            {e.synthetic && e.source !== "synthetic" ? ", synthetic" : ""}
-            {e.ledger_seq !== null ? `, ledger ${e.ledger_seq}` : ""}
-            {e.provenance_url ? (
-              <>
-                , <ExtLink href={e.provenance_url}>provenance</ExtLink>
-              </>
-            ) : null}
-          </dd>
-        </div>
-        <div>
-          <dt className="font-medium">Recorded by</dt>
-          <dd className="text-muted-foreground">
-            {e.recipe_ir ? (
-              <>
-                recipe <RepoLink path={e.recipe_ir} />
-                {e.chain ? (
-                  <>
-                    {" "}
-                    on chain <Id>{e.chain}</Id>
-                  </>
-                ) : null}
-              </>
-            ) : e.chain ? (
-              <>
-                chain <Id>{e.chain}</Id> (<Id>shapekit gen chains --family {e.family}</Id>)
-              </>
-            ) : (
-              "not recorded on a local core"
-            )}
-          </dd>
-        </div>
-        {e.flags.length > 0 ? (
-          <div>
-            <dt className="font-medium">Flags</dt>
-            <dd className="text-muted-foreground">{e.flags.join(", ")}</dd>
-          </div>
-        ) : null}
-        {e.linked_issues.length > 0 ? (
-          <div>
-            <dt className="font-medium">Upstream sightings</dt>
-            <dd className="text-muted-foreground">
-              {e.linked_issues.map((u, i) => (
-                <span key={u}>
-                  <ExtLink href={u}>{issueLabel(u)}</ExtLink>
-                  {i < e.linked_issues.length - 1 ? ", " : ""}
-                </span>
-              ))}
-            </dd>
-          </div>
-        ) : null}
-      </dl>
-
-      <Section title="Results" id="results">
-        <h3 className="font-medium">SDKs</h3>
-        {f.length === 0 ? (
-          <p className="text-sm text-muted-foreground">
-            No SDK version in the committed matrices has a failing check on this entry.
-          </p>
-        ) : (
+      <Section
+        title="Union arms"
+        id="arms"
+        description={
+          <>
+            A <GlossaryLink id="union-arm">union arm</GlossaryLink> is one variant that an XDR union can take.{" "}
+            {s.arms_covered} of the {s.arms_reachable} arms that <Id>{coverage.root_type}</Id> can reach under stellar-xdr{" "}
+            {coverage.stellar_xdr} have an entry from stellar-core. Each of the other {s.arms_uncovered} arms has a reason in{" "}
+            <RepoLink path={sources.uncovered} />, under one of these <GlossaryLink id="blocker">blockers</GlossaryLink>.
+          </>
+        }
+      >
+        <Table>
+          <caption className="sr-only">Uncovered union arms by blocker</caption>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Blocker</TableHead>
+              <TableHead className="hidden md:table-cell">Meaning</TableHead>
+              <TableHead className="text-right">Arms</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {coverage.blockers.map((b) => (
+              <TableRow key={b.blocker}>
+                <TableCell className="align-top whitespace-normal">
+                  <Id>{b.blocker}</Id>
+                  <span className="block text-xs text-muted-foreground md:hidden">{b.meaning}</span>
+                </TableCell>
+                <TableCell className="hidden text-sm whitespace-normal text-muted-foreground md:table-cell">{b.meaning}</TableCell>
+                <TableCell className="num text-right align-top">{s.arms_uncovered_by_blocker[b.blocker] ?? 0}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+        {coverage.arms.history_only.length > 0 && (
           <Table>
-            <caption className="sr-only">Failing SDK versions on this entry</caption>
+            <caption className="sr-only">Covered arms that only public network history holds</caption>
             <TableHeader>
               <TableRow>
-                <TableHead>SDK version</TableHead>
-                <TableHead>Result</TableHead>
-                <TableHead>Failing checks</TableHead>
-                <TableHead>Known failure</TableHead>
+                <TableHead>Arm that only history holds</TableHead>
+                <TableHead className="hidden md:table-cell">Entries</TableHead>
+                <TableHead>Why a local stellar-core cannot write it</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {f.map((x) => (
-                <TableRow key={`${x.sdk}@${x.version}`}>
-                  <TableCell className="align-top">
-                    <Link
-                      to={`/dashboard/sdk?sdk=${x.sdk}&entry=${encodeURIComponent(e.id)}`}
-                      className="text-primary underline decoration-primary/40"
-                    >
-                      {sdkName(x.sdk)} {x.version}
-                    </Link>
+              {coverage.arms.history_only.map((h) => (
+                <TableRow key={h.arm}>
+                  <TableCell className="align-top whitespace-normal">
+                    <Id>{h.arm}</Id>
                   </TableCell>
-                  <TableCell className="align-top">
-                    <Status tone="diverge">{x.result}</Status>
-                  </TableCell>
-                  <TableCell className="align-top text-xs whitespace-normal">
-                    {x.checks.map((c) => (
-                      <Id key={c} className="mr-2 inline-block">
-                        {c}
+                  <TableCell className="hidden align-top whitespace-normal md:table-cell">
+                    {h.entries.map((e) => (
+                      <Id key={e} className="block">
+                        {e}
                       </Id>
                     ))}
                   </TableCell>
-                  <TableCell className="align-top text-xs whitespace-normal">
-                    {x.known ? <IssueRef value={x.known} /> : <span className="text-diverge">not listed</span>}
-                  </TableCell>
+                  <TableCell className="text-sm whitespace-normal text-muted-foreground">{h.reason}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         )}
-        <h3 className="pt-2 font-medium">Indexer</h3>
-        {hx.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No committed indexer run replayed this entry.</p>
-        ) : (
-          <ul className="flex flex-col gap-1 text-sm">
-            {hx.map((r) => (
-              <li key={`${r.target}/${r.network}`}>
-                <Status tone={verdictTone(r.verdict)}>
-                  {r.target} on {r.network}: {verdictText(r)}
-                </Status>{" "}
-                <span className="text-muted-foreground">{verdictMeaning(r.verdict)}.</span>{" "}
-                {verdictTone(r.verdict) === "diverge" ? (
-                  <TextLink to={indexerHref(r.target, e.id)}>
-                    The problems
-                  </TextLink>
-                ) : null}
-              </li>
-            ))}
-          </ul>
-        )}
-        {onEntry.length > 0 ? (
-          <>
-            <h3 className="pt-2 font-medium">Findings</h3>
-            <ul className="flex flex-col divide-y border-y text-sm">
-              {onEntry.map((x) => (
-                <li key={x.id} className="flex flex-col gap-1 py-2 sm:flex-row sm:items-baseline sm:gap-4">
-                  <TextLink to={`/dashboard/findings#${x.id}`} className="shrink-0 font-mono sm:w-24">
-                    {x.id}
-                  </TextLink>
-                  <span className="flex-1">{x.title}</span>
-                  <span className="shrink-0 text-muted-foreground">
-                    {x.severity}, {x.status}
-                    {x.link ? (
-                      <>
-                        , <ExtLink href={x.link}>{issueLabel(x.link)}</ExtLink>
-                      </>
-                    ) : null}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </>
-        ) : null}
-      </Section>
-
-      <Section
-        title="Run it again"
-        id="reproduce"
-        description="From a shapekit checkout. The SDK command runs the current version unless you add --version; the harness command replays the entry's whole chain into the indexer behind your adapter."
-      >
-        {bySdkOrder(conformance.sdks, (s) => s.sdk).map((s) => {
-          const failingVersions = f.filter((x) => x.sdk === s.sdk).map((x) => x.version)
-          const v = failingVersions.at(-1)
-          return (
-            <Command key={s.sdk}>
-              {`shapekit check sdk --sdk ${s.sdk}${v ? ` --version ${quote(v)}` : ""} --entry ${quote(e.id)}`}
-            </Command>
-          )
-        })}
-        {e.chain ? (
-          <Command>{`shapekit check indexer --chain ${quote(e.chain)} --network ${e.files.some((x) => x.variant === "testnet") ? "testnet" : "mainnet"} --adapter "<your adapter command>"`}</Command>
-        ) : (
-          <p className="text-sm text-muted-foreground">The entry is not on a ledger chain, so the harness cannot replay it.</p>
-        )}
-      </Section>
-
-      <Section title="Files and decoded XDR-JSON" id="files">
-        {e.files.map((x) => (
-          <div key={x.path} className="flex flex-col gap-2">
-            <h3 className="font-medium">
-              {x.variant === "any" ? "Network-independent" : x.variant === "vector" ? "Vector" : x.variant}{" "}
-              <span className="text-sm font-normal text-muted-foreground">
-                <a href={`/${x.path}`} download className="text-primary underline decoration-primary/40">
-                  download {x.path.split("/").at(-1)}
-                </a>{" "}
-                ({bytes(x.bytes)}),{" "}
-                <RepoLink path={x.path}>on GitHub</RepoLink>
-                {x.expected ? (
-                  <>
-                    ,{" "}
-                    <a href={`/${x.expected}`} download className="text-primary underline decoration-primary/40">
-                      download the XDR-JSON
-                    </a>
-                  </>
-                ) : null}
-              </span>
-            </h3>
-            {x.expected ? (
-              <DecodedJson path={x.expected} size={x.expected_bytes ?? 0} />
-            ) : x.variant === "vector" ? (
-              <DecodedJson path={x.path} size={x.bytes} />
-            ) : (
-              <p className="text-sm text-muted-foreground">This file has no XDR-JSON rendering.</p>
-            )}
-          </div>
-        ))}
-      </Section>
-
-      <Section
-        title="In the guide"
-        id="guide"
-        description="The fields this entry exercises, their rows in the indexer-hardening guide's field table, and the checklist items that name them."
-      >
-        {e.fields.length === 0 ? (
-          <p className="text-sm text-muted-foreground">The entry names no field of the guide&apos;s field table.</p>
-        ) : (
-          <>
-            <Table>
-              <caption className="sr-only">Fields this entry exercises</caption>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Field</TableHead>
-                  <TableHead>Validated by core</TableHead>
-                  <TableHead>Risk</TableHead>
-                  <TableHead>Handling</TableHead>
+        <More label={`Show the ${coverage.arms.uncovered.length} arms without an entry from stellar-core`}>
+          <Table>
+            <caption className="sr-only">Every union arm without an entry from stellar-core, with its reason</caption>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Arm</TableHead>
+                <TableHead>Reason</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {coverage.arms.uncovered.map((a) => (
+                <TableRow key={a.arm}>
+                  <TableCell className="align-top whitespace-normal">
+                    <Id>{a.arm}</Id>
+                    <span className="block text-xs text-muted-foreground">
+                      blocker <Id>{a.uncovered?.blocker ?? ""}</Id>
+                    </span>
+                  </TableCell>
+                  <TableCell className="text-sm whitespace-normal text-muted-foreground">{a.uncovered?.reason ?? ""}</TableCell>
                 </TableRow>
-              </TableHeader>
-              <TableBody>
-                {fieldRows.map((r) => (
-                  <TableRow key={r.id}>
-                    <TableCell className="align-top">
-                      <Id>{r.id}</Id>
-                    </TableCell>
-                    <TableCell className="align-top">{r.validated_by_core}</TableCell>
-                    <TableCell className="max-w-[24rem] align-top text-xs whitespace-normal">{r.risk}</TableCell>
-                    <TableCell className="max-w-[24rem] align-top text-xs whitespace-normal">{r.handling}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-            <ul className="flex list-disc flex-col gap-1 pl-5 text-sm">
-              <li>
-                <TextLink to={`${docs.guide}#validated-and-unvalidated-fields`}>Validated and unvalidated fields</TextLink>
-                : what core checks for each field.
-              </li>
-              <li>
-                <TextLink to={`${docs.guide}#corpus-entries-by-field`}>Corpus entries by field</TextLink>: the entries
-                listed for these fields.
-              </li>
-              {checklist.map((c) => (
-                <li key={c.id}>
-                  <TextLink to={`${docs.guide}#self-audit-checklist`}>Self-audit checklist</TextLink>: {c.title}
-                </li>
               ))}
-            </ul>
+            </TableBody>
+          </Table>
+        </More>
+      </Section>
+
+      <Section
+        title="Obligations"
+        id="obligations"
+        description={
+          <>
+            An <GlossaryLink id="obligation">obligation</GlossaryLink> is a point that the corpus must show with an entry.
+            The list is <RepoLink path="corpus/coverage/obligations.json" />. For met, higher is better. For open, lower is
+            better. A side of a protocol gate is met in one of two ways. A branch count shows that a corpus chain takes the
+            side on the instrumented stellar-core. Or an execution count shows that a recipe runs the gate at a protocol
+            that takes the side. The table gives the two counts apart.
           </>
-        )}
+        }
+      >
+        <div className="overflow-x-auto">
+        <Table>
+          <caption className="sr-only">Obligations by kind and status</caption>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Kind</TableHead>
+              <TableHead className="text-right">Met</TableHead>
+              <TableHead className="text-right">Unmeetable</TableHead>
+              <TableHead className="text-right">Open</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {coverage.obligations.map((o) => (
+              <TableRow key={o.kind}>
+                <TableCell className="max-w-64 align-top whitespace-normal">
+                  <Id>{o.kind}</Id>
+                  <span className="block text-xs text-muted-foreground">{obligationKinds[o.kind] ?? ""}</span>
+                </TableCell>
+                <TableCell className="num text-right align-top whitespace-normal">
+                  {o.met_branch_count !== null && o.met_inferred !== null ? (
+                    <>
+                      {fmt.format(o.met_branch_count)} by branch count, {fmt.format(o.met_inferred)} by execution count
+                    </>
+                  ) : (
+                    fmt.format(o.met ?? 0)
+                  )}
+                </TableCell>
+                <TableCell className="num text-right align-top">{fmt.format(o.unmeetable)}</TableCell>
+                <TableCell className="num text-right align-top">{fmt.format(o.open)}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+        </div>
+      </Section>
+
+      <Section
+        title="Fields that stellar-core does not fully check"
+        id="fields"
+        description={
+          <>
+            stellar-core does not fully check {s.fields_not_fully_validated} transaction fields. At least one entry contains{" "}
+            {s.fields_not_fully_validated_exercised} of them (higher is better). An indexer must not trust these fields.
+            The{" "}
+            <TextLink to="/docs/guide/indexer-hardening#validated-and-unvalidated-fields">indexer-hardening guide</TextLink>{" "}
+            explains each field. The list is <RepoLink path={sources.fields} />.
+          </>
+        }
+      >
+        <Table>
+          <caption className="sr-only">Fields that stellar-core does not fully check, with their entries</caption>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Field</TableHead>
+              <TableHead className="hidden md:table-cell">XDR path</TableHead>
+              <TableHead>Checked by stellar-core</TableHead>
+              <TableHead className="hidden text-right sm:table-cell">Entries</TableHead>
+              <TableHead className="text-right">From stellar-core</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {coverage.fields.map((f) => (
+              <TableRow key={f.id}>
+                <TableCell className="whitespace-normal">
+                  <Id>{f.id}</Id>
+                </TableCell>
+                <TableCell className="hidden whitespace-normal md:table-cell">
+                  <Id className="text-muted-foreground">{f.xdr_path}</Id>
+                </TableCell>
+                <TableCell>{checked[f.validated_by_core] ?? f.validated_by_core}</TableCell>
+                <TableCell className="num hidden text-right sm:table-cell">{f.entries}</TableCell>
+                <TableCell className="num text-right">{f.core_emitted_entries}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       </Section>
     </div>
   )

@@ -5,7 +5,7 @@ import { IndexerPage } from "@/pages/indexer"
 
 // fetches this page's data files before the page renders, so navigation shows no skeleton
 export async function clientLoader() {
-  await Promise.all([load("harness"), load("coverage")])
+  await Promise.all([load("harness"), load("coverage"), load("findings")])
   return null
 }
 
@@ -15,7 +15,7 @@ export function shouldRevalidate() {
 }
 
 export function meta() {
-  return [{ title: "Indexer runs | shapekit" }, { name: "description", content: "What each indexer stored when the replay harness fed it the corpus chains, entry by entry and network by network." }]
+  return [{ title: "Indexer results | shapekit" }, { name: "description", content: "How each indexer stores the corpus entries: the verdict of each replay, the failing entries and the upstream bugs that shapekit reproduces." }]
 }
 
 export default function Route() {

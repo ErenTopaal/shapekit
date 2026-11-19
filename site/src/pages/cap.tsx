@@ -2,21 +2,23 @@ import { use, useMemo } from "react"
 import { Link, useParams } from "react-router"
 import { load, type Entry } from "@/lib/data"
 import { sdkName } from "@/lib/sdks"
-import { entryPath } from "./corpus"
-import { docs, expectations, sourceClasses, sources, verdictMeaning } from "@/lib/terms"
+import { findingRows } from "@/lib/metrics"
+import { capPath, entryPath, findingPath, sdkPath } from "@/lib/paths"
+import { label, verdictMeaning } from "@/lib/terms"
 import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Fragments } from "@/components/fragments"
 import {
+  Breadcrumb,
   ExtLink,
+  GlossaryLink,
   Id,
   useHashScroll,
   PageHeader,
+  PageTerms,
   RepoLink,
   Section,
   Status,
-  Term,
-  Terms,
   TextLink,
   fmt,
   indexerHref,
@@ -42,7 +44,8 @@ export function CapPage() {
   const row = coverage.caps.find((c) => c.id === cap)
   const families = coverage.families.filter((f) => row?.families.includes(f.id))
   const capEntries = useMemo(() => entries.entries.filter((e) => e.caps.includes(cap)), [entries, cap])
-  const capFindings = findings.findings.filter((f) => f.caps.includes(cap))
+  const allFindings = useMemo(() => findingRows(findings), [findings])
+  const capFindings = allFindings.filter((f) => f.reported && f.caps.includes(cap))
 
   // per entry and sdk, the versions with a failing cell in the committed matrix
   const sdkFails = useMemo(() => {
@@ -69,28 +72,18 @@ export function CapPage() {
 
   return (
     <div className="flex flex-col">
-      <nav aria-label="Breadcrumb" className="pb-3 text-sm">
-        <ol className="flex flex-wrap items-center gap-1.5 text-muted-foreground">
-          <li>
-            <TextLink to="/dashboard">Dashboard</TextLink>
-          </li>
-          <li aria-hidden>/</li>
-          <li>
-            <TextLink to="/dashboard/coverage">CAP coverage</TextLink>
-          </li>
-          <li aria-hidden>/</li>
-          <li aria-current="page" className="font-mono">
-            {row.id}
-          </li>
-        </ol>
-      </nav>
+      <Breadcrumb items={[{ to: "/dashboard/corpus", label: "Corpus" }, { to: "/dashboard/corpus#caps", label: "CAPs" }, { label: row.id, mono: true }]} />
       <PageHeader title={`${row.id}: ${row.title}`}>
         <p>
           {row.status}
           {row.protocol ? `, protocol ${row.protocol}` : ", no protocol"}.{" "}
-          {row.indexer_visible
-            ? "Indexer-visible: the CAP changes what an indexer reads."
-            : `Not indexer-visible: ${row.not_visible_reason ?? "no reason recorded"}.`}{" "}
+          {row.indexer_visible ? (
+            <>
+              <GlossaryLink id="indexer-visible">Indexer-visible</GlossaryLink>: the CAP changes what an indexer reads.
+            </>
+          ) : (
+            `Not indexer-visible: ${row.not_visible_reason ?? "no reason recorded"}.`
+          )}{" "}
           <ExtLink href={row.text_url}>Read the CAP text</ExtLink>.
         </p>
       </PageHeader>
@@ -99,7 +92,7 @@ export function CapPage() {
         <div>
           <dt className="font-medium">Entries</dt>
           <dd className="num text-muted-foreground">
-            {fmt.format(row.entries)}, of which {fmt.format(row.core_emitted_entries)} emitted by stellar-core
+            {fmt.format(row.entries)}. stellar-core emitted {fmt.format(row.core_emitted_entries)} of them (higher is better).
           </dd>
         </div>
         <div>
@@ -109,18 +102,18 @@ export function CapPage() {
           </dd>
         </div>
         <div>
-          <dt className="font-medium">Files by network</dt>
+          <dt className="font-medium">Files for each network</dt>
           <dd className="text-muted-foreground">
             <Counts counts={row.entries_by_variant} />
           </dd>
         </div>
         <div>
-          <dt className="font-medium">Protocols with core-emitted entries</dt>
+          <dt className="font-medium">Protocols with an entry from stellar-core</dt>
           <dd className="num text-muted-foreground">{row.protocols_core_emitted.join(", ") || "none"}</dd>
         </div>
         {row.uncovered ? (
           <div className="sm:col-span-2">
-            <dt className="font-medium">Why there is no core-emitted entry</dt>
+            <dt className="font-medium">Why no entry from stellar-core</dt>
             <dd className="text-muted-foreground">
               <Id>{row.uncovered.blocker}</Id> ({coverage.blockers.find((b) => b.blocker === row.uncovered?.blocker)?.meaning}
               ): {row.uncovered.reason}
@@ -141,62 +134,25 @@ export function CapPage() {
         ) : null}
       </dl>
 
-      {families.length > 0 || capFindings.length > 0 ? (
-        <div className="pt-4">
-          <Terms>
-            <Term name="source">
-              Where an entry&apos;s bytes come from:{" "}
-              {sourceClasses.map((c, i) => (
-                <span key={c.id}>
-                  <Id>{c.id}</Id> {c.meaning}
-                  {i < sourceClasses.length - 1 ? "; " : "."}
-                </span>
-              ))}{" "}
-              The first four are emitted by stellar-core and count as coverage.
-            </Term>
-            <Term name="fragment counts">
-              Entries of any family that contain the fragment: emitted by stellar-core (only these cover it), not
-              core-emitted (synthetic bytes or a refused envelope), and refusals whose result from core holds it.
-            </Term>
-            <Term name="fragment">
-              A path into the XDR that a family&apos;s entries must contain, such as a union arm or a length (
-              <Id>#one</Id>, <Id>#many</Id>, <Id>#max</Id>). Grammar: <RepoLink path={sources.signature} />.
-            </Term>
-            <Term name="expected">
-              What an SDK must do with the entry:{" "}
-              {expectations.map((x, i) => (
-                <span key={x.id}>
-                  <Id>{x.id}</Id> {x.meaning}
-                  {i < expectations.length - 1 ? "; " : "."}
-                </span>
-              ))}{" "}
-              <TextLink to={docs.checks}>How the runner checks it</TextLink>.
-            </Term>
-            <Term name="results">
-              The committed SDK matrices list only versions that diverge on the entry; the indexer lines give the
-              verdict of each committed indexer run, {harness.runs.map((r) => r.describe?.target ?? "").filter(Boolean).join(" and ")}{" "}
-              (<TextLink to={docs.verdicts}>verdicts</TextLink>). Entries that are not on a ledger chain (synthetic,
-              refused, vectors) are not replayed into an indexer.
-            </Term>
-          </Terms>
-        </div>
-      ) : null}
+      <div className="pt-4">
+        <PageTerms ids={["family", "fragment", "core-emitted", "corpus-terms", "diverging-entry", "verdict"]} />
+      </div>
 
       {capFindings.length > 0 ? (
         <Section
           title="Findings on this CAP"
           id="findings"
-          description={`${capFindings.length} of the ${findings.findings.length} findings name ${row.id}.`}
+          description={`${capFindings.length} of the ${findings.reported.findings} reported findings name ${row.id}.`}
         >
           <ul className="flex flex-col divide-y border-y text-sm">
             {capFindings.map((f) => (
               <li key={f.id} className="flex flex-col gap-1 py-2.5 sm:flex-row sm:items-baseline sm:gap-4">
-                <TextLink to={`/dashboard/findings#${f.id}`} className="shrink-0 font-mono sm:w-24">
+                <TextLink to={findingPath(f.id)} className="shrink-0 font-mono sm:w-32">
                   {f.id}
                 </TextLink>
-                <span className="flex-1">{f.title}</span>
+                <span className="flex-1">{f.short ?? f.title}</span>
                 <span className="shrink-0 text-muted-foreground">
-                  {f.component}, {f.severity}, {f.status}
+                  {f.component}, {label(f.severity)}, {label(f.status)}
                 </span>
               </li>
             ))}
@@ -220,7 +176,7 @@ export function CapPage() {
             title={f.id}
             description={
               <>
-                {f.title}. Shape introduced in protocol {f.protocol_introduced}; valid from protocol {f.protocol_valid.min}
+                {f.title}. The shape starts in protocol {f.protocol_introduced}. It is valid from protocol {f.protocol_valid.min}
                 {f.protocol_valid.max ? ` to ${f.protocol_valid.max}` : " on"}.
                 {f.caps.length > 1 ? (
                   <>
@@ -230,7 +186,7 @@ export function CapPage() {
                       .filter((c) => c !== row.id)
                       .map((c, i, all) => (
                         <span key={c}>
-                          <TextLink to={`/dashboard/coverage/${c}#${f.id}`}>{c}</TextLink>
+                          <TextLink to={capPath(c, f.id)}>{c}</TextLink>
                           {i < all.length - 1 ? ", " : ""}
                         </span>
                       ))}
@@ -244,17 +200,17 @@ export function CapPage() {
               <div className="flex flex-wrap items-center gap-3">
                 <Fragments fragments={f.fragments} />
                 <span className="num text-muted-foreground">
-                  {covered} of {f.fragments.length} fragments covered
+                  {covered} of {f.fragments.length} fragments have an entry from stellar-core (higher is better)
                 </span>
               </div>
               {f.missing_source_classes.length > 0 ? (
                 <p className="text-muted-foreground">
-                  Source classes the registry expects but no entry has: {f.missing_source_classes.join(", ")}.
+                  The registry expects these sources, but no entry has them: {f.missing_source_classes.join(", ")}.
                 </p>
               ) : null}
               {f.linked_issues.length > 0 ? (
                 <p className="text-muted-foreground">
-                  Upstream sightings:{" "}
+                  Upstream issues about this shape:{" "}
                   {f.linked_issues.map((u, i) => (
                     <span key={u}>
                       <ExtLink href={u}>{issueLabel(u)}</ExtLink>
@@ -268,11 +224,15 @@ export function CapPage() {
               <caption className="sr-only">Fragments of {f.id} and the entries that contain each</caption>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Fragment</TableHead>
-                  <TableHead>State</TableHead>
-                  <TableHead className="text-right">Core-emitted entries</TableHead>
-                  <TableHead className="text-right">Not core-emitted</TableHead>
-                  <TableHead className="text-right">In a core refusal</TableHead>
+                  <TableHead>
+                    <GlossaryLink id="fragment">Fragment</GlossaryLink>
+                  </TableHead>
+                  <TableHead className="text-right">
+                    From stellar-core
+                    <span className="block text-xs font-normal text-muted-foreground">higher is better</span>
+                  </TableHead>
+                  <TableHead className="hidden text-right sm:table-cell">Other sources</TableHead>
+                  <TableHead className="hidden text-right sm:table-cell">In a refusal of stellar-core</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -280,33 +240,33 @@ export function CapPage() {
                   <TableRow key={x.fragment}>
                     <TableCell className="max-w-[28rem] align-top whitespace-normal">
                       <Id>{x.fragment}</Id>
-                    </TableCell>
-                    <TableCell className="min-w-28 align-top whitespace-normal">
-                      {x.covered ? (
-                        <Status tone="pass">covered</Status>
-                      ) : (
-                        <span className="flex flex-col gap-1">
-                          <Status tone="diverge">uncovered</Status>
-                          {x.uncovered ? (
-                            <span className="text-xs text-muted-foreground">
-                              <Id>{x.uncovered.blocker}</Id>: {x.uncovered.reason}
-                            </span>
-                          ) : null}
-                        </span>
-                      )}
+                      <span className="flex flex-col gap-1 pt-1">
+                        {x.covered ? (
+                          <Status tone="pass">covered</Status>
+                        ) : (
+                          <>
+                            <Status tone="diverge">no entry from stellar-core</Status>
+                            {x.uncovered ? (
+                              <span className="text-xs text-muted-foreground">
+                                <Id>{x.uncovered.blocker}</Id>: {x.uncovered.reason}
+                              </span>
+                            ) : null}
+                          </>
+                        )}
+                      </span>
                     </TableCell>
                     <TableCell className="num text-right align-top">{x.core_emitted}</TableCell>
-                    <TableCell className="num text-right align-top">{x.non_core}</TableCell>
-                    <TableCell className="num text-right align-top">{x.refused_by_core}</TableCell>
+                    <TableCell className="num hidden text-right align-top sm:table-cell">{x.non_core}</TableCell>
+                    <TableCell className="num hidden text-right align-top sm:table-cell">{x.refused_by_core}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
             <h3 className="pt-2 font-medium">
-              Entries of this family tagged {row.id} <span className="num text-muted-foreground">({list.length})</span>
+              Entries of this family with the tag {row.id} <span className="num text-muted-foreground">({list.length})</span>
             </h3>
             {list.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No entry of this family carries the tag.</p>
+              <p className="text-sm text-muted-foreground">No entry of this family has the tag.</p>
             ) : (
               <ol className="flex flex-col divide-y border-y text-sm">
                 {list.map((e) => {
@@ -329,7 +289,7 @@ export function CapPage() {
                         <span className="text-xs text-muted-foreground">
                           {e.source}
                           {e.synthetic && e.source !== "synthetic" ? ", synthetic" : ""}, protocol{" "}
-                          {e.protocol.generated_at ?? e.protocol.valid_min}; {e.expected.decode}
+                          {e.protocol.generated_at ?? e.protocol.valid_min}, expected {e.expected.decode}
                           {e.expected.validity !== "valid" ? `, ${e.expected.validity}` : ""}
                           {e.expected.roundtrip ? ", round-trips" : ""}
                         </span>
@@ -351,20 +311,24 @@ export function CapPage() {
                           [...sdk].map(([s, vs]) => (
                             <Link
                               key={s}
-                              to={`/dashboard/sdk?sdk=${s}&entry=${encodeURIComponent(e.id)}`}
+                              to={sdkPath(s, e.id)}
                               className="text-diverge underline decoration-diverge/40"
                             >
-                              {sdkName(s)} diverges at {vs.length} of {versionsOf.get(s)} versions ({vs.join(", ")})
+                              <Status tone="diverge" wrap>
+                                {sdkName(s)} diverges at {vs.length} of {versionsOf.get(s)} versions ({vs.join(", ")})
+                              </Status>
                             </Link>
                           ))
                         ) : (
-                          <span className="text-muted-foreground">No SDK version diverges</span>
+                          <span className="text-muted-foreground">No SDK version diverges.</span>
                         )}
                         {hx.length > 0 ? (
                           hx.map((r) =>
                             r.tone === "pass" || r.tone === "idle" ? (
-                              <span key={r.target} className="text-muted-foreground" title={verdictMeaning(r.verdict)}>
-                                {r.target}: {r.text}
+                              <span key={r.target} title={verdictMeaning(r.verdict)}>
+                                <Status tone={r.tone} wrap>
+                                  {r.target}: {r.text}
+                                </Status>
                               </span>
                             ) : (
                               <Link
@@ -372,12 +336,14 @@ export function CapPage() {
                                 to={indexerHref(r.target, e.id)}
                                 className="text-diverge underline decoration-diverge/40"
                               >
-                                {r.target}: {r.text}
+                                <Status tone={r.tone} wrap>
+                                  {r.target}: {r.text}
+                                </Status>
                               </Link>
                             ),
                           )
                         ) : (
-                          <span className="text-muted-foreground">Indexers: not replayed</span>
+                          <span className="text-muted-foreground">The indexers did not replay this entry.</span>
                         )}
                       </div>
                     </li>

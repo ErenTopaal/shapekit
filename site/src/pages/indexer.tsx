@@ -1,7 +1,9 @@
 import { use, useMemo } from "react"
 import { Link, useSearchParams } from "react-router"
-import { load, sum, type FamilyRow, type HarnessRun, type HarnessReproduction } from "@/lib/data"
-import { docs, lintRules, verdicts } from "@/lib/terms"
+import { load, type FamilyRow, type HarnessRun, type HarnessReproduction } from "@/lib/data"
+import { docs, label, lintRules } from "@/lib/terms"
+import { runSummary } from "@/lib/metrics"
+import { capPath, entryPath, findingsPath } from "@/lib/paths"
 import { useMeta } from "@/lib/meta"
 import { Input } from "@/components/ui/input"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
@@ -10,14 +12,17 @@ import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@/components/u
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { VerdictBar, VerdictLegend, verdictOrder } from "@/components/charts"
 import {
+  Command,
   ExtLink,
+  GlossaryLink,
   Id,
+  More,
+  NextSteps,
   PageHeader,
+  PageTerms,
   RepoLink,
   Section,
   Status,
-  Term,
-  Terms,
   TextLink,
   bytes,
   fmt,
@@ -28,10 +33,9 @@ import {
   verdictTone,
 } from "@/components/common"
 
-// where an entry's own page is: the cap page of its family, at the entry's row
-function entryHref(entry: string, family: string, families: FamilyRow[]): string | null {
-  const cap = families.find((f) => f.id === family)?.caps[0]
-  return cap ? `/dashboard/coverage/${cap}#${entry}` : null
+// an entry's own page
+function entryHref(entry: string): string {
+  return entryPath(entry)
 }
 
 // whether every family got the same verdicts on every network, so one column can stand for all
@@ -55,10 +59,12 @@ function Families({ run, networks, agree, families }: { run: HarnessRun; network
       <caption className="sr-only">Verdicts per shape family{agree ? ", the same on every network" : ", per network"}</caption>
       <TableHeader>
         <TableRow>
-          <TableHead>Family</TableHead>
+          <TableHead>
+            <GlossaryLink id="family">Shape family</GlossaryLink>
+          </TableHead>
           {shown.map((n) => (
             <TableHead key={n} className="min-w-52">
-              {agree ? `Verdicts (each network)` : n}
+              {agree ? `Verdicts on each network` : `Verdicts on ${n}`}
             </TableHead>
           ))}
         </TableRow>
@@ -70,7 +76,7 @@ function Families({ run, networks, agree, families }: { run: HarnessRun; network
             <TableRow key={fam}>
               <TableCell className="align-top">
                 {cap ? (
-                  <TextLink to={`/dashboard/coverage/${cap}#${fam}`} className="font-mono text-xs">
+                  <TextLink to={capPath(cap, fam)} className="font-mono text-xs">
                     {fam}
                   </TextLink>
                 ) : (
@@ -100,7 +106,7 @@ function Families({ run, networks, agree, families }: { run: HarnessRun; network
   )
 }
 
-function Problems({ run, families }: { run: HarnessRun; families: FamilyRow[] }) {
+function Problems({ run }: { run: HarnessRun }) {
   const [params, setParams] = useSearchParams()
   const q = params.get("q") ?? ""
   const verdict = params.get("verdict") ?? "all"
@@ -129,9 +135,10 @@ function Problems({ run, families }: { run: HarnessRun; families: FamilyRow[] })
 
   return (
     <Section
-      title="Failing entries"
+      title="Failing replays"
       id="problems"
-      description="Every replayed entry whose verdict is not pass or out of scope, with each fact the indexer stored differently from what the ledger meta shows. In the first column, dropped means the meta shows the fact and the indexer did not store it, extra means the indexer stored a fact the meta does not show, and wrong-value means it stored the fact with another value."
+      level={3}
+      description="This list shows each replay with a verdict other than pass or out of scope. Each line gives a fact that the indexer stored in another way than the ledger meta shows. The kind dropped means that the indexer did not store the fact. The kind extra means that the indexer stored a fact that the meta does not show. The kind wrong-value means that the indexer stored the fact with another value."
     >
       <div className="flex flex-col gap-3 lg:flex-row lg:flex-wrap lg:items-center">
         <label className="sr-only" htmlFor="problem-filter">
@@ -149,6 +156,7 @@ function Problems({ run, families }: { run: HarnessRun; families: FamilyRow[] })
           type="single"
           variant="outline"
           size="sm"
+          className="flex-wrap"
           value={verdict}
           onValueChange={(v) => v && set("verdict", v, "all")}
           aria-label="Verdict"
@@ -156,7 +164,7 @@ function Problems({ run, families }: { run: HarnessRun; families: FamilyRow[] })
           <ToggleGroupItem value="all">All verdicts</ToggleGroupItem>
           {verdictList.map((v) => (
             <ToggleGroupItem key={v} value={v}>
-              {v}
+              {label(v)}
             </ToggleGroupItem>
           ))}
         </ToggleGroup>
@@ -189,24 +197,20 @@ function Problems({ run, families }: { run: HarnessRun; families: FamilyRow[] })
       ) : (
         <ol className="flex flex-col divide-y border-y">
           {rows.map((p) => {
-            const href = entryHref(p.entry, p.family, families)
+            const href = entryHref(p.entry)
             return (
               <li key={`${p.entry}/${p.network}`} className="flex flex-col gap-2 py-3">
                 <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                  {href ? (
-                    <TextLink to={href} className="font-mono text-sm [overflow-wrap:anywhere]">
-                      {p.entry}
-                    </TextLink>
-                  ) : (
-                    <Id className="text-sm">{p.entry}</Id>
-                  )}
-                  <Status tone={verdictTone(p.verdict)}>{p.verdict}</Status>
+                  <TextLink to={href} className="font-mono text-sm [overflow-wrap:anywhere]">
+                    {p.entry}
+                  </TextLink>
+                  <Status tone={verdictTone(p.verdict)}>{label(p.verdict)}</Status>
                   {p.reason ? <span className="text-xs text-muted-foreground">{p.reason}</span> : null}
                   <span className="text-xs text-muted-foreground">
                     {p.network}, chain <Id>{p.chain}</Id>, ledger {p.ledger}
                   </span>
-                  <TextLink to={`/dashboard/findings?q=${encodeURIComponent(p.entry)}`} className="text-xs">
-                    findings
+                  <TextLink to={findingsPath({ q: p.entry })} className="text-xs">
+                    findings on this entry
                   </TextLink>
                 </div>
                 <p className="text-sm text-muted-foreground [overflow-wrap:anywhere]">{p.detail}</p>
@@ -231,33 +235,25 @@ function Problems({ run, families }: { run: HarnessRun; families: FamilyRow[] })
 }
 
 function verdictText(v: string, reason: string | null) {
-  return reason ? `${v} (${reason})` : v
+  return reason ? `${label(v)} (${reason})` : label(v)
 }
 
-function Reproductions({
-  rows,
-  table,
-  families,
-  repo,
-}: {
-  rows: HarnessReproduction[]
-  table: string
-  families: FamilyRow[]
-  repo: string
-}) {
+function Reproductions({ rows, table, repo }: { rows: HarnessReproduction[]; table: string; repo: string }) {
   return (
     <Section
-      title="Reproductions of upstream wallet-backend bugs"
+      level={3}
+      title="Upstream wallet-backend bugs that shapekit reproduces"
       id="reproductions"
       description={
         <>
-          Each row of <RepoLink path={table} /> names a wallet-backend bug reported upstream, the corpus chain that carries
-          it, and the verdicts its entries must get on a commit before the fix and on the fix.{" "}
-          <Id>shapekit harness reproduce</Id> runs them in the nightly workflow, which commits no result; the last column
-          is the verdict the committed run gave at the pinned commit. <TextLink to={docs.harnessReproductions}>How reproductions work</TextLink>.
+          Each row of <RepoLink path={table} /> names a wallet-backend bug that somebody reported upstream, the corpus
+          chain that shows it, and the verdicts that its entries must get before and after the fix. The nightly workflow
+          runs the rows and commits no result. The last column gives the verdict of the committed run at the pinned
+          commit. <TextLink to={docs.harnessReproductions}>How reproductions work</TextLink>. Run them yourself:
         </>
       }
     >
+      <Command>shapekit harness reproduce --table adapters/walletbackend/reproductions.toml</Command>
       <ul className="flex flex-col divide-y border-y">
         {rows.map((r) => (
           <li key={r.id} className="flex flex-col gap-2 py-3 text-sm">
@@ -285,19 +281,14 @@ function Reproductions({
               </TableHeader>
               <TableBody>
                 {[...new Set(r.cases.flatMap((c) => c.expect.map((x) => x.entry)))].map((entry) => {
-                  const fam = families.find((f) => entry.startsWith(`${f.id}.`))
-                  const href = fam ? entryHref(entry, fam.id, families) : null
+                  const href = entryHref(entry)
                   const atPin = r.cases.flatMap((c) => c.expect).find((x) => x.entry === entry)?.at_pin ?? []
                   return (
                     <TableRow key={entry}>
                       <TableCell className="max-w-80 align-top whitespace-normal">
-                        {href ? (
-                          <TextLink to={href} className="font-mono text-xs [overflow-wrap:anywhere]">
-                            {entry}
-                          </TextLink>
-                        ) : (
-                          <Id>{entry}</Id>
-                        )}
+                        <TextLink to={href} className="font-mono text-xs [overflow-wrap:anywhere]">
+                          {entry}
+                        </TextLink>
                       </TableCell>
                       {r.cases.map((c) => {
                         const x = c.expect.find((y) => y.entry === entry)
@@ -332,6 +323,62 @@ function Reproductions({
 
 const targetOf = (r: HarnessRun, i: number) => r.describe?.target ?? `run ${i + 1}`
 
+// the summary of every indexer run: the one home of the per-run numbers the start page and the
+// landing page also show
+function RunTable({ runs, index }: { runs: HarnessRun[]; index: number }) {
+  return (
+    <Table>
+      <caption className="sr-only">Each indexer run: the verdicts of its replays</caption>
+      <TableHeader>
+        <TableRow>
+          <TableHead>Indexer</TableHead>
+          <TableHead className="text-right">
+            <GlossaryLink id="verdict-pass">Pass</GlossaryLink>
+            <span className="block text-xs font-normal text-muted-foreground">higher is better</span>
+          </TableHead>
+          <TableHead className="text-right">
+            <GlossaryLink id="verdict-mishandled">Mishandled</GlossaryLink> or <GlossaryLink id="verdict-dropped">dropped</GlossaryLink>
+            <span className="block text-xs font-normal text-muted-foreground">lower is better</span>
+          </TableHead>
+          <TableHead className="hidden text-right sm:table-cell">
+            <GlossaryLink id="verdict-not-evaluated">Not evaluated</GlossaryLink>
+            <span className="block text-xs font-normal text-muted-foreground">lower is better</span>
+          </TableHead>
+          <TableHead className="hidden text-right sm:table-cell">
+            <GlossaryLink id="verdict-out-of-scope">Out of scope</GlossaryLink>
+            <span className="block text-xs font-normal text-muted-foreground">not a failure</span>
+          </TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody className="num">
+        {runs.map((run, i) => {
+          const x = runSummary(run, i)
+          return (
+            <TableRow key={run.report} aria-current={i === index ? "true" : undefined} className={i === index ? "bg-accent/50" : undefined}>
+              <TableCell className="font-sans whitespace-normal">
+                <Link
+                  to={indexerHref(x.target)}
+                  preventScrollReset
+                  className="font-medium text-primary underline decoration-primary/40 hover:decoration-primary"
+                >
+                  {x.target}
+                </Link>
+                <span className="block text-xs text-muted-foreground">
+                  {fmt.format(x.replays)} replays
+                </span>
+              </TableCell>
+              <TableCell className="text-right font-semibold">{fmt.format(x.pass)}</TableCell>
+              <TableCell className="text-right">{x.wrong > 0 ? <Status tone="diverge">{fmt.format(x.wrong)}</Status> : <span className="text-muted-foreground">0</span>}</TableCell>
+              <TableCell className="hidden text-right sm:table-cell">{fmt.format(x.byVerdict["not-evaluated"] ?? 0)}</TableCell>
+              <TableCell className="hidden text-right sm:table-cell">{fmt.format(x.byVerdict["out-of-scope"] ?? 0)}</TableCell>
+            </TableRow>
+          )
+        })}
+      </TableBody>
+    </Table>
+  )
+}
+
 export function IndexerPage() {
   const meta = useMeta()
   // the target's repository, from its pin in pins.toml
@@ -349,7 +396,7 @@ export function IndexerPage() {
   if (!run) {
     return (
       <>
-        <PageHeader title="Indexer runs" />
+        <PageHeader title="Indexer results" />
         <Empty>
           <EmptyHeader>
             <EmptyTitle>No harness report is committed</EmptyTitle>
@@ -360,146 +407,121 @@ export function IndexerPage() {
     )
   }
   const d = run.describe
-  const networks = Object.keys(run.by_network).toSorted()
+  const sum = runSummary(run, index)
+  const networks = sum.networks
   const agree = networks.length > 1 && networksAgree(run, networks)
   const families = coverage.families
   return (
-    <div className="flex flex-col">
-      {harness.runs.length > 1 ? (
-        <nav aria-label="Indexer runs" className="pb-4">
-          <ul className="flex flex-wrap gap-2 text-sm">
-            {harness.runs.map((r, i) => (
-              <li key={r.report}>
-                <Link
-                  to={indexerHref(targetOf(r, i))}
-                  aria-current={i === index ? "page" : undefined}
-                  className={
-                    i === index
-                      ? "block rounded-md border border-primary bg-accent px-3 py-1.5 font-medium text-accent-foreground"
-                      : "block rounded-md border px-3 py-1.5 text-muted-foreground hover:bg-muted"
-                  }
-                >
-                  {targetOf(r, i)}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </nav>
-      ) : null}
-      <PageHeader title={`Indexer run: ${d?.target ?? "target"}`}>
+    <div className="flex flex-col gap-6">
+      <PageHeader title="Indexer results">
         <p>
-          The replay harness served the corpus&apos;s ledger chains to {d?.target ?? "the target"} at commit{" "}
+          The replay harness gives the ledgers of the corpus to each indexer through an{" "}
+          <GlossaryLink id="adapter">adapter</GlossaryLink>. Then it compares each fact that the indexer stored with the
+          ledger meta. Each <GlossaryLink id="replay">replay</GlossaryLink> is one entry on one network and gets one{" "}
+          <GlossaryLink id="verdict">verdict</GlossaryLink>.
+        </p>
+      </PageHeader>
+
+      <NextSteps>
+        <li>
+          <TextLink to={docs.indexerCi}>Add the replay to your indexer CI</TextLink>. CI fails when a verdict gets worse.
+        </li>
+        <li>
+          <TextLink to={docs.indexerCiLocal}>Reproduce a result on your computer</TextLink> with the command on the entry
+          page.
+        </li>
+        <li>Read the failing replays below to see the facts that the indexer stored in another way.</li>
+      </NextSteps>
+
+      <Section title="Summary" id="summary" description="Each indexer run replays the same entries. Select an indexer to see its run in detail.">
+        <RunTable runs={harness.runs} index={index} />
+      </Section>
+
+      <PageTerms ids={["replay", "verdict", "indexer-terms", "claim", "adapter"]} />
+
+      <section aria-labelledby="run-h" className="flex flex-col gap-3" id="run-detail">
+        <h2 id="run-h" className="text-xl font-semibold tracking-tight">
+          {d?.target ?? "The run"} in detail
+        </h2>
+        <p className="max-w-[70ch] text-sm text-muted-foreground">
+          The harness ran {d?.target ?? "the target"} at commit{" "}
           <ExtLink href={`${repoOf(d?.target ?? "")}/commit/${d?.target_version ?? ""}`}>
             <Id>{short(d?.target_version ?? "", 10)}</Id>
           </ExtLink>{" "}
-          through its adapter, <Id>{d?.adapter ?? "the adapter"}</Id> {d?.adapter_version}, over {d?.default_delivery ?? "its default delivery"}
-          , then compared every fact the indexer stored with what the ledger meta shows. Report:{" "}
-          <RepoLink path={run.report} />. {d?.target === "wallet-backend" ? (
+          through the adapter <Id>{d?.adapter ?? "the adapter"}</Id> {d?.adapter_version}, over {d?.default_delivery ?? "its default delivery"}.
+          The report is <RepoLink path={run.report} />.{" "}
+          {d?.target === "wallet-backend" ? (
             <TextLink to={docs.walletBackendAdapter}>The wallet-backend adapter</TextLink>
           ) : (
             <TextLink to={docs.adapter}>The adapter interface</TextLink>
           )}
           .
         </p>
-      </PageHeader>
 
-      {!run.ok ? (
-        <Alert variant="destructive" className="mb-4">
-          <AlertTitle>The run itself did not complete cleanly</AlertTitle>
-          <AlertDescription>
-            A chain failed to run, the memory checks did not hold, or rounds disagreed. See the report.
-          </AlertDescription>
-        </Alert>
-      ) : null}
+        {!run.ok ? (
+          <Alert variant="destructive">
+            <AlertTitle>The run did not complete correctly</AlertTitle>
+            <AlertDescription>
+              A chain did not run, the memory checks did not hold, or two rounds gave different verdicts. Read the report.
+            </AlertDescription>
+          </Alert>
+        ) : null}
 
-      <Terms label="What the verdicts mean">
-        {verdicts.map((v) => (
-          <Term key={v.id} name={<Status tone={verdictTone(v.id)}>{v.id}</Status>}>
-            {v.meaning}.
-          </Term>
-        ))}
-        <Term name="claims">
-          The facts the adapter says the indexer records (participants, balance changes, events and so on). A fact the
-          indexer does not claim is never a failure. <TextLink to={docs.claims}>Claims</TextLink>.
-        </Term>
-      </Terms>
+        <Section
+          title="Verdicts"
+          id="verdicts"
+          level={3}
+          description={
+            <>
+              {fmt.format(sum.replays)} replays: {fmt.format(sum.entries)} entries on {networks.join(" and ")}, from {run.chains}{" "}
+              chain runs.{" "}
+              {agree ? "Each network gave the same verdicts." : "The networks gave different verdicts, so each network has its own bar."}
+            </>
+          }
+        >
+          {agree ? (
+            <div className="flex flex-col gap-2">
+              <VerdictBar counts={sum.byVerdict} className="h-4" />
+              <VerdictLegend counts={sum.byVerdict} />
+            </div>
+          ) : (
+            networks.map((n) => (
+              <div key={n} className="flex flex-col gap-2">
+                <span className="text-sm font-medium">{n}</span>
+                <VerdictBar counts={run.by_network[n] ?? {}} className="h-4" />
+                <VerdictLegend counts={run.by_network[n] ?? {}} />
+              </div>
+            ))
+          )}
+          <p className="text-sm text-muted-foreground">
+            Reasons of the mishandled replays:{" "}
+            {Object.entries(run.totals.by_reason)
+              .map(([k, v]) => `${k} ${v}`)
+              .join(", ") || "none"}
+            . The harness did not replay {fmt.format(run.totals.without_chain)} entries, because they are on no recorded
+            ledger chain (core goldens, history captures, synthetic bytes, refused envelopes and vectors). It also did not
+            replay {run.totals.without_oracle} pairs of entry and network that have no{" "}
+            <GlossaryLink id="oracle">oracle file</GlossaryLink>.
+          </p>
+        </Section>
 
-      <Section
-        title="Verdicts"
-        id="verdicts"
-        description={
-          <>
-            {fmt.format(run.distinct_entries)} entries replayed on {networks.join(" and ")}, {fmt.format(run.totals.entries)}{" "}
-            replays over {run.chains} chain runs (
-            {Object.entries(run.chains_by_network)
-              .map(([n, c]) => `${c} on ${n}`)
-              .join(", ")}
-            ).{agree ? " Every family got the same verdicts on both networks." : ""}
-          </>
-        }
-      >
-        {(agree ? networks.slice(0, 1) : networks).map((n) => (
-          <div key={n} className="flex flex-col gap-2">
-            {!agree ? <span className="text-sm font-medium">{n}</span> : null}
-            <VerdictBar counts={run.by_network[n] ?? {}} className="h-4" />
-            <VerdictLegend counts={run.by_network[n] ?? {}} />
+        <Problems key={run.report} run={run} />
+
+        <More label="Show the verdicts for each shape family">
+          <div className="overflow-x-auto">
+            <Families run={run} networks={networks} agree={agree} families={families} />
           </div>
-        ))}
-        <Table>
-          <caption className="sr-only">Verdicts per network</caption>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Network</TableHead>
-              {verdictOrder.map((v) => (
-                <TableHead key={v} className="text-right">
-                  {v}
-                </TableHead>
-              ))}
-              <TableHead className="text-right">Total</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody className="num">
-            {networks.map((n) => (
-              <TableRow key={n}>
-                <TableCell className="font-medium">{n}</TableCell>
-                {verdictOrder.map((v) => (
-                  <TableCell key={v} className="text-right">
-                    {run.by_network[n]?.[v] ?? 0}
-                  </TableCell>
-                ))}
-                <TableCell className="text-right">{sum(run.by_network[n])}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-        <p className="text-sm text-muted-foreground">
-          Mishandled replays on {networks.join(" and ")}, by reason:{" "}
-          {Object.entries(run.totals.by_reason)
-            .map(([k, v]) => `${k} ${v}`)
-            .join(", ") || "none"}
-          . Not replayed: {fmt.format(run.totals.without_chain)} entries that are on no recorded ledger chain (core goldens,
-          history captures, synthetic bytes, refused envelopes, vectors), and {run.totals.without_oracle} entry and network
-          pairs with no oracle file, the expected facts the comparison needs.
-        </p>
-      </Section>
-
-      <Section title="Verdicts per family" id="families" description="Select a family for its CAP page and entries.">
-        <Families run={run} networks={networks} agree={agree} families={families} />
-      </Section>
-
-      <Problems key={run.report} run={run} families={families} />
-
+        </More>
       {/* the reproduction table and the linter result are wallet-backend's */}
       {d?.target === "wallet-backend" ? (
         <Reproductions
           rows={harness.reproductions.rows}
           table={harness.reproductions.table}
-          families={families}
           repo={repoOf("wallet-backend")}
         />
       ) : null}
 
-      <Section title="How the run went" id="run">
+      <More label="Show how the run went: rounds and memory">
         <dl className="grid gap-x-8 gap-y-3 text-sm sm:grid-cols-2">
           <div>
             <dt className="font-medium">Rounds</dt>
@@ -550,25 +572,27 @@ export function IndexerPage() {
             ))}
           </ul>
         ) : null}
-      </Section>
+      </More>
 
       {harness.lint.filter((l) => l.target === d?.target).map((l) => (
         <Section
           key={l.result}
-          title={`Linter on ${l.target}`}
+          title={`Linter results for ${l.target}`}
           id="lint"
+          level={3}
           description={
             <>
-              <TextLink to={docs.linter}>indexerlint</TextLink> checks Go indexer source for the three ingestion mistakes:
-              trusting unvalidated fields (IDX001), recursion with no depth or size cap (IDX002), and participants taken
-              from the envelope instead of the meta (IDX003). <Id>{l.command}</Id> at <Id>{short(l.version, 10)}</Id>:{" "}
-              {l.findings.length} {l.findings.length === 1 ? "finding" : "findings"}, {l.suppressed} suppressed,{" "}
-              {l.baselined} baselined. Result: <RepoLink path={l.result} />.
+              <TextLink to={docs.linter}>indexerlint</TextLink> checks the source code of a Go indexer for three
+              ingestion mistakes. IDX001: the code trusts a field that stellar-core does not fully check. IDX002: a
+              recursion has no depth or size limit. IDX003: the code reads the participants from the envelope, not from
+              the meta. The command <Id>{l.command}</Id> at <Id>{short(l.version, 10)}</Id> gave {l.findings.length}{" "}
+              {l.findings.length === 1 ? "result" : "results"}. It suppressed {l.suppressed} and the baseline holds{" "}
+              {l.baselined}. The result file is <RepoLink path={l.result} />.
             </>
           }
         >
           {l.findings.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No findings.</p>
+            <p className="text-sm text-muted-foreground">The linter reported no result.</p>
           ) : (
             <ul className="flex flex-col divide-y border-y text-sm">
               {l.findings.map((f) => (
@@ -591,6 +615,7 @@ export function IndexerPage() {
           )}
         </Section>
       ))}
+      </section>
     </div>
   )
 }

@@ -15,7 +15,7 @@ export function shouldRevalidate() {
 }
 
 export function meta() {
-  return [{ title: "Findings | shapekit" }, { name: "description", content: "Every failure the indexer runs, the SDK runs and the linter reported, traced to a root cause with its severity, entry and upstream status." }]
+  return [{ title: "Findings | shapekit" }, { name: "description", content: "Every defect that shapekit found, with its severity, its component, the upstream issue and the command that reproduces it." }]
 }
 
 export default function Route() {

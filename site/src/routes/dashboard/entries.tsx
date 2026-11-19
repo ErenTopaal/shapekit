@@ -1,11 +1,11 @@
 import { Suspense } from "react"
 import { load } from "@/lib/data"
 import { DataBoundary, Loading } from "@/components/common"
-import { CoveragePage } from "@/pages/coverage"
+import { EntriesPage } from "@/pages/entries"
 
 // fetches this page's data files before the page renders, so navigation shows no skeleton
 export async function clientLoader() {
-  await load("coverage")
+  await Promise.all([load("entries"), load("conformance"), load("harness")])
   return null
 }
 
@@ -15,14 +15,14 @@ export function shouldRevalidate() {
 }
 
 export function meta() {
-  return [{ title: "CAP coverage | shapekit" }, { name: "description", content: "Every CAP with the corpus entries that carry its shapes, the union arms covered and the fields core does not fully validate." }]
+  return [{ title: "Corpus entries | shapekit" }, { name: "description", content: "Every corpus entry with its CAPs, its source and the results of the SDKs and indexers." }]
 }
 
 export default function Route() {
   return (
     <DataBoundary>
       <Suspense fallback={<Loading />}>
-        <CoveragePage />
+        <EntriesPage />
       </Suspense>
     </DataBoundary>
   )

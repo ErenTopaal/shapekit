@@ -5,7 +5,7 @@ import { CorpusPage } from "@/pages/corpus"
 
 // fetches this page's data files before the page renders, so navigation shows no skeleton
 export async function clientLoader() {
-  await Promise.all([load("entries"), load("conformance"), load("harness")])
+  await load("coverage")
   return null
 }
 
@@ -15,7 +15,7 @@ export function shouldRevalidate() {
 }
 
 export function meta() {
-  return [{ title: "Corpus explorer | shapekit" }, { name: "description", content: "Every corpus entry with its decoded XDR-JSON, its source, what each SDK version and indexer did with it, and how to run it again." }]
+  return [{ title: "Corpus coverage | shapekit" }, { name: "description", content: "What the shapekit corpus covers: entries by source, CAPs, union arms, shape families, obligations and the fields that stellar-core does not fully check." }]
 }
 
 export default function Route() {

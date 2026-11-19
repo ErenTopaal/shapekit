@@ -1,142 +1,116 @@
-import { use, useEffect, useMemo, useState } from "react";
-import { useLocation, useSearchParams } from "react-router";
-import { ChevronDownIcon } from "lucide-react";
-import { load, type Entry, type Finding } from "@/lib/data";
-import { severities, severityRank, sources, statuses } from "@/lib/terms";
-import { cn } from "@/lib/utils";
-import { Input } from "@/components/ui/input";
+import { use, useEffect, useMemo, useState } from "react"
+import { useLocation, useSearchParams } from "react-router"
+import { ChevronDownIcon } from "lucide-react"
+import { load, sum } from "@/lib/data"
+import { findingRows, reportedFindings, type FindingRow } from "@/lib/metrics"
+import { docs, label, severities, severityRank, sources, statuses } from "@/lib/terms"
+import { entryPath, findingPath, findingsPath, capPath } from "@/lib/paths"
+import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
+import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@/components/ui/empty"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import {
-  Empty,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyTitle,
-} from "@/components/ui/empty";
-import {
+  Command,
   ExtLink,
-  Id,
+  GlossaryLink,
   IssueRef,
+  Metric,
+  More,
+  NextSteps,
   PageHeader,
+  PageTerms,
   RepoLink,
+  Section,
   Status,
-  Term,
-  Terms,
   TextLink,
   fmt,
   issueLabel,
   type Tone,
-} from "@/components/common";
+} from "@/components/common"
 
-const statusTone: Record<string, Tone> = {
-  draft: "known",
+export const statusTone: Record<string, Tone> = {
   filed: "pass",
   "duplicate-of": "pass",
   "private-report": "pass",
+  draft: "known",
   "wont-fix": "idle",
-};
+}
 
-// an entry's row on the cap page of its first cap
+// the severities of some findings as one phrase, worst first: "3 data loss, 1 robustness"
+export function severityPhrase(counts: Record<string, number>): string {
+  return severities
+    .filter((s) => (counts[s.id] ?? 0) > 0)
+    .map((s) => `${counts[s.id]} ${s.label}`)
+    .join(", ")
+}
 
 // answers recorded on implementation-defined entries are evidence, not failures
-function seen(f: Finding) {
-  const answers = f.occurrences_by_source.answer ?? 0;
-  const failures = Object.entries(f.occurrences_by_source).filter(
-    ([k]) => k !== "answer",
-  );
-  const parts = [];
+function seen(f: FindingRow) {
+  const answers = f.occurrences_by_source.answer ?? 0
+  const failures = Object.entries(f.occurrences_by_source).filter(([k]) => k !== "answer")
+  const parts = []
   if (failures.length > 0) {
-    parts.push(
-      `${f.occurrences - answers} failures (${failures.map(([k, v]) => `${k} ${v}`).join(", ")})`,
-    );
+    parts.push(`${f.occurrences - answers} failures (${failures.map(([k, v]) => `${k} ${v}`).join(", ")})`)
   }
-  if (answers > 0) {
-    parts.push(
-      `${answers} implementation-defined ${answers === 1 ? "answer" : "answers"}`,
-    );
-  }
-  return parts.join(" and ");
+  if (answers > 0) parts.push(`${answers} implementation-defined ${answers === 1 ? "answer" : "answers"}`)
+  return parts.join(" and ")
 }
 
-function entryHref(e: Entry | undefined): string | null {
-  const cap = e?.caps[0];
-  return e && cap ? `/dashboard/coverage/${cap}#${e.id}` : null;
-}
-
-function EntryLink({
-  id,
-  entries,
-}: {
-  id: string;
-  entries: Map<string, Entry>;
-}) {
-  const href = entryHref(entries.get(id));
-  return href ? (
-    <TextLink
-      to={href}
-      className="font-mono text-[0.85em] [overflow-wrap:anywhere]"
-    >
+function EntryLink({ id }: { id: string }) {
+  return (
+    <TextLink to={entryPath(id)} className="font-mono text-[0.85em] [overflow-wrap:anywhere]">
       {id}
     </TextLink>
-  ) : (
-    <Id>{id}</Id>
-  );
+  )
 }
 
-function Detail({ f, entries }: { f: Finding; entries: Map<string, Entry> }) {
+function Detail({ f }: { f: FindingRow }) {
+  const shown = 5
   return (
     <div className="flex flex-col gap-3 pt-2 pb-1 text-sm">
+      {f.short && f.short !== f.title ? <p className="max-w-[80ch]">{f.title}</p> : null}
       <p className="max-w-[80ch] text-muted-foreground">{f.cause}</p>
-      {f.reason ? (
-        <p className="max-w-[80ch] text-muted-foreground">
-          Decision: {f.reason}
-        </p>
+      {f.reason ? <p className="max-w-[80ch] text-muted-foreground">Reason for the status: {f.reason}</p> : null}
+      {f.reproduce ? (
+        <div className="flex flex-col gap-1">
+          <span className="font-medium">Reproduce this finding</span>
+          <Command>{f.reproduce}</Command>
+        </div>
       ) : null}
-      <dl className="grid gap-x-6 gap-y-2 sm:grid-cols-[9rem_minmax(0,1fr)]">
+      <dl className="grid gap-x-6 gap-y-2 sm:grid-cols-[10rem_minmax(0,1fr)]">
         {f.minimal_entry ? (
           <>
             <dt className="font-medium">Smallest entry</dt>
             <dd>
-              <EntryLink id={f.minimal_entry} entries={entries} />
-            </dd>
-          </>
-        ) : null}
-        {f.reproduce ? (
-          <>
-            <dt className="font-medium">Reproduce</dt>
-            <dd className="min-w-0">
-              <pre className="overflow-x-auto rounded-md bg-muted px-3 py-2 text-xs whitespace-pre-wrap [overflow-wrap:anywhere]">
-                {f.reproduce}
-              </pre>
+              <EntryLink id={f.minimal_entry} />
             </dd>
           </>
         ) : null}
         <dt className="font-medium">Seen</dt>
         <dd className="num text-muted-foreground">
-          {seen(f)} on {f.entries.length}{" "}
-          {f.entries.length === 1 ? "entry" : "entries"}
+          {seen(f)} on {f.entries.length} {f.entries.length === 1 ? "entry" : "entries"}
         </dd>
+        {f.caps.length > 0 ? (
+          <>
+            <dt className="font-medium">CAPs</dt>
+            <dd className="flex flex-wrap gap-x-3 gap-y-1">
+              {f.caps.map((c) => (
+                <TextLink key={c} to={capPath(c)} className="font-mono">
+                  {c}
+                </TextLink>
+              ))}
+            </dd>
+          </>
+        ) : null}
         {f.siblings.length > 0 ? (
           <>
-            <dt className="font-medium">Siblings</dt>
+            <dt className="font-medium">
+              <GlossaryLink id="siblings">Sibling findings</GlossaryLink>
+            </dt>
             <dd className="flex flex-wrap gap-x-3 gap-y-1">
               {f.siblings.map((id) => (
-                <TextLink
-                  key={id}
-                  to={`/dashboard/findings#${id}`}
-                  className="font-mono"
-                >
+                <TextLink key={id} to={findingPath(id)} className="font-mono">
                   {id}
                 </TextLink>
               ))}
@@ -145,7 +119,9 @@ function Detail({ f, entries }: { f: Finding; entries: Map<string, Entry> }) {
         ) : null}
         {f.related.length > 0 ? (
           <>
-            <dt className="font-medium">Related upstream</dt>
+            <dt className="font-medium">
+              <GlossaryLink id="related">Related issues</GlossaryLink>
+            </dt>
             <dd className="flex flex-wrap gap-x-3 gap-y-1">
               {f.related.map((u) => (
                 <ExtLink key={u} href={u}>
@@ -155,324 +131,387 @@ function Detail({ f, entries }: { f: Finding; entries: Map<string, Entry> }) {
             </dd>
           </>
         ) : null}
-        <dt className="font-medium">Entries</dt>
+        {f.reference ? (
+          <>
+            <dt className="font-medium">Report reference</dt>
+            <dd className="text-muted-foreground">{f.reference}</dd>
+          </>
+        ) : null}
+        {f.draft && !f.link ? (
+          <>
+            <dt className="font-medium">Issue text</dt>
+            <dd>
+              <IssueRef value={f.draft} />
+            </dd>
+          </>
+        ) : null}
+        <dt className="font-medium">
+          <GlossaryLink id="record">Record</GlossaryLink>
+        </dt>
         <dd>
+          {f.record === "first" ? "first record" : "second record"}, <RepoLink path={f.recordPath} />
+        </dd>
+        <dt className="font-medium">Entries</dt>
+        <dd className="flex min-w-0 flex-col gap-1">
           <ul className="flex flex-col gap-0.5">
-            {f.entries.map((e) => (
+            {f.entries.slice(0, shown).map((e) => (
               <li key={e}>
-                <EntryLink id={e} entries={entries} />
+                <EntryLink id={e} />
               </li>
             ))}
           </ul>
+          {f.entries.length > shown ? (
+            <More label={`Show the other ${f.entries.length - shown} entries`} className="border-dashed">
+              <ul className="flex flex-col gap-0.5">
+                {f.entries.slice(shown).map((e) => (
+                  <li key={e}>
+                    <EntryLink id={e} />
+                  </li>
+                ))}
+              </ul>
+            </More>
+          ) : null}
         </dd>
       </dl>
     </div>
-  );
+  )
 }
 
-function FindingItem({
-  f,
-  entries,
-  open,
-  onOpen,
-}: {
-  f: Finding;
-  entries: Map<string, Entry>;
-  open: boolean;
-  onOpen: (o: boolean) => void;
-}) {
+function FindingItem({ f, open, onOpen }: { f: FindingRow; open: boolean; onOpen: (o: boolean) => void }) {
   return (
     <li id={f.id} className="scroll-mt-20 py-3 target:bg-accent/40">
       <Collapsible open={open} onOpenChange={onOpen}>
-        <div className="grid gap-x-4 gap-y-1.5 md:grid-cols-[7.5rem_minmax(0,1fr)_14rem]">
+        <div className="grid gap-x-4 gap-y-1.5 md:grid-cols-[8rem_minmax(0,1fr)_15rem]">
           <CollapsibleTrigger className="group flex h-fit items-center gap-1 rounded-sm text-left font-mono text-sm font-medium focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none">
-            <ChevronDownIcon
-              aria-hidden
-              className="size-4 shrink-0 transition-transform group-data-[state=open]:rotate-180"
-            />
+            <ChevronDownIcon aria-hidden className="size-4 shrink-0 transition-transform group-data-[state=open]:rotate-180" />
             {f.id}
-            <span className="sr-only">
-              {open ? ", hide details" : ", show details"}
-            </span>
+            <span className="sr-only">{open ? ", hide the details" : ", show the details"}</span>
           </CollapsibleTrigger>
-          <div className="flex min-w-0 flex-col gap-1">
-            <span>{f.title}</span>
-            <span className="flex flex-wrap gap-x-2 gap-y-0.5 text-xs">
-              {f.caps.map((c) => (
-                <TextLink
-                  key={c}
-                  to={`/dashboard/coverage/${c}`}
-                  className="font-mono"
-                >
-                  {c}
-                </TextLink>
-              ))}
-            </span>
-          </div>
+          <span className="min-w-0">{f.short ?? f.title}</span>
           <div className="flex flex-col gap-1 text-sm">
             <span>
-              <span className="font-medium">{f.severity}</span>{" "}
-              <span className="text-muted-foreground">in</span>{" "}
-              <span className="font-mono text-[0.85em]">{f.component}</span>
+              <span className="text-muted-foreground">Severity:</span> <span className="font-medium">{label(f.severity)}</span>
             </span>
-            <span className="flex flex-wrap items-center gap-x-2">
-              <Status tone={statusTone[f.status] ?? "idle"}>{f.status}</Status>
+            <span className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+              <Status tone={statusTone[f.status] ?? "idle"}>{label(f.status)}</Status>
               {f.link ? (
-                <ExtLink href={f.link}>{issueLabel(f.link)}</ExtLink>
+                <ExtLink href={f.link} className="text-sm">
+                  <span className="sr-only">Open the upstream issue </span>
+                  {issueLabel(f.link)}
+                </ExtLink>
               ) : null}
             </span>
-            {f.reference ? (
-              <span className="text-xs text-muted-foreground">
-                {f.reference}
-              </span>
-            ) : null}
-            {f.draft && !f.link ? (
-              <IssueRef value={f.draft} className="text-xs" />
-            ) : null}
           </div>
         </div>
-        <CollapsibleContent className="md:pl-[8.5rem]">
-          <Detail f={f} entries={entries} />
+        <CollapsibleContent className="md:pl-[9rem]">
+          <Detail f={f} />
         </CollapsibleContent>
       </Collapsible>
     </li>
-  );
+  )
+}
+
+// the table of reported findings by component: the one home of these counts
+function ByComponent({ byComponent }: { byComponent: Record<string, Record<string, number>> }) {
+  const rows = Object.entries(byComponent).toSorted(
+    ([a, x], [b, y]) =>
+      Math.min(...Object.keys(x).map(severityRank)) - Math.min(...Object.keys(y).map(severityRank)) || sum(y) - sum(x) || a.localeCompare(b),
+  )
+  return (
+    <Table>
+      <caption className="sr-only">Reported findings by component. Fewer findings is better for a component.</caption>
+      <TableHeader>
+        <TableRow>
+          <TableHead>
+            <GlossaryLink id="component">Component</GlossaryLink>
+          </TableHead>
+          <TableHead className="text-right">
+            Findings <span className="block text-xs font-normal text-muted-foreground">lower is better</span>
+          </TableHead>
+          <TableHead className="hidden sm:table-cell">By severity</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {rows.map(([c, counts]) => (
+          <TableRow key={c}>
+            <TableCell className="whitespace-normal">
+              <TextLink to={findingsPath({ component: c })} className="font-mono text-[0.85em] [overflow-wrap:anywhere]">
+                {c}
+              </TextLink>
+              <span className="block text-xs text-muted-foreground sm:hidden">{severityPhrase(counts)}</span>
+            </TableCell>
+            <TableCell className="num text-right font-semibold">{sum(counts)}</TableCell>
+            <TableCell className="hidden text-sm whitespace-normal text-muted-foreground sm:table-cell">{severityPhrase(counts)}</TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
+  )
 }
 
 export function FindingsPage() {
-  const findings = use(load("findings"));
-  const entriesFile = use(load("entries"));
-  const entries = useMemo(
-    () => new Map(entriesFile.entries.map((e) => [e.id, e])),
-    [entriesFile],
-  );
-  const [params, setParams] = useSearchParams();
-  const { hash } = useLocation();
+  const findings = use(load("findings"))
+  const [params, setParams] = useSearchParams()
+  const { hash } = useLocation()
   // findings the reader opened or closed; the one the address names starts open
-  const [toggled, setToggled] = useState<Map<string, boolean>>(() => new Map());
-  const q = params.get("q") ?? "";
-  const component = params.get("component") ?? "all";
-  const severity = params.get("severity") ?? "all";
-  const status = params.get("status") ?? "all";
+  const [toggled, setToggled] = useState<Map<string, boolean>>(() => new Map())
+  const q = params.get("q") ?? ""
+  const component = params.get("component") ?? "all"
+  const severity = params.get("severity") ?? "all"
+  const status = params.get("status") ?? "all"
   const set = (k: string, v: string, dflt: string) => {
-    const next = new URLSearchParams(params);
-    if (v === dflt) next.delete(k);
-    else next.set(k, v);
-    setParams(next, { replace: true, preventScrollReset: true });
-  };
-  const target = hash ? decodeURIComponent(hash.slice(1)) : "";
+    const next = new URLSearchParams(params)
+    if (v === dflt) next.delete(k)
+    else next.set(k, v)
+    setParams(next, { replace: true, preventScrollReset: true })
+  }
+  const target = hash ? decodeURIComponent(hash.slice(1)) : ""
   // a link to one finding (#WB-W3) brings it into view once it has rendered open
   useEffect(() => {
-    if (target)
-      requestAnimationFrame(() =>
-        document.getElementById(target)?.scrollIntoView(),
-      );
-  }, [target]);
+    if (target) requestAnimationFrame(() => document.getElementById(target)?.scrollIntoView())
+  }, [target])
 
-  const cand = findings.candidates;
-  const both = useMemo(
-    () => [...findings.findings, ...(cand?.findings ?? [])],
-    [findings, cand],
-  );
+  const all = useMemo(() => findingRows(findings), [findings])
+  const reported = useMemo(() => reportedFindings(findings), [findings])
+  const r = findings.reported
+  const notReported = all.length - reported.length
   const options = {
-    component: [...new Set(both.map((f) => f.component))].toSorted(),
-    severity: [...new Set(both.map((f) => f.severity))].toSorted(
-      (a, b) => severityRank(a) - severityRank(b),
-    ),
-    status: [...new Set(both.map((f) => f.status))].toSorted(),
-  };
-  const [rows, candRows] = useMemo(() => {
-    const needle = q.trim().toLowerCase();
-    const keep = (f: Finding) =>
-      (component === "all" || f.component === component) &&
-      (severity === "all" || f.severity === severity) &&
-      (status === "all" || f.status === status) &&
-      (!needle ||
-        f.id.toLowerCase().includes(needle) ||
-        f.title.toLowerCase().includes(needle) ||
-        f.caps.some((c) => c.toLowerCase().includes(needle)) ||
-        f.entries.some((e) => e.includes(needle)));
-    return [findings.findings.filter(keep), (cand?.findings ?? []).filter(keep)];
-  }, [findings, cand, q, component, severity, status]);
-  const list = (fs: Finding[]) => (
-    <ol className={cn("mt-2 flex flex-col divide-y border-y")}>
-      {fs.map((f) => (
-        <FindingItem
-          key={f.id}
-          f={f}
-          entries={entries}
-          open={toggled.get(f.id) ?? f.id === target}
-          onOpen={(o) => setToggled((prev) => new Map(prev).set(f.id, o))}
-        />
-      ))}
-    </ol>
-  );
+    component: [...new Set(all.map((f) => f.component))].toSorted(),
+    severity: severities.filter((s) => all.some((f) => f.severity === s.id)).map((s) => s.id),
+    status: statuses.filter((s) => all.some((f) => f.status === s.id)).map((s) => s.id),
+  }
+  // a finding that is not reported shows only when the status filter or the address names it
+  const groups = useMemo(() => {
+    const needle = q.trim().toLowerCase()
+    const keep = (f: FindingRow) =>
+      f.id === target ||
+      ((status === "all" ? f.reported : f.status === status) &&
+        (component === "all" || f.component === component) &&
+        (severity === "all" || f.severity === severity) &&
+        (!needle ||
+          f.id.toLowerCase().includes(needle) ||
+          f.title.toLowerCase().includes(needle) ||
+          (f.short ?? "").toLowerCase().includes(needle) ||
+          f.caps.some((c) => c.toLowerCase().includes(needle)) ||
+          f.entries.some((e) => e.includes(needle))))
+    const by = new Map<string, FindingRow[]>()
+    for (const f of all.filter(keep)) by.set(f.component, [...(by.get(f.component) ?? []), f])
+    return [...by.entries()]
+      .map(
+        ([c, rows]) =>
+          [c, rows.toSorted((a, b) => severityRank(a.severity) - severityRank(b.severity) || a.id.localeCompare(b.id, "en", { numeric: true }))] as const,
+      )
+      .toSorted(([a, x], [b, y]) => y.length - x.length || a.localeCompare(b))
+  }, [all, q, component, severity, status, target])
+  const shown = groups.reduce((n, [, rows]) => n + rows.length, 0)
 
   const filters = [
     { key: "component", label: "Component", value: component },
     { key: "severity", label: "Severity", value: severity },
     { key: "status", label: "Status", value: status },
-  ] as const;
-  const s = findings.summary;
+  ] as const
+  const recordRows = [
+    {
+      name: "First record",
+      path: "findings/findings.json",
+      triage: "findings/triage.toml",
+      summary: findings.summary,
+      unmapped: findings.unmapped,
+      problems: findings.input_problems,
+    },
+    ...(findings.candidates
+      ? [
+          {
+            name: "Second record",
+            path: findings.candidates.record,
+            triage: "candidate/findings/triage.toml",
+            summary: findings.candidates.summary,
+            unmapped: findings.candidates.unmapped,
+            problems: findings.candidates.input_problems,
+          },
+        ]
+      : []),
+  ]
+  const problems = recordRows.flatMap((x) => x.problems)
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col gap-6">
       <PageHeader title="Findings">
         <p>
-          Every failure the indexer runs, the SDK runs and the linter reported,
-          traced to a root cause. {s.findings} findings cover{" "}
-          {fmt.format(s.failures)} failures, and{" "}
-          {s.unmapped === 0
-            ? "no failure is left without a finding"
-            : `${s.unmapped} failures have no finding`}
-          . Each finding names the smallest corpus entry that shows it and how
-          to reproduce it. Source: <RepoLink path="findings/findings.json" />,
-          readable as <RepoLink path={sources.findingsReport} />; the triage is
-          in <RepoLink path="findings/triage.toml" />.
+          A <GlossaryLink id="finding">finding</GlossaryLink> is one defect in an SDK, an indexer or a tool. One finding
+          can cause many failures. This page lists every finding with its upstream issue and the command that reproduces
+          it.
         </p>
       </PageHeader>
 
-      <Terms>
-        {severities.map((x) => (
-          <Term key={x.id} name={x.id}>
-            {x.meaning}.
-          </Term>
-        ))}
-        {statuses
-          .filter(
-            (x) =>
-              (s.by_status[x.id] ?? 0) + (cand?.summary.by_status[x.id] ?? 0) >
-              0,
-          )
-          .map((x) => (
-            <Term
-              key={x.id}
-              name={<Status tone={statusTone[x.id] ?? "idle"}>{x.id}</Status>}
-            >
-              {x.meaning}.
-            </Term>
-          ))}
-        <Term name="siblings, related">
-          Siblings are other findings filed alongside this one, such as the
-          same defect in another SDK. Related links are upstream issues or pull
-          requests that touch the same code but are not this finding. All of
-          these terms are defined in <RepoLink path={sources.triage} />.
-        </Term>
-      </Terms>
+      <NextSteps>
+        <li>Open a finding to see its cause and the command that reproduces it.</li>
+        <li>Select the issue link of a finding to follow the upstream fix.</li>
+        <li>
+          Stop a defect from coming back: add the corpus to <TextLink to={docs.sdkCi}>your SDK CI</TextLink> or{" "}
+          <TextLink to={docs.indexerCi}>your indexer CI</TextLink>.
+        </li>
+      </NextSteps>
 
-      {findings.input_problems.length > 0 ? (
-        <ul className="pt-4 text-sm text-diverge">
-          {findings.input_problems.map((p) => (
+      <Section title="Summary" id="summary">
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+          <Metric value={fmt.format(r.findings)} label={<GlossaryLink id="reported-finding">Reported findings</GlossaryLink>}>
+            in {r.components} components
+          </Metric>
+          {statuses
+            .filter((s) => (r.by_status[s.id] ?? 0) > 0)
+            .map((s) => (
+              <Metric key={s.id} value={fmt.format(r.by_status[s.id] ?? 0)} label={<GlossaryLink id={`status-${s.id}`}>{s.label}</GlossaryLink>} />
+            ))}
+        </div>
+        <p className="text-sm text-muted-foreground">
+          Each finding is a defect, so fewer findings is better for a component.
+          {notReported > 0 ? (
+            <>
+              {" "}
+              The total does not include{" "}
+              {Object.entries(r.not_reported)
+                .map(([k, n]) => `${n} ${n === 1 ? "finding" : "findings"} with the status ${label(k)}`)
+                .join(" and ")}
+              . Use the status filter below to see them.
+            </>
+          ) : null}
+        </p>
+        <ByComponent byComponent={r.by_component} />
+      </Section>
+
+      <PageTerms ids={["finding", "reported-finding", "severity-terms", "status-terms", "record"]} />
+
+      {problems.length > 0 ? (
+        <ul className="text-sm text-diverge">
+          {problems.map((p) => (
             <li key={p}>{p}</li>
           ))}
         </ul>
       ) : null}
 
-      <div className="flex flex-col gap-3 pt-6 lg:flex-row lg:items-center">
-        <label className="sr-only" htmlFor="finding-filter">
-          Filter findings
-        </label>
-        <Input
-          id="finding-filter"
-          type="search"
-          placeholder="Filter by id, title, CAP or entry"
-          value={q}
-          onChange={(e) => set("q", e.target.value, "")}
-          className="lg:max-w-xs"
-        />
-        {filters.map((fl) => (
-          <Select
-            key={fl.key}
-            value={fl.value}
-            onValueChange={(v) => set(fl.key, v, "all")}
-          >
-            <SelectTrigger className="w-full lg:w-48" aria-label={fl.label}>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectItem value="all">
-                  Any {fl.label.toLowerCase()}
-                </SelectItem>
-                {options[fl.key].map((o) => (
-                  <SelectItem key={o} value={o}>
-                    {o}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-        ))}
-      </div>
-      <p className="pt-3 text-sm text-muted-foreground" aria-live="polite">
-        {rows.length} of {findings.findings.length} findings shown. Select an id
-        for its cause, entries and how to reproduce it.
-      </p>
-
-      {rows.length === 0 ? (
-        <Empty className="my-6 border">
-          <EmptyHeader>
-            <EmptyTitle>No finding matches</EmptyTitle>
-            <EmptyDescription>
-              Clear the filters to see all {findings.findings.length}.
-            </EmptyDescription>
-          </EmptyHeader>
-        </Empty>
-      ) : (
-        list(rows)
-      )}
-
-      {cand ? (
-        <section className="flex flex-col pt-8" aria-labelledby="candidates-h">
-          <h2
-            id="candidates-h"
-            className="text-lg font-semibold tracking-tight"
-          >
-            Candidate lane
-          </h2>
-          <p className="max-w-[80ch] pt-2 text-sm text-muted-foreground">
-            Findings triaged in a record of their own, most of them in the
-            Dart, PHP, .NET and Kotlin Multiplatform SDKs, stellar-cli and
-            stellar-etl.{" "}
-            {cand.summary.findings} findings cover{" "}
-            {fmt.format(cand.summary.failures)} failures, and{" "}
-            {cand.unmapped === 0
-              ? "no failure is left without a finding"
-              : `${cand.unmapped} failures have no finding`}
-            . Source: <RepoLink path={cand.record} />; the triage is in{" "}
-            <RepoLink path="candidate/findings/triage.toml" />.
-          </p>
-          <p
-            className="pt-3 text-sm text-muted-foreground"
-            aria-live="polite"
-          >
-            {candRows.length} of {cand.findings.length} findings shown.
-          </p>
-          {candRows.length > 0 ? list(candRows) : null}
-        </section>
-      ) : null}
-
-      <section
-        className="flex flex-col gap-2 pt-8 text-sm text-muted-foreground"
-        aria-labelledby="inputs-h"
+      <Section
+        title="All findings"
+        id="list"
+        description="The list shows the reported findings, grouped by component. Use the status filter to see drafts and intended behavior."
       >
-        <h2
-          id="inputs-h"
-          className="text-lg font-semibold tracking-tight text-foreground"
-        >
-          Runs this record was collected from
-        </h2>
-        <ul className="flex flex-col gap-2">
-          {findings.inputs.map((i) => (
-            <li key={i.path} className="flex flex-col gap-0.5">
-              <span>
-                {i.kind}: <RepoLink path={i.path} />
-              </span>
-              <span className="[overflow-wrap:anywhere]">{i.detail}</span>
-            </li>
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
+          <label className="sr-only" htmlFor="finding-filter">
+            Filter the findings
+          </label>
+          <Input
+            id="finding-filter"
+            type="search"
+            placeholder="Filter by id, title, CAP or entry"
+            value={q}
+            onChange={(e) => set("q", e.target.value, "")}
+            className="lg:max-w-xs"
+          />
+          {filters.map((fl) => (
+            <Select key={fl.key} value={fl.value} onValueChange={(v) => set(fl.key, v, "all")}>
+              <SelectTrigger className="w-full lg:w-52" aria-label={fl.label}>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectItem value="all">{fl.key === "status" ? "Any reported status" : `Any ${fl.label.toLowerCase()}`}</SelectItem>
+                  {options[fl.key].map((o) => (
+                    <SelectItem key={o} value={o}>
+                      {label(o)}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
           ))}
-        </ul>
-      </section>
+        </div>
+        <p className="text-sm text-muted-foreground" aria-live="polite">
+          {shown} of {all.length} findings shown ({r.findings} reported, {notReported} not reported).
+        </p>
+        {groups.length === 0 ? (
+          <Empty className="border">
+            <EmptyHeader>
+              <EmptyTitle>No finding matches</EmptyTitle>
+              <EmptyDescription>Clear the filters to see all {r.findings} reported findings.</EmptyDescription>
+            </EmptyHeader>
+          </Empty>
+        ) : (
+          groups.map(([c, rows]) => (
+            <section key={c} aria-labelledby={`c-${c}`} className="flex flex-col">
+              <h3 id={`c-${c}`} className="pt-3 font-mono text-sm font-semibold [overflow-wrap:anywhere]">
+                {c} <span className="num font-sans font-normal text-muted-foreground">({rows.length})</span>
+              </h3>
+              <ol className="mt-1 flex flex-col divide-y border-y">
+                {rows.map((f) => (
+                  <FindingItem
+                    key={f.id}
+                    f={f}
+                    open={toggled.get(f.id) ?? f.id === target}
+                    onOpen={(o) => setToggled((prev) => new Map(prev).set(f.id, o))}
+                  />
+                ))}
+              </ol>
+            </section>
+          ))
+        )}
+      </Section>
+
+      <Section
+        title="Records and inputs"
+        id="records"
+        description={
+          <>
+            Two committed <GlossaryLink id="record">records</GlossaryLink> hold the findings. Each record maps every{" "}
+            <GlossaryLink id="failure">failure</GlossaryLink> of its runs to one finding. The readable report of the first
+            record is <RepoLink path={sources.findingsReport} />.
+          </>
+        }
+      >
+        <Table>
+          <caption className="sr-only">The two findings records</caption>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Record</TableHead>
+              <TableHead className="text-right">Findings, all statuses</TableHead>
+              <TableHead className="text-right">Failures</TableHead>
+              <TableHead className="text-right">
+                <GlossaryLink id="unmapped">Unmapped</GlossaryLink>
+                <span className="block text-xs font-normal text-muted-foreground">lower is better</span>
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody className="num">
+            {recordRows.map((x) => (
+              <TableRow key={x.path}>
+                <TableCell className="font-sans whitespace-normal">
+                  {x.name}
+                  <span className="block text-xs">
+                    <RepoLink path={x.path} />, triage <RepoLink path={x.triage} />
+                  </span>
+                </TableCell>
+                <TableCell className="text-right">{x.summary.findings}</TableCell>
+                <TableCell className="text-right">{fmt.format(x.summary.failures)}</TableCell>
+                <TableCell className="text-right">{x.unmapped}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+        <p className="text-sm text-muted-foreground">
+          The two records can read the same run, so you cannot add the failures of the two records.
+        </p>
+        <More label={`Show the ${findings.inputs.length} runs of the first record`}>
+          <ul className="flex flex-col gap-2 text-sm text-muted-foreground">
+            {findings.inputs.map((i) => (
+              <li key={i.path} className="flex flex-col gap-0.5">
+                <span>
+                  {i.kind}: <RepoLink path={i.path} />
+                </span>
+                <span className="[overflow-wrap:anywhere]">{i.detail}</span>
+              </li>
+            ))}
+          </ul>
+        </More>
+      </Section>
     </div>
-  );
+  )
 }

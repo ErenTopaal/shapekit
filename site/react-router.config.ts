@@ -25,7 +25,11 @@ export default {
       paths.add(markdownUrl([...slugs, "content.md"]))
     }
     const coverage = JSON.parse(await readFile("public/data/coverage.json", "utf8")) as { caps: { id: string }[] }
-    for (const cap of coverage.caps) paths.add(`/dashboard/coverage/${cap.id}`)
+    for (const cap of coverage.caps) {
+      paths.add(`/dashboard/corpus/cap/${cap.id}`)
+      // the address before the cap pages moved under the corpus page, which forwards
+      paths.add(`/dashboard/coverage/${cap.id}`)
+    }
     // one explorer page per corpus entry, from the entries.json the explorer reads
     const entries = JSON.parse(await readFile("public/data/entries.json", "utf8")) as { entries: { id: string }[] }
     for (const e of entries.entries) paths.add(`/dashboard/corpus/${encodeURIComponent(e.id)}`)

@@ -5,7 +5,7 @@ import { SdkPage } from "@/pages/sdk"
 
 // fetches this page's data files before the page renders, so navigation shows no skeleton
 export async function clientLoader() {
-  await Promise.all([load("conformance"), load("coverage")])
+  await Promise.all([load("conformance"), load("coverage"), load("findings")])
   return null
 }
 
@@ -15,7 +15,7 @@ export function shouldRevalidate() {
 }
 
 export function meta() {
-  return [{ title: "SDK matrix | shapekit" }, { name: "description", content: "Which corpus entries each SDK version diverges on, with the failing checks and the known failures." }]
+  return [{ title: "SDK results | shapekit" }, { name: "description", content: "How each SDK version answers the corpus entries: the entries that diverge, the known failures and the upstream bugs that shapekit reproduces." }]
 }
 
 export default function Route() {

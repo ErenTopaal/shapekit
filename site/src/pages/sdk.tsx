@@ -1,25 +1,29 @@
 import { use, useMemo, useState } from "react"
 import { useSearchParams } from "react-router"
-import { load, sum, type Cell, type FamilyRow, type Observation, type Reproduction, type Sdk } from "@/lib/data"
-import { checkResults, docs } from "@/lib/terms"
-import { bySdkOrder, sdkLabel, sdkName } from "@/lib/sdks"
+import { load, type Cell, type FamilyRow, type Observation, type Reproduction, type Sdk } from "@/lib/data"
+import { checkResults, docs, glossaryHref, label as termLabel } from "@/lib/terms"
+import { bySdkOrder, sdkComponent, sdkLabel, sdkName } from "@/lib/sdks"
+import { findingRows, sdkSummary } from "@/lib/metrics"
+import { capPath, entryPath, findingsPath } from "@/lib/paths"
 import { cn } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@/components/ui/empty"
 import {
+  Command,
   ExtLink,
+  GlossaryLink,
   Id,
   IssueRef,
+  More,
+  NextSteps,
   PageHeader,
+  PageTerms,
   RepoLink,
   Section,
   Status,
-  Term,
-  Terms,
   TextLink,
   issueLabel,
   type Tone,
@@ -54,6 +58,7 @@ function MatrixCell({ cell, onOpen, label }: { cell: Cell | undefined; onOpen: (
       )}
     >
       {n}
+      {known ? null : <span aria-hidden className="ml-0.5">!</span>}
     </button>
   )
 }
@@ -63,17 +68,17 @@ function Legend() {
     <ul className="flex flex-col gap-1.5 text-sm text-muted-foreground sm:flex-row sm:flex-wrap sm:gap-x-5">
       <li className="flex items-center gap-2">
         <span aria-hidden className="hatch inline-block h-4 w-6 shrink-0 rounded-sm border border-known/70 text-known" />
-        diverges, a known failure
+        diverges, <GlossaryLink id="known-failure">known failure</GlossaryLink>
       </li>
       <li className="flex items-center gap-2">
         <span aria-hidden className="inline-block h-4 w-6 shrink-0 rounded-sm border border-diverge bg-diverge/15" />
-        diverges, not a known failure
+        ! diverges, not a known failure (fails CI)
       </li>
       <li className="flex items-center gap-2">
         <span aria-hidden className="inline-block h-4 w-6 shrink-0 rounded-sm bg-muted/70" />
         no failing check
       </li>
-      <li>The number in a cell counts its failing checks; select a cell for them.</li>
+      <li>The number in a cell counts its failing checks. Select a cell to see them.</li>
     </ul>
   )
 }
@@ -104,7 +109,7 @@ function Totals({ sdk }: { sdk: Sdk }) {
         {results.map((r) => (
           <TableRow key={r}>
             <TableCell className={sticky}>
-              Entries whose result is <Id>{r}</Id>
+              Entries with the result {termLabel(r)} <span className="text-xs text-muted-foreground">(lower is better)</span>
             </TableCell>
             {sdk.versions.map((v) => (
               <TableCell key={v.version} className="text-right">
@@ -122,7 +127,7 @@ function Totals({ sdk }: { sdk: Sdk }) {
           ))}
         </TableRow>
         <TableRow>
-          <TableCell className={sticky}>Known-failure lines for the version</TableCell>
+          <TableCell className={sticky}>Lines in the known-failures file for the version</TableCell>
           {sdk.versions.map((v) => (
             <TableCell key={v.version} className="text-right">
               {count(v.known_failure_lines)}
@@ -132,7 +137,7 @@ function Totals({ sdk }: { sdk: Sdk }) {
         {ops.map((op) => (
           <TableRow key={op}>
             <TableCell className={sticky}>
-              Failing <TextLink to={`/docs/sdk/testee-protocol#${op}`}><Id>{op}</Id></TextLink> checks
+              Failing <TextLink to={`/docs/sdk/testee-protocol#${op}`}><Id>{op}</Id></TextLink> checks <span className="text-xs text-muted-foreground">(lower is better)</span>
             </TableCell>
             {sdk.versions.map((v) => (
               <TableCell key={v.version} className="text-right">
@@ -142,7 +147,7 @@ function Totals({ sdk }: { sdk: Sdk }) {
           </TableRow>
         ))}
         <TableRow>
-          <TableCell className={sticky}>Unsupported checks in those entries</TableCell>
+          <TableCell className={sticky}>Unsupported checks in the diverging entries</TableCell>
           {sdk.versions.map((v) => (
             <TableCell key={v.version} className="text-right">
               {count(v.checks_by_result.unsupported)}
@@ -225,7 +230,7 @@ function Matrix({ sdk, families, filter, op }: { sdk: Sdk; families: FamilyRow[]
                 <th scope="colgroup" colSpan={cols} className="px-2 py-1.5 text-left text-xs font-medium sm:px-3">
                   <span className="sticky left-2 inline-block sm:left-3">
                     {g.family ? (
-                      <TextLink to={`/dashboard/coverage/${g.family.caps[0] ?? ""}#${g.family.id}`} className="font-mono">
+                      <TextLink to={capPath(g.family.caps[0] ?? "", g.family.id)} className="font-mono">
                         {g.family.id}
                       </TextLink>
                     ) : (
@@ -242,9 +247,9 @@ function Matrix({ sdk, families, filter, op }: { sdk: Sdk; families: FamilyRow[]
                       scope="row"
                       className="sticky left-0 z-10 max-w-40 min-w-36 bg-background px-2 py-1 text-left font-normal sm:max-w-[26rem] sm:min-w-64 sm:px-3"
                     >
-                      <span className="block font-mono text-xs leading-snug [overflow-wrap:anywhere]" title={e.id}>
+                      <TextLink to={entryPath(e.id)} aria-label={e.id} className="block font-mono text-xs leading-snug [overflow-wrap:anywhere]">
                         {name}
-                      </span>
+                      </TextLink>
                     </th>
                     {sdk.versions.map((v) => {
                       const cell = e.cells[v.key]
@@ -272,7 +277,7 @@ function Matrix({ sdk, families, filter, op }: { sdk: Sdk; families: FamilyRow[]
               <SheetHeader>
                 <SheetTitle className="font-mono text-sm break-all">{open.entry}</SheetTitle>
                 <SheetDescription>
-                  {sdk.package} <Id>{open.version}</Id>: <Id>{open.cell.result}</Id>, {failingChecks(open.cell).length} failing of{" "}
+                  {sdk.package} <Id>{open.version}</Id>: {termLabel(open.cell.result)}, {failingChecks(open.cell).length} failing of{" "}
                   {open.cell.checks.length} listed checks
                 </SheetDescription>
               </SheetHeader>
@@ -292,14 +297,19 @@ function Matrix({ sdk, families, filter, op }: { sdk: Sdk; families: FamilyRow[]
                       <span className="flex flex-wrap items-baseline justify-between gap-2">
                         <Id>{k.check}</Id>
                         <span className={cn("text-xs", failing.has(k.result) ? "text-diverge" : "text-muted-foreground")}>
-                          {k.result}
+                          <TextLink to={glossaryHref(`check-${k.result}`)} className="text-inherit decoration-current/40">
+                            {termLabel(k.result)}
+                          </TextLink>
                         </span>
                       </span>
                       {k.detail ? <span className="break-words text-muted-foreground">{k.detail}</span> : null}
                     </li>
                   ))}
                 </ol>
-                <TextLink to={`/dashboard/findings?q=${encodeURIComponent(open.entry)}`}>Findings on this entry</TextLink>
+                <span className="font-medium">Run this entry again</span>
+                <Command>{`shapekit check sdk --sdk ${sdk.sdk} --version ${open.version} --entry ${open.entry}`}</Command>
+                <TextLink to={entryPath(open.entry)}>The entry page</TextLink>
+                <TextLink to={findingsPath({ q: open.entry })}>Findings on this entry</TextLink>
               </div>
             </>
           ) : null}
@@ -329,17 +339,18 @@ function Reproductions() {
   const conformance = use(load("conformance"))
   return (
     <Section
-      title="Reproductions of upstream SDK bugs"
+      title="Upstream SDK bugs that shapekit reproduces"
       id="reproductions"
       description={
         <>
-          Each row of <RepoLink path="conformance/reproductions.toml" /> names a bug reported upstream, the corpus entries
-          that carry it, and SDK versions before and after its fix. Shown is what the committed matrices hold for those
-          entries and versions; <Id>shapekit conformance reproduce</Id> runs the same rows, probes included, in the
+          Each row of <RepoLink path="conformance/reproductions.toml" /> names a bug that somebody reported upstream, the
+          corpus entries that show it, and SDK versions before and after its fix. The list shows the results of the
+          committed matrices for those entries and versions. <Id>shapekit conformance reproduce</Id> runs the same rows, probes included, in the
           nightly workflow.
         </>
       }
     >
+      <Command>shapekit conformance reproduce</Command>
       <ul className="flex flex-col divide-y border-y">
         {conformance.reproductions.map((r) => (
           <li key={r.id} className="grid gap-x-6 gap-y-2 py-3 text-sm md:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)_minmax(0,1fr)]">
@@ -377,124 +388,209 @@ function Reproductions() {
   )
 }
 
+// the summary of every sdk: the one home of the per-sdk numbers the start page also shows
+function Summary({ sdks, findingsBy, select }: { sdks: Sdk[]; findingsBy: Map<string, number>; select: (sdk: string) => void }) {
+  return (
+    <Table>
+      <caption className="sr-only">Each SDK at its current version: diverging entries, entries that fail CI, and reported findings</caption>
+      <TableHeader>
+        <TableRow>
+          <TableHead>SDK</TableHead>
+          <TableHead className="text-right">
+            <GlossaryLink id="diverging-entry">Diverging entries</GlossaryLink>
+            <span className="block text-xs font-normal text-muted-foreground">current version, lower is better</span>
+          </TableHead>
+          <TableHead className="hidden text-right sm:table-cell">
+            Not a <GlossaryLink id="known-failure">known failure</GlossaryLink>
+            <span className="block text-xs font-normal text-muted-foreground">fails CI, lower is better</span>
+          </TableHead>
+          <TableHead className="text-right">
+            <GlossaryLink id="reported-finding">Findings</GlossaryLink>
+            <span className="block text-xs font-normal text-muted-foreground">lower is better</span>
+          </TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody className="num">
+        {sdks.map((sdk) => {
+          const x = sdkSummary(sdk)
+          const nf = findingsBy.get(sdk.sdk) ?? 0
+          return (
+            <TableRow key={sdk.sdk}>
+              <TableCell className="font-sans whitespace-normal">
+                <button
+                  type="button"
+                  onClick={() => select(sdk.sdk)}
+                  className="text-left font-medium text-primary underline decoration-primary/40 hover:decoration-primary focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+                >
+                  {sdkName(sdk.sdk)}
+                </button>
+                <span className="block text-xs text-muted-foreground">
+                  <Id>{sdk.package}</Id> <Id>{x.version}</Id>
+                </span>
+              </TableCell>
+              <TableCell className="text-right">
+                {x.diverging > 0 ? <span className="font-semibold">{x.diverging}</span> : <span className="text-muted-foreground">0</span>}
+              </TableCell>
+              <TableCell className="hidden text-right sm:table-cell">
+                {x.notKnown > 0 ? <Status tone="diverge">{x.notKnown}</Status> : <span className="text-muted-foreground">0</span>}
+              </TableCell>
+              <TableCell className="text-right">
+                {nf > 0 ? (
+                  <TextLink to={findingsPath({ component: sdkComponent(sdk.sdk) })} aria-label={`${nf} reported findings in ${sdk.package}`}>
+                    {nf}
+                  </TextLink>
+                ) : (
+                  <span className="text-muted-foreground">0</span>
+                )}
+              </TableCell>
+            </TableRow>
+          )
+        })}
+      </TableBody>
+    </Table>
+  )
+}
+
 export function SdkPage() {
   const loaded = use(load("conformance"))
   const conformance = useMemo(() => ({ ...loaded, sdks: bySdkOrder(loaded.sdks, (s) => s.sdk) }), [loaded])
   const coverage = use(load("coverage"))
+  const findings = use(load("findings"))
   const [params, setParams] = useSearchParams()
   const first = conformance.sdks.find((s) => s.sdk === "js")?.sdk ?? conformance.sdks[0]?.sdk ?? ""
   const entryParam = params.get("entry") ?? ""
   // a link from an entry opens the first sdk that fails on it
   const entrySdk = entryParam ? conformance.sdks.find((s) => s.entries.some((e) => e.id === entryParam))?.sdk : undefined
   const tab = params.get("sdk") ?? entrySdk ?? first
+  const s = conformance.sdks.find((x) => x.sdk === tab) ?? conformance.sdks[0]
   const op = params.get("op") ?? "all"
   const set = (k: string, v: string, dflt: string) => {
     const next = new URLSearchParams(params)
     if (v === dflt) next.delete(k)
     else next.set(k, v)
-    setParams(next, { replace: true })
+    setParams(next, { replace: true, preventScrollReset: true })
+  }
+  // reported findings per sdk, counted from the same rows as the findings page
+  const findingsBy = useMemo(() => {
+    const rows = findingRows(findings).filter((f) => f.reported)
+    return new Map(conformance.sdks.map((x) => [x.sdk, rows.filter((f) => f.component === sdkComponent(x.sdk)).length]))
+  }, [findings, conformance])
+  const select = (sdk: string) => {
+    const next = new URLSearchParams(params)
+    next.set("sdk", sdk)
+    next.delete("entry")
+    next.delete("op")
+    setParams(next, { replace: true, preventScrollReset: true })
+    requestAnimationFrame(() => document.getElementById("detail")?.scrollIntoView())
   }
 
   return (
-    <div className="flex flex-col">
-      <PageHeader title="SDK matrix">
+    <div className="flex flex-col gap-6">
+      <PageHeader title="SDK results">
         <p>
-          The conformance runner sends every corpus entry to each SDK version through a small program, the testee, and
-          compares the answers with what the network does: decode and re-encode the bytes, render and parse XDR-JSON,
-          decode strkeys, order assets and map keys, parse ids. An entry diverges when the SDK accepts what stellar-core
-          refuses, refuses what it emits, or reads other values. The committed matrices keep diverging entries only, so
-          an entry missing here gave no failing check at any version.{" "}
+          The conformance runner gives every corpus entry to each SDK version through a{" "}
+          <GlossaryLink id="testee">testee</GlossaryLink>. It compares each answer with the answer of the network. An
+          entry diverges when one <GlossaryLink id="check">check</GlossaryLink> of the SDK gives another answer.{" "}
           <TextLink to={docs.testee}>The testee protocol</TextLink>.
         </p>
       </PageHeader>
 
-      <Terms>
-        {checkResults.map((c) => (
-          <Term key={c.id} name={<Id>{c.id}</Id>}>
-            {c.meaning}.
-          </Term>
-        ))}
-        <Term name="known failure">
-          A divergence listed, per SDK version and check, in that SDK&apos;s known-failures file with the issue that
-          tracks it, so the runner reports it without failing CI and catches anything new next to it.{" "}
-          <TextLink to={docs.knownFailures}>Known failures</TextLink>.
-        </Term>
-        <Term name="cell">
-          One entry at one SDK version. An entry is checked once per file (testnet, mainnet or network-independent), so
-          one cell can hold several failing checks of the same op.
-        </Term>
-      </Terms>
+      <NextSteps>
+        <li>
+          <TextLink to={docs.sdkCi}>Add the corpus check to your SDK CI</TextLink>. CI fails on a divergence that is not a
+          known failure.
+        </li>
+        <li>Select a diverging cell in the matrix to see the failing checks and the command that runs the entry again.</li>
+        <li>Select the findings count of your SDK to see its defects and their upstream issues.</li>
+      </NextSteps>
 
-      <Tabs value={tab} onValueChange={(v) => set("sdk", v, first)} className="pt-6">
-        <TabsList className="h-auto w-full flex-wrap justify-start sm:w-fit">
-          {conformance.sdks.map((s) => {
-            const cur = s.versions.find((v) => v.current)
-            return (
-              <TabsTrigger key={s.sdk} value={s.sdk} className="flex-col gap-0 py-1 sm:flex-row sm:gap-1.5">
-                {sdkName(s.sdk)}
-                <span className="num text-xs font-normal">{sum(cur?.failing_cells_by_result)} at current</span>
-              </TabsTrigger>
-            )
-          })}
-        </TabsList>
-        {conformance.sdks.map((s) => (
-          <TabsContent key={s.sdk} value={s.sdk} className="flex flex-col">
-            <p className="pt-4 text-sm text-muted-foreground">
-              <Id className="text-foreground">{s.package}</Id>, {s.versions.length} {s.versions.length === 1 ? "version" : "versions"}, current <Id>{s.current}</Id>.
-              Issues go to <ExtLink href={`https://github.com/${s.issues_repo}`}>{s.issues_repo}</ExtLink>. Matrix:{" "}
-              {s.matrix ? <RepoLink path={s.matrix} /> : "none committed"}
-              {s.known_failures_file ? (
-                <>
-                  . Known failures: <RepoLink path={s.known_failures_file} />
-                </>
-              ) : null}
-              .
-            </p>
-            {s.known_failure_problems && s.known_failure_problems.length > 0 ? (
-              <ul className="pt-2 text-sm text-diverge">
-                {s.known_failure_problems.map((p) => (
-                  <li key={p}>{p}</li>
-                ))}
-              </ul>
+      <Section
+        title="Summary"
+        id="summary"
+        description="Select an SDK to see its matrix. The matrix columns count the runs of the first record. The second record has its own runs of the newer SDKs, and their defects show in the findings column."
+      >
+        <Summary sdks={conformance.sdks} findingsBy={findingsBy} select={select} />
+      </Section>
+
+      <PageTerms ids={["testee", "check", "diverging-entry", "cell", "known-failure", "sdk-terms"]} />
+
+      {s ? (
+        <Section title={`${sdkLabel(s.sdk)} in detail`} id="detail">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <label htmlFor="sdk-select" className="text-sm font-medium">
+              SDK
+            </label>
+            <Select value={s.sdk} onValueChange={(v) => select(v)}>
+              <SelectTrigger id="sdk-select" className="w-full sm:w-64">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  {conformance.sdks.map((x) => (
+                    <SelectItem key={x.sdk} value={x.sdk}>
+                      {sdkName(x.sdk)}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            <Id className="text-foreground">{s.package}</Id>, {s.versions.length} {s.versions.length === 1 ? "version" : "versions"}, current{" "}
+            <Id>{s.current}</Id>. Issues go to <ExtLink href={`https://github.com/${s.issues_repo}`}>{s.issues_repo}</ExtLink>. Matrix:{" "}
+            {s.matrix ? <RepoLink path={s.matrix} /> : "none committed"}
+            {s.known_failures_file ? (
+              <>
+                . Known failures: <RepoLink path={s.known_failures_file} />
+              </>
             ) : null}
-            <Section title="Diverging entries by version" id={`matrix-${s.sdk}`}>
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-                <label className="sr-only" htmlFor={`entry-filter-${s.sdk}`}>
-                  Filter entries
-                </label>
-                <Input
-                  id={`entry-filter-${s.sdk}`}
-                  type="search"
-                  placeholder="Filter by entry id"
-                  value={entryParam}
-                  onChange={(e) => set("entry", e.target.value, "")}
-                  className="sm:max-w-sm"
-                />
-                <Select value={op} onValueChange={(v) => set("op", v, "all")}>
-                  <SelectTrigger className="w-full sm:w-56" aria-label="Filter by operation">
-                    <SelectValue placeholder="Any operation" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      <SelectItem value="all">Any operation</SelectItem>
-                      {[...new Set(s.versions.flatMap((v) => Object.keys(v.failing_checks_by_op)))].toSorted().map((o) => (
-                        <SelectItem key={o} value={o}>
-                          {o}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              </div>
-              <Legend />
-              <Matrix sdk={s} families={coverage.families} filter={entryParam} op={op} />
-            </Section>
-            <Section title="Totals per version" id={`totals-${s.sdk}`}>
+            .
+          </p>
+          {s.known_failure_problems && s.known_failure_problems.length > 0 ? (
+            <ul className="text-sm text-diverge">
+              {s.known_failure_problems.map((p) => (
+                <li key={p}>{p}</li>
+              ))}
+            </ul>
+          ) : null}
+          <h3 className="pt-2 font-medium">Diverging entries by version</h3>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <label className="sr-only" htmlFor={`entry-filter-${s.sdk}`}>
+              Filter the entries
+            </label>
+            <Input
+              id={`entry-filter-${s.sdk}`}
+              type="search"
+              placeholder="Filter by entry id"
+              value={entryParam}
+              onChange={(e) => set("entry", e.target.value, "")}
+              className="sm:max-w-sm"
+            />
+            <Select value={op} onValueChange={(v) => set("op", v, "all")}>
+              <SelectTrigger className="w-full sm:w-56" aria-label="Filter by operation">
+                <SelectValue placeholder="Any operation" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectItem value="all">Any operation</SelectItem>
+                  {[...new Set(s.versions.flatMap((v) => Object.keys(v.failing_checks_by_op)))].toSorted().map((o) => (
+                    <SelectItem key={o} value={o}>
+                      {o}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </div>
+          <Legend />
+          <Matrix key={s.sdk} sdk={s} families={coverage.families} filter={entryParam} op={op} />
+          <More label="Show the counts for each version">
+            <div className="overflow-x-auto">
               <Totals sdk={s} />
-            </Section>
-          </TabsContent>
-        ))}
-      </Tabs>
+            </div>
+          </More>
+        </Section>
+      ) : null}
       <Reproductions />
     </div>
   )

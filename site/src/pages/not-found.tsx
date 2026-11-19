@@ -10,11 +10,11 @@ export function NotFound() {
     <Empty>
       <EmptyHeader>
         <EmptyTitle>Nothing to show here</EmptyTitle>
-        <EmptyDescription>No page, CAP or corpus entry in this build of the site has this address.</EmptyDescription>
+        <EmptyDescription>This build of the site has no page, CAP or corpus entry at this address.</EmptyDescription>
       </EmptyHeader>
       <EmptyContent>
         <Button asChild>
-          <Link to="/dashboard">Open the overview</Link>
+          <Link to="/dashboard">Open the dashboard start page</Link>
         </Button>
       </EmptyContent>
     </Empty>

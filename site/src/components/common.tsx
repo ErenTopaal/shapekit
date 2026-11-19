@@ -1,8 +1,10 @@
 import { Component, useEffect, type ReactNode } from "react"
 import { Link, useLocation } from "react-router"
-import { ChevronDownIcon } from "lucide-react"
+import { CheckIcon, ChevronDownIcon, CircleAlertIcon, CopyIcon, InfoIcon, MinusIcon, XIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { blobUrl, useMeta } from "@/lib/meta"
+import { glossary, glossaryHref, label as termLabel } from "@/lib/terms"
+import { betterText, type Better } from "@/lib/metrics"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
@@ -44,27 +46,109 @@ export function IssueRef({ value, className }: { value: string; className?: stri
   )
 }
 
-// the terms a page uses, defined once near the top so a reader new to the project can look them up
-export function Terms({ children, label = "Terms used on this page" }: { children: ReactNode; label?: string }) {
+// a term of the glossary page, linked from the page that uses it
+export function GlossaryLink({ id, children, className }: { id: string; children: ReactNode; className?: string }) {
   return (
-    <Collapsible className="rounded-lg border bg-card text-sm">
-      <CollapsibleTrigger className="group flex w-full items-center justify-between gap-2 rounded-lg px-4 py-2.5 text-left font-medium focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none">
-        {label}
-        <ChevronDownIcon aria-hidden className="size-4 shrink-0 transition-transform group-data-[state=open]:rotate-180" />
-      </CollapsibleTrigger>
-      <CollapsibleContent>
-        <dl className="grid gap-x-6 gap-y-2.5 border-t px-4 py-3 sm:grid-cols-[minmax(8rem,auto)_1fr]">{children}</dl>
-      </CollapsibleContent>
-    </Collapsible>
+    <Link to={glossaryHref(id)} className={cn("underline decoration-dotted decoration-foreground/40 underline-offset-2 hover:decoration-foreground", className)}>
+      {children}
+    </Link>
   )
 }
 
-export function Term({ name, children }: { name: ReactNode; children: ReactNode }) {
+// a page can name a whole group of terms (its id) or one term
+const termNames = new Map([
+  ...glossary.map((g) => [g.id, g.title.toLowerCase()] as const),
+  ...glossary.flatMap((g) => g.terms.map((t) => [t.id, t.name] as const)),
+])
+
+// the terms a page uses, each linked to its one definition on the glossary page
+export function PageTerms({ ids }: { ids: string[] }) {
   return (
-    <>
-      <dt className="font-medium">{name}</dt>
-      <dd className="text-muted-foreground [&_a]:break-words">{children}</dd>
-    </>
+    <p className="text-sm text-muted-foreground">
+      Terms on this page:{" "}
+      {ids.map((id, i) => (
+        <span key={id}>
+          <TextLink to={glossaryHref(id)}>{termNames.get(id) ?? id}</TextLink>
+          {i < ids.length - 1 ? ", " : ". "}
+        </span>
+      ))}
+      <TextLink to="/dashboard/glossary">All terms</TextLink>.
+    </p>
+  )
+}
+
+// the next action of the page's reader: a short box near the top of the page
+export function NextSteps({ children }: { children: ReactNode }) {
+  return (
+    <aside aria-label="Next steps" className="flex flex-col gap-1.5 rounded-lg border border-primary/30 bg-primary/5 px-4 py-3 text-sm">
+      <span className="font-semibold">Next steps</span>
+      <ul className="flex list-disc flex-col gap-1 pl-5">{children}</ul>
+    </aside>
+  )
+}
+
+// a number with what it counts and which direction is better
+export function Metric({ value, label, better, children }: { value: ReactNode; label: ReactNode; better?: Better; children?: ReactNode }) {
+  return (
+    <div className="flex flex-col gap-0.5">
+      <span className="num text-2xl font-semibold tracking-tight">{value}</span>
+      <span className="text-sm font-medium">{label}</span>
+      {better ? <span className="text-xs text-muted-foreground">{betterText[better]}</span> : null}
+      {children ? <span className="text-xs text-muted-foreground">{children}</span> : null}
+    </div>
+  )
+}
+
+// a shell command, with a button that copies it
+export function Command({ children }: { children: string }) {
+  return (
+    <div className="flex min-w-0 items-start gap-2 rounded-md border bg-muted/40 px-3 py-2">
+      <pre className="min-w-0 flex-1 font-mono text-xs whitespace-pre-wrap [overflow-wrap:anywhere]">{children}</pre>
+      <button
+        type="button"
+        onClick={() => void navigator.clipboard?.writeText(children)}
+        className="shrink-0 rounded-sm p-1 text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+        aria-label="Copy the command"
+        title="Copy the command"
+      >
+        <CopyIcon aria-hidden className="size-3.5" />
+      </button>
+    </div>
+  )
+}
+
+// the path from the dashboard to a page below a section page
+export function Breadcrumb({ items }: { items: { to?: string; label: ReactNode; mono?: boolean }[] }) {
+  return (
+    <nav aria-label="Breadcrumb" className="pb-3 text-sm">
+      <ol className="flex flex-wrap items-center gap-1.5 text-muted-foreground">
+        {items.map((x, i) => (
+          <li key={i} className="flex items-center gap-1.5">
+            {i > 0 ? <span aria-hidden>/</span> : null}
+            {x.to ? (
+              <TextLink to={x.to}>{x.label}</TextLink>
+            ) : (
+              <span aria-current="page" className={cn(x.mono && "font-mono [overflow-wrap:anywhere]")}>
+                {x.label}
+              </span>
+            )}
+          </li>
+        ))}
+      </ol>
+    </nav>
+  )
+}
+
+// a part of a page the reader opens when they need it
+export function More({ label, children, className }: { label: ReactNode; children: ReactNode; className?: string }) {
+  return (
+    <Collapsible className={cn("rounded-lg border", className)}>
+      <CollapsibleTrigger className="group flex w-full items-center justify-between gap-2 rounded-lg px-4 py-2.5 text-left text-sm font-medium focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none">
+        {label}
+        <ChevronDownIcon aria-hidden className="size-4 shrink-0 transition-transform group-data-[state=open]:rotate-180" />
+      </CollapsibleTrigger>
+      <CollapsibleContent className="flex min-w-0 flex-col gap-3 border-t px-4 py-3">{children}</CollapsibleContent>
+    </Collapsible>
   )
 }
 
@@ -146,19 +230,23 @@ export function Section({
   id,
   children,
   description,
+  level = 2,
 }: {
   title: string
   id?: string
   children: ReactNode
   description?: ReactNode
+  // a section inside another section is a level 3 heading
+  level?: 2 | 3
 }) {
+  const H = level === 2 ? "h2" : "h3"
   return (
-    <section id={id} className="flex scroll-mt-20 flex-col gap-3 py-6" aria-labelledby={id ? `${id}-h` : undefined}>
+    <section id={id} className="flex min-w-0 scroll-mt-20 flex-col gap-3 py-2" aria-labelledby={id ? `${id}-h` : undefined}>
       <div className="flex flex-col gap-1">
-        <h2 id={id ? `${id}-h` : undefined} className="text-lg font-semibold tracking-tight">
+        <H id={id ? `${id}-h` : undefined} className={level === 2 ? "text-lg font-semibold tracking-tight" : "text-base font-semibold"}>
           {title}
-        </h2>
-        {description ? <p className="max-w-[68ch] text-sm text-muted-foreground">{description}</p> : null}
+        </H>
+        {description ? <div className="max-w-[70ch] text-sm text-muted-foreground">{description}</div> : null}
       </div>
       {children}
     </section>
@@ -239,10 +327,20 @@ export function Dot({ tone, className }: { tone: Tone; className?: string }) {
   return <span aria-hidden className={cn("inline-block size-2 shrink-0 rounded-full", toneBg[tone], className)} />
 }
 
-export function Status({ tone, children }: { tone: Tone; children: ReactNode }) {
+const toneIcon: Record<Tone, typeof CheckIcon> = {
+  pass: CheckIcon,
+  diverge: XIcon,
+  known: CircleAlertIcon,
+  idle: MinusIcon,
+  signal: InfoIcon,
+}
+
+// a status: an icon and a text, so it reads without colour
+export function Status({ tone, children, wrap = false }: { tone: Tone; children: ReactNode; wrap?: boolean }) {
+  const Icon = toneIcon[tone]
   return (
-    <span className={cn("inline-flex items-center gap-1.5 text-sm font-medium whitespace-nowrap", toneText[tone])}>
-      <Dot tone={tone} />
+    <span className={cn("inline-flex items-center gap-1.5 text-sm font-medium", wrap ? "" : "whitespace-nowrap", toneText[tone])}>
+      <Icon aria-hidden className="size-3.5 shrink-0" strokeWidth={2.5} />
       {children}
     </span>
   )
@@ -265,7 +363,7 @@ export function indexerResults(
     if (!v) return []
     const by = new Map<string, string[]>()
     for (const [net, r] of Object.entries(v)) {
-      const k = r.reason ? `${r.verdict} (${r.reason})` : r.verdict
+      const k = r.reason ? `${termLabel(r.verdict)} (${r.reason})` : termLabel(r.verdict)
       by.set(k, [...(by.get(k) ?? []), net])
     }
     const text = [...by].map(([k, nets]) => `${k} on ${nets.toSorted().join(" and ")}`).join("; ")
