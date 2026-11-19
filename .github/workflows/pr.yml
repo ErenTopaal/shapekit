@@ -184,6 +184,9 @@ jobs:
           name: shapekit
           path: ${{ runner.temp }}/bin
       - name: pinned jdk and maven
+        # on PATH for the testee's java; maven runs through scripts/with-java.sh, which sets
+        # JAVA_HOME to the pinned jdk. the runner's JAVA_HOME (jdk 17) stays, so this job also
+        # checks that the build does not depend on it
         run: scripts/java-toolchain.sh >>"$GITHUB_PATH"
       - name: conformance run on the current version
         run: |
@@ -194,7 +197,7 @@ jobs:
         run: |
           set -euo pipefail
           v=$(python3 -I -c 'import sys, tomllib; print(tomllib.load(open(sys.argv[1], "rb"))["sdk"]["java"]["current"])' conformance/versions.toml)
-          mvn -B -q -f "testees/java/versions/$v/pom.xml" test
+          scripts/with-java.sh mvn -B -q -f "testees/java/versions/$v/pom.xml" test
           python3 -I -m unittest discover -s testees/java/tests
       - name: type table
         # the generator reads every version's build, so the versions the run above did not
@@ -585,6 +588,9 @@ jobs:
           name: shapekit
           path: ${{ runner.temp }}/bin
       - name: pinned jdk and maven
+        # on PATH for the testee's java; maven runs through scripts/with-java.sh, which sets
+        # JAVA_HOME to the pinned jdk. the runner's JAVA_HOME (jdk 17) stays, so this job also
+        # checks that the build does not depend on it
         run: scripts/java-toolchain.sh >>"$GITHUB_PATH"
       - name: conformance run on the current version
         run: |
@@ -595,7 +601,7 @@ jobs:
         run: |
           set -euo pipefail
           v=$(python3 -I -c 'import sys, tomllib; print(tomllib.load(open(sys.argv[1], "rb"))["sdk"]["kmp"]["current"])' conformance/versions.toml)
-          mvn -B -q -f "testees/kmp/versions/$v/pom.xml" test
+          scripts/with-java.sh mvn -B -q -f "testees/kmp/versions/$v/pom.xml" test
           python3 -I -m unittest discover -s testees/kmp/tests
       - name: type table
         run: |
