@@ -355,7 +355,8 @@ export const glossary: { id: string; title: string; note?: string; terms: Glossa
       {
         id: "union-arm",
         name: "union arm",
-        meaning: "One variant that an XDR union can take, for example an operation type or a result code.",
+        meaning:
+          "One variant that an XDR union can take, for example an operation type or a result code. An arm that a ledger can hold is an arm that stellar-core can write to a ledger. Arms with the blocker refused-before-ledger or never-emitted cannot occur in any ledger, so arm coverage counts only the other arms.",
       },
       {
         id: "blocker",
