@@ -234,6 +234,8 @@ java_path=$(scripts/java-toolchain.sh)
 wrong_jdk="$root/$out/wrong-jdk"
 mkdir -p "$wrong_jdk/bin"
 for tool in java javac; do
+  # $0 belongs to the stub, expanded when it runs
+  # shellcheck disable=SC2016
   printf '#!/bin/sh\necho "the build used JAVA_HOME ($0), not the pinned jdk" >&2\nexit 1\n' >"$wrong_jdk/bin/$tool"
   chmod +x "$wrong_jdk/bin/$tool"
 done
