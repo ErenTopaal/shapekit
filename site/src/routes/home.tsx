@@ -274,7 +274,6 @@ export default function Home({ loaderData: s }: Route.ComponentProps) {
       rehearsedProtocol: s.protocol + 1,
     })
   }, [s])
-  const pct = ((s.arms.covered / s.arms.reachable) * 100).toFixed(1)
   const js = s.sdks.find((k) => k.key === "js")
   const tierRows = Object.entries(s.tiers).map(([p, t]) => [Number(p), t[0] + t[1] + t[2] + t[3]] as const).toSorted((a, b) => a[0] - b[0])
   const recorded = tierRows.reduce((a, r) => a + r[1], 0)
@@ -548,8 +547,8 @@ export default function Home({ loaderData: s }: Route.ComponentProps) {
     </div>
     <div className="cv-top">
     <div data-r="">
-    <span className="cv-num tnum" data-count="">{pct}<small>%</small></span>
-    <p className="cv-cap"><strong>{f(s.arms.covered)} of {f(s.arms.reachable)}</strong> union arms that a LedgerCloseMeta can reach have an entry that stellar-core emitted. Each of the {f(s.arms.reachable - s.arms.covered)} gaps has a written reason.</p>
+    <span className="cv-num tnum" data-count="">{s.arms.percent}<small>%</small></span>
+    <p className="cv-cap"><strong>{f(s.arms.covered)} of the {f(s.arms.total)}</strong> arms that a ledger can hold. {f(s.arms.refused + s.arms.never)} arms cannot occur in any ledger: stellar-core refuses {f(s.arms.refused)} before a ledger and never emits {f(s.arms.never)}.</p>
     <fieldset className="cv-keys" aria-label="Highlight union arms">
     <button type="button" className="chip" data-g="cov" aria-pressed="false"><i style={css({ "--sev": "var(--c-teal)" })} aria-hidden="true"></i>Covered <b>{f(s.arms.covered)}</b></button>
     <button type="button" className="chip" data-g="ref" aria-pressed="false"><i style={css({ "--sev": "var(--c-flare)" })} aria-hidden="true"></i>Refused before a ledger <b>{f(s.arms.refused)}</b></button>
@@ -557,7 +556,7 @@ export default function Home({ loaderData: s }: Route.ComponentProps) {
     <button type="button" className="chip" data-g="oth" aria-pressed="false"><i style={css({ "--sev": "var(--c-slate)" })} aria-hidden="true"></i>Other reasons <b>{f(s.arms.other)}</b></button>
     </fieldset>
     </div>
-    <div data-r="" style={css({ "--i": "1" })}><canvas className="cv-canvas" aria-hidden="true"></canvas><p className="sr-only">{`${s.arms.reachable} squares, one for each union arm: ${s.arms.covered} covered, ${s.arms.refused} refused before a ledger, ${s.arms.never} never emitted by stellar-core, ${s.arms.other} for other reasons`}</p></div>
+    <div data-r="" style={css({ "--i": "1" })}><canvas className="cv-canvas" aria-hidden="true"></canvas><p className="sr-only">{`${s.arms.all} squares, one for each union arm: ${s.arms.covered} covered, ${s.arms.refused} refused before a ledger, ${s.arms.never} never emitted by stellar-core, ${s.arms.other} for other reasons`}</p></div>
     </div>
     <div className="cv-facts">
     <div className="cv-fact" data-r=""><strong className="tnum" data-count="">{f(s.entries)}</strong><span>corpus entries. stellar-core emitted {f(s.coreEmitted)} of them.</span></div>

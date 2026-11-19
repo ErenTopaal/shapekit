@@ -2,7 +2,7 @@
 // writes. the page computes only counts, sums and filters over these files.
 import { readFile } from "node:fs/promises"
 import type { Conformance, Coverage, Entries, Finding, Findings, Harness, Meta } from "@/lib/data"
-import { findingRows, reportedFindings, runSummary } from "@/lib/metrics"
+import { findingRows, ledgerArms, reportedFindings, runSummary, type LedgerArms } from "@/lib/metrics"
 import { proofText } from "./content"
 
 async function json<T>(name: string): Promise<T> {
@@ -74,7 +74,7 @@ export interface LandingStats {
   refused: number
   sources: { local: number; golden: number; history: number; refused: number }
   decode: { accept: number; reject: number; defined: number }
-  arms: { covered: number; reachable: number; refused: number; never: number; other: number }
+  arms: LedgerArms
   caps: { visible: number; covered: number }
   fields: { notValidated: number; exercised: number }
   findings: LandingFinding[]
@@ -125,9 +125,8 @@ export async function loadLandingStats(): Promise<LandingStats> {
     row[g] = (row[g] ?? 0) + 1
   }
 
-  const blockers = sum.arms_uncovered_by_blocker
-  const refusedArms = blockers["refused-before-ledger"] ?? 0
-  const neverArms = blockers["never-emitted"] ?? 0
+  // the same arm coverage as the dashboard's (src/lib/metrics.ts)
+  const arms = ledgerArms(sum)
 
   // the reported findings of both records, the same findings and the same count as the
   // dashboard's (src/lib/metrics.ts); drafts and intended behavior stay off the page
@@ -243,7 +242,7 @@ export async function loadLandingStats(): Promise<LandingStats> {
     refused: n("local-core-refused"),
     sources: { local: n("local-core"), golden: n("core-golden"), history: n("mainnet-history") + n("testnet-history"), refused: n("local-core-refused") },
     decode,
-    arms: { covered: sum.arms_covered, reachable: sum.arms_reachable, refused: refusedArms, never: neverArms, other: sum.arms_uncovered - refusedArms - neverArms },
+    arms,
     caps: { visible: sum.caps_indexer_visible, covered: sum.caps_indexer_visible_core_emitted },
     fields: { notValidated: sum.fields_not_fully_validated, exercised: sum.fields_not_fully_validated_exercised },
     findings: landingFindings,
