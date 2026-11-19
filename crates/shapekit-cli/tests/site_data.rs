@@ -229,6 +229,106 @@ fn site_data_matches_the_committed_files() {
         }
     }
 
+    // the findings total every page shows: one count over both records, and every breakdown
+    // the pages draw adds up to it
+    let reported = &findings["reported"];
+    let statuses: Vec<&str> = reported["statuses"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|s| s.as_str().unwrap())
+        .collect();
+    assert_eq!(statuses, ["filed", "duplicate-of", "private-report"]);
+    let all: Vec<&Value> = findings["findings"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .chain(cand["findings"].as_array().unwrap())
+        .collect();
+    let counted: Vec<&str> = all
+        .iter()
+        .filter(|f| statuses.contains(&f["status"].as_str().unwrap()))
+        .map(|f| f["id"].as_str().unwrap())
+        .collect();
+    let total = reported["findings"].as_u64().unwrap() as usize;
+    assert!(total > 0);
+    assert_eq!(total, counted.len());
+    let reported_ids: Vec<&str> = reported["ids"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|i| i.as_str().unwrap())
+        .collect();
+    assert_eq!(reported_ids, counted);
+    let sum_of = |v: &Value| -> usize {
+        v.as_object()
+            .unwrap()
+            .values()
+            .map(|n| n.as_u64().unwrap() as usize)
+            .sum()
+    };
+    assert_eq!(sum_of(&reported["by_status"]), total);
+    assert_eq!(sum_of(&reported["by_severity"]), total);
+    assert_eq!(sum_of(&reported["by_record"]), total);
+    let by_component = reported["by_component"].as_object().unwrap();
+    assert_eq!(by_component.values().map(sum_of).sum::<usize>(), total);
+    assert_eq!(reported["components"], by_component.len());
+    assert_eq!(sum_of(&reported["not_reported"]) + total, all.len());
+    // each record's share is the reported part of that record's own summary
+    for (path, summary) in [
+        ("findings/findings.json", &record["summary"]),
+        ("candidate/findings/findings.json", &cand_record["summary"]),
+    ] {
+        let own: u64 = statuses
+            .iter()
+            .map(|s| summary["by_status"][*s].as_u64().unwrap_or(0))
+            .sum();
+        assert_eq!(reported["by_record"][path], own, "{path}");
+    }
+
+    // every page shows the findings total from that one count: the landing page and the
+    // dashboard call reportedFindings in site/src/lib/metrics.ts, which checks its rows against
+    // reported.findings, and no page counts the findings of one record as the total
+    let site = root.join("site/src");
+    let read = |rel: &str| std::fs::read_to_string(site.join(rel)).unwrap();
+    assert!(read("lib/metrics.ts").contains("f.reported.findings"));
+    for page in [
+        "landing/stats.ts",
+        "pages/overview.tsx",
+        "pages/findings.tsx",
+    ] {
+        assert!(
+            read(page).contains("reportedFindings("),
+            "{page} does not count the findings with reportedFindings"
+        );
+    }
+    let mut stack = vec![site.clone()];
+    while let Some(dir) = stack.pop() {
+        for e in std::fs::read_dir(&dir).unwrap() {
+            let p = e.unwrap().path();
+            if p.is_dir() {
+                stack.push(p);
+                continue;
+            }
+            let text = std::fs::read_to_string(&p).unwrap();
+            let rel = p
+                .strip_prefix(&site)
+                .unwrap()
+                .to_string_lossy()
+                .into_owned();
+            for bad in [
+                "findings.summary.findings",
+                "findings.findings.length",
+                "fs.findings",
+            ] {
+                assert!(
+                    !text.contains(bad),
+                    "{rel} shows {bad}, the findings of one record, not reported.findings"
+                );
+            }
+        }
+    }
+
     // conformance: every matrix entry is a corpus entry, and cell counts add up
     let conformance = read_json(&out.join("conformance.json"));
     // one per sdk of the versions file, with or without a committed matrix
