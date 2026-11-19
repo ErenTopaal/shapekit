@@ -927,9 +927,11 @@ fn drafts_name_siblings_from_known_failures_and_carry_the_triaged_cause() {
             Cause {
                 finding: "RS-9".into(),
                 title: "assets order by text".into(),
-                cause: "the comparison reads the issuer as text.".into(),
+                cause: "the comparison reads the issuer as text (src/asset.rs L12).".into(),
+                ..Cause::default()
             },
         )]),
+        ..DraftContext::default()
     };
     let drafts =
         shapekit_conformance::issues::drafts(&out.matrix, &manifest, &corpus_dir, &file, &context)
@@ -938,19 +940,38 @@ fn drafts_name_siblings_from_known_failures_and_carry_the_triaged_cause() {
     let go = file.sdk("go").unwrap();
     assert!(
         d.body.contains(&format!(
-            "- `{}` ({}) diverges on the same entry.",
+            "- `{}` ({}) diverges on the same entry: no finding takes it yet.",
             go.package, go.issues_repo
         )),
         "{}",
         d.body
     );
     assert!(!d.body.contains("None: "), "{}", d.body);
-    assert!(
-        d.body
-            .contains("(RS-9, assets order by text): The comparison reads the issuer as text."),
-        "{}",
-        d.body
+    // the finding leads: its title, then its cause with the citation, then the versions,
+    // and only then the checks of the entry
+    let rust = file.sdk("rust").unwrap();
+    assert_eq!(
+        d.title,
+        format!("{} 30.0.0: assets order by text", rust.package)
     );
+    let at = |needle: &str| {
+        d.body
+            .find(needle)
+            .unwrap_or_else(|| panic!("{needle:?} not in {}", d.body))
+    };
+    assert!(at("## What happens\n\nAssets order by text.") < at("## Cause"));
+    assert!(
+        at("The comparison reads the issuer as text (src/asset.rs L12).")
+            < at("## Affected versions")
+    );
+    assert!(
+        at(&format!(
+            "`{}` 30.0.0, every version shapekit ran.",
+            rust.package
+        )) < at("## Entries")
+    );
+    assert!(at("## Entries") < at("## Checks on `t.order-wrong`"));
+    assert!(at("## Checks on `t.order-wrong`") < at("### `case 0/asset_order`"));
     // distinct checks and versions, not (version, check) records
     let row = out
         .matrix
@@ -975,9 +996,161 @@ fn drafts_name_siblings_from_known_failures_and_carry_the_triaged_cause() {
         d.body
             .contains("cargo build --release --locked -p shapekit-cli")
     );
-    // the title's detail starts with a capital and names what was tested
-    let detail = d.title.split(": ").nth(1).unwrap();
-    assert!(detail.starts_with("The SDK "), "{}", d.title);
+    // without a cause the title names what was tested, starting with a capital
+    let plain = shapekit_conformance::issues::drafts(
+        &out.matrix,
+        &manifest,
+        &corpus_dir,
+        &file,
+        &Default::default(),
+    )
+    .unwrap();
+    let detail = plain[0].title.split(": ").nth(1).unwrap();
+    assert!(detail.starts_with("The SDK "), "{}", plain[0].title);
+}
+
+#[test]
+fn draft_siblings_come_from_every_matrix_and_name_the_finding_that_takes_them() {
+    use shapekit_conformance::issues::{Cause, Claim, DraftContext};
+    rust_testees();
+    let c = corpus();
+    let out = runner::run(&options(&c, 1)).unwrap();
+    let (manifest, corpus_dir) = runner::load_manifest(&c.manifest()).unwrap();
+    let file = VersionsFile::load(&versions_file()).unwrap();
+    // another sdk's matrix, where the same entry diverges
+    let mut go_matrix = out.matrix.clone();
+    for t in &mut go_matrix.testees {
+        t.sdk = "go".into();
+        t.key = format!("go@{}", t.version);
+    }
+    for row in &mut go_matrix.entries {
+        row.cells = std::mem::take(&mut row.cells)
+            .into_iter()
+            .map(|(k, v)| (k.replacen("rust@", "go@", 1), v))
+            .collect();
+    }
+    let mut context = DraftContext {
+        causes: BTreeMap::from([(
+            "rust-t.order-wrong.md".to_string(),
+            Cause {
+                finding: "RS-9".into(),
+                title: "assets order by text".into(),
+                cause: "c".into(),
+                entries: vec!["t.accept".into(), "t.order-wrong".into()],
+                ..Cause::default()
+            },
+        )]),
+        claims: BTreeMap::from([(
+            ("go".to_string(), "t.order-wrong".to_string()),
+            BTreeSet::from(["GO-9".to_string()]),
+        )]),
+        findings: BTreeMap::from([(
+            "GO-9".to_string(),
+            Claim {
+                title: "offers order by text".into(),
+                component: "go-stellar-sdk".into(),
+                status: "filed".into(),
+                link: Some("https://github.com/stellar/go-stellar-sdk/issues/9".into()),
+            },
+        )]),
+        ..DraftContext::default()
+    };
+    let before =
+        shapekit_conformance::issues::drafts(&out.matrix, &manifest, &corpus_dir, &file, &context)
+            .unwrap();
+    assert!(before[0].body.contains("None: "), "{}", before[0].body);
+    context.add_matrix(&go_matrix);
+    let d =
+        &shapekit_conformance::issues::drafts(&out.matrix, &manifest, &corpus_dir, &file, &context)
+            .unwrap()[0];
+    let go = file.sdk("go").unwrap();
+    assert!(
+        d.body.contains(&format!(
+            "- `{}` ({}) diverges on `t.order-wrong`, one of these entries: shapekit's finding GO-9, offers order by text (filed as https://github.com/stellar/go-stellar-sdk/issues/9).",
+            go.package, go.issues_repo
+        )),
+        "{}",
+        d.body
+    );
+    assert!(
+        d.body
+            .contains("shapekit's finding RS-9 takes 2 corpus entries on this SDK: `t.accept`, `t.order-wrong`."),
+        "{}",
+        d.body
+    );
+}
+
+#[test]
+fn a_draft_says_when_a_passphrase_named_check_ran_on_a_local_chain() {
+    use shapekit_conformance::issues::{Cause, DraftContext};
+    rust_testees();
+    let c = corpus();
+    let mut out = runner::run(&options(&c, 1)).unwrap();
+    let (mut manifest, corpus_dir) = runner::load_manifest(&c.manifest()).unwrap();
+    let file = VersionsFile::load(&versions_file()).unwrap();
+    for row in &mut out.matrix.entries {
+        for cell in row.cells.values_mut() {
+            for (i, ch) in cell.checks.iter_mut().enumerate() {
+                ch.check = format!("mainnet/tx_hash {i}");
+            }
+        }
+    }
+    let note = "A check named `mainnet/...` or `testnet/...` names the network passphrase it hashes or signs with.";
+    let draft = |manifest: &shapekit_manifest::Manifest, context: &DraftContext| {
+        shapekit_conformance::issues::drafts(&out.matrix, manifest, &corpus_dir, &file, context)
+            .unwrap()
+            .remove(0)
+    };
+    let synthetic = draft(&manifest, &DraftContext::default());
+    assert!(
+        synthetic.body.contains(&format!(
+            "{note} The data is a value built by hand, not a transaction or ledger of that network."
+        )),
+        "{}",
+        synthetic.body
+    );
+    let e = manifest
+        .entries
+        .iter_mut()
+        .find(|e| e.id == "t.order-wrong")
+        .unwrap();
+    e.source.class = shapekit_registry::SourceClass::LocalCore;
+    e.source.chain = Some("t.p30".into());
+    let local = draft(&manifest, &DraftContext::default());
+    assert!(
+        local.body.contains("The data is a ledger stellar-core closed on a private network shapekit ran locally (chain `t.p30`), not a transaction or ledger of that network."),
+        "{}",
+        local.body
+    );
+    // a finding that names the checks it takes shows only those
+    let narrowed = DraftContext {
+        causes: BTreeMap::from([(
+            "rust-t.order-wrong.md".to_string(),
+            Cause {
+                finding: "RS-9".into(),
+                title: "t".into(),
+                cause: "c".into(),
+                checks: vec!["*/tx_hash 1".into()],
+                ..Cause::default()
+            },
+        )]),
+        ..DraftContext::default()
+    };
+    let d = draft(&manifest, &narrowed);
+    assert!(d.body.contains("### `mainnet/tx_hash 1`"), "{}", d.body);
+    assert!(!d.body.contains("### `mainnet/tx_hash 0`"), "{}", d.body);
+    e_class_is_public(&mut manifest);
+    let public = draft(&manifest, &DraftContext::default());
+    assert!(!public.body.contains(note), "{}", public.body);
+}
+
+fn e_class_is_public(manifest: &mut shapekit_manifest::Manifest) {
+    let e = manifest
+        .entries
+        .iter_mut()
+        .find(|e| e.id == "t.order-wrong")
+        .unwrap();
+    e.source.class = shapekit_registry::SourceClass::MainnetHistory;
 }
 
 #[test]
@@ -1401,6 +1574,10 @@ fn draft_issues_only_prunes_cells_the_matrix_covers() {
         known_failures: c.dir.path().join("no-known-failures"),
         out: drafts.clone(),
         causes: Default::default(),
+        sibling_matrices: Vec::new(),
+        claims: Default::default(),
+        findings: Default::default(),
+        named_only: false,
     };
     let report = issues::draft(&opts).unwrap();
     assert_eq!(report.removed, vec!["rust-t.accept.md".to_string()]);

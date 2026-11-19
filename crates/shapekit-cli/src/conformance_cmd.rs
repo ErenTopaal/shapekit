@@ -263,6 +263,10 @@ pub enum ConformanceCommand {
         /// Directory the issue bodies are written into.
         #[arg(long, default_value = "findings/issues")]
         out: PathBuf,
+        /// Write only the drafts a finding of the triages names, and remove the other drafts
+        /// of entries the matrix ran.
+        #[arg(long)]
+        named_only: bool,
     },
     /// Open the drafted issues upstream with gh. Refuses to run without --confirm.
     FileIssues {
@@ -675,15 +679,20 @@ fn dispatch(cmd: ConformanceCommand) -> Result<bool> {
             known_failures,
             triages,
             out,
+            named_only,
         } => {
-            let causes = draft_causes(&triages, &out)?;
+            let triaged = draft_triage(&root, &triages, &out)?;
             let report = issues::draft(&issues::DraftOptions {
                 matrix,
                 manifest,
                 versions: versions_file,
                 known_failures,
                 out: out.clone(),
-                causes,
+                causes: triaged.causes,
+                sibling_matrices: triaged.matrices,
+                claims: triaged.claims,
+                findings: triaged.findings,
+                named_only,
             })?;
             for f in &report.removed {
                 println!("removed stale draft {}", out.join(f).display());
@@ -713,21 +722,55 @@ fn dispatch(cmd: ConformanceCommand) -> Result<bool> {
     }
 }
 
-/// The triaged cause of every draft under `out`, by file name, from the findings that name
-/// one in `draft`.
-fn draft_causes(
-    triages: &[PathBuf],
-    out: &Path,
-) -> Result<std::collections::BTreeMap<String, issues::Cause>> {
+/// What the findings triages tell the drafts: the cause of every draft under `out` by file name,
+/// the matrices of every sdk, and which finding takes each divergence.
+struct Triaged {
+    causes: std::collections::BTreeMap<String, issues::Cause>,
+    matrices: Vec<PathBuf>,
+    claims: std::collections::BTreeMap<(String, String), std::collections::BTreeSet<String>>,
+    findings: std::collections::BTreeMap<String, issues::Claim>,
+}
+
+/// Reads every triage and collects its findings over its inputs, as `findings collect` does,
+/// so a draft cites what the triage says now rather than a findings.json written earlier.
+fn draft_triage(root: &Path, triages: &[PathBuf], out: &Path) -> Result<Triaged> {
     let normal = |p: &Path| -> PathBuf {
         p.components()
             .filter(|c| !matches!(c, std::path::Component::CurDir))
             .collect()
     };
     let out = normal(out);
-    let mut causes = std::collections::BTreeMap::new();
-    for t in triages {
-        let triage = shapekit_findings::triage::load(t)?;
+    let mut t = Triaged {
+        causes: Default::default(),
+        matrices: Vec::new(),
+        claims: Default::default(),
+        findings: Default::default(),
+    };
+    for path in triages {
+        let triage = shapekit_findings::triage::load(path)?;
+        t.matrices
+            .extend(triage.inputs.matrices.iter().map(|m| root.join(m)));
+        let collection = shapekit_findings::collect::collect(root, &triage)
+            .with_context(|| format!("collecting the findings of {}", path.display()))?;
+        for r in &collection.findings {
+            t.findings.insert(
+                r.id.clone(),
+                issues::Claim {
+                    title: r.title.clone(),
+                    component: r.component.clone(),
+                    status: r.status.name().to_string(),
+                    link: r.link.clone(),
+                },
+            );
+            for o in r.occurrences.iter().filter(|o| o.source == "conformance") {
+                let Some(entry) = &o.entry else { continue };
+                let sdk = o.on.split_once('@').map_or(o.on.as_str(), |(s, _)| s);
+                t.claims
+                    .entry((sdk.to_string(), entry.clone()))
+                    .or_default()
+                    .insert(r.id.clone());
+            }
+        }
         for f in &triage.findings {
             let Some(draft) = &f.draft else { continue };
             let draft = normal(Path::new(draft));
@@ -737,12 +780,59 @@ fn draft_causes(
             let Some(name) = draft.file_name().and_then(|n| n.to_str()) else {
                 continue;
             };
+            let record = collection.findings.iter().find(|r| r.id == f.id);
+            // the draft's sdk is the conformance matcher's whose name starts the file name
+            let sdk = f
+                .conformance
+                .iter()
+                .map(|m| m.sdk.as_str())
+                .filter(|s| name.starts_with(&format!("{s}-")))
+                .max_by_key(|s| s.len());
+            let affected = record.and_then(|r| {
+                r.affected
+                    .iter()
+                    .find(|a| Some(a.on.as_str()) == sdk)
+                    .cloned()
+            });
+            let entries: Vec<String> = match (record, sdk) {
+                (Some(r), Some(sdk)) => {
+                    let mut es: Vec<String> = r
+                        .occurrences
+                        .iter()
+                        .filter(|o| o.source == "conformance")
+                        .filter(|o| o.on.split_once('@').map(|(s, _)| s) == Some(sdk))
+                        .filter_map(|o| o.entry.clone())
+                        .collect();
+                    es.sort();
+                    es.dedup();
+                    es
+                }
+                _ => Vec::new(),
+            };
+            // a matcher of the sdk without check patterns takes every check
+            let own: Vec<_> = f
+                .conformance
+                .iter()
+                .filter(|m| Some(m.sdk.as_str()) == sdk)
+                .collect();
+            let checks: Vec<String> = if own.iter().any(|m| m.checks.is_empty()) {
+                Vec::new()
+            } else {
+                own.iter().flat_map(|m| m.checks.iter().cloned()).collect()
+            };
             let cause = issues::Cause {
                 finding: f.id.clone(),
                 title: f.title.clone(),
                 cause: f.cause.clone(),
+                entries,
+                tested: affected
+                    .as_ref()
+                    .map(|a| a.tested.clone())
+                    .unwrap_or_default(),
+                failing: affected.map(|a| a.failing).unwrap_or_default(),
+                checks,
             };
-            if let Some(other) = causes.insert(name.to_owned(), cause) {
+            if let Some(other) = t.causes.insert(name.to_owned(), cause) {
                 anyhow::bail!(
                     "findings {} and {} both name the draft {}",
                     other.finding,
@@ -752,5 +842,5 @@ fn draft_causes(
             }
         }
     }
-    Ok(causes)
+    Ok(t)
 }

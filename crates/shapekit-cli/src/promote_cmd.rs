@@ -174,6 +174,7 @@ impl Record {
                     sdk: own.clone(),
                     entries: self.entries.clone(),
                     versions: self.versions.clone(),
+                    checks: Vec::new(),
                 },
                 sdk,
                 version,

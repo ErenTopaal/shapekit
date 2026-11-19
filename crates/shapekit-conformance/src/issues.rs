@@ -81,22 +81,54 @@ pub struct DraftOptions {
     pub out: PathBuf,
     /// The triaged cause of a draft, by its file name: the finding's id, title and cause.
     pub causes: BTreeMap<String, Cause>,
+    /// The divergence matrices of every sdk, beside `matrix`: a draft names as siblings the
+    /// sdks diverging on its entries in any of them.
+    pub sibling_matrices: Vec<PathBuf>,
+    /// Which finding takes each (sdk, entry) divergence, from the findings collected over
+    /// every triage, and what each finding is.
+    pub claims: BTreeMap<(String, String), BTreeSet<String>>,
+    pub findings: BTreeMap<String, Claim>,
+    /// Write only the drafts a finding names; remove the other drafts the matrix covers.
+    pub named_only: bool,
 }
 
 /// What the findings triage says about a draft.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct Cause {
     pub finding: String,
     pub title: String,
     pub cause: String,
+    /// The corpus entries the finding takes on the draft's sdk.
+    pub entries: Vec<String>,
+    /// The versions of the draft's sdk the finding's inputs ran, oldest first, and those that
+    /// fail.
+    pub tested: Vec<String>,
+    pub failing: Vec<String>,
+    /// Check name patterns the finding takes on the draft's sdk; every check when empty.
+    pub checks: Vec<String>,
+}
+
+/// A finding as another draft cites it.
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct Claim {
+    pub title: String,
+    pub component: String,
+    /// `draft`, `filed`, `duplicate-of`, ...
+    pub status: String,
+    pub link: Option<String>,
 }
 
 /// What a draft says beyond the matrix: the other sdks that diverge on each entry, from their
-/// known-failures lists, and the triaged causes by draft file name.
+/// known-failures lists and every sdk's matrix, the findings that take those divergences, and
+/// the triaged causes by draft file name.
 #[derive(Debug, Clone, Default)]
 pub struct DraftContext {
     pub diverging: BTreeMap<String, BTreeSet<String>>,
     pub causes: BTreeMap<String, Cause>,
+    pub claims: BTreeMap<(String, String), BTreeSet<String>>,
+    pub findings: BTreeMap<String, Claim>,
+    /// Draft only what a finding names.
+    pub named_only: bool,
 }
 
 impl DraftContext {
@@ -113,8 +145,74 @@ impl DraftContext {
         }
         Ok(DraftContext {
             diverging,
-            causes: BTreeMap::new(),
+            ..DraftContext::default()
         })
+    }
+
+    /// Adds the sdks diverging on each entry of `matrix`.
+    pub fn add_matrix(&mut self, matrix: &Matrix) {
+        for row in &matrix.entries {
+            for t in &matrix.testees {
+                let Some(cell) = row.cells.get(&t.key) else {
+                    continue;
+                };
+                if cell.checks.iter().any(|c| {
+                    matches!(
+                        c.result,
+                        ResultClass::DivergesFromNetwork | ResultClass::DivergesFromPeers
+                    )
+                }) {
+                    self.diverging
+                        .entry(row.id.clone())
+                        .or_default()
+                        .insert(t.sdk.clone());
+                }
+            }
+        }
+    }
+}
+
+// `*` matches any run of characters, as the findings triage's patterns do
+fn glob(pattern: &str, s: &str) -> bool {
+    let parts: Vec<&str> = pattern.split('*').collect();
+    if parts.len() == 1 {
+        return pattern == s;
+    }
+    let (first, last) = (parts[0], parts[parts.len() - 1]);
+    if !s.starts_with(first) || s.len() < first.len() + last.len() || !s.ends_with(last) {
+        return false;
+    }
+    let mut rest = &s[first.len()..s.len() - last.len()];
+    for p in &parts[1..parts.len() - 1] {
+        match rest.find(p) {
+            Some(i) => rest = &rest[i + p.len()..],
+            None => return false,
+        }
+    }
+    true
+}
+
+// what the ledger behind an entry is, for a reader who takes a `mainnet/` check for mainnet
+// data; None for data taken from a public network
+fn local_origin(entry: &shapekit_manifest::Entry) -> Option<String> {
+    use shapekit_registry::SourceClass;
+    let chain = entry
+        .source
+        .chain
+        .as_deref()
+        .map(|c| format!(" (chain `{c}`)"))
+        .unwrap_or_default();
+    match entry.source.class {
+        SourceClass::MainnetHistory | SourceClass::TestnetHistory => None,
+        SourceClass::LocalCore => Some(format!(
+            "a ledger stellar-core closed on a private network shapekit ran locally{chain}"
+        )),
+        SourceClass::LocalCoreRefused => Some(format!(
+            "an envelope built locally that stellar-core refused at submission{chain}"
+        )),
+        SourceClass::CoreGolden => Some("a stellar-core test golden file".into()),
+        SourceClass::CoreTestDump => Some("a dump of a stellar-core test".into()),
+        SourceClass::Synthetic => Some("a value built by hand".into()),
     }
 }
 
@@ -202,13 +300,29 @@ pub fn drafts(
             .find(|e| e.id == row.id)
             .with_context(|| format!("matrix entry {} is not in the manifest", row.id))?;
         let checks = plan::checks(entry, corpus)?;
-        // the sdks diverging here in this matrix or in their own known-failures lists
-        let mut affected: BTreeSet<&String> = by_sdk.keys().collect();
-        if let Some(listed) = context.diverging.get(&row.id) {
-            affected.extend(listed.iter());
-        }
         for (sdk, failing) in &by_sdk {
             let sdk_conf = versions.sdk(sdk)?;
+            let file = file_name(sdk, &row.id);
+            let cause = context.causes.get(&file);
+            if context.named_only && cause.is_none() {
+                continue;
+            }
+            // a finding that names checks takes only those; another finding takes the rest
+            let failing: Vec<(String, &CheckRecord)> = match cause {
+                Some(c) if !c.checks.is_empty() => failing
+                    .iter()
+                    .filter(|(_, ch)| c.checks.iter().any(|g| glob(g, &ch.check)))
+                    .cloned()
+                    .collect(),
+                _ => failing.clone(),
+            };
+            ensure!(
+                !failing.is_empty(),
+                "{file}: finding {} takes checks {:?}, which none of the failing checks of {} match",
+                cause.map(|c| c.finding.as_str()).unwrap_or_default(),
+                cause.map(|c| c.checks.clone()).unwrap_or_default(),
+                row.id
+            );
             let ops: BTreeSet<&str> = failing.iter().map(|(_, c)| c.op.as_str()).collect();
             let repos: BTreeSet<&str> = ops
                 .iter()
@@ -231,22 +345,23 @@ pub fn drafts(
             vers.dedup();
             let noun = sdk_conf.kind.noun();
             let first = failing[0].1;
-            let file = file_name(sdk, &row.id);
-            let cause = context.causes.get(&file);
-            let title = format!(
-                "{} {}: {} ({})",
-                sdk_conf.package,
-                vers.join(", "),
-                subject(
-                    first.detail.as_deref().unwrap_or(first.result.as_str()),
-                    noun,
-                    false
+            let title = match cause {
+                Some(c) => format!("{} {}: {}", sdk_conf.package, vers.join(", "), c.title),
+                None => format!(
+                    "{} {}: {} ({})",
+                    sdk_conf.package,
+                    vers.join(", "),
+                    subject(
+                        first.detail.as_deref().unwrap_or(first.result.as_str()),
+                        noun,
+                        false
+                    ),
+                    row.id
                 ),
-                row.id
-            );
+            };
             // the same check failing on several versions is shown once, with its versions
             let mut by_check: Vec<(&CheckRecord, Vec<&str>)> = Vec::new();
-            for (version, ch) in failing {
+            for (version, ch) in &failing {
                 match by_check
                     .iter_mut()
                     .find(|(c, _)| c.check == ch.check && c.actual == ch.actual)
@@ -257,19 +372,13 @@ pub fn drafts(
             }
             let distinct: BTreeSet<&str> = failing.iter().map(|(_, c)| c.check.as_str()).collect();
             let tag = release_tag(&matrix.corpus_version);
-            let mut body = String::new();
-            let _ = writeln!(body, "## What happens\n");
             let against = if first.result == ResultClass::DivergesFromPeers {
                 "the other Stellar SDKs (the protocol leaves this case to the implementation, so the SDKs are compared with each other)"
             } else {
                 "the Stellar network"
             };
-            let _ = writeln!(
-                body,
-                "On the input below, `{}` {} answers differently from {} in {} {} on {} {}.\n",
-                sdk_conf.package,
-                vers.join(", "),
-                against,
+            let counted = format!(
+                "{} {} on {} {}",
                 distinct.len(),
                 if distinct.len() == 1 {
                     "check"
@@ -283,20 +392,100 @@ pub fn drafts(
                     "versions"
                 }
             );
+            let mut body = String::new();
+            // the entries the sibling section looks at: the finding's, or this one
+            let mut scope: Vec<String> = vec![row.id.clone()];
             if let Some(c) = cause {
+                let _ = writeln!(body, "## What happens\n");
+                let _ = writeln!(body, "{}\n", full_stop(&sentence(c.title.trim())));
+                let _ = writeln!(body, "## Cause\n");
+                let _ = writeln!(body, "{}\n", full_stop(&sentence(c.cause.trim())));
+                let _ = writeln!(body, "## Affected versions\n");
+                let tested: Vec<&str> = if c.tested.is_empty() {
+                    vers.clone()
+                } else {
+                    c.tested.iter().map(String::as_str).collect()
+                };
+                let failing_versions: Vec<&str> = if c.failing.is_empty() {
+                    vers.clone()
+                } else {
+                    c.failing.iter().map(String::as_str).collect()
+                };
+                if failing_versions == tested {
+                    let _ = writeln!(
+                        body,
+                        "`{}` {}, every version shapekit ran.\n",
+                        sdk_conf.package,
+                        tested.join(", ")
+                    );
+                } else {
+                    let _ = writeln!(
+                        body,
+                        "`{}` {} fail; shapekit ran {}.\n",
+                        sdk_conf.package,
+                        failing_versions.join(", "),
+                        tested.join(", ")
+                    );
+                }
+                if !c.entries.is_empty() {
+                    scope = c.entries.clone();
+                }
+                let _ = writeln!(body, "## Entries\n");
+                const LISTED: usize = 12;
+                let listed: Vec<String> = scope
+                    .iter()
+                    .take(LISTED)
+                    .map(|e| format!("`{e}`"))
+                    .collect();
+                let more = if scope.len() > LISTED {
+                    format!(", and {} more", scope.len() - LISTED)
+                } else {
+                    String::new()
+                };
                 let _ = writeln!(
                     body,
-                    "The cause, as triaged in shapekit's findings ({}, {}): {}\n",
+                    "shapekit's finding {} takes {} corpus {} on this {noun}: {}{more}. The checks below are those of `{}`.\n",
                     c.finding,
-                    c.title,
-                    sentence(c.cause.trim())
+                    scope.len(),
+                    if scope.len() == 1 { "entry" } else { "entries" },
+                    listed.join(", "),
+                    row.id
+                );
+                let _ = writeln!(body, "## Checks on `{}`\n", row.id);
+                let _ = writeln!(
+                    body,
+                    "On this entry, `{}` {} answers differently from {} in {counted}.\n",
+                    sdk_conf.package,
+                    vers.join(", "),
+                    against
+                );
+            } else {
+                let _ = writeln!(body, "## What happens\n");
+                let _ = writeln!(
+                    body,
+                    "On the input below, `{}` {} answers differently from {} in {counted}.\n",
+                    sdk_conf.package,
+                    vers.join(", "),
+                    against
                 );
             }
             let _ = writeln!(
                 body,
                 "A check is one call into the SDK with a known right answer. Each check below shows the call as a JSON request of the [shapekit testee protocol]({SHAPEKIT_URL}/blob/{tag}/docs/testee-protocol.md) (`op` names the SDK operation), the expected answer and the answer the SDK gave.\n"
             );
-            let _ = writeln!(body, "## Input\n");
+            let passphrase_named = by_check
+                .iter()
+                .take(SHOWN_CHECKS)
+                .any(|(c, _)| c.check.starts_with("mainnet/") || c.check.starts_with("testnet/"));
+            if passphrase_named && let Some(origin) = local_origin(entry) {
+                let _ = writeln!(
+                    body,
+                    "A check named `mainnet/...` or `testnet/...` names the network passphrase it hashes or signs with. The data is {origin}, not a transaction or ledger of that network.\n"
+                );
+            }
+            if cause.is_none() {
+                let _ = writeln!(body, "## Input\n");
+            }
             let _ = writeln!(
                 body,
                 "Corpus entry `{}` (family `{}`) of the [shapekit]({SHAPEKIT_URL}) corpus {}.\n",
@@ -355,18 +544,16 @@ pub fn drafts(
                 let _ = writeln!(body, "\nRelated: {}", entry.linked_issues.join(", "));
             }
             let _ = writeln!(body, "\n## Sibling issues\n");
-            let mut siblings = Vec::new();
-            for s in affected.iter().filter(|s| *s != &sdk) {
-                let conf = versions.sdk(s)?;
-                siblings.push(format!(
-                    "- `{}` ({}) diverges on the same entry.",
-                    conf.package, conf.issues_repo
-                ));
-            }
+            let siblings = sibling_lines(sdk, &row.id, &scope, &by_sdk, context, versions)?;
             if siblings.is_empty() {
                 let _ = writeln!(
                     body,
-                    "None: no other package of shapekit's conformance matrix diverges on this entry, in this run or in its list of known failures."
+                    "None: no other package of shapekit's conformance matrices diverges on {}, in any matrix or in its list of known failures.",
+                    if scope.len() == 1 {
+                        "this entry"
+                    } else {
+                        "these entries"
+                    }
                 );
             } else {
                 for s in siblings {
@@ -386,6 +573,88 @@ pub fn drafts(
     }
     out.sort_by(|a, b| a.file.cmp(&b.file));
     Ok(out)
+}
+
+fn full_stop(text: &str) -> String {
+    if text.ends_with(['.', '?', '!']) {
+        text.to_string()
+    } else {
+        format!("{text}.")
+    }
+}
+
+// one line per other sdk diverging on any of `scope`, with the findings that take those
+// divergences
+fn sibling_lines(
+    sdk: &str,
+    entry: &str,
+    scope: &[String],
+    by_sdk: &BTreeMap<String, Vec<(String, &CheckRecord)>>,
+    context: &DraftContext,
+    versions: &VersionsFile,
+) -> Result<Vec<String>> {
+    // sdk -> entries of the scope it diverges on
+    let mut others: BTreeMap<String, BTreeSet<&str>> = BTreeMap::new();
+    for s in by_sdk.keys().filter(|s| *s != sdk) {
+        others.entry(s.clone()).or_default().insert(entry);
+    }
+    for e in scope {
+        for s in context.diverging.get(e).into_iter().flatten() {
+            if s != sdk {
+                others.entry(s.clone()).or_default().insert(e.as_str());
+            }
+        }
+    }
+    let mut lines = Vec::new();
+    for (other, entries) in &others {
+        let conf = versions.sdk(other)?;
+        let on = if scope.len() == 1 {
+            "the same entry".to_string()
+        } else if entries.len() == 1 {
+            format!(
+                "`{}`, one of these entries",
+                entries.iter().next().expect("one entry")
+            )
+        } else {
+            format!("{} of these entries", entries.len())
+        };
+        let ids: BTreeSet<&String> = entries
+            .iter()
+            .flat_map(|e| {
+                context
+                    .claims
+                    .get(&(other.clone(), (*e).to_string()))
+                    .into_iter()
+                    .flatten()
+            })
+            .collect();
+        let taken: Vec<String> = ids
+            .iter()
+            .map(|id| match context.findings.get(*id) {
+                Some(f) => {
+                    let state = match (f.status.as_str(), &f.link) {
+                        ("filed", Some(l)) => format!("filed as {l}"),
+                        ("duplicate-of", Some(l)) => format!("covered upstream by {l}"),
+                        ("draft", _) => "not filed yet".to_string(),
+                        ("wont-fix", _) => "not filed".to_string(),
+                        (s, _) => s.to_string(),
+                    };
+                    format!("{id}, {} ({state})", f.title)
+                }
+                None => (*id).clone(),
+            })
+            .collect();
+        let finding = if taken.is_empty() {
+            "no finding takes it yet".to_string()
+        } else {
+            format!("shapekit's finding {}", taken.join("; "))
+        };
+        lines.push(format!(
+            "- `{}` ({}) diverges on {on}: {finding}.",
+            conf.package, conf.issues_repo
+        ));
+    }
+    Ok(lines)
 }
 
 // one-line json for an issue body; long values are cut, the source file holds them whole
@@ -561,6 +830,13 @@ pub fn draft(opts: &DraftOptions) -> Result<DraftReport> {
     let versions = VersionsFile::load(&opts.versions)?;
     let mut context = DraftContext::from_known_failures(&opts.known_failures, &versions)?;
     context.causes = opts.causes.clone();
+    context.claims = opts.claims.clone();
+    context.findings = opts.findings.clone();
+    context.named_only = opts.named_only;
+    context.add_matrix(&matrix);
+    for m in &opts.sibling_matrices {
+        context.add_matrix(&runner::load_matrix(m)?);
+    }
     let drafts = drafts(&matrix, &manifest, &corpus, &versions, &context)?;
     std::fs::create_dir_all(&opts.out)
         .with_context(|| format!("creating {}", opts.out.display()))?;
