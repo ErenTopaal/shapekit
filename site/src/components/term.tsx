@@ -75,11 +75,14 @@ function TermTip({ id, definition, children, className }: { id: string; definiti
     }
   }, [open])
 
-  // escape and a press outside the term close the tip
+  // escape and a press outside the term close the tip. the escape listener runs in the capture
+  // phase of the window, before the radix dialog layers listen on the document, and prevents the
+  // default: an escape that closes a tip does not also close the sheet or dialog around it
   useEffect(() => {
     if (!open) return
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== "Escape") return
+      e.preventDefault()
       if (tip.current?.contains(document.activeElement)) trigger.current?.focus()
       clearTimeout(timer.current)
       setOpen(false)
@@ -89,10 +92,10 @@ function TermTip({ id, definition, children, className }: { id: string; definiti
       clearTimeout(timer.current)
       setOpen(false)
     }
-    document.addEventListener("keydown", onKey)
+    window.addEventListener("keydown", onKey, true)
     document.addEventListener("pointerdown", onDown)
     return () => {
-      document.removeEventListener("keydown", onKey)
+      window.removeEventListener("keydown", onKey, true)
       document.removeEventListener("pointerdown", onDown)
     }
   }, [open])
