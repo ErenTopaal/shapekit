@@ -75,8 +75,9 @@ What 0.2.0 holds:
   flags stay the same, as Horizon's effects do. Of stellar-etl's new failures, 112 are
   ETL-META-V4 (20 explorer chains below protocol 23 recorded with classic events off, so their
   meta is v2 or v3) and 4 are ETL-1.
-- Candidate lane: 46 findings, 45 drafted and not filed, covering 847 failures, 0 unmapped
-  (`candidate/findings/FINDINGS.md`). New with the promoted entries: DART-PRICE and NET-PRICE
+- Candidate lane: 46 findings covering 847 failures, 0 unmapped
+  (`candidate/findings/FINDINGS.md`): 27 drafted and not filed, 8 duplicates of another
+  finding and 11 recorded as won't fix. New with the promoted entries: DART-PRICE and NET-PRICE
   (offer prices not in lowest terms rebuilt as another fraction, so the hash changes),
   DART-MAXTIME (a max time of 2^64-1 clamped), KMP-TXOBJECT and PHP-OFFERID (values core
   applied refused when the transaction is rebuilt) and PHP-SETOPTIONS (a present 0 or empty
