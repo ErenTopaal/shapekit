@@ -10,7 +10,7 @@ import sys
 from collections.abc import Callable, Iterator
 from typing import Any, TypeVar
 
-import xdrlib3
+from .sdkapi import codec_rejections
 
 PROTOCOL_VERSION = 2
 
@@ -38,10 +38,11 @@ class SdkFailure(Exception):
 
 
 # the exceptions stellar-sdk raises on purpose when it refuses an input. its docstrings name
-# ValueError (stellar_sdk.exceptions.SdkError's subclasses are ValueErrors too); the generated
-# xdr classes let xdrlib3 refuse short or malformed input with EOFError, xdrlib3.Error or the
-# struct.error its packer raises; OverflowError is python's refusal of an int that does not fit
-# a fixed width. anything else escaping an sdk call (RecursionError, TypeError, KeyError,
+# ValueError (stellar_sdk.exceptions.SdkError's subclasses are ValueErrors too, and so are
+# stellar-xdr's XdrError and stellar-strkey's StrkeyError); the generated xdr classes of 17.x
+# let xdrlib3 refuse short or malformed input with EOFError, xdrlib3.Error or the struct.error
+# its packer raises; OverflowError is python's refusal of an int that does not fit a fixed
+# width. anything else escaping an sdk call (RecursionError, TypeError, KeyError,
 # AttributeError, AssertionError, ...) is not a documented refusal and counts as a crash.
 REJECTIONS: tuple[type[BaseException], ...] = (
     ValueError,
@@ -49,8 +50,7 @@ REJECTIONS: tuple[type[BaseException], ...] = (
     OverflowError,
     struct.error,
     binascii.Error,
-    xdrlib3.Error,
-)
+) + codec_rejections()
 
 
 # the request and response json of the deepest corpus values nests about 2100 levels, past

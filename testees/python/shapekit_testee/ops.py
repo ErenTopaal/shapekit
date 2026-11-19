@@ -10,13 +10,14 @@ import platform
 from typing import Any
 
 import stellar_sdk
-from stellar_sdk import Asset, MuxedAccount, Network, StrKey, TransactionBuilder, scval
+from stellar_sdk import Asset, MuxedAccount, Network, TransactionBuilder, scval
 from stellar_sdk import xdr as stellar_xdr
 from stellar_sdk.fee_bump_transaction_envelope import FeeBumpTransactionEnvelope
 from stellar_sdk.liquidity_pool_asset import LiquidityPoolAsset
 from stellar_sdk.operation import ManageSellOffer
 from stellar_sdk.utils import sha256
 
+from . import sdkapi
 from .native import describe_native
 from .protocol import (
     PROTOCOL_VERSION,
@@ -37,8 +38,8 @@ SDK_PACKAGE = "stellar-sdk"
 # the base account of muxed ids: 32 bytes of 0x3a, the key the textual-id vectors use
 MUXED_BASE = "GA5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DVTUJ"
 
-# StrKey has one decoder and encoder per kind; the protocol's kind, its first character and
-# the StrKey method suffix
+# StrKey (up to 17.x) has one decoder and encoder per kind; the protocol's kind, its first
+# character and the StrKey method suffix
 STRKEY_KINDS = {
     "account": ("G", "ed25519_public_key"),
     "muxed_account": ("M", "med25519_public_key"),
@@ -119,9 +120,8 @@ class Ops:
     def hello(self, req: Request) -> dict[str, Any]:
         components = {
             "python": f"{platform.python_implementation()} {platform.python_version()}",
+            **sdkapi.components(),
         }
-        for dist in ("xdrlib3", "pynacl"):
-            components[dist] = importlib.metadata.version(dist)
         if self.coverage is not None:
             components["coverage"] = importlib.metadata.version("coverage")
         return {
@@ -130,9 +130,10 @@ class Ops:
             "sdk_version": self.version,
             "components": components,
             "ops": self.supported(),
-            # from_xdr_bytes takes no limits. the generated unpack(unpacker, depth_limit) takes a
-            # depth, but nothing in the sdk takes a length limit, so the sdk decodes with its
-            # defaults: depth 512 (stellar_sdk.xdr.base.DEFAULT_XDR_MAX_DEPTH), any length
+            # nothing in the sdk takes a length limit, so the sdk decodes with its defaults. up
+            # to 17.x from_xdr_bytes takes no limits (the generated unpack takes a depth): depth
+            # 512, any length. stellar-xdr's from_xdr_bytes takes max_depth only: depth 500,
+            # any length
             "decode_limits": "ignored",
         }
 
@@ -141,7 +142,8 @@ class Ops:
     def decode(self, req: Request) -> Any:
         cls = xdr_class(self.version, req.str("type"))
         data = req.bytes("xdr")
-        # from_xdr_bytes refuses trailing bytes itself ("Unexpected trailing ... bytes")
+        # from_xdr_bytes refuses trailing bytes itself ("Unexpected trailing ... bytes", or
+        # stellar-xdr's "... unexpected bytes after the value")
         return sdk(lambda: cls.from_xdr_bytes(data))
 
     def decode_encode(self, req: Request) -> dict[str, Any]:
@@ -151,19 +153,22 @@ class Ops:
 
     def decode_json(self, req: Request) -> dict[str, Any]:
         value = self.decode(req)
-        text = sdk(value.to_json)
+        out = sdk(lambda: sdkapi.to_json(value))
         try:
             with testee_recursion():
-                return {"json": json.loads(text)}
-        except ValueError as err:
-            raise Internal(f"to_json wrote text that is not json: {err}") from err
+                if isinstance(out, str):
+                    return {"json": json.loads(out)}
+                # a json value goes through json text, which checks that it holds only json
+                return {"json": json.loads(json.dumps(out, allow_nan=False))}
+        except (TypeError, ValueError) as err:
+            raise Internal(f"the sdk wrote json that is not json: {err}") from err
 
     def encode_json(self, req: Request) -> dict[str, Any]:
         cls = xdr_class(self.version, req.str("type"))
         plain = plain_json(req.raw("json"))
         with testee_recursion():
             text = json.dumps(plain)
-        value = sdk(lambda: cls.from_json(text))
+        value = sdk(lambda: sdkapi.from_json(cls, plain, text))
         out = sdk(value.to_xdr_bytes)
         return {"xdr": base64.b64encode(out).decode("ascii")}
 
@@ -181,11 +186,13 @@ class Ops:
                 text = raw.decode("utf-8")
             except UnicodeDecodeError as err:
                 raise Unsupported(
-                    "StrKey decodes python str, which cannot hold bytes that are not utf-8"
+                    "the sdk's strkey decoders take python str, which cannot hold bytes that are not utf-8"
                 ) from err
+        if sdkapi.STRKEY_CLASSES:
+            return self.strkey_decode_classes(text)
         for kind, (prefix, suffix) in STRKEY_KINDS.items():
             if text.startswith(prefix):
-                decode = getattr(StrKey, f"decode_{suffix}", None)
+                decode = getattr(stellar_sdk.StrKey, f"decode_{suffix}", None)
                 if decode is None:
                     # the protocol counts a missing decoder for a prefix as the sdk refusing it
                     raise_rejected(f"StrKey.decode_{suffix} does not exist in stellar-sdk {self.version}")
@@ -199,11 +206,43 @@ class Ops:
         payload = req.bytes("payload")
         if kind not in STRKEY_KINDS:
             raise BadRequest(f"unknown strkey kind {kind}")
+        if sdkapi.STRKEY_CLASSES:
+            return self.strkey_encode_classes(kind, payload)
         _, suffix = STRKEY_KINDS[kind]
-        encode = getattr(StrKey, f"encode_{suffix}", None)
+        encode = getattr(stellar_sdk.StrKey, f"encode_{suffix}", None)
         if encode is None:
             raise Unsupported(f"stellar-sdk {self.version} has no StrKey.encode_{suffix}")
         return {"text": sdk(lambda: encode(payload))}
+
+    def strkey_decode_classes(self, text: str) -> dict[str, Any]:
+        """stellar-strkey's generic decoder, parse, which refuses a seed by design and points
+        at Ed25519PrivateKey.from_string for it."""
+        strkey = sdkapi.strkey
+
+        def decode() -> Any:
+            try:
+                return strkey.parse(text)
+            except strkey.WrongStrkeyTypeError as err:
+                if err.expected is None and err.found is strkey.Ed25519PrivateKey:
+                    return strkey.Ed25519PrivateKey.from_string(text)
+                raise
+
+        key = sdk(decode)
+        kind = sdkapi.STRKEY_CLASS_KINDS.get(type(key).__name__)
+        if kind is None:
+            raise Internal(f"stellar-strkey decoded a {type(key).__name__}, which has no protocol kind")
+        # to_bytes is the binary form between the version byte and the checksum
+        return {"kind": kind, "payload": base64.b64encode(sdk(key.to_bytes)).decode("ascii")}
+
+    def strkey_encode_classes(self, kind: str, payload: bytes) -> dict[str, Any]:
+        """the class of the kind built from_bytes, the binary form, and written as text: str,
+        or reveal for a seed, whose str hides it."""
+        name = next(n for n, k in sdkapi.STRKEY_CLASS_KINDS.items() if k == kind)
+        cls = getattr(sdkapi.strkey, name, None)
+        if cls is None:
+            raise Unsupported(f"stellar-sdk {self.version} has no stellar_sdk.strkey.{name}")
+        key = sdk(lambda: cls.from_bytes(payload))
+        return {"text": sdk(key.reveal if kind == "seed" else lambda: str(key))}
 
     # ordering
 
@@ -291,8 +330,7 @@ class Ops:
         muxed = sdk(lambda: MuxedAccount(MUXED_BASE, number))  # type: ignore[arg-type]
         # the id the network sees is the one in the M address
         address = sdk(lambda: muxed.account_muxed)
-        raw = sdk(lambda: StrKey.decode_med25519_public_key(address))
-        return str(int.from_bytes(raw[32:40], "big"))
+        return str(sdk(lambda: sdkapi.muxed_account_id(address)))
 
     def to_native(self, req: Request) -> dict[str, Any]:
         data = req.bytes("xdr")
@@ -348,17 +386,11 @@ class Ops:
         if preimage.type == stellar_xdr.ContractIDPreimageType.CONTRACT_ID_PREIMAGE_FROM_ASSET:
             asset = sdk(lambda: Asset.from_xdr_object(preimage.from_asset))
             text = sdk(lambda: asset.contract_id(passphrase))
-            raw = sdk(lambda: StrKey.decode_contract(text))
+            raw = sdk(lambda: sdkapi.decode_contract(text))
             return {"contract_id": raw.hex()}
 
         def address_id() -> bytes:
-            full = stellar_xdr.HashIDPreimage(
-                stellar_xdr.EnvelopeType.ENVELOPE_TYPE_CONTRACT_ID,
-                contract_id=stellar_xdr.HashIDPreimageContractID(
-                    network_id=stellar_xdr.Hash(Network(passphrase).network_id()),
-                    contract_id_preimage=preimage,
-                ),
-            )
+            full = sdkapi.contract_id_preimage(Network(passphrase).network_id(), preimage)
             return sha256(full.to_xdr_bytes())
 
         return {"contract_id": sdk(address_id).hex()}
