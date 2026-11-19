@@ -33,21 +33,24 @@ permissions:
   contents: read
 jobs:
   corpus:
-    uses: ErenTopaal/shapekit/.github/workflows/indexer-conformance.yml@<release tag>
+    uses: ErenTopaal/shapekit/.github/workflows/indexer-conformance.yml@v0.2.0
     with:
       adapter: bin/my-adapter
       setup: go build -o bin/my-adapter ./cmd/my-adapter
       go-version: "1.27.4"
-      shapekit-tag: <release tag>
-      corpus-asset: corpus-<version>.tar.zst
-      corpus-sha256: <sha256 of corpus-<version>.tar.zst from SHA256SUMS>
-      shapekit-sha256: <sha256 of shapekit-linux-x86_64 from SHA256SUMS>
+      shapekit-tag: v0.2.0
+      corpus-asset: corpus-0.2.0.tar.zst
+      corpus-sha256: 6fa534d82f6cb46b39311904ff2d6f1233e2b39f71aef391afcdce664fa65c04
+      shapekit-sha256: 9b6c29ba1be088b76678777523b1cbcd17fc2c6194c6306e6dda33e890b6484e
       expect: ci/shapekit/expected-verdicts.toml
       expect-mode: regressions
 ```
 
-The values in angle brackets come from the release page. Reference the reusable workflow by the
-same tag, so the workflow and the corpus come from one release.
+The release values are those of
+[v0.2.0](https://github.com/ErenTopaal/shapekit/releases/tag/v0.2.0): the two sha256 values are
+the lines of `corpus-0.2.0.tar.zst` and `shapekit-linux-x86_64` in its `SHA256SUMS`. For a
+later release, take the tag, the asset name and both values from its release page. Reference the
+reusable workflow by the same tag, so the workflow and the corpus come from one release.
 
 | input | required | meaning |
 |---|---|---|
@@ -179,7 +182,7 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
-    uses: ErenTopaal/shapekit/.github/workflows/indexer-conformance.yml@<release tag>
+    uses: ErenTopaal/shapekit/.github/workflows/indexer-conformance.yml@v0.2.0
     with:
       adapter: bin/my-adapter
       comment: true
@@ -209,7 +212,7 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
-    uses: ErenTopaal/shapekit/.github/workflows/indexer-conformance.yml@<release tag>
+    uses: ErenTopaal/shapekit/.github/workflows/indexer-conformance.yml@v0.2.0
     with:
       go-version: "1.27.4"
       setup: go build -C ../shapekit/adapters -o bin/wb-adapter ./walletbackend/cmd/wb-adapter
@@ -235,7 +238,7 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
-    uses: ErenTopaal/shapekit/.github/workflows/indexer-conformance.yml@<release tag>
+    uses: ErenTopaal/shapekit/.github/workflows/indexer-conformance.yml@v0.2.0
     with:
       go-version: "1.27.4"
       setup: |

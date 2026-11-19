@@ -33,19 +33,22 @@ permissions:
   contents: read
 jobs:
   corpus:
-    uses: ErenTopaal/shapekit/.github/workflows/sdk-conformance.yml@<release tag>
+    uses: ErenTopaal/shapekit/.github/workflows/sdk-conformance.yml@v0.2.0
     with:
       sdk: js
-      shapekit-tag: <release tag>
-      corpus-asset: corpus-<version>.tar.zst
-      corpus-sha256: <sha256 of corpus-<version>.tar.zst from SHA256SUMS>
-      shapekit-sha256: <sha256 of shapekit-linux-x86_64 from SHA256SUMS>
+      shapekit-tag: v0.2.0
+      corpus-asset: corpus-0.2.0.tar.zst
+      corpus-sha256: 6fa534d82f6cb46b39311904ff2d6f1233e2b39f71aef391afcdce664fa65c04
+      shapekit-sha256: 9b6c29ba1be088b76678777523b1cbcd17fc2c6194c6306e6dda33e890b6484e
       versions-file: ci/shapekit/versions.toml
       known-failures: ci/shapekit/known-failures
 ```
 
-The values in angle brackets come from the release page. Reference the reusable workflow by the
-same tag, so the workflow and the corpus come from one release. `sdk` is one of `rust`, `go`,
+The release values are those of
+[v0.2.0](https://github.com/ErenTopaal/shapekit/releases/tag/v0.2.0): the two sha256 values are
+the lines of `corpus-0.2.0.tar.zst` and `shapekit-linux-x86_64` in its `SHA256SUMS`. For a
+later release, take the tag, the asset name and both values from its release page. Reference the
+reusable workflow by the same tag, so the workflow and the corpus come from one release. `sdk` is one of `rust`, `go`,
 `js`, `python`, `java`, `kmp`, `soroban`, `dart`, `php`, `dotnet` and `stellar-cli`, the keys of
 [conformance/versions.toml](../conformance/versions.toml); each SDK's section under
 [Versions files per SDK](#versions-files-per-sdk) shows the workflow file for it.
@@ -108,7 +111,7 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
-    uses: ErenTopaal/shapekit/.github/workflows/sdk-conformance.yml@<release tag>
+    uses: ErenTopaal/shapekit/.github/workflows/sdk-conformance.yml@v0.2.0
     with:
       sdk: js
       comment: true
@@ -186,13 +189,13 @@ permissions:
   contents: read
 jobs:
   corpus:
-    uses: ErenTopaal/shapekit/.github/workflows/sdk-conformance.yml@<release tag>
+    uses: ErenTopaal/shapekit/.github/workflows/sdk-conformance.yml@v0.2.0
     with:
       sdk: rust
-      shapekit-tag: <release tag>
-      corpus-asset: corpus-<version>.tar.zst
-      corpus-sha256: <sha256 of corpus-<version>.tar.zst from SHA256SUMS>
-      shapekit-sha256: <sha256 of shapekit-linux-x86_64 from SHA256SUMS>
+      shapekit-tag: v0.2.0
+      corpus-asset: corpus-0.2.0.tar.zst
+      corpus-sha256: 6fa534d82f6cb46b39311904ff2d6f1233e2b39f71aef391afcdce664fa65c04
+      shapekit-sha256: 9b6c29ba1be088b76678777523b1cbcd17fc2c6194c6306e6dda33e890b6484e
       versions-file: ci/shapekit/versions.toml
       known-failures: ci/shapekit/known-failures
 ```
@@ -246,13 +249,13 @@ permissions:
   contents: read
 jobs:
   corpus:
-    uses: ErenTopaal/shapekit/.github/workflows/sdk-conformance.yml@<release tag>
+    uses: ErenTopaal/shapekit/.github/workflows/sdk-conformance.yml@v0.2.0
     with:
       sdk: go
-      shapekit-tag: <release tag>
-      corpus-asset: corpus-<version>.tar.zst
-      corpus-sha256: <sha256 of corpus-<version>.tar.zst from SHA256SUMS>
-      shapekit-sha256: <sha256 of shapekit-linux-x86_64 from SHA256SUMS>
+      shapekit-tag: v0.2.0
+      corpus-asset: corpus-0.2.0.tar.zst
+      corpus-sha256: 6fa534d82f6cb46b39311904ff2d6f1233e2b39f71aef391afcdce664fa65c04
+      shapekit-sha256: 9b6c29ba1be088b76678777523b1cbcd17fc2c6194c6306e6dda33e890b6484e
       versions-file: ci/shapekit/versions.toml
       known-failures: ci/shapekit/known-failures
 ```
@@ -316,13 +319,13 @@ permissions:
   contents: read
 jobs:
   corpus:
-    uses: ErenTopaal/shapekit/.github/workflows/sdk-conformance.yml@<release tag>
+    uses: ErenTopaal/shapekit/.github/workflows/sdk-conformance.yml@v0.2.0
     with:
       sdk: js
-      shapekit-tag: <release tag>
-      corpus-asset: corpus-<version>.tar.zst
-      corpus-sha256: <sha256 of corpus-<version>.tar.zst from SHA256SUMS>
-      shapekit-sha256: <sha256 of shapekit-linux-x86_64 from SHA256SUMS>
+      shapekit-tag: v0.2.0
+      corpus-asset: corpus-0.2.0.tar.zst
+      corpus-sha256: 6fa534d82f6cb46b39311904ff2d6f1233e2b39f71aef391afcdce664fa65c04
+      shapekit-sha256: 9b6c29ba1be088b76678777523b1cbcd17fc2c6194c6306e6dda33e890b6484e
       versions-file: ci/shapekit/versions.toml
       known-failures: ci/shapekit/known-failures
 ```
@@ -383,13 +386,13 @@ permissions:
   contents: read
 jobs:
   corpus:
-    uses: ErenTopaal/shapekit/.github/workflows/sdk-conformance.yml@<release tag>
+    uses: ErenTopaal/shapekit/.github/workflows/sdk-conformance.yml@v0.2.0
     with:
       sdk: python
-      shapekit-tag: <release tag>
-      corpus-asset: corpus-<version>.tar.zst
-      corpus-sha256: <sha256 of corpus-<version>.tar.zst from SHA256SUMS>
-      shapekit-sha256: <sha256 of shapekit-linux-x86_64 from SHA256SUMS>
+      shapekit-tag: v0.2.0
+      corpus-asset: corpus-0.2.0.tar.zst
+      corpus-sha256: 6fa534d82f6cb46b39311904ff2d6f1233e2b39f71aef391afcdce664fa65c04
+      shapekit-sha256: 9b6c29ba1be088b76678777523b1cbcd17fc2c6194c6306e6dda33e890b6484e
       versions-file: ci/shapekit/versions.toml
       known-failures: ci/shapekit/known-failures
 ```
@@ -451,13 +454,13 @@ permissions:
   contents: read
 jobs:
   corpus:
-    uses: ErenTopaal/shapekit/.github/workflows/sdk-conformance.yml@<release tag>
+    uses: ErenTopaal/shapekit/.github/workflows/sdk-conformance.yml@v0.2.0
     with:
       sdk: java
-      shapekit-tag: <release tag>
-      corpus-asset: corpus-<version>.tar.zst
-      corpus-sha256: <sha256 of corpus-<version>.tar.zst from SHA256SUMS>
-      shapekit-sha256: <sha256 of shapekit-linux-x86_64 from SHA256SUMS>
+      shapekit-tag: v0.2.0
+      corpus-asset: corpus-0.2.0.tar.zst
+      corpus-sha256: 6fa534d82f6cb46b39311904ff2d6f1233e2b39f71aef391afcdce664fa65c04
+      shapekit-sha256: 9b6c29ba1be088b76678777523b1cbcd17fc2c6194c6306e6dda33e890b6484e
       versions-file: ci/shapekit/versions.toml
       known-failures: ci/shapekit/known-failures
 ```
@@ -516,13 +519,13 @@ permissions:
   contents: read
 jobs:
   corpus:
-    uses: ErenTopaal/shapekit/.github/workflows/sdk-conformance.yml@<release tag>
+    uses: ErenTopaal/shapekit/.github/workflows/sdk-conformance.yml@v0.2.0
     with:
       sdk: kmp
-      shapekit-tag: <release tag>
-      corpus-asset: corpus-<version>.tar.zst
-      corpus-sha256: <sha256 of corpus-<version>.tar.zst from SHA256SUMS>
-      shapekit-sha256: <sha256 of shapekit-linux-x86_64 from SHA256SUMS>
+      shapekit-tag: v0.2.0
+      corpus-asset: corpus-0.2.0.tar.zst
+      corpus-sha256: 6fa534d82f6cb46b39311904ff2d6f1233e2b39f71aef391afcdce664fa65c04
+      shapekit-sha256: 9b6c29ba1be088b76678777523b1cbcd17fc2c6194c6306e6dda33e890b6484e
       versions-file: ci/shapekit/versions.toml
       known-failures: ci/shapekit/known-failures
 ```
@@ -573,13 +576,13 @@ permissions:
   contents: read
 jobs:
   corpus:
-    uses: ErenTopaal/shapekit/.github/workflows/sdk-conformance.yml@<release tag>
+    uses: ErenTopaal/shapekit/.github/workflows/sdk-conformance.yml@v0.2.0
     with:
       sdk: soroban
-      shapekit-tag: <release tag>
-      corpus-asset: corpus-<version>.tar.zst
-      corpus-sha256: <sha256 of corpus-<version>.tar.zst from SHA256SUMS>
-      shapekit-sha256: <sha256 of shapekit-linux-x86_64 from SHA256SUMS>
+      shapekit-tag: v0.2.0
+      corpus-asset: corpus-0.2.0.tar.zst
+      corpus-sha256: 6fa534d82f6cb46b39311904ff2d6f1233e2b39f71aef391afcdce664fa65c04
+      shapekit-sha256: 9b6c29ba1be088b76678777523b1cbcd17fc2c6194c6306e6dda33e890b6484e
       versions-file: ci/shapekit/versions.toml
       known-failures: ci/shapekit/known-failures
 ```
@@ -637,13 +640,13 @@ permissions:
   contents: read
 jobs:
   corpus:
-    uses: ErenTopaal/shapekit/.github/workflows/sdk-conformance.yml@<release tag>
+    uses: ErenTopaal/shapekit/.github/workflows/sdk-conformance.yml@v0.2.0
     with:
       sdk: dart
-      shapekit-tag: <release tag>
-      corpus-asset: corpus-<version>.tar.zst
-      corpus-sha256: <sha256 of corpus-<version>.tar.zst from SHA256SUMS>
-      shapekit-sha256: <sha256 of shapekit-linux-x86_64 from SHA256SUMS>
+      shapekit-tag: v0.2.0
+      corpus-asset: corpus-0.2.0.tar.zst
+      corpus-sha256: 6fa534d82f6cb46b39311904ff2d6f1233e2b39f71aef391afcdce664fa65c04
+      shapekit-sha256: 9b6c29ba1be088b76678777523b1cbcd17fc2c6194c6306e6dda33e890b6484e
       versions-file: ci/shapekit/versions.toml
       known-failures: ci/shapekit/known-failures
 ```
@@ -714,13 +717,13 @@ permissions:
   contents: read
 jobs:
   corpus:
-    uses: ErenTopaal/shapekit/.github/workflows/sdk-conformance.yml@<release tag>
+    uses: ErenTopaal/shapekit/.github/workflows/sdk-conformance.yml@v0.2.0
     with:
       sdk: php
-      shapekit-tag: <release tag>
-      corpus-asset: corpus-<version>.tar.zst
-      corpus-sha256: <sha256 of corpus-<version>.tar.zst from SHA256SUMS>
-      shapekit-sha256: <sha256 of shapekit-linux-x86_64 from SHA256SUMS>
+      shapekit-tag: v0.2.0
+      corpus-asset: corpus-0.2.0.tar.zst
+      corpus-sha256: 6fa534d82f6cb46b39311904ff2d6f1233e2b39f71aef391afcdce664fa65c04
+      shapekit-sha256: 9b6c29ba1be088b76678777523b1cbcd17fc2c6194c6306e6dda33e890b6484e
       versions-file: ci/shapekit/versions.toml
       known-failures: ci/shapekit/known-failures
 ```
@@ -786,13 +789,13 @@ permissions:
   contents: read
 jobs:
   corpus:
-    uses: ErenTopaal/shapekit/.github/workflows/sdk-conformance.yml@<release tag>
+    uses: ErenTopaal/shapekit/.github/workflows/sdk-conformance.yml@v0.2.0
     with:
       sdk: dotnet
-      shapekit-tag: <release tag>
-      corpus-asset: corpus-<version>.tar.zst
-      corpus-sha256: <sha256 of corpus-<version>.tar.zst from SHA256SUMS>
-      shapekit-sha256: <sha256 of shapekit-linux-x86_64 from SHA256SUMS>
+      shapekit-tag: v0.2.0
+      corpus-asset: corpus-0.2.0.tar.zst
+      corpus-sha256: 6fa534d82f6cb46b39311904ff2d6f1233e2b39f71aef391afcdce664fa65c04
+      shapekit-sha256: 9b6c29ba1be088b76678777523b1cbcd17fc2c6194c6306e6dda33e890b6484e
       versions-file: ci/shapekit/versions.toml
       known-failures: ci/shapekit/known-failures
 ```
@@ -836,13 +839,13 @@ permissions:
   contents: read
 jobs:
   corpus:
-    uses: ErenTopaal/shapekit/.github/workflows/sdk-conformance.yml@<release tag>
+    uses: ErenTopaal/shapekit/.github/workflows/sdk-conformance.yml@v0.2.0
     with:
       sdk: stellar-cli
-      shapekit-tag: <release tag>
-      corpus-asset: corpus-<version>.tar.zst
-      corpus-sha256: <sha256 of corpus-<version>.tar.zst from SHA256SUMS>
-      shapekit-sha256: <sha256 of shapekit-linux-x86_64 from SHA256SUMS>
+      shapekit-tag: v0.2.0
+      corpus-asset: corpus-0.2.0.tar.zst
+      corpus-sha256: 6fa534d82f6cb46b39311904ff2d6f1233e2b39f71aef391afcdce664fa65c04
+      shapekit-sha256: 9b6c29ba1be088b76678777523b1cbcd17fc2c6194c6306e6dda33e890b6484e
       versions-file: ci/shapekit/versions.toml
       known-failures: ci/shapekit/known-failures
 ```

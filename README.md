@@ -52,10 +52,37 @@ and, for every platform:
   checked against;
 - `SHA256SUMS` over all of them.
 
+The current release is [v0.2.0](https://github.com/ErenTopaal/shapekit/releases/tag/v0.2.0),
+with corpus 0.2.0. To download and check its Linux x86-64 assets:
+
 ```sh
+gh release download v0.2.0 --repo ErenTopaal/shapekit \
+  --pattern SHA256SUMS --pattern corpus-0.2.0.tar.zst \
+  --pattern 'shapekit-linux-x86_64' --pattern 'indexerlint-linux-x86_64' --pattern 'wb-adapter-linux-x86_64'
 sha256sum -c --ignore-missing SHA256SUMS      # macOS: shasum -a 256 -c --ignore-missing SHA256SUMS
 gh attestation verify shapekit-linux-x86_64 --repo ErenTopaal/shapekit
 chmod +x shapekit-linux-x86_64 indexerlint-linux-x86_64 wb-adapter-linux-x86_64
+```
+
+Without `gh`, each asset is at
+`https://github.com/ErenTopaal/shapekit/releases/download/v0.2.0/<asset>`. The sha256 values of
+v0.2.0, as its `SHA256SUMS` lists them:
+
+```text
+6fa534d82f6cb46b39311904ff2d6f1233e2b39f71aef391afcdce664fa65c04  corpus-0.2.0.tar.zst
+0a11bf9c0d981be29833e133b20f703ef027c8541366aefc246abb3c4310ef6e  goldens-core-v30.0.0.tar.zst
+0702a6b66d8bba87a802275f3290de07e24cc685352b8224d89710c79f5b834b  indexerlint-linux-arm64
+591504f89a07a20a0305e8766ff3d4fe06c96183652ebc34d4cd8b1ec1b20125  indexerlint-linux-x86_64
+c97deb7a80bbac4f8f00178c31efe02a7de4f9545fafdad0ee4fee9f56884202  indexerlint-macos-arm64
+f95e8c82210642f53cca6717dbd1d118234757fbdf16bc3af12430dde561fa90  indexerlint-macos-x86_64
+cc37401a07cfd3f06de7c9e91ee6a4c5b430d20fc5a336af61f6b1184f1b30e1  shapekit-linux-arm64
+9b6c29ba1be088b76678777523b1cbcd17fc2c6194c6306e6dda33e890b6484e  shapekit-linux-x86_64
+4e4ee6db8d89e713d8dd87f996056b97a63a4a7b431398b7846011d71ede0055  shapekit-macos-arm64
+11184dce82ce5c1a4d5ab35b76108f338ae9a71e30fdd5b0cc2737d3049786c8  shapekit-macos-x86_64
+1a310137739e86e7e2c5789006c823f68d57ce766d4f5dc93fea87b5f01179bd  wb-adapter-linux-arm64
+03a8407e6ead2aa334ff70d0e4ccb9597b8feeb8256771a03f3b8023076e58cc  wb-adapter-linux-x86_64
+548e5b7ca74daf264d0f1821ecb61f818faef5b4086a4952acbadbb9f69e0e14  wb-adapter-macos-arm64
+ba23828f768078d6969d77ae2eda6440dc3f4f9f657d555665993912d7c45713  wb-adapter-macos-x86_64
 ```
 
 Each platform's binaries are built on a GitHub runner of that platform. The project's own CI

@@ -410,12 +410,15 @@ finding's issue link when it is filed, at its draft otherwise, or at
 `candidate/finding-candidates.toml` for a record. Then run `shapekit oracle run`,
 `shapekit coverage` and the conformance run for the corpus.
 
-Failures a new run reports that are triaged but not filed upstream yet are recorded the same
-way, apart from the main findings: `candidate/findings/triage.toml` holds their findings, the
-committed run outputs live under `candidate/findings/inputs/`, and the issue drafts under
-`candidate/findings/issues/`. Check them with
-`shapekit findings check --triage candidate/findings/triage.toml --out candidate/findings --allow-draft`.
-A finding moves to `findings/triage.toml` once its upstream decision is recorded.
+Failures a new run reports are triaged the same way in the candidate lane, apart from the main
+findings: `candidate/findings/triage.toml` holds their findings, the committed run outputs live
+under `candidate/findings/inputs/`, and the issue drafts under `candidate/findings/issues/`.
+Check them with
+`shapekit findings check --triage candidate/findings/triage.toml --out candidate/findings --allow-draft`;
+`--allow-draft` lets a finding that waits for filing pass. A candidate finding records its
+upstream issue in its own triage, as a main finding does (`status = "filed"` and `link`).
+Moving it to `findings/triage.toml` also moves the inputs that hold its failures into the
+main record.
 `findings/triage.toml` names the candidate triage (`candidates = "candidate/findings/triage.toml"`),
 so when a main input reports a failure that no main finding takes but a candidate finding
 does, `shapekit findings collect` and `check` count it as held by that candidate finding:
