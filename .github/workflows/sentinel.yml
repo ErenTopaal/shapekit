@@ -48,23 +48,23 @@ jobs:
       # only to push the cursor to the sentinel-state branch
       contents: write
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: restore the shapekit binary built from this source
         id: bin
-        uses: actions/cache/restore@v6
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: target/release/shapekit
           key: shapekit-bin-${{ hashFiles('Cargo.lock', 'Cargo.toml', 'crates/**', 'rust-toolchain.toml') }}
       - if: steps.bin.outputs.cache-hit != 'true'
-        uses: dtolnay/rust-toolchain@1.99.1
+        uses: dtolnay/rust-toolchain@263313d2989f864a2b8613f97277288638e7d8f8 # 1.99.1
       - if: steps.bin.outputs.cache-hit != 'true'
-        uses: Swatinem/rust-cache@v2
+        uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         with:
           key: release
       - if: steps.bin.outputs.cache-hit != 'true'
         run: cargo build --release --locked -p shapekit-cli
       - if: steps.bin.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v6
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: target/release/shapekit
           key: ${{ steps.bin.outputs.cache-primary-key }}
@@ -158,7 +158,7 @@ jobs:
             grep '^backlog:' sentinel/watch.log || true
             echo "cursor after this run: $(cat sentinel/cursor.json)"
           } >> "$GITHUB_STEP_SUMMARY"
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: sentinel-${{ matrix.network }}

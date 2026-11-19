@@ -18,7 +18,7 @@ Docker.
 
 | Tool | Version | Pinned in |
 |---|---|---|
-| Rust | 1.99.1 | `rust-toolchain.toml`, `pins.toml` (with the channel manifest sha256), `dtolnay/rust-toolchain@1.99.1` |
+| Rust | 1.99.1 | `rust-toolchain.toml`, `pins.toml` (with the channel manifest sha256), `dtolnay/rust-toolchain` at the commit of its 1.99.1 branch |
 | Go | 1.27.4 | `go.work`, each `go.mod`, `pins.toml` (with the archive sha256), `actions/setup-go` |
 | Node.js | 26.13.1 | `actions/setup-node`, `pins.toml` (with the archive sha256); `testees/js/package.json` requires `>=26` |
 | TypeScript | 7.0.2 | `testees/js/package.json` and its lock file |

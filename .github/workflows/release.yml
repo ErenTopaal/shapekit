@@ -58,8 +58,8 @@ jobs:
       matrix:
         build: [a, b]
     steps:
-      - uses: actions/checkout@v7
-      - uses: dtolnay/rust-toolchain@1.99.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: dtolnay/rust-toolchain@263313d2989f864a2b8613f97277288638e7d8f8 # 1.99.1
       - run: cargo build --release --locked -p shapekit-cli
       - name: the tag names the version the binaries and the corpus archive carry
         # the binaries report the workspace version and the archive is named after the
@@ -109,7 +109,7 @@ jobs:
           cd "$RUNNER_TEMP/assets"
           rm -f SHA256SUMS
           sha256sum -- *.tar.zst | tee "$RUNNER_TEMP/archives-${{ matrix.build }}.sha256"
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: archives-${{ matrix.build }}
           path: |
@@ -133,9 +133,9 @@ jobs:
           - { runner: macos-15, platform: macos-arm64 }
           - { runner: macos-15-intel, platform: macos-x86_64 }
     steps:
-      - uses: actions/checkout@v7
-      - uses: dtolnay/rust-toolchain@1.99.1
-      - uses: actions/setup-go@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: dtolnay/rust-toolchain@263313d2989f864a2b8613f97277288638e7d8f8 # 1.99.1
+      - uses: actions/setup-go@d8cbb8045d7f43706b9177cceb36c1f91a6644d5 # v7.1.0
         with:
           go-version: 1.27.4
           cache: false
@@ -163,7 +163,7 @@ jobs:
           CGO_ENABLED: "0"
           PLATFORM: ${{ matrix.platform }}
         run: go build -trimpath -o "$RUNNER_TEMP/bin/wb-adapter-$PLATFORM" ./walletbackend/cmd/wb-adapter
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: binaries-${{ matrix.platform }}
           path: ${{ runner.temp }}/bin/
@@ -180,8 +180,8 @@ jobs:
       attestations: write
       artifact-metadata: write
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/download-artifact@v8
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           path: ${{ runner.temp }}/in
       - name: both archive builds agree byte for byte
@@ -208,7 +208,7 @@ jobs:
           fi
           chmod +x "$out"/shapekit-* "$out"/indexerlint-* "$out"/wb-adapter-*
           (cd "$out" && sha256sum -- * >SHA256SUMS && cat SHA256SUMS)
-      - uses: actions/attest@v4
+      - uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
         with:
           subject-checksums: ${{ runner.temp }}/release/SHA256SUMS
       - name: release notes and publish

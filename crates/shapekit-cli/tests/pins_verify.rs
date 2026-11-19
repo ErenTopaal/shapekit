@@ -141,3 +141,71 @@ fn online_altered_sha_fails() {
     assert!(stdout.contains("FAIL  git       stellar-core  refs/tags/v30.0.0 resolves to 0e49751aa9ddf892302cca02cea7f3f5d97df9f1"));
     assert!(stdout.contains(" 1 failed"));
 }
+
+/// Every action a workflow uses is named by a commit sha that pins.toml pins, with the release
+/// tag that names that commit as the comment after it, so a moved tag cannot change what runs
+/// and pins verify checks the tag still names the commit. No git pin of the repository floats.
+#[test]
+fn workflow_actions_are_the_pinned_commits() {
+    let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
+    let pins: toml::Table = std::fs::read_to_string(repo_pins())
+        .unwrap()
+        .parse()
+        .unwrap();
+    let git = pins["git"].as_array().unwrap();
+    for g in git {
+        assert!(
+            g.get("sha").is_some(),
+            "pins.toml: git pin {} has no sha",
+            g["name"]
+        );
+    }
+    let mut seen = 0;
+    let mut dir: Vec<_> = std::fs::read_dir(root.join(".github/workflows"))
+        .unwrap()
+        .map(|e| e.unwrap().path())
+        .collect();
+    dir.sort();
+    for wf in dir {
+        let text = std::fs::read_to_string(&wf).unwrap();
+        for (n, line) in text.lines().enumerate() {
+            let rest = line.trim_start().trim_start_matches("- ");
+            let Some(rest) = rest.strip_prefix("uses:") else {
+                continue;
+            };
+            let at = format!("{}:{}", wf.display(), n + 1);
+            let (action, comment) = rest.trim().split_once(' ').unwrap_or((rest.trim(), ""));
+            // a reusable workflow of this repository runs at the caller's own commit
+            if action.starts_with("./") {
+                continue;
+            }
+            let (path, sha) = action
+                .split_once('@')
+                .unwrap_or_else(|| panic!("{at}: {action} names no version"));
+            assert!(
+                sha.len() == 40 && sha.bytes().all(|b| matches!(b, b'0'..=b'9' | b'a'..=b'f')),
+                "{at}: {action} is not named by a commit sha"
+            );
+            // owner/repo, then an optional path inside it (actions/cache/restore)
+            let repo: Vec<&str> = path.splitn(3, '/').take(2).collect();
+            let url = format!("https://github.com/{}", repo.join("/"));
+            let pin = git
+                .iter()
+                .find(|g| g["url"].as_str() == Some(&url) && g["sha"].as_str() == Some(sha))
+                .unwrap_or_else(|| panic!("{at}: no git pin in pins.toml for {url} at {sha}"));
+            let comment = comment.trim();
+            let version = comment
+                .strip_prefix("# ")
+                .unwrap_or_else(|| panic!("{at}: {action} has no `# <version>` comment"));
+            if let Some(r) = pin.get("ref") {
+                assert_eq!(
+                    r.as_str().unwrap(),
+                    format!("refs/tags/{version}"),
+                    "{at}: the comment names another release than pins.toml"
+                );
+            }
+            seen += 1;
+        }
+    }
+    assert!(seen > 100, "read only {seen} action uses");
+}

@@ -57,15 +57,15 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v7
-      - uses: dtolnay/rust-toolchain@1.99.1
-      - uses: Swatinem/rust-cache@v2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: dtolnay/rust-toolchain@263313d2989f864a2b8613f97277288638e7d8f8 # 1.99.1
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         with:
           key: release
       - run: cargo build --release --locked -p shapekit-cli
       - name: derive the site data from the committed files
         run: target/release/shapekit site data --out site/public/data --commit "$GITHUB_SHA"
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 26.13.1
           cache: npm
@@ -106,7 +106,7 @@ jobs:
           docker run --rm -v "$PWD/site/Caddyfile:/etc/caddy/Caddyfile:ro" "$image" \
             caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile
       # the built site, for inspection
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: site
           path: site/dist/client

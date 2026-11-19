@@ -41,7 +41,7 @@ jobs:
       seed: ${{ steps.seed.outputs.seed }}
       below: ${{ steps.below.outputs.below }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: the seed every job draws with
         id: seed
         env:
@@ -49,20 +49,20 @@ jobs:
         run: echo "seed=${SEED:-$(date -u +%Y%m%d)}" >> "$GITHUB_OUTPUT"
       - name: restore the shapekit binary built from this source
         id: bin
-        uses: actions/cache/restore@v6
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: target/release/shapekit
           key: shapekit-bin-${{ hashFiles('Cargo.lock', 'Cargo.toml', 'crates/**', 'rust-toolchain.toml') }}
       - if: steps.bin.outputs.cache-hit != 'true'
-        uses: dtolnay/rust-toolchain@1.99.1
+        uses: dtolnay/rust-toolchain@263313d2989f864a2b8613f97277288638e7d8f8 # 1.99.1
       - if: steps.bin.outputs.cache-hit != 'true'
-        uses: Swatinem/rust-cache@v2
+        uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         with:
           key: release
       - if: steps.bin.outputs.cache-hit != 'true'
         run: cargo build --release --locked -p shapekit-cli
       - if: steps.bin.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v6
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: target/release/shapekit
           key: ${{ steps.bin.outputs.cache-primary-key }}
@@ -80,7 +80,7 @@ jobs:
           fi
           echo "below=$BELOW" >> "$GITHUB_OUTPUT"
           echo "drawn with \`--seed $SEED --below $BELOW\`" >> "$GITHUB_STEP_SUMMARY"
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: shapekit-audit-bin
           path: target/release/shapekit
@@ -92,8 +92,8 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/download-artifact@v8
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: shapekit-audit-bin
           path: ${{ runner.temp }}/bin
@@ -111,7 +111,7 @@ jobs:
       - name: job summary
         if: always() && hashFiles('audit/laws.json') != ''
         run: '"$RUNNER_TEMP/bin/shapekit" audit summary --report audit/laws.json >> "$GITHUB_STEP_SUMMARY"'
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: audit-laws
@@ -131,13 +131,13 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - if: matrix.sdk == 'rust'
-        uses: dtolnay/rust-toolchain@1.99.1
+        uses: dtolnay/rust-toolchain@263313d2989f864a2b8613f97277288638e7d8f8 # 1.99.1
       # the rust testee builds outside the workspace into its own target directory, which is
       # what is cached
       - if: matrix.sdk == 'rust'
-        uses: actions/cache@v6
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: |
             ~/.cargo/registry/index
@@ -145,17 +145,17 @@ jobs:
             target/testees/rust/30.0.0
           key: testee-rust-30.0.0-${{ hashFiles('testees/rust/versions/30.0.0/Cargo.lock') }}
       - if: matrix.sdk == 'go'
-        uses: actions/setup-go@v7
+        uses: actions/setup-go@d8cbb8045d7f43706b9177cceb36c1f91a6644d5 # v7.1.0
         with:
           go-version: 1.27.4
           cache-dependency-path: "testees/go/**/*.sum"
       - if: matrix.sdk == 'js'
-        uses: actions/setup-node@v7
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 26.13.1
           cache: npm
           cache-dependency-path: "testees/js/**/package-lock.json"
-      - uses: actions/download-artifact@v8
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: shapekit-audit-bin
           path: ${{ runner.temp }}/bin
@@ -176,7 +176,7 @@ jobs:
         env:
           SDK: ${{ matrix.sdk }}
         run: '"$RUNNER_TEMP/bin/shapekit" audit summary --report "audit/$SDK.json" >> "$GITHUB_STEP_SUMMARY"'
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: audit-${{ matrix.sdk }}

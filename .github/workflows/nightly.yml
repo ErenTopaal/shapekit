@@ -25,13 +25,13 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v7
-      - uses: dtolnay/rust-toolchain@1.99.1
-      - uses: Swatinem/rust-cache@v2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: dtolnay/rust-toolchain@263313d2989f864a2b8613f97277288638e7d8f8 # 1.99.1
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         with:
           key: release
       - run: cargo build --release --locked -p shapekit-cli
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: shapekit
           path: target/release/shapekit
@@ -45,8 +45,8 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/download-artifact@v8
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: shapekit
           path: ${{ runner.temp }}/bin
@@ -114,8 +114,8 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 120
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/download-artifact@v8
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: shapekit
           path: ${{ runner.temp }}/bin
@@ -137,18 +137,18 @@ jobs:
       # unauthenticated requests from shared runner addresses once their hourly quota is spent
       GITHUB_TOKEN: ${{ github.token }}
     steps:
-      - uses: actions/checkout@v7
-      - uses: dtolnay/rust-toolchain@1.99.1
-      - uses: Swatinem/rust-cache@v2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: dtolnay/rust-toolchain@263313d2989f864a2b8613f97277288638e7d8f8 # 1.99.1
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         with:
           key: debug
       # the init skeleton tests build and run the go and typescript skeletons, the ignored
       # ones with their sdks installed, on the pinned toolchains rather than the runner's
-      - uses: actions/setup-go@v7
+      - uses: actions/setup-go@d8cbb8045d7f43706b9177cceb36c1f91a6644d5 # v7.1.0
         with:
           go-version: 1.27.4
           cache: false
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 26.13.1
       - run: docker pull --quiet "$(scripts/pin.sh image stellar-core)"
@@ -163,28 +163,28 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 90
     steps:
-      - uses: actions/checkout@v7
-      - uses: dtolnay/rust-toolchain@1.99.1
-      - uses: actions/setup-go@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: dtolnay/rust-toolchain@263313d2989f864a2b8613f97277288638e7d8f8 # 1.99.1
+      - uses: actions/setup-go@d8cbb8045d7f43706b9177cceb36c1f91a6644d5 # v7.1.0
         with:
           go-version: 1.27.4
           cache-dependency-path: "testees/go/**/*.sum"
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 26.13.1
           cache: npm
           cache-dependency-path: testees/js/**/package-lock.json
-      - uses: actions/setup-dotnet@v5
+      - uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5.4.0
         with:
           dotnet-version: 11.0.100
-      - uses: shivammathur/setup-php@v2
+      - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
         with:
           php-version: "8.5"
           extensions: bcmath, gmp, mbstring, sodium
           tools: composer:2.11.2
       - name: pinned flutter for the dart testee
         run: scripts/flutter-toolchain.sh >>"$GITHUB_PATH"
-      - uses: actions/download-artifact@v8
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: shapekit
           path: ${{ runner.temp }}/bin
@@ -220,7 +220,7 @@ jobs:
             f="target/conformance/$sdk/MATRIX.md"
             if [ -f "$f" ]; then sed '/^## Entries that do not pass everywhere/,$d' "$f" >>"$GITHUB_STEP_SUMMARY"; fi
           done
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: ${{ !cancelled() }}
         with:
           name: conformance
@@ -237,28 +237,28 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 90
     steps:
-      - uses: actions/checkout@v7
-      - uses: dtolnay/rust-toolchain@1.99.1
-      - uses: actions/setup-go@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: dtolnay/rust-toolchain@263313d2989f864a2b8613f97277288638e7d8f8 # 1.99.1
+      - uses: actions/setup-go@d8cbb8045d7f43706b9177cceb36c1f91a6644d5 # v7.1.0
         with:
           go-version: 1.27.4
           cache-dependency-path: "testees/go/**/*.sum"
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 26.13.1
           cache: npm
           cache-dependency-path: testees/js/**/package-lock.json
-      - uses: actions/setup-dotnet@v5
+      - uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5.4.0
         with:
           dotnet-version: 11.0.100
-      - uses: shivammathur/setup-php@v2
+      - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
         with:
           php-version: "8.5"
           extensions: bcmath, gmp, mbstring, sodium
           tools: composer:2.11.2
       - name: pinned flutter for the dart testee
         run: scripts/flutter-toolchain.sh >>"$GITHUB_PATH"
-      - uses: actions/download-artifact@v8
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: shapekit
           path: ${{ runner.temp }}/bin
@@ -317,7 +317,7 @@ jobs:
             grep ' can be promoted$' target/candidate/promotion.txt || true
             echo '```'
           } >>"$GITHUB_STEP_SUMMARY"
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: ${{ !cancelled() }}
         with:
           name: candidate
@@ -352,12 +352,12 @@ jobs:
           - {delivery: sep54-s3, network: testnet, repeat: 1, shard: 4, shards: 4}
     name: harness (${{ matrix.delivery }}, ${{ matrix.shard }}/${{ matrix.shards }})
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-go@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-go@d8cbb8045d7f43706b9177cceb36c1f91a6644d5 # v7.1.0
         with:
           go-version: 1.27.4
           cache-dependency-path: adapters/go.sum
-      - uses: actions/download-artifact@v8
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: shapekit
           path: ${{ runner.temp }}/bin
@@ -381,7 +381,7 @@ jobs:
         # with a hit the run needs no network for wallet-backend; caches written by main's
         # pushes are visible to every pull request
         id: wb-cache
-        uses: actions/cache@v6
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: |
             ~/.cache/shapekit/wallet-backend
@@ -412,7 +412,7 @@ jobs:
           if docker image inspect "shapekit-wallet-backend:$PIN" >/dev/null 2>&1; then
             docker save --output "$RUNNER_TEMP/wallet-backend-image.tar" "shapekit-wallet-backend:$PIN"
           fi
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: ${{ !cancelled() }}
         with:
           name: harness-${{ matrix.delivery }}-shard-${{ matrix.shard }}
@@ -433,12 +433,12 @@ jobs:
         shard: [1, 2, 3, 4, 5]
     name: harness stellar-etl (${{ matrix.shard }}/5)
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-go@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-go@d8cbb8045d7f43706b9177cceb36c1f91a6644d5 # v7.1.0
         with:
           go-version: 1.27.4
           cache-dependency-path: adapters/go.sum
-      - uses: actions/download-artifact@v8
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: shapekit
           path: ${{ runner.temp }}/bin
@@ -455,7 +455,7 @@ jobs:
           "$RUNNER_TEMP/bin/shapekit" harness run \
             --adapter "adapters/bin/etl-adapter --commit $pin --cpus 2" \
             --network both --shard "$SHARD/5" --out harness-out
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: ${{ !cancelled() }}
         with:
           name: harness-stellar-etl-shard-${{ matrix.shard }}
@@ -468,7 +468,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 180
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: free runner disk
         # ten wallet-backend images and their build caches fill the runner's free disk (the
         # first nightly failed with "no space left on device"); the preinstalled toolchains
@@ -478,11 +478,11 @@ jobs:
           sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /usr/local/.ghcup \
             /usr/share/swift /opt/hostedtoolcache/CodeQL
           df -h /
-      - uses: actions/setup-go@v7
+      - uses: actions/setup-go@d8cbb8045d7f43706b9177cceb36c1f91a6644d5 # v7.1.0
         with:
           go-version: 1.27.4
           cache-dependency-path: adapters/go.sum
-      - uses: actions/download-artifact@v8
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: shapekit
           path: ${{ runner.temp }}/bin
@@ -497,7 +497,7 @@ jobs:
         run: |
           df -h /
           if [ -f harness-reproduce/REPRODUCTIONS.md ]; then cat harness-reproduce/REPRODUCTIONS.md >>"$GITHUB_STEP_SUMMARY"; fi
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: ${{ !cancelled() }}
         with:
           name: harness-reproduce
@@ -519,12 +519,12 @@ jobs:
         shard: [1, 2, 3]
     name: harness stellar-rpc (${{ matrix.events-from }}, ${{ matrix.shard }}/3)
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-go@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-go@d8cbb8045d7f43706b9177cceb36c1f91a6644d5 # v7.1.0
         with:
           go-version: 1.27.4
           cache-dependency-path: adapters/go.sum
-      - uses: actions/download-artifact@v8
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: shapekit
           path: ${{ runner.temp }}/bin
@@ -542,7 +542,7 @@ jobs:
           "$RUNNER_TEMP/bin/shapekit" harness run \
             --adapter "adapters/bin/rpc-adapter --cpus 2 --events-from $EVENTS_FROM" \
             --network both --shard "$SHARD" --out harness-out
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: ${{ !cancelled() }}
         with:
           name: harness-stellar-rpc-${{ matrix.events-from }}-shard-${{ matrix.shard }}
@@ -558,12 +558,12 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-go@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-go@d8cbb8045d7f43706b9177cceb36c1f91a6644d5 # v7.1.0
         with:
           go-version: 1.27.4
           cache-dependency-path: "testees/go/**/*.sum"
-      - uses: actions/download-artifact@v8
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: shapekit
           path: ${{ runner.temp }}/bin
@@ -586,7 +586,7 @@ jobs:
         if: ${{ !cancelled() }}
         run: |
           if [ -f fuzz-out/FUZZ.md ]; then cat fuzz-out/FUZZ.md >>"$GITHUB_STEP_SUMMARY"; fi
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: ${{ !cancelled() }}
         with:
           name: fuzz
@@ -612,12 +612,12 @@ jobs:
           - {leg: stellar-rpc-ledgers, artifact: harness-stellar-rpc-ledgers, expect: crates/shapekit-harness/expect/stellar-rpc.toml}
     name: harness merge (${{ matrix.leg }})
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/download-artifact@v8
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: shapekit
           path: ${{ runner.temp }}/bin
-      - uses: actions/download-artifact@v8
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           pattern: ${{ matrix.artifact }}-shard-*
           path: ${{ runner.temp }}/shards
@@ -634,7 +634,7 @@ jobs:
         if: ${{ !cancelled() }}
         run: |
           if [ -f harness-out/HARNESS.md ]; then cat harness-out/HARNESS.md >>"$GITHUB_STEP_SUMMARY"; fi
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: ${{ !cancelled() }}
         with:
           name: ${{ matrix.artifact }}
@@ -654,32 +654,32 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-go@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-go@d8cbb8045d7f43706b9177cceb36c1f91a6644d5 # v7.1.0
         with:
           go-version: 1.27.4
           cache-dependency-path: lint/go.sum
-      - uses: actions/download-artifact@v8
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: shapekit
           path: ${{ runner.temp }}/bin
       - name: conformance matrices
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: conformance
           path: target/conformance
       - name: harness report, rpc delivery, both networks
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: harness-rpc
           path: ${{ runner.temp }}/harness-rpc
       - name: harness report, stellar-etl, both networks
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: harness-stellar-etl
           path: ${{ runner.temp }}/harness-stellar-etl
       - name: harness report, stellar-rpc with getEvents, both networks
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: harness-stellar-rpc-events
           path: ${{ runner.temp }}/harness-stellar-rpc-events

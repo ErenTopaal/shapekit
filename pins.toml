@@ -347,79 +347,93 @@ url = "https://github.com/stellar/wallet-backend"
 sha = "a9bac8d2f59f7590d393c3e72e67d95b7cb2fba1"
 purpose = "pr 792, base of the rebased commit range"
 
-# github actions. workflows use these major-version refs, which
-# upstream moves on every release, so only their existence is checked
+# github actions. workflows name each action by the commit below, with its release tag as a
+# comment, because a tag (v7) is moved by upstream and anyone holding the action repository can
+# point it at other code. pins verify checks that the release tag still names that commit.
+# rust-toolchain has no release tags: its 1.99.1 branch carries an action.yml that installs
+# 1.99.1, and upstream rebuilds that branch when the action changes, so the commit is pinned bare
 
 [[git]]
 name = "actions-checkout"
 url = "https://github.com/actions/checkout"
-ref = "refs/tags/v7"
+ref = "refs/tags/v7.0.1"
+sha = "3d3c42e5aac5ba805825da76410c181273ba90b1"
 purpose = "ci checkout"
 
 [[git]]
 name = "actions-setup-node"
 url = "https://github.com/actions/setup-node"
-ref = "refs/tags/v7"
+ref = "refs/tags/v7.1.0"
+sha = "949feb2413d6458794dcd2491c4babbbce0c15c1"
 purpose = "ci node setup"
 
 [[git]]
 name = "actions-setup-go"
 url = "https://github.com/actions/setup-go"
-ref = "refs/tags/v7"
+ref = "refs/tags/v7.1.0"
+sha = "d8cbb8045d7f43706b9177cceb36c1f91a6644d5"
 purpose = "ci go setup"
 
 [[git]]
 name = "dtolnay-rust-toolchain"
 url = "https://github.com/dtolnay/rust-toolchain"
-ref = "refs/heads/1.99.1"
-purpose = "ci rust setup"
+sha = "263313d2989f864a2b8613f97277288638e7d8f8"
+purpose = "ci rust setup, the 1.99.1 branch's commit"
 
 [[git]]
 name = "swatinem-rust-cache"
 url = "https://github.com/Swatinem/rust-cache"
-ref = "refs/tags/v2"
+ref = "refs/tags/v2.9.3"
+sha = "d1527c8f67ef9af357290475d4af4b0fab8f12e0"
 purpose = "ci cargo cache"
 
 [[git]]
 name = "actions-upload-artifact"
 url = "https://github.com/actions/upload-artifact"
-ref = "refs/tags/v7"
+ref = "refs/tags/v7.0.2"
+sha = "cf430e030ddbb5b0abf93d22962f4752f3646cd9"
 purpose = "ci artifact upload"
 
 [[git]]
 name = "actions-cache"
 url = "https://github.com/actions/cache"
-ref = "refs/tags/v6"
+ref = "refs/tags/v6.1.0"
+sha = "55cc8345863c7cc4c66a329aec7e433d2d1c52a9"
 purpose = "ci cache"
 
 [[git]]
 name = "actions-download-artifact"
 url = "https://github.com/actions/download-artifact"
-ref = "refs/tags/v8"
+ref = "refs/tags/v8.0.2"
+sha = "9000827ccba6bdab643e8b6fd33ac0654aef8333"
 purpose = "ci artifact download"
 
 [[git]]
 name = "actions-setup-python"
 url = "https://github.com/actions/setup-python"
-ref = "refs/tags/v7"
+ref = "refs/tags/v7.1.0"
+sha = "6d4fd22b20465ccc0f7354476588e8df7c9ca0e0"
 purpose = "ci python setup"
 
 [[git]]
 name = "actions-setup-dotnet"
 url = "https://github.com/actions/setup-dotnet"
-ref = "refs/tags/v5"
+ref = "refs/tags/v5.4.0"
+sha = "26b0ec14cb23fa6904739307f278c14f94c95bf1"
 purpose = "ci dotnet setup for the dotnet testee"
 
 [[git]]
 name = "shivammathur-setup-php"
 url = "https://github.com/shivammathur/setup-php"
-ref = "refs/tags/v2"
+ref = "refs/tags/2.40.0"
+sha = "eb7c497e18156a6bbabfef1d3a82760b9eda3962"
 purpose = "ci php setup for the php testee"
 
 [[git]]
 name = "actions-attest"
 url = "https://github.com/actions/attest"
-ref = "refs/tags/v4"
+ref = "refs/tags/v4.2.2"
+sha = "1e69f48acb82d1966a394da916b4c1698aa569d6"
 purpose = "build provenance attestation of the release assets"
 
 # rust crates: workspace dependencies
