@@ -47,3 +47,22 @@ export function and(xs: string[]): string {
   if (xs.length <= 1) return xs.join("")
   return `${xs.slice(0, -1).join(", ")} and ${xs.at(-1)}`
 }
+
+// the findings component of each sdk key: the name the findings records give the sdk's project
+const components: Record<string, string> = {
+  js: "js-stellar-sdk",
+  go: "go-stellar-sdk",
+  rust: "rs-stellar-xdr",
+  python: "py-stellar-base",
+  java: "java-stellar-sdk",
+  dart: "stellar_flutter_sdk",
+  php: "soneso/stellar-php-sdk",
+  dotnet: "stellar-dotnet-sdk",
+  kmp: "kmp-stellar-sdk",
+  soroban: "rs-soroban-sdk",
+  "stellar-cli": "stellar-cli",
+}
+
+export function sdkComponent(key: string): string {
+  return components[key] ?? key
+}
