@@ -3,10 +3,25 @@
 # not there yet, checks each download against its sha256 in pins.toml, and prints the
 # directories to put in front of PATH, separated by ':'.
 #
+# with --gradle-jdk it installs the pinned jdk 21 instead and prints its home directory: the
+# jdk the sdk-conformance workflow sets as JAVA_HOME for the gradle build of a java-stellar-sdk
+# or kmp-stellar-sdk checkout (docs/sdk-ci.md).
+#
 # usage: export PATH="$(scripts/java-toolchain.sh):$PATH"
+#        export JAVA_HOME="$(scripts/java-toolchain.sh --gradle-jdk)"
 #
 # needs curl, sha256sum, tar and python3 >= 3.11 (for scripts/pin.sh).
 set -euo pipefail
+
+mode=testee
+case "${1:-}" in
+  "") ;;
+  --gradle-jdk) mode=gradle ;;
+  *)
+    echo "usage: scripts/java-toolchain.sh [--gradle-jdk]" >&2
+    exit 2
+    ;;
+esac
 
 cd "$(git rev-parse --show-toplevel)"
 dest=target/toolchains
@@ -26,6 +41,13 @@ fetch() {
   rm "$dir.tar.gz"
   echo "$sha256" >"$dir/.sha256"
 }
+
+if [ "$mode" = gradle ]; then
+  read -r tag _ url sha256 < <(scripts/pin.sh release jdk-gradle)
+  fetch "$dest/$tag" "$url" "$sha256"
+  echo "$PWD/$dest/$tag"
+  exit 0
+fi
 
 read -r tag _ url sha256 < <(scripts/pin.sh release jdk)
 fetch "$dest/$tag" "$url" "$sha256"
