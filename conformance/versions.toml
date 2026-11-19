@@ -371,7 +371,7 @@ memory = { resource = "data", mib = 4096 }
 [[sdk.java.versions]]
 version = "5.0.0"
 build = [
-  { argv = ["mvn", "-B", "-q", "-f", "testees/java/versions/5.0.0/pom.xml", "-DskipTests", "package"] },
+  { argv = ["scripts/with-java.sh", "mvn", "-B", "-q", "-f", "testees/java/versions/5.0.0/pom.xml", "-DskipTests", "package"] },
   { argv = ["scripts/check-jars.sh", "target/testees/java/5.0.0/lib", "testees/java/versions/5.0.0/lib.sha256"] },
 ]
 command = ["java", "-jar", "target/testees/java/5.0.0/testee.jar"]
@@ -381,7 +381,7 @@ max_protocol = 29
 [[sdk.java.versions]]
 version = "6.0.0"
 build = [
-  { argv = ["mvn", "-B", "-q", "-f", "testees/java/versions/6.0.0/pom.xml", "-DskipTests", "package"] },
+  { argv = ["scripts/with-java.sh", "mvn", "-B", "-q", "-f", "testees/java/versions/6.0.0/pom.xml", "-DskipTests", "package"] },
   { argv = ["scripts/check-jars.sh", "target/testees/java/6.0.0/lib", "testees/java/versions/6.0.0/lib.sha256"] },
 ]
 command = ["java", "-jar", "target/testees/java/6.0.0/testee.jar"]
@@ -464,7 +464,7 @@ memory = { resource = "data", mib = 4096 }
 [[sdk.kmp.versions]]
 version = "1.18.0"
 build = [
-  { argv = ["mvn", "-B", "-q", "-f", "testees/kmp/versions/1.18.0/pom.xml", "-DskipTests", "package"] },
+  { argv = ["scripts/with-java.sh", "mvn", "-B", "-q", "-f", "testees/kmp/versions/1.18.0/pom.xml", "-DskipTests", "package"] },
   { argv = ["scripts/check-jars.sh", "target/testees/kmp/1.18.0/lib", "testees/kmp/versions/1.18.0/lib.sha256"] },
 ]
 command = ["java", "-jar", "target/testees/kmp/1.18.0/testee.jar"]

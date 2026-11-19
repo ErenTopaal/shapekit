@@ -752,6 +752,7 @@ fn build_lines(sdk: &str, v: &str) -> (Vec<String>, Vec<String>) {
                     format!(
                         "  {{ argv = {} }},",
                         array(&[
+                            s("scripts/with-java.sh"),
                             s("mvn"),
                             s("-B"),
                             s("-q"),
@@ -901,6 +902,7 @@ fn build_lines(sdk: &str, v: &str) -> (Vec<String>, Vec<String>) {
                     format!(
                         "  {{ argv = {} }},",
                         array(&[
+                            s("scripts/with-java.sh"),
                             s("mvn"),
                             s("-B"),
                             s("-q"),

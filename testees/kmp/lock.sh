@@ -4,7 +4,7 @@
 # conformance/versions.toml checks the jars against that file, so the resolved dependency tree
 # is pinned, not only the sdk version in the pom.
 #
-#   testees/kmp/lock.sh <version>      (from any directory; needs java and mvn on PATH)
+#   testees/kmp/lock.sh <version>      (from any directory; builds with the pinned jdk and maven)
 set -eu
 if [ "$#" -ne 1 ]; then
   echo "usage: $0 <version>" >&2
@@ -18,7 +18,7 @@ if [ ! -f "$pom" ]; then
   exit 1
 fi
 rm -rf "$root/target/testees/kmp/$version"
-mvn -B -q -f "$pom" -DskipTests package
+"$root/scripts/with-java.sh" mvn -B -q -f "$pom" -DskipTests package
 cd "$root/target/testees/kmp/$version/lib"
 # the jacoco agent jar the coverage build starts with sits next to lib/, so it is listed with
 # its path from there and checked by the same sha256sum --check
