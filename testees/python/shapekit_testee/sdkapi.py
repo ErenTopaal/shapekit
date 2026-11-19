@@ -36,6 +36,14 @@ STRKEY_CLASS_KINDS = {
 }
 
 
+# a constructor of stellar-xdr or stellar-strkey given an argument of the wrong type refuses it
+# with TypeError ("constructing a value with a wrong argument raises a plain TypeError or
+# ValueError", stellar_xdr's error docs). up to 17.x a TypeError escaping an sdk call is no
+# documented refusal
+XDR_TYPE_REFUSALS: tuple[type[BaseException], ...] = (TypeError,) if STELLAR_XDR else ()
+STRKEY_TYPE_REFUSALS: tuple[type[BaseException], ...] = (TypeError,) if STRKEY_CLASSES else ()
+
+
 def components() -> dict[str, str]:
     """the packages the sdk does its xdr and strkey work with, and their versions."""
     dists = ["stellar-xdr" if STELLAR_XDR else "xdrlib3"]

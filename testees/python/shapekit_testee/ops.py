@@ -322,14 +322,17 @@ class Ops:
                 offer_id=number,  # type: ignore[arg-type]
             )
         )
-        raw = sdk(lambda: op.to_xdr_object().to_xdr_bytes())
+        # stellar-xdr's constructors refuse a field of the wrong type, a float here, with
+        # TypeError, as its documentation and the sdk's changelog say
+        raw = sdk(lambda: op.to_xdr_object().to_xdr_bytes(), documented=sdkapi.XDR_TYPE_REFUSALS)
         # ManageSellOfferOp ends with the int64 offer id, so the operation's xdr does too
         return str(int.from_bytes(raw[-8:], "big", signed=True))
 
     def muxed_id(self, number: int | float) -> str:
         muxed = sdk(lambda: MuxedAccount(MUXED_BASE, number))  # type: ignore[arg-type]
         # the id the network sees is the one in the M address
-        address = sdk(lambda: muxed.account_muxed)
+        # stellar-strkey's MuxedEd25519Account refuses an id that is not an int with TypeError
+        address = sdk(lambda: muxed.account_muxed, documented=sdkapi.STRKEY_TYPE_REFUSALS)
         return str(sdk(lambda: sdkapi.muxed_account_id(address)))
 
     def to_native(self, req: Request) -> dict[str, Any]:
