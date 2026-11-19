@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils"
 import { blobUrl, useMeta } from "@/lib/meta"
 import { glossary, glossaryHref, label as termLabel } from "@/lib/terms"
 import { betterText, type Better } from "@/lib/metrics"
+import { Term } from "@/components/term"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
@@ -46,12 +47,12 @@ export function IssueRef({ value, className }: { value: string; className?: stri
   )
 }
 
-// a term of the glossary page, linked from the page that uses it
+// a term of the glossary page, linked from the page that uses it, with its short definition in place
 export function GlossaryLink({ id, children, className }: { id: string; children: ReactNode; className?: string }) {
   return (
-    <Link to={glossaryHref(id)} className={cn("underline decoration-dotted decoration-foreground/40 underline-offset-2 hover:decoration-foreground", className)}>
+    <Term id={id} className={className}>
       {children}
-    </Link>
+    </Term>
   )
 }
 
@@ -61,6 +62,8 @@ const termNames = new Map([
   ...glossary.flatMap((g) => g.terms.map((t) => [t.id, t.name] as const)),
 ])
 
+const groupIds = new Set(glossary.map((g) => g.id))
+
 // the terms a page uses, each linked to its one definition on the glossary page
 export function PageTerms({ ids }: { ids: string[] }) {
   return (
@@ -68,7 +71,11 @@ export function PageTerms({ ids }: { ids: string[] }) {
       Terms on this page:{" "}
       {ids.map((id, i) => (
         <span key={id}>
-          <TextLink to={glossaryHref(id)}>{termNames.get(id) ?? id}</TextLink>
+          {groupIds.has(id) ? (
+            <TextLink to={glossaryHref(id)}>{termNames.get(id) ?? id}</TextLink>
+          ) : (
+            <Term id={id}>{termNames.get(id) ?? id}</Term>
+          )}
           {i < ids.length - 1 ? ", " : ". "}
         </span>
       ))}

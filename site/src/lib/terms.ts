@@ -382,3 +382,12 @@ export const glossary: { id: string; title: string; note?: string; terms: Glossa
 function sentence(s: string): string {
   return `${s.charAt(0).toUpperCase()}${s.slice(1)}.`
 }
+
+const glossaryTerms = new Map(glossary.flatMap((g) => g.terms.map((t) => [t.id, t] as const)))
+
+// the short definition a page shows in place of a term: the first sentence of its glossary
+// meaning. a group id or an unknown id has none
+export function termDefinition(id: string): string | undefined {
+  const m = glossaryTerms.get(id)?.meaning
+  return m?.match(/^.*?\.(?=\s+[A-Z]|$)/s)?.[0]
+}
