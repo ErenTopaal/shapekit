@@ -329,99 +329,157 @@ fn site_data_matches_the_committed_files() {
         }
     }
 
-    // conformance: every matrix entry is a corpus entry, and cell counts add up
+    // conformance: every sdk of the versions file at every version, its failing cells exactly
+    // the checks its known-failures list names for that version, which a conformance run
+    // without known-failures problems fails and nothing else
     let conformance = read_json(&out.join("conformance.json"));
-    // one per sdk of the versions file, with or without a committed matrix
     let versions =
         shapekit_conformance::versions::VersionsFile::load(&root.join("conformance/versions.toml"))
             .unwrap();
     assert_eq!(len(&conformance["sdks"]), versions.sdk.len());
-    // an sdk's cells come from its own matrix and its share of any matrix over every sdk
-    let matrices: Vec<Value> = std::fs::read_dir(root.join("findings/inputs"))
-        .unwrap()
-        .map(|e| e.unwrap().path())
-        .filter(|p| {
-            p.file_name()
-                .unwrap()
-                .to_str()
-                .unwrap()
-                .starts_with("conformance-")
-        })
-        .map(|p| read_json(&p))
-        .collect();
-    assert!(
-        matrices.iter().any(|m| {
-            let t = m["testees"].as_array().unwrap();
-            t.iter().any(|x| x["sdk"] != t[0]["sdk"])
-        }),
-        "no matrix spans sdks, so the merge is not exercised"
-    );
-    for sdk in conformance["sdks"].as_array().unwrap() {
-        let prefix = format!("{}@", sdk["sdk"].as_str().unwrap());
-        let mut entries = std::collections::BTreeSet::new();
-        let mut cells = std::collections::BTreeSet::new();
-        for m in &matrices {
-            for e in m["entries"].as_array().unwrap() {
-                // a cell that only carries implementation-defined answers for the findings
-                // is not a failure, and the conformance page counts failures
-                for (key, cell) in e["cells"].as_object().unwrap() {
-                    let failing =
-                        !["pass", "unsupported"].contains(&cell["result"].as_str().unwrap());
-                    if key.starts_with(&prefix) && failing {
-                        entries.insert(e["id"].as_str().unwrap().to_owned());
-                        cells.insert((e["id"].as_str().unwrap().to_owned(), key.clone()));
-                    }
-                }
-            }
-        }
-        assert_eq!(sdk["entries"].as_array().unwrap().len(), entries.len());
-        let cells = cells.len();
-        let counted: u64 = sdk["versions"]
+    let known_dir = root.join("conformance/known-failures");
+    for (name, def) in &versions.sdk {
+        let sdk = conformance["sdks"]
             .as_array()
             .unwrap()
             .iter()
-            .flat_map(|v| v["failing_cells_by_result"].as_object().unwrap().values())
-            .map(|n| n.as_u64().unwrap())
-            .sum();
-        assert_eq!(counted as usize, cells, "{}", sdk["sdk"]);
-        // failing checks by op count every check of the cells except the ones not answered
-        for v in sdk["versions"].as_array().unwrap() {
-            let by_op: u64 = v["failing_checks_by_op"]
+            .find(|s| s["sdk"] == name.as_str())
+            .unwrap_or_else(|| panic!("{name} is not in conformance.json"));
+        assert_eq!(sdk["current"], def.current.as_str(), "{name}");
+        let lines = shapekit_conformance::known::load(&known_dir, name).unwrap();
+        let file = format!("conformance/known-failures/{name}.txt");
+        assert_eq!(
+            sdk["known_failures_file"].as_str(),
+            root.join(&file).is_file().then_some(file.as_str()),
+            "{name}"
+        );
+        let json_versions = sdk["versions"].as_array().unwrap();
+        assert_eq!(json_versions.len(), def.versions.len(), "{name}");
+        let current: Vec<&Value> = json_versions
+            .iter()
+            .filter(|v| v["current"] == true)
+            .collect();
+        assert_eq!(current.len(), 1, "{name}");
+        assert_eq!(current[0]["version"], def.current.as_str(), "{name}");
+        for (v, def_v) in json_versions.iter().zip(&def.versions) {
+            let version = def_v.version.as_str();
+            assert_eq!(v["version"], version, "{name}");
+            let key = format!("{name}@{version}");
+            // what the list names for this version: entry, check and result
+            let mut listed = std::collections::BTreeSet::new();
+            for l in &lines {
+                if l.version.as_deref().is_none_or(|lv| lv == version) {
+                    for c in &l.checks {
+                        listed.insert((l.entry.clone(), c.clone(), l.result.to_string()));
+                    }
+                }
+            }
+            let listed_entries: std::collections::BTreeSet<&str> =
+                listed.iter().map(|(e, _, _)| e.as_str()).collect();
+            let diverging: u64 = v["failing_cells_by_result"]
                 .as_object()
                 .unwrap()
                 .values()
                 .map(|n| n.as_u64().unwrap())
                 .sum();
-            let by_result = v["checks_by_result"].as_object().unwrap();
-            let failing: u64 = by_result
-                .iter()
-                .filter(|(k, _)| {
-                    ["error", "diverges-from-network", "diverges-from-peers"].contains(&k.as_str())
-                })
-                .map(|(_, n)| n.as_u64().unwrap())
-                .sum();
-            assert_eq!(by_op, failing, "{} {}", sdk["sdk"], v["version"]);
-            for k in by_result.keys() {
-                assert!(
-                    [
-                        "error",
-                        "diverges-from-network",
-                        "diverges-from-peers",
-                        "unsupported",
-                        "reference"
-                    ]
-                    .contains(&k.as_str()),
-                    "unexpected check result {k}"
-                );
+            assert_eq!(
+                diverging as usize,
+                listed_entries.len(),
+                "{key}: diverging entries"
+            );
+            assert_eq!(v["failing_cells_with_known_issue"], diverging, "{key}");
+            let mut shown = std::collections::BTreeSet::new();
+            for e in sdk["entries"].as_array().unwrap() {
+                let id = e["id"].as_str().unwrap();
+                assert!(ids.contains(id), "entry {id} is not in the manifest");
+                if let Some(cell) = e["cells"].get(&key) {
+                    for k in cell["checks"].as_array().unwrap() {
+                        let result = match k["failure"].as_str() {
+                            Some(f) => format!("{}:{f}", k["result"].as_str().unwrap()),
+                            None => k["result"].as_str().unwrap().to_owned(),
+                        };
+                        shown.insert((
+                            id.to_owned(),
+                            k["check"].as_str().unwrap().to_owned(),
+                            result,
+                        ));
+                    }
+                }
             }
-        }
-        for e in sdk["entries"].as_array().unwrap() {
-            let id = e["id"].as_str().unwrap();
-            assert!(ids.contains(id), "matrix entry {id} is not in the manifest");
+            assert_eq!(shown, listed, "{key}: failing checks");
+            let sum = |field: &str| -> u64 {
+                v[field]
+                    .as_object()
+                    .unwrap()
+                    .values()
+                    .map(|n| n.as_u64().unwrap())
+                    .sum()
+            };
+            assert_eq!(sum("failing_checks_by_op") as usize, listed.len(), "{key}");
+            assert_eq!(
+                sum("failing_checks_by_result") as usize,
+                listed.len(),
+                "{key}"
+            );
         }
     }
-    let repro = read_json(&out.join("conformance.json"))["reproductions"].clone();
-    assert!(len(&repro) > 0);
+    // the committed matrices of both lanes give the listed checks their detail
+    let triage: toml::Value =
+        toml::from_str(&std::fs::read_to_string(root.join("findings/triage.toml")).unwrap())
+            .unwrap();
+    let cand: toml::Value = toml::from_str(
+        &std::fs::read_to_string(root.join(triage["candidates"].as_str().unwrap())).unwrap(),
+    )
+    .unwrap();
+    let mut detailed = 0usize;
+    for t in [&triage, &cand] {
+        for rel in t["inputs"]["matrices"].as_array().unwrap() {
+            let m = read_json(&root.join(rel.as_str().unwrap()));
+            for e in m["entries"].as_array().unwrap() {
+                for (key, cell) in e["cells"].as_object().unwrap() {
+                    let name = key.split('@').next().unwrap();
+                    let sdk = conformance["sdks"]
+                        .as_array()
+                        .unwrap()
+                        .iter()
+                        .find(|s| s["sdk"] == name)
+                        .unwrap();
+                    let shown = sdk["entries"]
+                        .as_array()
+                        .unwrap()
+                        .iter()
+                        .find(|x| x["id"] == e["id"])
+                        .map(|x| &x["cells"][key]);
+                    for k in cell["checks"].as_array().unwrap() {
+                        if ["pass", "unsupported"].contains(&k["result"].as_str().unwrap()) {
+                            continue;
+                        }
+                        let s = shown
+                            .and_then(|c| c["checks"].as_array())
+                            .and_then(|cs| cs.iter().find(|x| x["check"] == k["check"]))
+                            .unwrap_or_else(|| {
+                                panic!("{rel} {} {key} {} is not shown", e["id"], k["check"])
+                            });
+                        assert_eq!(s["result"], k["result"]);
+                        assert_eq!(s["detail"], k["detail"]);
+                        detailed += 1;
+                    }
+                }
+            }
+        }
+    }
+    assert!(detailed > 0);
+    let repro = &conformance["reproductions"];
+    assert!(len(repro) > 0);
+    // every row whose versions the versions file lists is observed; only probes are not
+    for r in repro.as_array().unwrap() {
+        for side in ["fail", "pass"] {
+            for (v, o) in r[side].as_object().unwrap() {
+                let probe = len(&r["probes"]) > 0;
+                assert_eq!(o == "not-recorded", probe, "{} {v}", r["id"]);
+            }
+        }
+    }
 
     // harness: the report's totals, and per family and network counts that sum to them
     let harness = read_json(&out.join("harness.json"));

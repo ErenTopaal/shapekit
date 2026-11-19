@@ -11,6 +11,7 @@ use anyhow::{Context, Result, bail, ensure};
 use clap::Subcommand;
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
+use shapekit_conformance::compare::Outcome;
 use shapekit_conformance::known;
 use shapekit_conformance::reproduce::ReproductionsFile;
 use shapekit_conformance::versions::VersionsFile;
@@ -205,7 +206,8 @@ pub fn write_data(
     let checklist = shapekit_guide::ChecklistFile::load(&src.path("registry/guide-checklist.toml"))
         .map_err(|e| anyhow::anyhow!("loading registry/guide-checklist.toml: {e}"))?;
     let entries_out = entries_json(&manifest, &src.path("corpus"), &registry, &checklist)?;
-    let conformance_out = conformance_json(&mut src, &triage, &versions, &reproductions)?;
+    let conformance_out =
+        conformance_json(&mut src, &triage, &manifest, &versions, &reproductions)?;
     let harness_out = harness_json(&mut src, &triage)?;
     let findings_out = findings_json(&findings, candidates.as_ref());
 
@@ -643,50 +645,35 @@ fn entries_json(
     }))
 }
 
-/// Check results that count as a failure (docs/testee-protocol.md, "How the runner uses the
-/// ops"); `unsupported` and `reference` do not.
-fn is_failing_check(result: &str) -> bool {
-    matches!(
-        result,
-        "error" | "diverges-from-network" | "diverges-from-peers"
-    )
-}
+/// One sdk's failing cells: entry id, then testee key (`<sdk>@<version>`), then the cell.
+type SdkCells = BTreeMap<String, BTreeMap<String, inputs::CellView>>;
 
-/// What the committed matrix shows for one reproduction row at one version.
+/// What the committed results show for one reproduction row at one version.
 fn observe(
     row: &shapekit_conformance::reproduce::Reproduction,
-    m: &MatrixView,
+    cells: &SdkCells,
+    known_version: bool,
     version: &str,
 ) -> &'static str {
+    if !known_version || !row.probes.is_empty() || row.select.is_some() {
+        // probes and selections are resolved by the runner, not stored in the results
+        return "not-recorded";
+    }
     let key = format!("{}@{}", row.sdk, version);
-    if !m.testees.iter().any(|t| t.key == key) {
-        return "not-in-matrix";
-    }
-    if !row.probes.is_empty() || row.select.is_some() {
-        // probes and selections are resolved by the runner, not stored in the matrix
-        return "not-in-matrix";
-    }
+    let cell = |entry: &str| cells.get(entry).and_then(|c| c.get(&key));
     let failing = |entry: &str, check: &str| -> bool {
-        m.entries
-            .iter()
-            .find(|e| e.id == entry)
-            .and_then(|e| e.cells.get(&key))
-            .is_some_and(|c| c.checks.iter().any(|k| k.check == check))
+        cell(entry).is_some_and(|c| c.checks.iter().any(|k| k.check == check))
     };
     let named_all = row.must_diverge.iter().all(|d| match &d.entry {
         Some(entry) => d.checks.iter().all(|c| failing(entry, c)),
         None => false,
     });
     let counted_any = row.entries.iter().any(|entry| {
-        m.entries
-            .iter()
-            .find(|e| &e.id == entry)
-            .and_then(|e| e.cells.get(&key))
-            .is_some_and(|c| {
-                c.checks
-                    .iter()
-                    .any(|k| row.ops.is_empty() || row.ops.contains(&k.op))
-            })
+        cell(entry).is_some_and(|c| {
+            c.checks
+                .iter()
+                .any(|k| row.ops.is_empty() || row.ops.contains(&k.op))
+        })
     });
     match (named_all, counted_any) {
         (true, _) => "named-checks-diverge",
@@ -695,11 +682,11 @@ fn observe(
     }
 }
 
-/// Splits a matrix that spans sdks by testee and adds each sdk's cells to its own matrix,
-/// or makes them that sdk's matrix when there is none. A cell both runs failed keeps the
-/// per-sdk result and gains the checks it lacked.
-fn merge_mixed(
-    matrices: &mut BTreeMap<String, (String, MatrixView)>,
+/// Splits a matrix by testee sdk and adds each sdk's cells to that sdk's matrix, or makes them
+/// that sdk's matrix when there is none. A cell two runs failed keeps the first result and
+/// gains the checks it lacked.
+fn merge_matrix(
+    matrices: &mut BTreeMap<String, (Vec<String>, MatrixView)>,
     rel: &str,
     m: MatrixView,
 ) -> Result<()> {
@@ -709,17 +696,25 @@ fn merge_mixed(
         .map(|t| (t.key.clone(), t.sdk.clone()))
         .collect();
     for t in &m.testees {
-        let (_, own) = matrices.entry(t.sdk.clone()).or_insert_with(|| {
+        let (rels, own) = matrices.entry(t.sdk.clone()).or_insert_with(|| {
             (
-                rel.to_owned(),
+                Vec::new(),
                 MatrixView {
                     corpus_version: m.corpus_version.clone(),
                     testees: Vec::new(),
                     entries: Vec::new(),
-                    known_failure_problems: m.known_failure_problems.clone(),
+                    known_failure_problems: Vec::new(),
                 },
             )
         });
+        if !rels.iter().any(|r| r == rel) {
+            rels.push(rel.to_owned());
+            for p in &m.known_failure_problems {
+                if !own.known_failure_problems.contains(p) {
+                    own.known_failure_problems.push(p.clone());
+                }
+            }
+        }
         if !own.testees.iter().any(|o| o.key == t.key) {
             own.testees.push(t.clone());
         }
@@ -776,40 +771,182 @@ fn failures_only(mut m: MatrixView) -> MatrixView {
     m
 }
 
+/// The checks of corpus entries, each entry's planned once: their names and ops in the order
+/// the runner runs them.
+struct Plans<'a> {
+    manifest: &'a Manifest,
+    corpus: PathBuf,
+    planned: BTreeMap<String, Vec<(String, String)>>,
+}
+
+impl Plans<'_> {
+    fn of(&mut self, entry: &str) -> Result<&[(String, String)]> {
+        if !self.planned.contains_key(entry) {
+            let e = self
+                .manifest
+                .entries
+                .iter()
+                .find(|e| e.id == entry)
+                .with_context(|| format!("{entry} is not a corpus entry"))?;
+            let plan = shapekit_conformance::plan::checks(e, &self.corpus)
+                .with_context(|| format!("planning the checks of {entry}"))?;
+            self.planned.insert(
+                entry.to_owned(),
+                plan.into_iter().map(|c| (c.name, c.op)).collect(),
+            );
+        }
+        Ok(&self.planned[entry])
+    }
+}
+
+/// The failing cells of one sdk at every version versions.toml lists, from its known-failures
+/// list. `shapekit conformance run` fails on every failing check the list does not name with
+/// its result and on every listed check that does not fail so, so the list of a run without
+/// known-failures problems is that run's failing checks, and it covers every sdk and version.
+/// A committed matrix that holds a cell of the sdk must fail exactly the listed checks there;
+/// it adds the detail of each check.
+fn sdk_cells(
+    name: &str,
+    versions: &[String],
+    known: &[known::KnownLine],
+    known_rel: &str,
+    matrix: Option<&(Vec<String>, MatrixView)>,
+    plans: &mut Plans,
+) -> Result<SdkCells> {
+    for l in known {
+        ensure!(
+            plans.manifest.entries.iter().any(|e| e.id == l.entry),
+            "{known_rel} line {}: {} is not a corpus entry",
+            l.line,
+            l.entry
+        );
+        if let Some(v) = &l.version {
+            ensure!(
+                versions.contains(v),
+                "{known_rel} line {}: {name} {v} is not in conformance/versions.toml",
+                l.line
+            );
+        }
+    }
+    let mut cells = SdkCells::new();
+    for version in versions {
+        let key = format!("{name}@{version}");
+        let mut listed: BTreeMap<&str, BTreeMap<&str, Outcome>> = BTreeMap::new();
+        for l in known
+            .iter()
+            .filter(|l| l.version.as_ref().is_none_or(|v| v == version))
+        {
+            let checks = listed.entry(l.entry.as_str()).or_default();
+            for c in &l.checks {
+                checks.insert(c.as_str(), l.result);
+            }
+        }
+        if let Some((rels, m)) = matrix {
+            for e in &m.entries {
+                let Some(cell) = e.cells.get(&key) else {
+                    continue;
+                };
+                let ran: BTreeMap<&str, String> = cell
+                    .checks
+                    .iter()
+                    .filter(|k| k.is_failure())
+                    .map(|k| (k.check.as_str(), k.outcome()))
+                    .collect();
+                let want: BTreeMap<&str, String> = listed
+                    .get(e.id.as_str())
+                    .map(|c| c.iter().map(|(k, o)| (*k, o.to_string())).collect())
+                    .unwrap_or_default();
+                ensure!(
+                    ran == want,
+                    "{key} {}: {} fails {ran:?} but {known_rel} lists {want:?}; run the sdk \
+                     again and import its matrix, or correct the list",
+                    e.id,
+                    rels.join(", ")
+                );
+            }
+        }
+        for (entry, checks) in listed {
+            let plan = plans.of(entry)?;
+            let detailed = matrix
+                .and_then(|(_, m)| m.entries.iter().find(|e| e.id == entry))
+                .and_then(|e| e.cells.get(&key));
+            let mut out = Vec::new();
+            for (check, op) in plan {
+                let Some(outcome) = checks.get(check.as_str()) else {
+                    continue;
+                };
+                out.push(inputs::CheckView {
+                    check: check.clone(),
+                    op: op.clone(),
+                    result: outcome.result.as_str().to_owned(),
+                    failure: outcome.failure.map(|f| f.as_str().to_owned()),
+                    detail: detailed
+                        .and_then(|c| c.checks.iter().find(|k| &k.check == check))
+                        .and_then(|k| k.detail.clone()),
+                    actual: None,
+                });
+            }
+            for check in checks.keys() {
+                ensure!(
+                    plan.iter().any(|(c, _)| c == check),
+                    "{known_rel}: {entry} has no check {check:?}"
+                );
+            }
+            let result = checks
+                .values()
+                .map(|o| o.result)
+                .max()
+                .expect("a listed entry has a check");
+            let known_issue = known::issue_for(known, entry, version, checks.keys().copied());
+            cells.entry(entry.to_owned()).or_default().insert(
+                key.clone(),
+                inputs::CellView {
+                    result: result.as_str().to_owned(),
+                    known_issue,
+                    checks: out,
+                },
+            );
+        }
+    }
+    Ok(cells)
+}
+
 fn conformance_json(
     src: &mut Sources,
     triage: &Triage,
+    manifest: &Manifest,
     versions: &VersionsFile,
     reproductions: &ReproductionsFile,
 ) -> Result<Value> {
-    let mut matrices: BTreeMap<String, (String, MatrixView)> = BTreeMap::new();
-    let mut mixed: Vec<(String, MatrixView)> = Vec::new();
-    for rel in &triage.inputs.matrices {
+    // every committed matrix of both lanes; they give each listed check its detail
+    let mut rels = triage.inputs.matrices.clone();
+    if let Some(rel) = &triage.candidates {
+        src.read(rel)?;
+        rels.extend(triage::load(&src.path(rel))?.inputs.matrices);
+    }
+    let mut matrices: BTreeMap<String, (Vec<String>, MatrixView)> = BTreeMap::new();
+    for rel in &rels {
         let bytes = src.read(rel)?;
         let path = src.path(rel);
         let m = failures_only(shapekit_findings::parse_on_big_stack(move || {
             inputs::matrix(&bytes, &path)
         })?);
-        let sdks: Vec<&str> = m.testees.iter().map(|t| t.sdk.as_str()).collect();
-        let Some(sdk) = sdks.first().map(|s| (*s).to_owned()) else {
-            bail!("{rel} has no testees");
-        };
-        if sdks.iter().any(|s| *s != sdk) {
-            mixed.push((rel.clone(), m));
-            continue;
-        }
+        ensure!(!m.testees.is_empty(), "{rel} has no testees");
         ensure!(
-            !matrices.contains_key(&sdk),
-            "two matrices for sdk {sdk} in findings/triage.toml"
+            m.corpus_version == manifest.corpus_version,
+            "{rel} is a run over corpus {} but the manifest is {}",
+            m.corpus_version,
+            manifest.corpus_version
         );
-        matrices.insert(sdk, (rel.clone(), m));
-    }
-    // a run over every sdk at once (the references-disagree run) holds cells a per-sdk run
-    // cannot produce, so each sdk's share of it joins that sdk's own matrix
-    for (rel, m) in mixed {
-        merge_mixed(&mut matrices, &rel, m)?;
+        merge_matrix(&mut matrices, rel, m)?;
     }
 
+    let mut plans = Plans {
+        manifest,
+        corpus: src.path("corpus"),
+        planned: BTreeMap::new(),
+    };
+    let mut all_cells: BTreeMap<&str, SdkCells> = BTreeMap::new();
     let mut sdks = Vec::new();
     for (name, sdk) in &versions.sdk {
         let known_rel = format!("conformance/known-failures/{name}.txt");
@@ -820,6 +957,8 @@ fn conformance_json(
             Vec::new()
         };
         let matrix = matrices.get(name);
+        let names: Vec<String> = sdk.versions.iter().map(|v| v.version.clone()).collect();
+        let cells = sdk_cells(name, &names, &known, &known_rel, matrix, &mut plans)?;
         let mut vers = Vec::new();
         for v in &sdk.versions {
             let key = format!("{name}@{}", v.version);
@@ -827,24 +966,14 @@ fn conformance_json(
             let mut checks_by_op: BTreeMap<String, usize> = BTreeMap::new();
             let mut checks_by_result: BTreeMap<String, usize> = BTreeMap::new();
             let mut cells_known = 0usize;
-            let in_matrix = matrix.is_some_and(|(_, m)| m.testees.iter().any(|t| t.key == key));
-            if let Some((_, m)) = matrix {
-                for e in &m.entries {
-                    if let Some(c) = e.cells.get(&key) {
-                        *cells_by_result.entry(c.result.clone()).or_default() += 1;
-                        if c.known_issue.is_some() {
-                            cells_known += 1;
-                        }
-                        for k in &c.checks {
-                            // a failing cell also lists checks the version could not answer
-                            // (`unsupported`); those are not failures, so only the per-result
-                            // count holds them
-                            if is_failing_check(&k.result) {
-                                *checks_by_op.entry(k.op.clone()).or_default() += 1;
-                            }
-                            *checks_by_result.entry(k.result.clone()).or_default() += 1;
-                        }
-                    }
+            for c in cells.values().filter_map(|e| e.get(&key)) {
+                *cells_by_result.entry(c.result.clone()).or_default() += 1;
+                if c.known_issue.is_some() {
+                    cells_known += 1;
+                }
+                for k in &c.checks {
+                    *checks_by_op.entry(k.op.clone()).or_default() += 1;
+                    *checks_by_result.entry(k.result.clone()).or_default() += 1;
                 }
             }
             let known_lines = known
@@ -856,68 +985,64 @@ fn conformance_json(
                 "key": key,
                 "current": v.version == sdk.current,
                 "max_protocol": v.max_protocol,
-                "in_matrix": in_matrix,
                 "failing_cells_by_result": cells_by_result,
                 "failing_cells_with_known_issue": cells_known,
                 "failing_checks_by_op": checks_by_op,
-                "checks_by_result": checks_by_result,
+                "failing_checks_by_result": checks_by_result,
                 "known_failure_lines": known_lines,
             }));
         }
-        let entries: Vec<Value> = match matrix {
-            Some((_, m)) => m
-                .entries
-                .iter()
-                .map(|e| {
-                    let cells: BTreeMap<&String, Value> = e
-                        .cells
-                        .iter()
-                        .map(|(k, c)| {
-                            (
-                                k,
-                                json!({
-                                    "result": c.result,
-                                    "known_issue": c.known_issue,
-                                    "checks": c.checks.iter().map(|ch| json!({
-                                        "check": ch.check,
-                                        "op": ch.op,
-                                        "result": ch.result,
-                                        "detail": ch.detail,
-                                    })).collect::<Vec<_>>(),
-                                }),
-                            )
-                        })
-                        .collect();
-                    json!({ "id": e.id, "cells": cells })
-                })
-                .collect(),
-            None => Vec::new(),
-        };
+        let entries: Vec<Value> = cells
+            .iter()
+            .map(|(id, by_key)| {
+                let cells: BTreeMap<&String, Value> = by_key
+                    .iter()
+                    .map(|(k, c)| {
+                        (
+                            k,
+                            json!({
+                                "result": c.result,
+                                "known_issue": c.known_issue,
+                                "checks": c.checks.iter().map(|ch| json!({
+                                    "check": ch.check,
+                                    "op": ch.op,
+                                    "result": ch.result,
+                                    "failure": ch.failure,
+                                    "detail": ch.detail,
+                                })).collect::<Vec<_>>(),
+                            }),
+                        )
+                    })
+                    .collect();
+                json!({ "id": id, "cells": cells })
+            })
+            .collect();
         sdks.push(json!({
             "sdk": name,
             "package": sdk.package,
             "current": sdk.current,
             "issues_repo": sdk.issues_repo,
-            "matrix": matrix.map(|(rel, _)| rel),
-            "corpus_version": matrix.map(|(_, m)| &m.corpus_version),
-            "known_failure_problems": matrix.map(|(_, m)| &m.known_failure_problems),
-            "known_failures_file": if known.is_empty() { None } else { Some(format!("conformance/known-failures/{name}.txt")) },
+            "matrices": matrix.map_or(&[][..], |(rels, _)| rels.as_slice()),
+            "known_failure_problems": matrix.map_or(&[][..], |(_, m)| m.known_failure_problems.as_slice()),
+            "known_failures_file": if known.is_empty() { None } else { Some(known_rel) },
             "known_failure_lines": known.len(),
             "versions": vers,
             "entries": entries,
         }));
+        all_cells.insert(name.as_str(), cells);
     }
 
     let mut rows = Vec::new();
     for r in &reproductions.reproductions {
-        let matrix = matrices.get(&r.sdk).map(|(_, m)| m);
+        let empty = SdkCells::new();
+        let cells = all_cells.get(r.sdk.as_str()).unwrap_or(&empty);
+        let listed = versions.sdk.get(&r.sdk);
         let observed = |vs: &[String]| -> BTreeMap<String, &'static str> {
             vs.iter()
                 .map(|v| {
-                    (
-                        v.clone(),
-                        matrix.map_or("not-in-matrix", |m| observe(r, m, v)),
-                    )
+                    let known_version =
+                        listed.is_some_and(|s| s.versions.iter().any(|x| &x.version == v));
+                    (v.clone(), observe(r, cells, known_version, v))
                 })
                 .collect()
         };
