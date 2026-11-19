@@ -246,7 +246,11 @@ entry the set of ids, `entry.json` (oracle references excluded) and every `.xdr`
 `.expected.json` file byte for byte. It then runs `shapekit oracle run` over the regenerated
 chains and compares each entry's `.oracle.json` files with the committed ones, so an oracle
 change whose files were not regenerated is a difference too. Exit status 1 when anything
-differs.
+differs. `--chain <id>` (repeatable) selects single chains instead of whole families.
+
+Each new chain also needs a line in `scripts/repro-seconds.tsv`: its id, a tab and the seconds
+`gen verify-repro` printed for it, rounded up. The `pr.yml` repro shards are packed by those
+seconds, and `scripts/select-repro.sh --check-chains` fails while a chain has no line.
 
 ## 4. What is written
 
