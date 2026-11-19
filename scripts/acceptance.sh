@@ -144,7 +144,7 @@ python_testee() {
 maven_testee() {
   local v
   v=$(python3 -I -c 'import sys, tomllib; print(tomllib.load(open(sys.argv[1], "rb"))["sdk"][sys.argv[2]]["current"])' conformance/versions.toml "$1")
-  mvn -B -q -f "testees/$1/versions/$v/pom.xml" test
+  scripts/with-java.sh mvn -B -q -f "testees/$1/versions/$v/pom.xml" test
   python3 -I -m unittest discover -s "testees/$1/tests"
 }
 
@@ -229,8 +229,16 @@ step python_testee
 current="java toolchain"
 echo "== $current"
 java_path=$(scripts/java-toolchain.sh)
-PATH="$java_path:$PATH" step testee_build java
-PATH="$java_path:$PATH" step maven_testee java
+# the java and kmp builds and unit tests run with JAVA_HOME naming a jdk whose java and javac
+# fail: maven must take the pinned jdk whatever JAVA_HOME a user or ci runner has set
+wrong_jdk="$root/$out/wrong-jdk"
+mkdir -p "$wrong_jdk/bin"
+for tool in java javac; do
+  printf '#!/bin/sh\necho "the build used JAVA_HOME ($0), not the pinned jdk" >&2\nexit 1\n' >"$wrong_jdk/bin/$tool"
+  chmod +x "$wrong_jdk/bin/$tool"
+done
+JAVA_HOME=$wrong_jdk PATH="$java_path:$PATH" step testee_build java
+JAVA_HOME=$wrong_jdk PATH="$java_path:$PATH" step maven_testee java
 step testee_build dart
 step dart_testee
 step testee_build php
@@ -239,8 +247,8 @@ step php_testee
 step testee_build dotnet
 step dotnet_testee
 # the kmp build treats warnings as errors and checks the resolved jars against lib.sha256
-PATH="$java_path:$PATH" step testee_build kmp
-PATH="$java_path:$PATH" step maven_testee kmp
+JAVA_HOME=$wrong_jdk PATH="$java_path:$PATH" step testee_build kmp
+JAVA_HOME=$wrong_jdk PATH="$java_path:$PATH" step maven_testee kmp
 step stellar_cli_testee
 step testee_build stellar-cli
 step "$shapekit" findings check
