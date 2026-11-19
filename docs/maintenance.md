@@ -156,6 +156,34 @@ Policy, in the order issues are looked at:
 Security-sensitive findings in other projects go through that project's private disclosure channel, not a public issue; reports
 about shapekit itself go through GitHub security advisories, as `SECURITY.md` describes.
 
+## When Maven Central refuses a CI job
+
+A job that fails with `curl: (22) The requested URL returned error: 404` on a `repo1.maven.org`
+URL, or with `Could not find artifact ... in central (https://repo.maven.apache.org/maven2)`,
+met the Maven Central refusal that
+[infrastructure](infrastructure.md#maven-central-refusals) describes. The Maven downloads fall
+back to the mirrors Central lists on their own, so a job only fails when every source refused.
+To read what happened:
+
+- `scripts/java-toolchain.sh` logs each source that failed and, once the bytes match the pin,
+  the one that served them, on stderr.
+- `shapekit pins verify` names the source that served each `[[maven]]` pin and quotes what each
+  source before it answered, with the `server`, `via`, `x-served-by`, `cf-ray` and
+  `cf-mitigated` headers when the answer carried them.
+- `scripts/with-java.sh` prints `with-java: a download from maven central failed; retrying ...`
+  before the run with `scripts/maven-mirror-settings.xml`.
+
+A sha256 mismatch is never a refusal: it fails the job whichever source served the bytes, and it
+means the pin or the source is wrong. Check the file at each source by hand
+(`curl -fsSL <url> | sha256sum`) before you change a pin.
+
+The source list lives in three places that must agree: `MAVEN_REPOSITORIES` and
+`MavenPin::urls` in `crates/shapekit-cli/src/pins/mod.rs`, the `repositories` list in
+`scripts/pin.sh`, and the mirror in `scripts/maven-mirror-settings.xml`. Add only mirrors that
+Central lists in its own
+[repository metadata](https://repo.maven.apache.org/maven2/.meta/repository-metadata.xml). `shapekit conformance sync-versions` reads Central's `maven-metadata.xml` and the
+SDK versions files in [SDK CI](sdk-ci.md) call `mvn` directly; neither falls back to a mirror.
+
 ## Changes to expected values
 
 Expected decoded values (`<variant>.expected.json`), the `expected` block of an entry, the

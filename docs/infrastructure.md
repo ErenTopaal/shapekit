@@ -218,6 +218,28 @@ its 44).
 | harness-stellar-rpc, transactions method | 12,100 s | 3 | 4,000 s | 150 min |
 | harness-stellar-rpc, ledgers method | 10,700 s | 3 | 3,600 s | 150 min |
 
+### Maven Central refusals
+
+Maven Central sits behind a CDN that has answered `404` to some GitHub runners for files it
+serves to every other address, while other jobs of the same run fetched the same files. A
+refused runner fails at the first Maven download, which can be the pinned Maven itself
+(`scripts/java-toolchain.sh`), a `[[maven]]` pin in `pins verify`, or a dependency or plugin in
+a Java or KMP testee build. Each of these paths now tries the mirrors Central lists in a fixed
+order, and the pinned hashes decide in every case, so a mirror changes where the bytes come from
+and never which bytes are accepted:
+
+| Path | Sources, in order | What decides |
+|---|---|---|
+| `scripts/java-toolchain.sh` (Maven) | `repo1.maven.org`, `repo.maven.apache.org`, Google's mirror `maven-central.storage-download.googleapis.com`, then `archive.apache.org` (the list `scripts/pin.sh maven-urls apache-maven` prints) | the sha256 in `pins.toml`; bytes that differ stop the script, whichever source served them. The script logs on stderr each source that failed and the one that served the file |
+| `shapekit pins verify`, `[[maven]]` pins | the same list (the archive only for `apache-maven`) | `ok` only when a source serves bytes with the pinned sha256; the line names that source and quotes what every source before it answered, with the headers that say who answered. Other bytes from any source fail the pin; the mirrors are not asked once a source has served bytes |
+| `scripts/with-java.sh mvn ...` (testee builds and unit tests) | Central as Maven configures it; when the build failed and Maven's output names `https://repo.maven.apache.org/maven2`, one more run with `scripts/maven-mirror-settings.xml`, which reads `central` from Google's mirror | Maven runs the retry with `--strict-checksums`; the jars a build copies into `lib/` are then checked against the version's `lib.sha256` by `scripts/check-jars.sh`, as on a build from Central |
+
+`repo.maven.apache.org` is the same service as `repo1.maven.org` and resolves to the same CDN
+addresses; Google's mirror and the Apache archive run on other infrastructure. A build that fails for any other reason, such as a compile error or a
+failing test, is not retried. The retry replaces the user settings file (`~/.m2/settings.xml`)
+for that run. Maven plugins are not hash-locked in `lib.sha256`; on a retry Maven checks them
+against the checksum files the mirror serves, as it checks them against Central's otherwise.
+
 ## Network access and telemetry
 
 shapekit collects no telemetry. It does not phone home, report usage, check for updates, or
@@ -229,13 +251,13 @@ requests an hour per address; with `GITHUB_TOKEN` set they send it, as the workf
 
 | Command | Talks to | Why |
 |---|---|---|
-| `shapekit pins verify` | GitHub (git and the releases api), static.rust-lang.org, go.dev, nodejs.org, crates.io index, npm registry, Go module proxy, Docker Hub registry | checks every pin still resolves to the pinned bytes |
+| `shapekit pins verify` | GitHub (git and the releases api), static.rust-lang.org, go.dev, nodejs.org, crates.io index, npm registry, Go module proxy, PyPI, Maven Central (and the mirrors it lists, when it refuses, see [Maven Central refusals](#maven-central-refusals)), Docker Hub registry | checks every pin still resolves to the pinned bytes |
 | `shapekit conformance sync-versions` | crates.io, npm, the Go module proxy, PyPI, Maven Central, pub.dev, Packagist, NuGet, and the GitHub REST API and raw.githubusercontent.com for stellar-xdr commits | derives the SDK version matrix from the registries; `upstream-drift.yml` runs it with `--check` |
-| `scripts/python-toolchain.sh`, `scripts/java-toolchain.sh`, `scripts/flutter-toolchain.sh` | GitHub release assets of uv, CPython (python-build-standalone) and the Temurin JDKs (27 for the testees, 21 with `--gradle-jdk` for an SDK checkout's Gradle build), Maven from Maven Central, and the Flutter archive from Flutter's release storage (`storage.googleapis.com`), as named in `pins.toml`, once | fetch the toolchains of the Python, Java, KMP and Dart testees into `target/toolchains/`, checked against their sha256 |
+| `scripts/python-toolchain.sh`, `scripts/java-toolchain.sh`, `scripts/flutter-toolchain.sh` | GitHub release assets of uv, CPython (python-build-standalone) and the Temurin JDKs (27 for the testees, 21 with `--gradle-jdk` for an SDK checkout's Gradle build), Maven from Maven Central (or, when it refuses, the mirrors it lists or the Apache archive), and the Flutter archive from Flutter's release storage (`storage.googleapis.com`), as named in `pins.toml`, once | fetch the toolchains of the Python, Java, KMP and Dart testees into `target/toolchains/`, checked against their sha256 |
 | `shapekit capture history` | the public SEP-54 data lake (`aws-public-blockchain`, us-east-2), or with `--via rpc` a stellar-rpc endpoint (default `https://soroban-testnet.stellar.org`) | captures one ledger from public network history |
 | `shapekit doctor`, with `sdk` or no argument, unless `--offline` | index.crates.io, proxy.golang.org, registry.npmjs.org, one HEAD request each, only for the toolchains the selected SDKs build with | checks that the SDK builds can fetch their packages |
 | `shapekit conformance file-issues` | GitHub, through `gh` | opens the drafted issues upstream; it refuses to run without the `--confirm` flag |
-| `shapekit conformance run` and `reproduce`, and `shapekit fuzz`, unless `--no-build` | crates.io, the Go module proxy, the npm registry, pub.dev, Packagist and NuGet, through `cargo`, `go`, `npm`, `flutter pub`, `composer` and `dotnet` | the build steps in `conformance/versions.toml` fetch the pinned SDK versions; running the testees is offline |
+| `shapekit conformance run` and `reproduce`, and `shapekit fuzz`, unless `--no-build` | crates.io, the Go module proxy, the npm registry, PyPI, Maven Central (Google's mirror of it on a retry), pub.dev, Packagist and NuGet, through `cargo`, `go`, `npm`, `uv`, `mvn`, `flutter pub`, `composer` and `dotnet` | the build steps in `conformance/versions.toml` fetch the pinned SDK versions; running the testees is offline |
 | `shapekit audit run`, `shapekit audit watch` and `shapekit audit newest`, unless `--lake <dir>` | the public SEP-54 data lake (`aws-public-blockchain`, us-east-2): `.config.json`, bucket listings for the newest ledger and the testnet prefix, and one object per ledger checked | checks the law book on public ledgers; objects are streamed and never written to disk. With `--sdk`, the SDK's build steps from `conformance/versions.toml` fetch packages unless `--no-build` is given |
 | `wb-adapter` (used by `shapekit harness`) | GitHub and the image registries, on first use of a commit | fetches that wallet-backend commit and builds its image; later runs reuse both and are offline |
 | `etl-adapter` (used by `shapekit harness`) | GitHub and the image registries, on first use of a commit | fetches that stellar-etl commit and builds its image; later runs reuse both and are offline |
