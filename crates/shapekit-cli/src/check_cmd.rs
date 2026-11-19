@@ -72,6 +72,16 @@ pub struct IndexerArgs {
     /// reason differs from the file.
     #[arg(long)]
     expect: Option<PathBuf>,
+    /// How --expect holds the run: `exact` (every difference fails, at the listed target
+    /// build) or `regressions` (any build; only a new or changed failure, or a missing entry,
+    /// fails), for a pull request checked against its default branch's file.
+    #[arg(long, default_value = "exact", value_parser = harness_cmd::EXPECT_MODES, requires = "expect")]
+    expect_mode: String,
+    /// Replay only this shard of the selection, `<index>/<count>` (1-based), for a run split
+    /// across jobs; `shapekit harness merge` puts the shard reports together. Not with
+    /// --expect: check the merged report with `harness merge --expect`.
+    #[arg(long, value_name = "INDEX/COUNT")]
+    shard: Option<shapekit_harness::corpus::Shard>,
     /// Directory for harness-report.json, HARNESS.md and the logs.
     #[arg(long, default_value = "harness-out")]
     out: PathBuf,
@@ -111,7 +121,8 @@ pub fn run(cmd: CheckCommand) -> Result<bool> {
             memory_slack: 0.1,
             memory_budget: None,
             expect: a.expect,
-            shard: None,
+            expect_mode: a.expect_mode,
+            shard: a.shard,
             common: a.common,
         })),
     }

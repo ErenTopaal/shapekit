@@ -131,6 +131,10 @@ pub struct RunArgs {
     /// differs, an entry is missing or unlisted, or the target build is another one.
     #[arg(long)]
     pub(crate) expect: Option<PathBuf>,
+    /// How --expect holds the run: `exact` (every difference fails) or `regressions` (any
+    /// build of the target; only a new or changed failure, or a missing entry, fails).
+    #[arg(long, default_value = "exact", value_parser = EXPECT_MODES, requires = "expect")]
+    pub(crate) expect_mode: String,
     /// Replay only this shard of the selection, `<index>/<count>` (1-based): the selected
     /// chains, sorted by name, dealt out in turn, a chain's networks together. For a run split
     /// across jobs; `harness merge` puts the shard reports together.
@@ -151,6 +155,16 @@ pub struct MergeArgs {
     /// whole run.
     #[arg(long)]
     pub(crate) expect: Option<PathBuf>,
+    /// How --expect holds the merged report, as in `harness run --expect-mode`.
+    #[arg(long, default_value = "exact", value_parser = EXPECT_MODES, requires = "expect")]
+    pub(crate) expect_mode: String,
+}
+
+/// The values of --expect-mode, as `expect::Mode` names them.
+pub(crate) const EXPECT_MODES: [&str; 2] = ["exact", "regressions"];
+
+pub(crate) fn expect_mode(name: &str) -> expect::Mode {
+    expect::Mode::parse(name).expect("clap only accepts the names in EXPECT_MODES")
 }
 
 #[derive(Subcommand)]
@@ -305,6 +319,9 @@ pub struct ExpectArgs {
     /// Compare the report with this expectations file.
     #[arg(long)]
     check: Option<PathBuf>,
+    /// How --check holds the report, as in `harness run --expect-mode`.
+    #[arg(long, default_value = "exact", value_parser = EXPECT_MODES, conflicts_with = "write")]
+    mode: String,
 }
 
 fn read_report(path: &std::path::Path) -> Result<report::Report> {
@@ -317,21 +334,26 @@ fn report_expectations(
     rep: &report::Report,
     want: &expect::Expectations,
     path: &std::path::Path,
+    mode: expect::Mode,
 ) -> Result<bool> {
-    let diffs = expect::compare(rep, want);
-    for d in &diffs {
+    let o = expect::check(rep, want, mode);
+    for n in &o.notes {
+        println!("expectation note: {n}");
+    }
+    for d in &o.failures {
         println!("expectation: {d}");
     }
     println!(
-        "expectations {}: {}",
+        "expectations {} ({}): {}",
         path.display(),
-        if diffs.is_empty() {
+        mode.name(),
+        if o.met() {
             format!("met, {} entries", want.entries.len())
         } else {
-            format!("FAILED, {} difference(s)", diffs.len())
+            format!("FAILED, {} difference(s)", o.failures.len())
         }
     );
-    Ok(diffs.is_empty())
+    Ok(o.met())
 }
 
 #[derive(Args)]
@@ -560,7 +582,12 @@ pub fn run(cmd: HarnessCommand) -> Result<bool> {
         HarnessCommand::Expect(a) => {
             let rep = read_report(&a.report)?;
             if let Some(path) = a.check {
-                return report_expectations(&rep, &expect::load(&path)?, &path);
+                return report_expectations(
+                    &rep,
+                    &expect::load(&path)?,
+                    &path,
+                    expect_mode(&a.mode),
+                );
             }
             let path = a.write.expect("clap requires --write or --check");
             let e = expect::from_report(&rep)?;
@@ -854,7 +881,7 @@ pub fn run(cmd: HarnessCommand) -> Result<bool> {
             }
             println!("wrote {} and {}", json.display(), md.display());
             let met = match &want {
-                Some((w, path)) => report_expectations(&rep, w, path)?,
+                Some((w, path)) => report_expectations(&rep, w, path, expect_mode(&a.expect_mode))?,
                 None => true,
             };
             Ok(rep.ok() && met)
@@ -887,7 +914,7 @@ pub fn run(cmd: HarnessCommand) -> Result<bool> {
             }
             println!("wrote {} and {}", json.display(), md.display());
             let met = match &want {
-                Some((w, path)) => report_expectations(&rep, w, path)?,
+                Some((w, path)) => report_expectations(&rep, w, path, expect_mode(&a.expect_mode))?,
                 None => true,
             };
             Ok(rep.ok() && met)

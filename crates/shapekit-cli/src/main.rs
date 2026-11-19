@@ -999,6 +999,102 @@ mod tests {
         }
     }
 
+    // --expect-mode only means something with an expectations file, so it is refused alone
+    #[test]
+    fn expect_modes_need_an_expectations_file() {
+        let ok: [&[&str]; 4] = [
+            &[
+                "shapekit",
+                "check",
+                "indexer",
+                "--adapter",
+                "a",
+                "--expect",
+                "e.toml",
+                "--expect-mode",
+                "regressions",
+            ],
+            &[
+                "shapekit",
+                "check",
+                "indexer",
+                "--adapter",
+                "a",
+                "--shard",
+                "1/2",
+            ],
+            &[
+                "shapekit",
+                "harness",
+                "merge",
+                "s1",
+                "s2",
+                "--expect",
+                "e.toml",
+                "--expect-mode",
+                "regressions",
+            ],
+            &[
+                "shapekit",
+                "harness",
+                "expect",
+                "--report",
+                "r.json",
+                "--check",
+                "e.toml",
+                "--mode",
+                "regressions",
+            ],
+        ];
+        for argv in ok {
+            Cli::try_parse_from(argv).unwrap_or_else(|e| panic!("{argv:?}: {e}"));
+        }
+        let refused: [&[&str]; 4] = [
+            &[
+                "shapekit",
+                "check",
+                "indexer",
+                "--adapter",
+                "a",
+                "--expect-mode",
+                "regressions",
+            ],
+            &[
+                "shapekit",
+                "harness",
+                "run",
+                "--adapter",
+                "a",
+                "--expect",
+                "e.toml",
+                "--expect-mode",
+                "loose",
+            ],
+            &[
+                "shapekit",
+                "harness",
+                "merge",
+                "s1",
+                "--expect-mode",
+                "regressions",
+            ],
+            &[
+                "shapekit",
+                "harness",
+                "expect",
+                "--report",
+                "r.json",
+                "--write",
+                "e.toml",
+                "--mode",
+                "regressions",
+            ],
+        ];
+        for argv in refused {
+            assert!(Cli::try_parse_from(argv).is_err(), "{argv:?} parses");
+        }
+    }
+
     // a dataset run ignores these options, so giving them with --dataset is refused rather
     // than silently dropped
     #[test]

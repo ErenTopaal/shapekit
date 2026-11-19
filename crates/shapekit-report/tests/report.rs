@@ -182,6 +182,107 @@ fn harness_baseline_new_fixed_unchanged() {
     assert!(md.contains("**1 fixed**"));
 }
 
+// a pull request's run held to the expectations its default branch committed at another
+// build: the gate (expect, regressions mode) and the comment (the baseline comparison) name
+// the same entries
+#[test]
+fn regressions_gate_and_comment_agree() {
+    use shapekit_harness::expect::{self, Mode};
+    let tmp = tempfile::tempdir().unwrap();
+    let text = std::fs::read_to_string(root().join(HARNESS)).unwrap();
+    let run: shapekit_harness::report::Report = serde_json::from_str(&text).unwrap();
+    let mut want = expect::from_report(&run).unwrap();
+    want.target_version = "0000000000000000000000000000000000000000".into();
+    let path = tmp.path().join("expected-verdicts.toml");
+    let write = |w: &expect::Expectations| {
+        std::fs::write(&path, expect::render(w, "test").unwrap()).unwrap();
+    };
+
+    // another build, the same verdicts: met, where exact fails on the build alone
+    write(&want);
+    let w = expect::load(&path).unwrap();
+    assert!(expect::check(&run, &w, Mode::Regressions).met());
+    assert_eq!(expect::check(&run, &w, Mode::Exact).failures.len(), 1);
+
+    let failing: Vec<usize> = want
+        .entries
+        .iter()
+        .enumerate()
+        .filter(|(_, x)| x.network == "testnet" && expect::is_failure(&x.verdict))
+        .map(|(i, _)| i)
+        .collect();
+    let passing = want
+        .entries
+        .iter()
+        .position(|x| x.network == "testnet" && x.verdict == "pass")
+        .unwrap();
+    let (new_i, changed_i) = (failing[0], failing[1]);
+    let new_id = want.entries[new_i].entry.clone();
+    let changed_id = want.entries[changed_i].entry.clone();
+    let fixed_id = want.entries[passing].entry.clone();
+    assert!(new_id != changed_id && new_id != fixed_id && changed_id != fixed_id);
+    // the default branch passed one entry the run now fails, failed another with another
+    // verdict, and failed one the run now passes
+    want.entries[new_i].verdict = "pass".into();
+    want.entries[new_i].reason = None;
+    let other = if want.entries[changed_i].verdict == "dropped" {
+        ("mishandled", Some("halted".to_owned()))
+    } else {
+        ("dropped", None)
+    };
+    want.entries[changed_i].verdict = other.0.into();
+    want.entries[changed_i].reason = other.1;
+    want.entries[passing].verdict = "mishandled".into();
+    want.entries[passing].reason = Some("wrong-value".into());
+    write(&want);
+    let w = expect::load(&path).unwrap();
+    let o = expect::check(&run, &w, Mode::Regressions);
+    assert_eq!(o.failures.len(), 2, "{o:?}");
+    assert!(
+        o.failures
+            .iter()
+            .any(|f| f.starts_with(&format!("{new_id} ")) && f.contains("new failure")),
+        "{o:?}"
+    );
+    assert!(
+        o.failures
+            .iter()
+            .any(|f| f.starts_with(&format!("{changed_id} ")) && f.contains("changed failure")),
+        "{o:?}"
+    );
+    assert!(
+        o.notes
+            .iter()
+            .any(|n| n.starts_with(&format!("{fixed_id} ")) && n.contains("fixed")),
+        "{o:?}"
+    );
+
+    // only the fix: met, and still reported
+    let mut only_fix = expect::from_report(&run).unwrap();
+    only_fix.target_version = want.target_version.clone();
+    only_fix.entries[passing] = want.entries[passing].clone();
+    write(&only_fix);
+    let o = expect::check(&run, &expect::load(&path).unwrap(), Mode::Regressions);
+    assert!(o.met(), "{o:?}");
+    assert!(o.notes.iter().any(|n| n.contains("fixed")), "{o:?}");
+
+    write(&want);
+    let mut opts = options(root().join(HARNESS));
+    opts.baseline = Some(path.clone());
+    let r = build(&opts).unwrap();
+    let c = r.comparison.as_ref().unwrap();
+    let ids = |l: &[shapekit_report::Change]| -> Vec<String> {
+        l.iter().map(|x| x.entry.clone()).collect()
+    };
+    assert_eq!(ids(&c.new), vec![new_id.clone()]);
+    assert_eq!(ids(&c.changed), vec![changed_id.clone()]);
+    assert_eq!(ids(&c.fixed), vec![fixed_id.clone()]);
+    let md = summary::render(&r, Some("report.html"));
+    for id in [&new_id, &changed_id, &fixed_id] {
+        assert!(md.contains(&format!("`{id}`")), "{id} not in\n{md}");
+    }
+}
+
 #[test]
 fn a_run_compared_with_itself_has_nothing_new() {
     let mut o = options(root().join(HARNESS));

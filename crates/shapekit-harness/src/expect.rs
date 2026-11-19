@@ -19,6 +19,12 @@
 //!
 //! `shapekit harness expect --report <harness-report.json> --write <file>` writes one from a
 //! real run.
+//!
+//! [`Mode::Regressions`] reads the same file as a floor instead: it ignores the target build,
+//! so a pull request (a new commit) can be checked against the expectations committed on its
+//! default branch, and fails only when a verdict gets worse. A failure (`mishandled`,
+//! `dropped`, `not-evaluated`) the file does not expect, or one whose verdict or reason
+//! changed, fails; a failure that went away is reported as fixed and passes.
 
 use std::collections::BTreeMap;
 use std::fmt::Write as _;
@@ -144,14 +150,150 @@ pub fn render(e: &Expectations, header: &str) -> Result<String> {
     Ok(out)
 }
 
+/// How a run is held to an expectations file.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum Mode {
+    /// Every verdict and reason as listed, at the listed target build.
+    #[default]
+    Exact,
+    /// No verdict worse than listed, at any build of the listed target.
+    Regressions,
+}
+
+impl Mode {
+    pub fn name(self) -> &'static str {
+        match self {
+            Mode::Exact => "exact",
+            Mode::Regressions => "regressions",
+        }
+    }
+
+    pub fn parse(s: &str) -> Option<Self> {
+        [Mode::Exact, Mode::Regressions]
+            .into_iter()
+            .find(|m| m.name() == s)
+    }
+}
+
+/// The result of holding a run to its expectations: what fails it, and what is worth a line
+/// without failing it (a fixed failure, another build in regressions mode).
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct Outcome {
+    pub failures: Vec<String>,
+    pub notes: Vec<String>,
+}
+
+impl Outcome {
+    pub fn met(&self) -> bool {
+        self.failures.is_empty()
+    }
+}
+
+/// The verdicts a pull request summary counts as failures, the same set `shapekit report`
+/// classes as new, changed or fixed.
+pub fn is_failure(verdict: &str) -> bool {
+    matches!(verdict, "dropped" | "mishandled" | "not-evaluated")
+}
+
 /// Every difference between `report` and `want`, one line each. Empty means the run met
 /// its expectations.
 pub fn compare(report: &Report, want: &Expectations) -> Vec<String> {
+    check(report, want, Mode::Exact).failures
+}
+
+/// Holds `report` to `want` in `mode`.
+pub fn check(report: &Report, want: &Expectations, mode: Mode) -> Outcome {
     let target = report
         .describe
         .as_ref()
         .map(|d| (d.target.as_str(), d.target_version.as_str()));
-    compare_rows(target, &report.entries, want)
+    match mode {
+        Mode::Exact => Outcome {
+            failures: compare_rows(target, &report.entries, want),
+            notes: Vec::new(),
+        },
+        Mode::Regressions => regressions(target, &report.entries, want),
+    }
+}
+
+fn regressions(target: Option<(&str, &str)>, rows: &[EntryRow], want: &Expectations) -> Outcome {
+    let mut o = Outcome::default();
+    match target {
+        None => o
+            .failures
+            .push("the report has no describe, so the target is unknown".into()),
+        Some((t, _)) if t != want.target => o.failures.push(format!(
+            "the run is of {t}, the expectations are of {}",
+            want.target
+        )),
+        Some((_, v)) if v != want.target_version => o.notes.push(format!(
+            "the run is of {} {v}, the expectations were written at {}; regressions mode compares the verdicts only",
+            want.target, want.target_version
+        )),
+        Some(_) => {}
+    }
+    let got: BTreeMap<(&str, &str), (&str, Option<&str>)> = rows
+        .iter()
+        .map(|r| {
+            (
+                (r.entry.as_str(), r.network.as_str()),
+                (r.result.verdict.name(), r.result.reason.map(|x| x.name())),
+            )
+        })
+        .collect();
+    let expected: BTreeMap<(&str, &str), (&str, Option<&str>)> = want
+        .entries
+        .iter()
+        .map(|x| {
+            (
+                (x.entry.as_str(), x.network.as_str()),
+                (x.verdict.as_str(), x.reason.as_deref()),
+            )
+        })
+        .collect();
+    for ((entry, network), (v, r)) in &expected {
+        let was = label(v, *r);
+        let Some((gv, gr)) = got.get(&(*entry, *network)) else {
+            o.failures.push(format!(
+                "{entry} ({network}): expected {was}, not in the run"
+            ));
+            continue;
+        };
+        if gv == v && gr == r {
+            continue;
+        }
+        let now = label(gv, *gr);
+        match (is_failure(v), is_failure(gv)) {
+            (false, true) => o
+                .failures
+                .push(format!("{entry} ({network}): new failure, expected {was}, got {now}")),
+            (true, true) => o.failures.push(format!(
+                "{entry} ({network}): changed failure, expected {was}, got {now}"
+            )),
+            (true, false) => o.notes.push(format!(
+                "{entry} ({network}): fixed, expected {was}, got {now}; regenerate the expectations to keep it fixed"
+            )),
+            (false, false) => o
+                .notes
+                .push(format!("{entry} ({network}): expected {was}, got {now}")),
+        }
+    }
+    for ((entry, network), (gv, gr)) in &got {
+        if expected.contains_key(&(*entry, *network)) {
+            continue;
+        }
+        let now = label(gv, *gr);
+        if is_failure(gv) {
+            o.failures.push(format!(
+                "{entry} ({network}): new failure, got {now}, and the expectations do not list it"
+            ));
+        } else {
+            o.notes.push(format!(
+                "{entry} ({network}): got {now}, and the expectations do not list it"
+            ));
+        }
+    }
+    o
 }
 
 fn compare_rows(
@@ -284,6 +426,128 @@ mod tests {
             row("b", Verdict::Mishandled, Some(Reason::WrongValue)),
         ];
         assert_eq!(compare_rows(Some(("t", "v1")), &other_reason, &w).len(), 1);
+    }
+
+    fn regressions_of(rows: &[EntryRow], version: &str) -> Outcome {
+        regressions(Some(("t", version)), rows, &want())
+    }
+
+    #[test]
+    fn regressions_ignore_the_build() {
+        let same = [
+            row("a", Verdict::Pass, None),
+            row("b", Verdict::Mishandled, Some(Reason::Halted)),
+        ];
+        let o = regressions_of(&same, "v2");
+        assert!(o.met(), "{o:?}");
+        assert_eq!(o.notes.len(), 1, "{o:?}");
+        assert!(o.notes[0].contains("compares the verdicts only"), "{o:?}");
+        assert_eq!(regressions_of(&same, "v1"), Outcome::default());
+        let o = regressions(Some(("other", "v1")), &same, &want());
+        assert!(
+            !o.met() && o.failures[0].contains("expectations are of t"),
+            "{o:?}"
+        );
+        assert!(!regressions(None, &same, &want()).met());
+    }
+
+    #[test]
+    fn regressions_fail_on_a_new_mishandled_verdict() {
+        let rows = [
+            row("a", Verdict::Mishandled, Some(Reason::WrongValue)),
+            row("b", Verdict::Mishandled, Some(Reason::Halted)),
+        ];
+        let o = regressions_of(&rows, "v2");
+        assert_eq!(o.failures.len(), 1, "{o:?}");
+        assert!(
+            o.failures[0].starts_with(
+                "a (testnet): new failure, expected pass, got mishandled (wrong-value)"
+            ),
+            "{o:?}"
+        );
+    }
+
+    #[test]
+    fn regressions_fail_on_a_new_dropped_verdict() {
+        let rows = [
+            row("a", Verdict::Dropped, None),
+            row("b", Verdict::Mishandled, Some(Reason::Halted)),
+        ];
+        let o = regressions_of(&rows, "v2");
+        assert_eq!(o.failures.len(), 1, "{o:?}");
+        assert!(
+            o.failures[0].contains("new failure, expected pass, got dropped"),
+            "{o:?}"
+        );
+    }
+
+    #[test]
+    fn regressions_fail_on_a_changed_failure() {
+        for b in [
+            row("b", Verdict::Mishandled, Some(Reason::WrongValue)),
+            row("b", Verdict::Dropped, None),
+            row("b", Verdict::NotEvaluated, None),
+        ] {
+            let rows = [row("a", Verdict::Pass, None), b];
+            let o = regressions_of(&rows, "v2");
+            assert_eq!(o.failures.len(), 1, "{o:?}");
+            assert!(
+                o.failures[0]
+                    .starts_with("b (testnet): changed failure, expected mishandled (halted)"),
+                "{o:?}"
+            );
+        }
+    }
+
+    #[test]
+    fn regressions_report_a_fix_and_pass() {
+        let rows = [row("a", Verdict::Pass, None), row("b", Verdict::Pass, None)];
+        let o = regressions_of(&rows, "v2");
+        assert!(o.met(), "{o:?}");
+        assert_eq!(o.notes.len(), 2, "{o:?}");
+        assert!(
+            o.notes[1].starts_with("b (testnet): fixed, expected mishandled (halted), got pass"),
+            "{o:?}"
+        );
+        // out of scope is not a failure either way
+        let rows = [
+            row("a", Verdict::OutOfScope, None),
+            row("b", Verdict::OutOfScope, None),
+        ];
+        let o = regressions_of(&rows, "v1");
+        assert!(o.met(), "{o:?}");
+        assert_eq!(o.notes.len(), 2, "{o:?}");
+    }
+
+    #[test]
+    fn regressions_hold_the_selection() {
+        // an expected entry gone fails; an unlisted entry fails only as a failure
+        let o = regressions_of(&[row("a", Verdict::Pass, None)], "v1");
+        assert_eq!(o.failures.len(), 1, "{o:?}");
+        assert!(o.failures[0].contains("not in the run"), "{o:?}");
+        let rows = [
+            row("a", Verdict::Pass, None),
+            row("b", Verdict::Mishandled, Some(Reason::Halted)),
+            row("c", Verdict::Pass, None),
+            row("d", Verdict::Dropped, None),
+        ];
+        let o = regressions_of(&rows, "v1");
+        assert_eq!(o.failures.len(), 1, "{o:?}");
+        assert!(
+            o.failures[0].starts_with("d (testnet): new failure, got dropped"),
+            "{o:?}"
+        );
+        assert_eq!(o.notes.len(), 1, "{o:?}");
+        assert!(o.notes[0].starts_with("c (testnet): got pass"), "{o:?}");
+    }
+
+    #[test]
+    fn modes_parse_by_name() {
+        for m in [Mode::Exact, Mode::Regressions] {
+            assert_eq!(Mode::parse(m.name()), Some(m));
+        }
+        assert_eq!(Mode::parse("loose"), None);
+        assert_eq!(Mode::default(), Mode::Exact);
     }
 
     #[test]
