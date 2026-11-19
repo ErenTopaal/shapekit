@@ -27,30 +27,46 @@ cd "$(git rev-parse --show-toplevel)"
 dest=target/toolchains
 mkdir -p "$dest"
 
-# fetch <dir> <url> <sha256>
+# fetch <dir> <sha256> <url>...
+# tries the urls in order until one serves the file. a source that refuses or cannot be reached
+# passes to the next; bytes that do not match the sha256 stop the script, whichever source
+# served them. the source that served the file is logged on stderr (stdout is the PATH line).
 fetch() {
-  local dir=$1 url=$2 sha256=$3
+  local dir=$1 sha256=$2 url
+  shift 2
   if [ -f "$dir/.sha256" ] && [ "$(cat "$dir/.sha256")" = "$sha256" ]; then
     return
   fi
   rm -rf "$dir" "$dir.tar.gz"
   mkdir -p "$dir"
-  curl -fsSL --retry 3 -o "$dir.tar.gz" "$url"
-  echo "$sha256  $dir.tar.gz" | sha256sum --check --strict --quiet
-  tar -xzf "$dir.tar.gz" -C "$dir" --strip-components=1
-  rm "$dir.tar.gz"
-  echo "$sha256" >"$dir/.sha256"
+  for url in "$@"; do
+    if curl -fsSL --retry 3 -o "$dir.tar.gz" "$url"; then
+      echo "java-toolchain: $(basename "$dir") from $url" >&2
+      echo "$sha256  $dir.tar.gz" | sha256sum --check --strict --quiet
+      tar -xzf "$dir.tar.gz" -C "$dir" --strip-components=1
+      rm "$dir.tar.gz"
+      echo "$sha256" >"$dir/.sha256"
+      return
+    fi
+    echo "java-toolchain: $url failed, trying the next source" >&2
+    rm -f "$dir.tar.gz"
+  done
+  echo "java-toolchain: no source served $(basename "$dir")" >&2
+  return 1
 }
 
 if [ "$mode" = gradle ]; then
   read -r tag _ url sha256 < <(scripts/pin.sh release jdk-gradle)
-  fetch "$dest/$tag" "$url" "$sha256"
+  fetch "$dest/$tag" "$sha256" "$url"
   echo "$PWD/$dest/$tag"
   exit 0
 fi
 
 read -r tag _ url sha256 < <(scripts/pin.sh release jdk)
-fetch "$dest/$tag" "$url" "$sha256"
-read -r version url sha256 < <(scripts/pin.sh maven apache-maven)
-fetch "$dest/maven-$version" "$url" "$sha256"
+fetch "$dest/$tag" "$sha256" "$url"
+# maven central, then its official mirrors and the apache archive (scripts/pin.sh maven-urls)
+read -r version _ sha256 < <(scripts/pin.sh maven apache-maven)
+urls=$(scripts/pin.sh maven-urls apache-maven)
+mapfile -t urls <<<"$urls"
+fetch "$dest/maven-$version" "$sha256" "${urls[@]}"
 echo "$PWD/$dest/$tag/bin:$PWD/$dest/maven-$version/bin"
