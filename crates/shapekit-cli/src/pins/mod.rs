@@ -155,15 +155,39 @@ pub struct MavenPin {
     pub purpose: String,
 }
 
+/// Maven Central, then its official mirrors, in the order `pins verify` and scripts/pin.sh try
+/// them. Central's cdn has answered 404 to some CI runners for files it serves everywhere else;
+/// repo.maven.apache.org is the same service under its other name, google's copy sits on other
+/// infrastructure.
+pub const MAVEN_REPOSITORIES: [&str; 3] = [
+    "https://repo1.maven.org/maven2",
+    "https://repo.maven.apache.org/maven2",
+    "https://maven-central.storage-download.googleapis.com/maven2",
+];
+
 impl MavenPin {
-    pub fn url(&self) -> String {
-        format!(
-            "https://repo1.maven.org/maven2/{}/{}/{}/{}",
+    /// Every url that serves this file, Maven Central's first. The maven distribution is also on
+    /// the apache archive, a source apart from Central and its mirrors.
+    pub fn urls(&self) -> Vec<String> {
+        let path = format!(
+            "{}/{}/{}/{}",
             self.group.replace('.', "/"),
             self.artifact,
             self.version,
             self.file
-        )
+        );
+        let mut urls: Vec<String> = MAVEN_REPOSITORIES
+            .iter()
+            .map(|base| format!("{base}/{path}"))
+            .collect();
+        if self.group == "org.apache.maven" && self.artifact == "apache-maven" {
+            let major = self.version.split('.').next().unwrap_or_default();
+            urls.push(format!(
+                "https://archive.apache.org/dist/maven/maven-{major}/{}/binaries/{}",
+                self.version, self.file
+            ));
+        }
+        urls
     }
 }
 

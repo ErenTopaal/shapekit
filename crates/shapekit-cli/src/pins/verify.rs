@@ -204,13 +204,39 @@ fn jobs<'a>(pins: &'a Pins, http: &'a Http) -> Vec<(&'static str, String, Job<'a
         out.push((
             "maven",
             format!("{}:{}@{} {}", m.group, m.artifact, m.version, m.file),
-            Box::new(move || {
-                check::check_sha256(&net(http.get_bytes(&m.url()))?, &m.file, &m.sha256)
-            }),
+            Box::new(move || check_maven(http, &m.urls(), &m.file, &m.sha256)),
         ));
     }
 
     out
+}
+
+fn host(url: &str) -> &str {
+    let rest = url.split_once("://").map_or(url, |(_, rest)| rest);
+    rest.split('/').next().unwrap_or(rest)
+}
+
+/// Downloads a maven file from the first of `urls` that serves it and checks its sha256. A
+/// source that refuses or cannot be reached passes the file to the next one; a source that
+/// serves other bytes fails the pin, whichever source it is. The verdict names the source that
+/// served the bytes and what every source before it answered.
+fn check_maven(http: &Http, urls: &[String], file: &str, sha256: &str) -> Verdict {
+    let mut refused = Vec::new();
+    for url in urls {
+        match http.get_bytes(url) {
+            Ok(bytes) => {
+                let detail = check::check_sha256(&bytes, file, sha256)
+                    .map_err(|e| format!("{e}, served by {}", host(url)))?;
+                let mut out = format!("{detail}, served by {}", host(url));
+                if !refused.is_empty() {
+                    out.push_str(&format!("; before it: {}", refused.join("; ")));
+                }
+                return Ok(out);
+            }
+            Err(e) => refused.push(crate::error_text::chain(e.as_ref())),
+        }
+    }
+    Err(format!("no source served {file}: {}", refused.join("; ")))
 }
 
 /// Runs all checks with up to `workers` at once and returns them in file order.
@@ -280,6 +306,174 @@ pub fn run(path: &Path, workers: usize) -> Result<bool> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    use std::io::{BufRead, BufReader, Write};
+    use std::net::TcpListener;
+
+    /// A local http server that answers each request path from `routes` (status, body) and
+    /// every other path with 404, until the test ends. Returns its base url.
+    fn serve(routes: Vec<(&'static str, u16, Vec<u8>)>) -> String {
+        let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+        let base = format!("http://{}", listener.local_addr().unwrap());
+        std::thread::spawn(move || {
+            for stream in listener.incoming() {
+                let mut stream = stream.unwrap();
+                let mut reader = BufReader::new(stream.try_clone().unwrap());
+                let mut line = String::new();
+                reader.read_line(&mut line).unwrap();
+                let path = line
+                    .split_whitespace()
+                    .nth(1)
+                    .unwrap_or_default()
+                    .to_string();
+                loop {
+                    let mut header = String::new();
+                    if reader.read_line(&mut header).unwrap() == 0 || header == "\r\n" {
+                        break;
+                    }
+                }
+                let (status, body) = routes
+                    .iter()
+                    .find(|(p, _, _)| *p == path)
+                    .map_or((404, b"not found".to_vec()), |(_, s, b)| (*s, b.clone()));
+                let head = format!(
+                    "HTTP/1.1 {status} X\r\nserver: fixture\r\ncontent-length: {}\r\nconnection: close\r\n\r\n",
+                    body.len()
+                );
+                stream.write_all(head.as_bytes()).unwrap();
+                stream.write_all(&body).unwrap();
+            }
+        });
+        base
+    }
+
+    fn sha256_hex(bytes: &[u8]) -> String {
+        use sha2::{Digest, Sha256};
+        hex::encode(Sha256::digest(bytes))
+    }
+
+    const JAR: &str = "/maven2/g/a/1/a-1.jar";
+
+    #[test]
+    fn maven_refused_by_central_served_by_a_mirror() {
+        let bytes = b"jar bytes".to_vec();
+        let primary = serve(vec![]);
+        let mirror = serve(vec![(JAR, 200, bytes.clone())]);
+        let urls = [format!("{primary}{JAR}"), format!("{mirror}{JAR}")];
+        let http = Http::new().unwrap();
+        let detail = check_maven(&http, &urls, "a-1.jar", &sha256_hex(&bytes)).unwrap();
+        assert!(
+            detail.starts_with(&format!(
+                "a-1.jar, sha256 matches, served by {}; before it: GET {primary}{JAR} returned 404",
+                host(&mirror)
+            )),
+            "{detail}"
+        );
+        // the refusal keeps the header that says who answered it
+        assert!(detail.contains("server: fixture"), "{detail}");
+    }
+
+    #[test]
+    fn maven_served_by_central_names_it() {
+        let bytes = b"jar bytes".to_vec();
+        let primary = serve(vec![(JAR, 200, bytes.clone())]);
+        let urls = [
+            format!("{primary}{JAR}"),
+            "http://127.0.0.1:1/unused".to_string(),
+        ];
+        let http = Http::new().unwrap();
+        let detail = check_maven(&http, &urls, "a-1.jar", &sha256_hex(&bytes)).unwrap();
+        assert_eq!(
+            detail,
+            format!("a-1.jar, sha256 matches, served by {}", host(&primary))
+        );
+    }
+
+    #[test]
+    fn maven_other_bytes_fail_from_any_source() {
+        let pinned = sha256_hex(b"jar bytes");
+        let http = Http::new().unwrap();
+
+        // the mirror serves other bytes after central refused
+        let primary = serve(vec![]);
+        let mirror = serve(vec![(JAR, 200, b"other bytes".to_vec())]);
+        let urls = [format!("{primary}{JAR}"), format!("{mirror}{JAR}")];
+        let err = check_maven(&http, &urls, "a-1.jar", &pinned).unwrap_err();
+        assert!(
+            err.starts_with("a-1.jar has sha256 ")
+                && err.ends_with(&format!(", served by {}", host(&mirror))),
+            "{err}"
+        );
+
+        // central serves other bytes: the mirror that has the pinned ones is not asked
+        let primary = serve(vec![(JAR, 200, b"other bytes".to_vec())]);
+        let mirror = serve(vec![(JAR, 200, b"jar bytes".to_vec())]);
+        let urls = [format!("{primary}{JAR}"), format!("{mirror}{JAR}")];
+        let err = check_maven(&http, &urls, "a-1.jar", &pinned).unwrap_err();
+        assert!(
+            err.ends_with(&format!(", served by {}", host(&primary))),
+            "{err}"
+        );
+    }
+
+    #[test]
+    fn maven_refused_everywhere_fails_with_every_answer() {
+        let primary = serve(vec![]);
+        let mirror = serve(vec![(JAR, 403, b"blocked".to_vec())]);
+        let urls = [format!("{primary}{JAR}"), format!("{mirror}{JAR}")];
+        let http = Http::new().unwrap();
+        let err = check_maven(&http, &urls, "a-1.jar", &sha256_hex(b"x")).unwrap_err();
+        assert!(err.starts_with("no source served a-1.jar: "), "{err}");
+        assert!(
+            err.contains(&format!("GET {primary}{JAR} returned 404")),
+            "{err}"
+        );
+        assert!(
+            err.contains(&format!("GET {mirror}{JAR} returned 403")),
+            "{err}"
+        );
+    }
+
+    #[test]
+    fn maven_urls_try_central_then_its_mirrors() {
+        let pins = crate::pins::parse(
+            r#"
+schema = 1
+[[maven]]
+group = "org.apache.maven"
+artifact = "apache-maven"
+version = "3.10.1"
+file = "apache-maven-3.10.1-bin.tar.gz"
+sha256 = "810b8348f0a40f9116c202093fae007ebeabf67699bf34d81ee7e272289e085a"
+purpose = "p"
+[[maven]]
+group = "org.junit.jupiter"
+artifact = "junit-jupiter"
+version = "6.1.3"
+file = "junit-jupiter-6.1.3.jar"
+sha256 = "6b0a14075c74221de53047e363860b7d19fce802bebc152df2c35c4089c6c379"
+purpose = "p"
+"#,
+        )
+        .unwrap();
+        assert_eq!(
+            pins.maven[0].urls(),
+            [
+                "https://repo1.maven.org/maven2/org/apache/maven/apache-maven/3.10.1/apache-maven-3.10.1-bin.tar.gz",
+                "https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.10.1/apache-maven-3.10.1-bin.tar.gz",
+                "https://maven-central.storage-download.googleapis.com/maven2/org/apache/maven/apache-maven/3.10.1/apache-maven-3.10.1-bin.tar.gz",
+                "https://archive.apache.org/dist/maven/maven-3/3.10.1/binaries/apache-maven-3.10.1-bin.tar.gz",
+            ]
+        );
+        assert_eq!(
+            pins.maven[1].urls(),
+            [
+                "https://repo1.maven.org/maven2/org/junit/jupiter/junit-jupiter/6.1.3/junit-jupiter-6.1.3.jar",
+                "https://repo.maven.apache.org/maven2/org/junit/jupiter/junit-jupiter/6.1.3/junit-jupiter-6.1.3.jar",
+                "https://maven-central.storage-download.googleapis.com/maven2/org/junit/jupiter/junit-jupiter/6.1.3/junit-jupiter-6.1.3.jar",
+            ]
+        );
+    }
 
     #[test]
     fn report_lines() {
