@@ -88,8 +88,15 @@ fn site_data_matches_the_committed_files() {
     let coverage = read_json(&out.join("coverage.json"));
     let entries = read_json(&out.join("entries.json"));
     assert_eq!(coverage["summary"], report["summary"]);
+    // the summary counts CAPs; the PRE-CAP row tags shapes older than every CAP and is no CAP
+    let real_caps = coverage["caps"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .filter(|c| c["id"] != "PRE-CAP")
+        .count();
     assert_eq!(
-        len(&coverage["caps"]),
+        real_caps,
         report["summary"]["caps"].as_u64().unwrap() as usize
     );
     assert_eq!(
