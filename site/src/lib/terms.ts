@@ -251,7 +251,7 @@ export const glossary: { id: string; title: string; note?: string; terms: Glossa
         id: "diverging-entry",
         name: "diverging entry",
         meaning:
-          "An entry on which at least one check of an SDK version fails. A lower count is better. The committed matrices keep diverging entries only.",
+          "An entry on which at least one check of an SDK version fails. A lower count is better. The SDK results count the entries that the known-failures file of the SDK lists for the version, which are the entries a conformance run finds diverging.",
       },
       {
         id: "cell",
