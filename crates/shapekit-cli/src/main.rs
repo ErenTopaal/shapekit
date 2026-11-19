@@ -813,6 +813,9 @@ fn main() -> ExitCode {
             Ok(true)
         }
     };
+    // a command that ended because a signal killed what it ran leaves the exit to the signal
+    // thread, which is still removing what was recorded
+    shapekit_process::cleanup::park_if_stopping();
     match result {
         Ok(true) => ExitCode::SUCCESS,
         Ok(false) => ExitCode::FAILURE,

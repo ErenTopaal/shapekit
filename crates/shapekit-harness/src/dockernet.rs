@@ -137,6 +137,8 @@ impl Network {
         if self.removed {
             return Ok(());
         }
+        // a signal's cleanup removes this network; removing it here too would race it
+        shapekit_process::cleanup::park_if_stopping();
         let filter = format!("network={}", self.name);
         let ids = docker(&["ps", "-aq", "--filter", &filter])?;
         let ids: Vec<&str> = ids.split_whitespace().collect();

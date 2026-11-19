@@ -600,6 +600,8 @@ fn drive_adapter(
         Ok((stop, records))
     })();
 
+    // a signal killed the adapter: its cleanup removes the network and containers and exits
+    shapekit_process::cleanup::park_if_stopping();
     // always try to stop the target, and keep its logs, whatever happened above
     let stopped = adapter.call::<StopResult>(Command::Stop, t.stop);
     let logs_path = opts.logs.join(log_name(job, "target"));

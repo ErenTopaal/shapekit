@@ -132,6 +132,23 @@ pub fn install() -> std::io::Result<()> {
     Ok(())
 }
 
+/// Whether a signal is stopping the process: [`stop`] has taken the record.
+pub fn stopping() -> bool {
+    with(|s| s.stopping)
+}
+
+/// Parks the calling thread for good when a signal is stopping the process. The signal thread
+/// removes what is recorded and exits with `128 + signal`; a thread that went on would race
+/// it for the same containers and networks and could exit the process first, with another
+/// status. Call it where a thread would clean up or exit after what the signal killed.
+pub fn park_if_stopping() {
+    if stopping() {
+        loop {
+            std::thread::park();
+        }
+    }
+}
+
 /// Runs the hooks, then removes every recorded container, network and scratch directory.
 /// Returns what could not be removed, with why. Called by the signal thread; a process
 /// about to exit without unwinding can call it too.
