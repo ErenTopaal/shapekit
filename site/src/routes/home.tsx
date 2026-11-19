@@ -106,8 +106,8 @@ function Kit({ s }: { s: LandingStats }) {
 
 function FindingsHead({ s }: { s: LandingStats }) {
   const components = new Set(s.findings.map((x) => x.component)).size
-  const n = s.findingsIntended.length
-  const intended = n === 0 ? "" : n === 1 ? ` One more record, ${s.findingsIntended[0]}, is intended behavior and is not filed.` : ` ${n} more records, ${s.findingsIntended.join(", ")}, are intended behavior and are not filed.`
+  const n = s.findingsIntended
+  const intended = n === 0 ? "" : n === 1 ? " One more record is intended behavior and is not filed." : ` ${n} more records are intended behavior and are not filed.`
   return (
     <div className="fd-big" data-r="">
       <span className="fd-num tnum" data-count="">{f(s.findings.length)}</span>
@@ -175,11 +175,11 @@ function SdkTable({ s }: { s: LandingStats }) {
 }
 
 function IndexerRuns({ s }: { s: LandingStats }) {
-  const entries = s.runs[0]?.entries ?? 0
+  const replays = s.runs[0]?.replays ?? 0
   return (
     <>
       <div className="ix-head" data-r="">
-        <h3 className="h2" style={css({ fontSize: "var(--fs-2xl)" })}>{plural(s.runs.length, "indexer", "indexers")}. {f(entries)} entries <span className="acc">each.</span></h3>
+        <h3 className="h2" style={css({ fontSize: "var(--fs-2xl)" })}>{plural(s.runs.length, "indexer", "indexers")}. {f(replays)} replays <span className="acc">each.</span></h3>
         <a className="arrow-link" href="/dashboard/indexer">Indexer results</a>
       </div>
       {s.runs.map((r) => {
@@ -194,9 +194,9 @@ function IndexerRuns({ s }: { s: LandingStats }) {
         return (
           <div key={r.target} className="ix-row" data-r="">
             <div className="ix-top"><span className="ix-name">{r.target}<span>{r.note}</span></span><span className="ix-pass"><b className="tnum" data-count="">{f(r.pass)}</b> pass</span></div>
-            <p className="sr-only">{`${r.target}: ${shown.map((g) => `${f(g[1])} ${g[2]}`).join(", ")}, of ${f(r.entries)} entries`}</p>
+            <p className="sr-only">{`${r.target}: ${shown.map((g) => `${f(g[1])} ${g[2]}`).join(", ")}, of ${f(r.replays)} replays`}</p>
             <div className="bar" aria-hidden="true">
-              {shown.map((g, i) => <span key={g[0]} className={`seg ${g[0]}`} style={css({ "--n": g[1], "--i": i })}>{g[0] === "s-pass" ? `${f(g[1])} pass` : g[1] / r.entries >= 0.03 || g[0] === "s-ne" ? f(g[1]) : ""}</span>)}
+              {shown.map((g, i) => <span key={g[0]} className={`seg ${g[0]}`} style={css({ "--n": g[1], "--i": i })}>{g[0] === "s-pass" ? `${f(g[1])} pass` : g[1] / r.replays >= 0.03 || g[0] === "s-ne" ? f(g[1]) : ""}</span>)}
             </div>
           </div>
         )
@@ -317,7 +317,7 @@ export default function Home({ loaderData: s }: Route.ComponentProps) {
     <Kit s={s} />
     <div className="repro" data-r="">
     <p>Every finding comes with its smallest corpus entry and the command that runs it again.</p>
-    <div className="repro-links"><a className="pill" href="/dashboard/findings">All findings</a><a className="pill" href="/dashboard/corpus">Browse the corpus</a><a className="pill" href="/docs/guide/indexer-hardening">Indexer-hardening guide</a></div>
+    <div className="repro-links"><a className="pill" href="/dashboard/findings">All findings</a><a className="pill" href="/dashboard/corpus/entries">Browse the corpus</a><a className="pill" href="/docs/guide/indexer-hardening">Indexer-hardening guide</a></div>
     </div>
     </div>
     </section>
@@ -417,7 +417,7 @@ export default function Home({ loaderData: s }: Route.ComponentProps) {
 
     </div>
     </div>
-    <div className="pm-outro" data-r=""><p>shapekit gives every team <span className="acc">the same shapes</span>, and the tools to run them.</p><a className="arrow-link" href="/dashboard/corpus">See every shape in the corpus</a></div>
+    <div className="pm-outro" data-r=""><p>shapekit gives every team <span className="acc">the same shapes</span>, and the tools to run them.</p><a className="arrow-link" href="/dashboard/corpus/entries">See every shape in the corpus</a></div>
     </div>
     </section>
 
@@ -529,7 +529,7 @@ export default function Home({ loaderData: s }: Route.ComponentProps) {
     <div className="src">
     <div className="src-c" style={css({ "--i": "0" })}><span className="src-x">Option 1</span><h3>Another indexer</h3><p>Compare your rows with its rows. If both indexers have the same bug, the bug passes.</p></div>
     <div className="src-c" style={css({ "--i": "1" })}><span className="src-x">Option 2</span><h3>Rows you write by hand</h3><p>You test only the cases that you think of, and each new case is more work.</p></div>
-    <div className="src-c me" style={css({ "--i": "2" })}><span className="src-x">shapekit</span><h3>The ledger</h3><p>stellar-core already wrote what each transaction did into the transaction meta. The harness reads the answer from there, so <strong>every one of the {f(s.runs[0]?.entries ?? 0)} entries has its answer</strong>, and nobody writes it by hand.</p></div>
+    <div className="src-c me" style={css({ "--i": "2" })}><span className="src-x">shapekit</span><h3>The ledger</h3><p>stellar-core already wrote what each transaction did into the transaction meta. The harness reads the answer from there, so <strong>every one of the {f(s.runs[0]?.replays ?? 0)} replays has its answer</strong>, and nobody writes it by hand.</p></div>
     </div>
     <div className="verd"><p className="verd-k">Then each fact gets one result.</p>
     <div className="vt k-pass" style={css({ "--i": "0" })}><span className="vt-pic" aria-hidden="true"><i></i><i></i></span><b>pass</b><span>The indexer stored the same value.</span></div>
@@ -564,7 +564,7 @@ export default function Home({ loaderData: s }: Route.ComponentProps) {
     <div className="cv-fact" data-r="" style={css({ "--i": "1" })}><strong className="tnum">{s.caps.covered}/{s.caps.visible}</strong><span>CAPs that an indexer can see have an entry from stellar-core.</span></div>
     <div className="cv-fact" data-r="" style={css({ "--i": "2" })}><strong className="tnum">{s.fields.exercised}/{s.fields.notValidated}</strong><span>fields that stellar-core does not fully validate are in the corpus.</span></div>
     </div>
-    <div className="cv-foot"><span><span className="mono">shapekit coverage --check</span> fails when these counts are out of date.</span><a className="arrow-link" href="/dashboard/coverage">Coverage for each CAP</a></div>
+    <div className="cv-foot"><span><span className="mono">shapekit coverage --check</span> fails when these counts are out of date.</span><a className="arrow-link" href="/dashboard/corpus#caps">Coverage for each CAP</a></div>
     </div>
     </section>
 
@@ -785,7 +785,7 @@ export default function Home({ loaderData: s }: Route.ComponentProps) {
     <li>Maintained through protocol 31. The upgrade runbook is already tested on it.</li>
     </ul>
     <div className="ft-col"><h3>Use</h3><ul><li><a href="/docs">Docs</a></li><li><a href="/docs/quick-start">Quick start</a></li><li><a href="/docs/guide/indexer-hardening">Indexer-hardening guide</a></li><li><a href="/docs/corpus/adding-a-shape">Add a shape</a></li></ul></div>
-    <div className="ft-col"><h3>Results</h3><ul><li><a href="/dashboard">Dashboard</a></li><li><a href="/dashboard/corpus">Corpus explorer</a></li><li><a href="/dashboard/sdk">SDK matrix</a></li><li><a href="/dashboard/findings">Findings</a></li></ul></div>
+    <div className="ft-col"><h3>Results</h3><ul><li><a href="/dashboard">Dashboard</a></li><li><a href="/dashboard/corpus/entries">Corpus entries</a></li><li><a href="/dashboard/sdk">SDK results</a></li><li><a href="/dashboard/findings">Findings</a></li></ul></div>
     <div className="ft-col"><h3>Project</h3><ul><li><a href="https://github.com/ErenTopaal/shapekit">GitHub</a></li><li><a href="https://github.com/ErenTopaal/shapekit/releases">Releases</a></li><li><a href="https://github.com/ErenTopaal/shapekit/blob/main/STATUS.md">Status log</a></li><li><a href="https://github.com/ErenTopaal/shapekit/blob/main/SECURITY.md">Security policy</a></li></ul></div>
     </div>
     <div className="ft-mark" aria-hidden="true"><svg viewBox="0 0 16 16"><rect width="16" height="16" rx="3" fill="currentColor"></rect><rect x="3" y="3" width="4" height="4" rx="1" fill="var(--c-brand)"></rect><rect x="9" y="3" width="4" height="4" rx="1" fill="var(--c-brand)"></rect><rect x="3" y="9" width="4" height="4" rx="1" fill="var(--c-brand)"></rect><rect x="9.5" y="9.5" width="3" height="3" rx="0.6" fill="none" stroke="var(--c-brand)"></rect></svg>shapekit</div>

@@ -2,6 +2,7 @@
 // writes. the page computes only counts, sums and filters over these files.
 import { readFile } from "node:fs/promises"
 import type { Conformance, Coverage, Entries, Finding, Findings, Harness, Meta } from "@/lib/data"
+import { findingRows, reportedFindings, runSummary } from "@/lib/metrics"
 import { proofText } from "./content"
 
 async function json<T>(name: string): Promise<T> {
@@ -47,7 +48,8 @@ export interface Bug {
 export interface IndexerRun {
   target: string
   note: string
-  entries: number
+  /** one replay is one entry on one network */
+  replays: number
   pass: number
   mishandled: number
   dropped: number
@@ -76,7 +78,8 @@ export interface LandingStats {
   caps: { visible: number; covered: number }
   fields: { notValidated: number; exercised: number }
   findings: LandingFinding[]
-  findingsIntended: string[]
+  /** findings of both records whose behavior is intended, so shapekit did not file them */
+  findingsIntended: number
   /** upstream issues shapekit filed that the findings link, each counted once */
   issuesFiled: number
   /** upstream issues the findings link that shapekit did not file, each counted once */
@@ -126,14 +129,12 @@ export async function loadLandingStats(): Promise<LandingStats> {
   const refusedArms = blockers["refused-before-ledger"] ?? 0
   const neverArms = blockers["never-emitted"] ?? 0
 
-  const all: Finding[] = findings.findings
-  // the candidate lane's findings join once they have an upstream decision: filed, or a
-  // duplicate of an issue reported before; drafts and won't-fix records stay off the page
-  const candidates = (findings.candidates?.findings ?? []).filter((f) => f.status === "filed" || f.status === "duplicate-of")
-  const bugs = [...all.filter((f) => f.status !== "wont-fix"), ...candidates]
-  // shapekit's own issues are the links of the filed findings of both lanes; a finding that
+  // the reported findings of both records, the same findings and the same count as the
+  // dashboard's (src/lib/metrics.ts); drafts and intended behavior stay off the page
+  const bugs = reportedFindings(findings)
+  // shapekit's own issues are the links of the filed findings of both records; a finding that
   // links one of them is shapekit's whatever its status, so it is never counted as reported before
-  const ownLinks = new Set([...all, ...(findings.candidates?.findings ?? [])].flatMap((f) => (f.status === "filed" && f.link ? [f.link] : [])))
+  const ownLinks = new Set(findingRows(findings).flatMap((f) => (f.status === "filed" && f.link ? [f.link] : [])))
   const own = (f: Finding) => f.link !== null && ownLinks.has(f.link)
   // findings that share one upstream link count once
   const issues = (keep: (f: Finding) => boolean) => new Set(bugs.filter(keep).map((f) => f.link ?? f.id)).size
@@ -155,12 +156,13 @@ export async function loadLandingStats(): Promise<LandingStats> {
   const runs: IndexerRun[] = harness.runs
     .filter((r) => r.describe)
     .map((r) => {
-      const v = r.totals.by_verdict
-      const target = r.describe?.target ?? ""
+      const x = runSummary(r)
+      const v = x.byVerdict
+      const target = x.target
       return {
         target,
         note: runNotes[target] ?? (target === "stellar-etl" && etlRef ? etlRef : ""),
-        entries: r.totals.entries,
+        replays: x.replays,
         pass: v["pass"] ?? 0,
         mishandled: v["mishandled"] ?? 0,
         dropped: v["dropped"] ?? 0,
@@ -245,7 +247,7 @@ export async function loadLandingStats(): Promise<LandingStats> {
     caps: { visible: sum.caps_indexer_visible, covered: sum.caps_indexer_visible_core_emitted },
     fields: { notValidated: sum.fields_not_fully_validated, exercised: sum.fields_not_fully_validated_exercised },
     findings: landingFindings,
-    findingsIntended: all.filter((f) => f.status === "wont-fix").map((f) => f.id),
+    findingsIntended: findings.reported.not_reported["wont-fix"] ?? 0,
     issuesFiled: issues(own),
     issuesReported: issues((f) => !own(f)),
     sdks,
