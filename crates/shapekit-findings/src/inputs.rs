@@ -165,10 +165,23 @@ mod tests {
 
     #[test]
     fn a_shard_report_is_not_an_input() {
-        let path = Path::new(concat!(
+        // any harness input of the findings
+        let dir = Path::new(concat!(
             env!("CARGO_MANIFEST_DIR"),
-            "/../../findings/inputs/harness-stellar-etl-2b24ec89.json"
+            "/../../findings/inputs"
         ));
+        let mut inputs: Vec<_> = std::fs::read_dir(dir)
+            .unwrap()
+            .map(|e| e.unwrap().path())
+            .filter(|p| {
+                p.file_name()
+                    .unwrap()
+                    .to_string_lossy()
+                    .starts_with("harness-")
+            })
+            .collect();
+        inputs.sort();
+        let path = inputs.first().unwrap().as_path();
         let bytes = std::fs::read(path).unwrap();
         assert!(harness_report(&bytes, path).is_ok());
         let mut v: serde_json::Value = serde_json::from_slice(&bytes).unwrap();

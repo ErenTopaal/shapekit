@@ -5,11 +5,20 @@ use std::collections::BTreeMap;
 use shapekit_harness::report::{Report, merge};
 
 fn whole() -> Report {
-    // a committed run of every chain of both networks
-    let path = concat!(
-        env!("CARGO_MANIFEST_DIR"),
-        "/../../findings/inputs/harness-stellar-etl-2b24ec89.json"
-    );
+    // a committed run of every chain of both networks: any harness input of the findings
+    let dir = concat!(env!("CARGO_MANIFEST_DIR"), "/../../findings/inputs");
+    let mut inputs: Vec<_> = std::fs::read_dir(dir)
+        .expect("reading findings/inputs")
+        .map(|e| e.unwrap().path())
+        .filter(|p| {
+            p.file_name()
+                .unwrap()
+                .to_string_lossy()
+                .starts_with("harness-")
+        })
+        .collect();
+    inputs.sort();
+    let path = inputs.first().expect("a committed harness input");
     serde_json::from_slice(&std::fs::read(path).expect("reading the committed run"))
         .expect("parsing it")
 }
