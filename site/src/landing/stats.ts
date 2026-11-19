@@ -2,7 +2,7 @@
 // writes. the page computes only counts, sums and filters over these files.
 import { readFile } from "node:fs/promises"
 import type { Conformance, Coverage, Entries, Finding, Findings, Harness, Meta } from "@/lib/data"
-import { findingRows, ledgerArms, reportedFindings, runSummary, type LedgerArms } from "@/lib/metrics"
+import { capCoverage, componentFindings, entryComposition, findingRows, foundText, ledgerArms, reportedFindings, runSummary, type CapCoverage, type LedgerArms, type SourcePart } from "@/lib/metrics"
 import { proofText } from "./content"
 
 async function json<T>(name: string): Promise<T> {
@@ -53,8 +53,11 @@ export interface IndexerRun {
   pass: number
   mishandled: number
   dropped: number
-  outOfScope: number
   notEvaluated: number
+  /** what the harness found, the text of foundText in src/lib/metrics.ts */
+  found: string
+  /** the reported findings of the indexer */
+  findings: number
 }
 
 export interface Sdk {
@@ -75,7 +78,8 @@ export interface LandingStats {
   sources: { local: number; golden: number; history: number; refused: number }
   decode: { accept: number; reject: number; defined: number }
   arms: LedgerArms
-  caps: { visible: number; covered: number }
+  caps: CapCoverage
+  composition: SourcePart[]
   fields: { notValidated: number; exercised: number }
   findings: LandingFinding[]
   /** findings of both records whose behavior is intended, so shapekit did not file them */
@@ -165,8 +169,9 @@ export async function loadLandingStats(): Promise<LandingStats> {
         pass: v["pass"] ?? 0,
         mishandled: v["mishandled"] ?? 0,
         dropped: v["dropped"] ?? 0,
-        outOfScope: v["out-of-scope"] ?? 0,
         notEvaluated: v["not-evaluated"] ?? 0,
+        found: foundText(x),
+        findings: componentFindings(findings, target),
       }
     })
     .toSorted((a, b) => ["wallet-backend", "stellar-rpc", "stellar-etl"].indexOf(a.target) - ["wallet-backend", "stellar-rpc", "stellar-etl"].indexOf(b.target))
@@ -243,7 +248,8 @@ export async function loadLandingStats(): Promise<LandingStats> {
     sources: { local: n("local-core"), golden: n("core-golden"), history: n("mainnet-history") + n("testnet-history"), refused: n("local-core-refused") },
     decode,
     arms,
-    caps: { visible: sum.caps_indexer_visible, covered: sum.caps_indexer_visible_core_emitted },
+    caps: capCoverage(sum),
+    composition: entryComposition(sum),
     fields: { notValidated: sum.fields_not_fully_validated, exercised: sum.fields_not_fully_validated_exercised },
     findings: landingFindings,
     findingsIntended: findings.reported.not_reported["wont-fix"] ?? 0,

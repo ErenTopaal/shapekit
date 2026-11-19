@@ -8,6 +8,7 @@ import { loadLandingStats, type LandingFinding, type LandingStats } from "@/land
 import { setupLanding } from "@/landing/setup"
 import { breakSegments, statement } from "@/landing/statement"
 import { sdkName } from "@/lib/sdks"
+import { findingsPath } from "@/lib/paths"
 
 // the landing page. every number on it is read at build time from the json files `shapekit site
 // data` writes (src/landing/stats.ts); the motion and the interactive parts are in
@@ -187,14 +188,13 @@ function IndexerRuns({ s }: { s: LandingStats }) {
           ["s-pass", r.pass, "pass"],
           ["s-mis", r.mishandled, "mishandled"],
           ["s-drop", r.dropped, "dropped"],
-          ["s-oos", r.outOfScope, "out of scope"],
           ["s-ne", r.notEvaluated, "not evaluated"],
         ]
         const shown = segs.filter((g) => g[1] > 0)
         return (
           <div key={r.target} className="ix-row" data-r="">
-            <div className="ix-top"><span className="ix-name">{r.target}<span>{r.note}</span></span><span className="ix-pass"><b className="tnum" data-count="">{f(r.pass)}</b> pass</span></div>
-            <p className="sr-only">{`${r.target}: ${shown.map((g) => `${f(g[1])} ${g[2]}`).join(", ")}, of ${f(r.replays)} replays`}</p>
+            <div className="ix-top"><span className="ix-name">{r.target}<span>{r.note}</span></span><span className="ix-found"><b>{r.found}</b>{r.findings > 0 ? <a className="arrow-link" href={findingsPath({ component: r.target })}>{plural(r.findings, "reported finding", "reported findings")}</a> : null}</span></div>
+            <p className="sr-only">{`${r.target}: ${shown.map((g) => `${f(g[1])} ${g[2]}`).join(", ")}`}</p>
             <div className="bar" aria-hidden="true">
               {shown.map((g, i) => <span key={g[0]} className={`seg ${g[0]}`} style={css({ "--n": g[1], "--i": i })}>{g[0] === "s-pass" ? `${f(g[1])} pass` : g[1] / r.replays >= 0.03 || g[0] === "s-ne" ? f(g[1]) : ""}</span>)}
             </div>
@@ -548,7 +548,7 @@ export default function Home({ loaderData: s }: Route.ComponentProps) {
     <div className="cv-top">
     <div data-r="">
     <span className="cv-num tnum" data-count="">{s.arms.percent}<small>%</small></span>
-    <p className="cv-cap"><strong>{f(s.arms.covered)} of the {f(s.arms.total)}</strong> arms that a ledger can hold. {f(s.arms.refused + s.arms.never)} arms cannot occur in any ledger: stellar-core refuses {f(s.arms.refused)} before a ledger and never emits {f(s.arms.never)}.</p>
+    <p className="cv-cap"><strong>{f(s.arms.covered)} of {f(s.arms.total)}</strong> union arms that a ledger can hold have an entry from stellar-core.</p>
     <fieldset className="cv-keys" aria-label="Highlight union arms">
     <button type="button" className="chip" data-g="cov" aria-pressed="false"><i style={css({ "--sev": "var(--c-teal)" })} aria-hidden="true"></i>Covered <b>{f(s.arms.covered)}</b></button>
     <button type="button" className="chip" data-g="ref" aria-pressed="false"><i style={css({ "--sev": "var(--c-flare)" })} aria-hidden="true"></i>Refused before a ledger <b>{f(s.arms.refused)}</b></button>
@@ -559,8 +559,8 @@ export default function Home({ loaderData: s }: Route.ComponentProps) {
     <div data-r="" style={css({ "--i": "1" })}><canvas className="cv-canvas" aria-hidden="true"></canvas><p className="sr-only">{`${s.arms.all} squares, one for each union arm: ${s.arms.covered} covered, ${s.arms.refused} refused before a ledger, ${s.arms.never} never emitted by stellar-core, ${s.arms.other} for other reasons`}</p></div>
     </div>
     <div className="cv-facts">
-    <div className="cv-fact" data-r=""><strong className="tnum" data-count="">{f(s.entries)}</strong><span>corpus entries. stellar-core emitted {f(s.coreEmitted)} of them.</span></div>
-    <div className="cv-fact" data-r="" style={css({ "--i": "1" })}><strong className="tnum">{s.caps.covered}/{s.caps.visible}</strong><span>CAPs that an indexer can see have an entry from stellar-core.</span></div>
+    <div className="cv-fact" data-r=""><strong className="tnum" data-count="">{f(s.entries)}</strong><span>corpus entries, by source:</span><ul className="cv-mix">{s.composition.map((p) => <li key={p.id}><b className="tnum">{f(p.entries)}</b> {p.label}</li>)}</ul></div>
+    <div className="cv-fact" data-r="" style={css({ "--i": "1" })}>{s.caps.covered === s.caps.total ? <><strong className="tnum" data-count="">{s.caps.covered}</strong><span>CAPs that an indexer can see, each with an entry from stellar-core.</span></> : <><strong className="tnum">{s.caps.covered}/{s.caps.total}</strong><span>CAPs that an indexer can see have an entry from stellar-core.</span></>}</div>
     <div className="cv-fact" data-r="" style={css({ "--i": "2" })}><strong className="tnum">{s.fields.exercised}/{s.fields.notValidated}</strong><span>fields that stellar-core does not fully validate are in the corpus.</span></div>
     </div>
     <div className="cv-foot"><span><span className="mono">shapekit coverage --check</span> fails when these counts are out of date.</span><a className="arrow-link" href="/dashboard/corpus">Coverage for each CAP</a></div>
@@ -607,7 +607,6 @@ export default function Home({ loaderData: s }: Route.ComponentProps) {
     <span><i className="s-pass" aria-hidden="true"></i>pass</span>
     <span><i className="s-mis" aria-hidden="true"></i>mishandled</span>
     <span><i className="s-drop" aria-hidden="true"></i>dropped</span>
-    <span><i className="s-oos" aria-hidden="true"></i>out of scope</span>
     <span><i className="s-ne" aria-hidden="true"></i>not evaluated</span>
     </div>
     </div>
