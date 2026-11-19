@@ -40,7 +40,7 @@ What 0.2.0 holds:
   `scripts/select-repro.sh --check-chains` and `shapekit pack verify` (270 chain directories)
   cover them, and `shapekit gen verify-repro --family explore.witnesses --family explore.pairs`
   records each again under both passphrases with 0 differences over 182 chains and 373
-  entries. The moved chains hold 47.7 MB.
+  entries. The moved chains hold 47.3 MB.
 - Obligations: every obligation in `corpus/coverage/obligations.json` has a status, met,
   unmeetable or open, and `shapekit coverage --check` fails on one without, and on a witness
   that names an entry, chain, recipe or dataset that does not exist. By kind: format
@@ -60,7 +60,8 @@ What 0.2.0 holds:
 - Harness, every chain on both networks, 1,652 entries per run:
   - wallet-backend at `3e22515a`, twice in one process: 1,206 pass, 166 mishandled, 56 dropped
     and 224 out of scope (906 entries before: 678, 106, 44, 78).
-  - stellar-etl: 1,388 pass, 28 dropped, 54 out of scope and 182 not evaluated.
+  - stellar-etl at v2.8.35 (`7e3fc9af`): 1,388 pass, 28 dropped, 54 out of scope and 182 not
+    evaluated.
   - stellar-rpc from its pinned release image: 1,416 pass and 236 out of scope, the same with
     events read from events, transactions or ledgers, as
     `crates/shapekit-harness/expect/stellar-rpc.toml` says.
@@ -154,7 +155,8 @@ What 0.2.0 holds:
   expectations file says. The wallet-backend reproductions hold (24 of 24 rows) and
   `indexerlint` is clean on wallet-backend with its baseline.
 - stellar-etl: its harness run now covers every chain on both networks, and it is an
-  input of the main findings (`findings/inputs/harness-stellar-etl-2b24ec89.json`). 906 entries:
+  input of the main findings (`findings/inputs/harness-stellar-etl-<commit>.json`; since
+  2026-11-19 the run at v2.8.35, `7e3fc9af`, the commit `pins.toml` pins). 906 entries:
   796 pass, 24 dropped, 16 out of scope and 70 not evaluated. Its findings stay in the
   candidate lane, which imports the same run, because none has an upstream decision; the main
   findings check counts their failures as held. Two new questions, drafted and not filed: a

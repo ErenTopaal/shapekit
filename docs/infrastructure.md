@@ -48,7 +48,7 @@ Docker.
 | `stellar-cli` (crates.io for the versions, GitHub release assets for the binaries) | 28.1.0, 30.0.1 (current) | stellar-cli testee matrix: the `stellar xdr`, `strkey` and `tx hash` commands of each release binary, pinned by `testees/stellar-cli/versions/<version>/asset.sha256` |
 | `github.com/stellar/go-stellar-sdk` | v0.7.1, v0.7.2, v0.7.3, v0.8.0, v0.9.0 (current) | Go testee matrix (all), the wallet-backend adapter and the linter's analysis target (v0.8.0 only) |
 | stellar-rpc | tag `v30.0.1` (commit `6b6ec60c`, image `stellar/stellar-rpc:30.0.1` `sha256:b6d41d314808...`) | the JSON-RPC behaviour `shapekit serve` follows ([replay-server.md](replay-server.md)), and the image the stellar-rpc adapter runs as a harness target |
-| stellar-etl | tag `v2.8.34` (commit `2b24ec89`) | the second indexer the harness runs, built by the stellar-etl adapter from its own `docker/Dockerfile` at that tag |
+| stellar-etl | tag `v2.8.35` (commit `7e3fc9af`) | the second indexer the harness runs, built by the stellar-etl adapter from its own `docker/Dockerfile` at that tag |
 | stellar/wallet-backend | commit `3e22515a` (current, `main` on 2026-11-13), plus the pre-fix and fixed commits in `adapters/walletbackend/reproductions.toml` (`e967ce8b`, the previous current pin, is the fixed side of #716) | reference harness target |
 
 On 2026-11-14 each of these is the newest stable upstream release: `scripts/upstream-releases.sh

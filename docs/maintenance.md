@@ -102,8 +102,8 @@ run you made yourself, call the script on its output:
 ```sh
 python3 -I scripts/upstream-drift.py sdk-report --sdk go --pinned v0.8.0 --upstream v0.9.0 \
   --matrix target/conformance/go/divergence-matrix.json
-python3 -I scripts/upstream-drift.py indexer-report --name stellar-etl --upstream v2.8.35 \
-  --base findings/inputs/harness-stellar-etl-2b24ec89.json --run harness-out/harness-report.json
+python3 -I scripts/upstream-drift.py indexer-report --name stellar-etl --upstream <new tag> \
+  --base findings/inputs/harness-stellar-etl-7e3fc9af.json --run harness-out/harness-report.json
 ```
 
 ### Moving an SDK to a new version

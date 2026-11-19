@@ -871,10 +871,10 @@ findings.
 
 ```sh
 (cd adapters && go build -o bin/etl-adapter ./stellaretl/cmd/etl-adapter)
-shapekit harness run --adapter "adapters/bin/etl-adapter --commit 2b24ec89ddce7fc0beb7795de982c93e6895eaf3"
+shapekit harness run --adapter "adapters/bin/etl-adapter --commit 7e3fc9af95359dad6ba939fa88791f49cdf531ae"
 ```
 
-That commit is stellar-etl v2.8.34, pinned in `pins.toml`. `--repo` names a clone (default:
+That commit is stellar-etl v2.8.35, pinned in `pins.toml` (`scripts/pin.sh git stellar-etl` prints it). `--repo` names a clone (default:
 `<user cache dir>/shapekit/stellar-etl`), `--cpus` passes docker's `--cpus` to every container
 and `--builder` names the buildx builder the image is built with.
 
