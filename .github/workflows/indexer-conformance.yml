@@ -323,7 +323,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        shard: ${{ fromJSON(needs.plan.outputs.shards) }}
+        # the fallback only keeps the expression valid where a runner evaluates the matrix of a
+        # job it skips (act does); with plan skipped, this job is skipped too
+        shard: ${{ fromJSON(needs.plan.outputs.shards || '[1]') }}
     steps:
       - name: check out the indexer under test
         uses: actions/checkout@v7
