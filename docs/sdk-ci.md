@@ -359,9 +359,22 @@ max_protocol = 30
 ```
 
 `uv pip install` resolves the checkout's own dependencies from PyPI at build time; the pinned
-versions use hash-locked requirement files instead. The testee calls the stellar-sdk 17 API
-(`StrKey` and the generated classes of `stellar_sdk.xdr`). A checkout that removes them fails
-at the testee's start until the testee supports the new API.
+versions use hash-locked requirement files instead. The testee runs on the API of the
+released versions (`StrKey` and the generated classes of `stellar_sdk.xdr`) and on the API of
+py-stellar-base's default branch (the classes of `stellar-strkey` and `stellar-xdr`, which
+`stellar_sdk.strkey` and `stellar_sdk.xdr` re-export), and picks the one the installed SDK has.
+The default branch still reports `__version__` 17.0.1, so `current`, `version` and the
+`--version` of the type table stay `17.0.1` until the checkout changes it.
+
+Started from the 17.0.1 list, a run of the default branch asks you to remove the lines of the
+failures the branch fixes, and names two kinds of failure 17.0.1 does not have:
+
+- `decode_json` of a transaction with an ed25519 signed payload signer whose payload is empty:
+  `stellar-xdr` refuses to write it as SEP-51 JSON, though the network accepts it.
+- `decode_encode` of an `ScMap` nested one level deeper than the network accepts: `stellar-xdr`
+  decodes to a depth of 500 by default. The SDK takes no length limit, so the testee does not
+  pass the runner's limits and decodes with the defaults (see the Python testee in
+  [testee-protocol.md](testee-protocol.md#the-python-testee)).
 
 ```yaml title=".github/workflows/shapekit.yml"
 name: shapekit conformance
