@@ -117,7 +117,7 @@ on:
     outputs:
       report-artifact:
         description: "name of the uploaded artifact with harness-report.json, HARNESS.md and the logs"
-        value: ${{ jobs.harness.outputs.artifact || jobs.merge.outputs.artifact }}
+        value: ${{ inputs.shards > 1 && jobs.merge.outputs.artifact || jobs.harness.outputs.artifact }}
 
 # no workflow-wide permissions: the harness job reads only, and the comment job runs with
 # what the calling job grants, so a caller that does not ask for comments grants nothing more
@@ -534,20 +534,20 @@ jobs:
     if: >-
       ${{ !cancelled() && inputs.comment && github.event_name == 'pull_request'
       && github.event.pull_request.head.repo.full_name == github.repository
-      && (needs.harness.outputs.summary != '' || needs.merge.outputs.summary != '') }}
+      && (inputs.shards > 1 && needs.merge.outputs.summary || needs.harness.outputs.summary) != '' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
       - uses: actions/download-artifact@v8
         with:
-          name: ${{ needs.harness.outputs.artifact || needs.merge.outputs.artifact }}
+          name: ${{ inputs.shards > 1 && needs.merge.outputs.artifact || needs.harness.outputs.artifact }}
           path: report
       - name: post or update the summary comment
         env:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
           PR: ${{ github.event.pull_request.number }}
-          SUMMARY: report/${{ needs.harness.outputs.summary || needs.merge.outputs.summary }}
+          SUMMARY: report/${{ inputs.shards > 1 && needs.merge.outputs.summary || needs.harness.outputs.summary }}
         run: |
           set -euo pipefail
           # the summary's first line names it: the shapekit-report marker and the run kind
