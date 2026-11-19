@@ -139,6 +139,26 @@ fn site_data_matches_the_committed_files() {
         assert!(explained(name), "blocker {name} has no meaning");
     }
 
+    // the arms that a ledger can hold: every arm minus the arms of the two blockers that no
+    // ledger can hold. both blockers have a meaning, and the count is the report's own
+    let summary = &report["summary"];
+    for name in ["refused-before-ledger", "never-emitted"] {
+        assert!(explained(name), "blocker {name} has no meaning");
+    }
+    let by_blocker = |name: &str| {
+        summary["arms_uncovered_by_blocker"][name]
+            .as_u64()
+            .unwrap_or(0)
+    };
+    let all_arms = summary["arms_reachable"].as_u64().unwrap();
+    let covered_arms = summary["arms_covered"].as_u64().unwrap();
+    let ledger_arms = all_arms - by_blocker("refused-before-ledger") - by_blocker("never-emitted");
+    assert!(covered_arms <= ledger_arms && ledger_arms <= all_arms);
+    assert_eq!(
+        summary["arms_uncovered"].as_u64().unwrap(),
+        all_arms - covered_arms
+    );
+
     // every file the site links to exists in the checkout
     let ids: std::collections::BTreeSet<&str> = entries["entries"]
         .as_array()
@@ -302,6 +322,22 @@ fn site_data_matches_the_committed_files() {
             "{page} does not count the findings with reportedFindings"
         );
     }
+
+    // the landing page and the dashboard show the same arm coverage: both call ledgerArms in
+    // site/src/lib/metrics.ts, which takes out the arms of the two blockers that no ledger can
+    // hold, and the dashboard's arms metric is its total
+    let metrics = read("lib/metrics.ts");
+    for name in ["refused-before-ledger", "never-emitted"] {
+        assert!(metrics.contains(&format!(r#"by["{name}"]"#)));
+    }
+    assert!(metrics.contains("total: arms.total"));
+    for page in ["landing/stats.ts", "pages/corpus.tsx"] {
+        assert!(
+            read(page).contains("ledgerArms("),
+            "{page} does not count the arms with ledgerArms"
+        );
+    }
+    assert!(read("routes/home.tsx").contains("s.arms.percent"));
     let mut stack = vec![site.clone()];
     while let Some(dir) = stack.pop() {
         for e in std::fs::read_dir(&dir).unwrap() {
