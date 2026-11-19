@@ -6,11 +6,11 @@ cap21.preconditions.synth-extra-signers-3 * diverges-from-network candidate/find
 cap23.claimable-balances.synth-claimants-11 * diverges-from-network candidate/findings/issues/dart-classic.max-length.synth-tx-101-operations.md any/decode_encode
 cap26.inflation.p11-inflation-not-time * diverges-from-network candidate/findings/issues/dart-cap26.inflation.p11-inflation-payout.md mainnet/tx_hash 0, testnet/tx_hash 0
 cap26.inflation.p11-inflation-payout * diverges-from-network candidate/findings/issues/dart-cap26.inflation.p11-inflation-payout.md mainnet/tx_hash 0, testnet/tx_hash 0
-cap40.signed-payload-signer.p28-extra-signer-empty-payload * diverges-from-network candidate/findings/issues/dart-cap40.signed-payload-signer.synth-empty-payload-signer.md mainnet/decode_json, testnet/decode_json
-cap40.signed-payload-signer.p28-set-options-empty-payload * diverges-from-network candidate/findings/issues/dart-cap40.signed-payload-signer.synth-empty-payload-signer.md mainnet/decode_json, testnet/decode_json
-cap40.signed-payload-signer.p30-extra-signer-empty-payload * diverges-from-network candidate/findings/issues/dart-cap40.signed-payload-signer.synth-empty-payload-signer.md mainnet/decode_json, testnet/decode_json
-cap40.signed-payload-signer.p30-set-options-empty-payload * diverges-from-network candidate/findings/issues/dart-cap40.signed-payload-signer.synth-empty-payload-signer.md mainnet/decode_json, testnet/decode_json
-cap40.signed-payload-signer.synth-empty-payload-signer * diverges-from-network candidate/findings/issues/dart-cap40.signed-payload-signer.synth-empty-payload-signer.md any/decode_json
+cap40.signed-payload-signer.p28-extra-signer-empty-payload * diverges-from-network candidate/findings/triage.toml mainnet/decode_json, testnet/decode_json
+cap40.signed-payload-signer.p28-set-options-empty-payload * diverges-from-network candidate/findings/triage.toml mainnet/decode_json, testnet/decode_json
+cap40.signed-payload-signer.p30-extra-signer-empty-payload * diverges-from-network candidate/findings/triage.toml mainnet/decode_json, testnet/decode_json
+cap40.signed-payload-signer.p30-set-options-empty-payload * diverges-from-network candidate/findings/triage.toml mainnet/decode_json, testnet/decode_json
+cap40.signed-payload-signer.synth-empty-payload-signer * diverges-from-network candidate/findings/triage.toml any/decode_json
 cap40.signed-payload-signer.synth-payload-65-bytes * diverges-from-network candidate/findings/issues/dart-classic.max-length.synth-tx-101-operations.md any/decode_encode
 cap71.credentials.golden-e25799a2e2e9eea2-17 * diverges-from-network candidate/findings/issues/dart-classic.memo-bytes.p30-memo-ff.md any/decode_encode, any/decode_json, any/encode_json, any/tx_hash 0
 classic.max-length.synth-data-value-65-bytes * diverges-from-network candidate/findings/issues/dart-classic.max-length.synth-tx-101-operations.md any/decode_encode
@@ -27,15 +27,15 @@ classic.memo-bytes.p30-memo-surrogate * diverges-from-network candidate/findings
 classic.memo-bytes.p30-memo-truncated-sequence-28 * diverges-from-network candidate/findings/issues/dart-classic.memo-bytes.p30-memo-ff.md mainnet/decode_encode, mainnet/decode_json, mainnet/encode_json, mainnet/tx_hash 0, testnet/decode_encode, testnet/decode_json, testnet/encode_json, testnet/tx_hash 0
 soroban.auth-trees.golden-57a486abce28859d-17 * diverges-from-network candidate/findings/issues/dart-classic.memo-bytes.p30-memo-ff.md any/decode_encode, any/decode_json, any/encode_json, any/tx_hash 0
 soroban.auth-trees.golden-e0d0e3f38b2d55e0-17 * diverges-from-network candidate/findings/issues/dart-classic.memo-bytes.p30-memo-ff.md any/decode_encode, any/decode_json, any/encode_json, any/tx_hash 0
-soroban.auth-trees.p30-declared-depth-493 * diverges-from-network candidate/findings/issues/dart-soroban.auth-trees.synth-auth-depth-494-over-cap.md mainnet/decode_encode, testnet/decode_encode
-soroban.auth-trees.synth-auth-depth-494-over-cap * diverges-from-network candidate/findings/issues/dart-soroban.auth-trees.synth-auth-depth-494-over-cap.md any/decode_encode
+soroban.auth-trees.p30-declared-depth-493 * diverges-from-network candidate/findings/issues/dart-classic.max-length.synth-tx-101-operations.md mainnet/decode_encode, testnet/decode_encode
+soroban.auth-trees.synth-auth-depth-494-over-cap * diverges-from-network candidate/findings/issues/dart-classic.max-length.synth-tx-101-operations.md any/decode_encode
 soroban.invoke-basics.synth-ghsa-3xhm-spec-outputs-2 * diverges-from-network candidate/findings/issues/dart-classic.max-length.synth-tx-101-operations.md any/decode_encode
 soroban.scval-shapes.p30-errors-auth-crypto-events-meta * diverges-from-network candidate/findings/issues/dart-classic.memo-bytes.p30-memo-ff.md mainnet/decode_encode, mainnet/decode_json, mainnet/encode_json, testnet/decode_encode, testnet/decode_json, testnet/encode_json
 soroban.scval-shapes.p30-string-not-utf8-envelope * diverges-from-network candidate/findings/issues/dart-classic.memo-bytes.p30-memo-ff.md mainnet/decode_encode, mainnet/decode_json, mainnet/encode_json, mainnet/tx_hash, testnet/decode_encode, testnet/decode_json, testnet/encode_json, testnet/tx_hash
 soroban.scval-shapes.p30-string-not-utf8-meta * diverges-from-network candidate/findings/issues/dart-classic.memo-bytes.p30-memo-ff.md mainnet/decode_encode, mainnet/decode_json, mainnet/encode_json, testnet/decode_encode, testnet/decode_json, testnet/encode_json
 soroban.scval-shapes.p30-symbol-not-utf8 * diverges-from-network candidate/findings/issues/dart-classic.memo-bytes.p30-memo-ff.md mainnet/decode_encode, mainnet/decode_json, mainnet/encode_json, mainnet/tx_hash 0, testnet/decode_encode, testnet/decode_json, testnet/encode_json, testnet/tx_hash 0
-soroban.scval-shapes.synth-scmap-depth-198-over-cap * diverges-from-network candidate/findings/issues/dart-soroban.auth-trees.synth-auth-depth-494-over-cap.md any/decode_encode
-soroban.scval-shapes.synth-scvec-depth-247-over-cap * diverges-from-network candidate/findings/issues/dart-soroban.auth-trees.synth-auth-depth-494-over-cap.md any/decode_encode
+soroban.scval-shapes.synth-scmap-depth-198-over-cap * diverges-from-network candidate/findings/issues/dart-classic.max-length.synth-tx-101-operations.md any/decode_encode
+soroban.scval-shapes.synth-scvec-depth-247-over-cap * diverges-from-network candidate/findings/issues/dart-classic.max-length.synth-tx-101-operations.md any/decode_encode
 soroban.scval-shapes.synth-symbol-33-bytes * diverges-from-network candidate/findings/issues/dart-classic.max-length.synth-tx-101-operations.md any/decode_encode
 # a candidate: AbstractTransaction.fromEnvelopeXdr(..).hash(network) is not the hash the network wrote for transactions whose offers carry a price fraction that is not in lowest terms: the sdk rebuilds the operation and writes 3418153/572181201 where the envelope holds 6836306/1144362402, so it hashes other bytes
 cap03.offer-liabilities.mainnet-37466023 3.12.0 diverges-from-network candidate/findings/issues/dart-cap03.offer-liabilities.mainnet-37466023.md mainnet/tx_hash 12, mainnet/tx_hash 236, mainnet/tx_hash 236 inner

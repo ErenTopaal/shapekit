@@ -23,13 +23,13 @@ cap27.muxed-accounts.p28-path-payment-strict-receive-destination-id-2p64-1 * div
 cap27.muxed-accounts.p28-tx-source-and-payment-destination-id-2p64-1 * diverges-from-network candidate/findings/issues/php-cap27.muxed-accounts.p30-tx-source-and-payment-destination-id-2p64-1.md mainnet/decode_json, testnet/decode_json
 cap27.muxed-accounts.p30-path-payment-strict-receive-destination-id-2p64-1 * diverges-from-network candidate/findings/issues/php-cap27.muxed-accounts.p30-tx-source-and-payment-destination-id-2p64-1.md mainnet/decode_json, testnet/decode_json
 cap27.muxed-accounts.p30-tx-source-and-payment-destination-id-2p64-1 * diverges-from-network candidate/findings/issues/php-cap27.muxed-accounts.p30-tx-source-and-payment-destination-id-2p64-1.md mainnet/decode_json, testnet/decode_json
-cap27.muxed-accounts.synth-textual-muxed-id-noncanonical * diverges-from-network candidate/findings/issues/php-cap27.muxed-accounts.synth-textual-muxed-id-noncanonical.md case 18/id_parse, case 19/id_parse
+cap27.muxed-accounts.synth-textual-muxed-id-noncanonical * diverges-from-network candidate/findings/triage.toml case 18/id_parse, case 19/id_parse
 cap35.clawback.p30-clawback-claimable-balance-meta * diverges-from-network candidate/findings/issues/php-cap23.claimable-balances.p30-claim-through-depth-4-meta.md mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
-cap40.signed-payload-signer.p28-extra-signer-empty-payload * diverges-from-network candidate/findings/issues/php-cap40.signed-payload-signer.synth-empty-payload-signer.md mainnet/decode_json, testnet/decode_json
-cap40.signed-payload-signer.p28-set-options-empty-payload * diverges-from-network candidate/findings/issues/php-cap40.signed-payload-signer.synth-empty-payload-signer.md mainnet/decode_json, testnet/decode_json
-cap40.signed-payload-signer.p30-extra-signer-empty-payload * diverges-from-network candidate/findings/issues/php-cap40.signed-payload-signer.synth-empty-payload-signer.md mainnet/decode_json, testnet/decode_json
-cap40.signed-payload-signer.p30-set-options-empty-payload * diverges-from-network candidate/findings/issues/php-cap40.signed-payload-signer.synth-empty-payload-signer.md mainnet/decode_json, testnet/decode_json
-cap40.signed-payload-signer.synth-empty-payload-signer * diverges-from-network candidate/findings/issues/php-cap40.signed-payload-signer.synth-empty-payload-signer.md any/decode_json
+cap40.signed-payload-signer.p28-extra-signer-empty-payload * diverges-from-network candidate/findings/triage.toml mainnet/decode_json, testnet/decode_json
+cap40.signed-payload-signer.p28-set-options-empty-payload * diverges-from-network candidate/findings/triage.toml mainnet/decode_json, testnet/decode_json
+cap40.signed-payload-signer.p30-extra-signer-empty-payload * diverges-from-network candidate/findings/triage.toml mainnet/decode_json, testnet/decode_json
+cap40.signed-payload-signer.p30-set-options-empty-payload * diverges-from-network candidate/findings/triage.toml mainnet/decode_json, testnet/decode_json
+cap40.signed-payload-signer.synth-empty-payload-signer * diverges-from-network candidate/findings/triage.toml any/decode_json
 cap40.signed-payload-signer.synth-payload-65-bytes * diverges-from-network candidate/findings/issues/php-classic.max-length.synth-tx-101-operations.md any/decode_encode
 cap40.signed-payload-signer.synth-signer-key-nonzero-padding * diverges-from-network candidate/findings/issues/php-classic.max-length.synth-tx-101-operations.md any/decode_encode
 cap42.generalized-txset.golden-27003f6cc5cdecc2-5 * diverges-from-network candidate/findings/issues/php-cap15.fee-bump.p30-fee-source-is-inner-source-meta.md any/decode_json
@@ -94,7 +94,7 @@ soroban.scval-shapes.synth-scvec-depth-247-over-cap * diverges-from-network cand
 soroban.scval-shapes.synth-string-nonzero-padding * diverges-from-network candidate/findings/issues/php-classic.max-length.synth-tx-101-operations.md any/decode_encode
 soroban.scval-shapes.synth-symbol-33-bytes * diverges-from-network candidate/findings/issues/php-classic.max-length.synth-tx-101-operations.md any/decode_encode
 # a candidate: rebuilding a transaction core applied (and failed) whose manage sell offer has offer id -1 throws "Invalid offer id: -1": the offer id check of ManageSellOfferOperationBuilder::setOfferId (Soneso/StellarSDK/ManageSellOfferOperationBuilder.php L69-L72 at 1.18.0) refuses a value the int64 field holds, the class of the kmp sdk's transaction-object refusals
-explore.witnesses.f62d-r0004-l69 1.18.0 diverges-from-network candidate/findings/issues/php-explore.witnesses.f62d-r0004-l69.md mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.f62d-r0004-l69 1.18.0 diverges-from-network candidate/findings/triage.toml mainnet/tx_hash 0, testnet/tx_hash 0
 # a candidate: the set options candidate of the php sdk above: clear_flags 0 and an empty home domain left out when the sdk rebuilds the operation
 explore.witnesses.g2-r0015-l71 1.18.0 diverges-from-network candidate/findings/issues/php-explore.witnesses.g2-r0015-l71.md mainnet/tx_hash 0, testnet/tx_hash 0
 # as PHP-CBKEY-JSON: a removed claimable balance's ledger key without its balance_id member
@@ -120,7 +120,8 @@ explore.witnesses.f62d-r0000-l100 1.18.0 diverges-from-network candidate/finding
 explore.witnesses.f62d-r0003-l73 1.18.0 diverges-from-network candidate/findings/issues/php-cap15.fee-bump.p30-fee-source-is-inner-source-meta.md mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
 explore.witnesses.f62d-r0007-l72 1.18.0 diverges-from-network candidate/findings/issues/php-cap15.fee-bump.p30-fee-source-is-inner-source-meta.md mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
 explore.witnesses.f62d-r0007-l74 1.18.0 diverges-from-network candidate/findings/issues/php-cap15.fee-bump.p30-fee-source-is-inner-source-meta.md mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
-explore.witnesses.f62d-r0007-l77 1.18.0 diverges-from-network candidate/findings/issues/php-cap15.fee-bump.p30-fee-source-is-inner-source-meta.md mainnet/decode_json, mainnet/encode_json, mainnet/tx_hash 0, mainnet/tx_hash 0 inner, testnet/decode_json, testnet/encode_json, testnet/tx_hash 0, testnet/tx_hash 0 inner
+explore.witnesses.f62d-r0007-l77 1.18.0 diverges-from-network candidate/findings/issues/php-cap15.fee-bump.p30-fee-source-is-inner-source-meta.md mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+explore.witnesses.f62d-r0007-l77 1.18.0 diverges-from-network candidate/findings/issues/php-explore.witnesses.g2-r0015-l71.md mainnet/tx_hash 0, mainnet/tx_hash 0 inner, testnet/tx_hash 0, testnet/tx_hash 0 inner
 explore.witnesses.f62d-r0008-l84 1.18.0 diverges-from-network candidate/findings/issues/php-cap15.fee-bump.p30-fee-source-is-inner-source-meta.md mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
 explore.witnesses.f62d-r0008-l87 1.18.0 diverges-from-network candidate/findings/issues/php-cap15.fee-bump.p30-fee-source-is-inner-source-meta.md mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
 explore.witnesses.f62d-r0022-l76 1.18.0 diverges-from-network candidate/findings/issues/php-cap15.fee-bump.p30-fee-source-is-inner-source-meta.md mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json

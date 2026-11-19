@@ -1,194 +1,198 @@
 # known failures of stellar-cli, one line per entry and version; the drafts are in the candidate
 # lane (candidate/findings/triage.toml), not filed
-cap03.offer-liabilities.mainnet-25000000 * diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, mainnet/tx_hash 1, mainnet/tx_hash 2, mainnet/tx_hash 3, mainnet/tx_hash 4, mainnet/tx_hash 5, mainnet/tx_hash 6, mainnet/tx_hash 7, mainnet/tx_hash 8, mainnet/tx_hash 9, mainnet/tx_hash 10, mainnet/tx_hash 11, mainnet/tx_hash 12, mainnet/tx_hash 13
-cap15.fee-bump.golden-f5fa0a4b15bfd9d9-12 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md any/tx_hash 0, any/tx_hash 1
-cap15.fee-bump.p30-fee-source-is-inner-source-envelope 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash, testnet/tx_hash
-cap15.fee-bump.p30-fee-source-is-inner-source-pre-auth-signer-envelope 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash, testnet/tx_hash
-cap15.fee-bump.p30-inner-bad-auth 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 1, testnet/tx_hash 1
-cap15.fee-bump.p30-inner-bad-auth-extra 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-cap15.fee-bump.p30-inner-bad-min-seq-gap 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 1, testnet/tx_hash 0
-cap15.fee-bump.p30-inner-bad-seq 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 1
-cap15.fee-bump.p30-inner-bad-sponsorship 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-cap15.fee-bump.p30-inner-failed-envelope 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash, testnet/tx_hash
-cap15.fee-bump.p30-inner-success-envelope 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash, testnet/tx_hash
-cap15.fee-bump.p30-muxed-fee-source-inner-failed-envelope 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash, testnet/tx_hash
-cap15.fee-bump.p30-muxed-fee-source-inner-success-envelope 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash, testnet/tx_hash
-cap23.claimable-balances.synth-strkey-b-invalid * diverges-from-network candidate/findings/issues/stellar-cli-cap23.claimable-balances.synth-strkey-b-invalid.md case 7/strkey_decode
-cap26.inflation.p11-inflation-not-time * diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-cap26.inflation.p11-inflation-payout * diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-cap27.muxed-accounts.synth-strkey-g-invalid * diverges-from-network candidate/findings/issues/stellar-cli-cap23.claimable-balances.synth-strkey-b-invalid.md case 7/strkey_decode
-cap27.muxed-accounts.synth-strkey-g-noncanonical-chars * diverges-from-network candidate/findings/issues/stellar-cli-cap23.claimable-balances.synth-strkey-b-invalid.md case 0/strkey_decode, case 1/strkey_decode
-cap27.muxed-accounts.synth-strkey-m-invalid * diverges-from-network candidate/findings/issues/stellar-cli-cap23.claimable-balances.synth-strkey-b-invalid.md case 7/strkey_decode
-cap27.muxed-accounts.synth-strkey-m-noncanonical-chars * diverges-from-network candidate/findings/issues/stellar-cli-cap23.claimable-balances.synth-strkey-b-invalid.md case 0/strkey_decode, case 1/strkey_decode
-cap27.muxed-accounts.synth-strkey-s-invalid * diverges-from-network candidate/findings/issues/stellar-cli-cap23.claimable-balances.synth-strkey-b-invalid.md case 7/strkey_decode
-cap38.liquidity-pools.synth-strkey-l-invalid * diverges-from-network candidate/findings/issues/stellar-cli-cap23.claimable-balances.synth-strkey-b-invalid.md case 7/strkey_decode
-cap40.signed-payload-signer.p28-extra-signer-empty-payload * diverges-from-network candidate/findings/issues/stellar-cli-cap40.signed-payload-signer.p28-extra-signer-empty-payload.md mainnet/decode_encode, testnet/decode_encode
-cap40.signed-payload-signer.p28-set-options-empty-payload * diverges-from-network candidate/findings/issues/stellar-cli-cap40.signed-payload-signer.p28-extra-signer-empty-payload.md mainnet/decode_encode, testnet/decode_encode
-cap40.signed-payload-signer.p30-extra-signer-empty-payload 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap40.signed-payload-signer.p28-extra-signer-empty-payload.md mainnet/decode_encode, testnet/decode_encode
-cap40.signed-payload-signer.p30-set-options-empty-payload 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap40.signed-payload-signer.p28-extra-signer-empty-payload.md mainnet/decode_encode, testnet/decode_encode
-cap40.signed-payload-signer.synth-empty-payload-signer * diverges-from-network candidate/findings/issues/stellar-cli-cap40.signed-payload-signer.p28-extra-signer-empty-payload.md any/decode_encode
-cap40.signed-payload-signer.synth-strkey-p-invalid * diverges-from-network candidate/findings/issues/stellar-cli-cap23.claimable-balances.synth-strkey-b-invalid.md case 7/strkey_decode
-cap40.signed-payload-signer.synth-strkey-p-noncanonical-chars * diverges-from-network candidate/findings/issues/stellar-cli-cap23.claimable-balances.synth-strkey-b-invalid.md case 0/strkey_decode, case 1/strkey_decode
-cap40.signed-payload-signer.synth-strkey-t-invalid * diverges-from-network candidate/findings/issues/stellar-cli-cap23.claimable-balances.synth-strkey-b-invalid.md case 7/strkey_decode
-cap40.signed-payload-signer.synth-strkey-x-invalid * diverges-from-network candidate/findings/issues/stellar-cli-cap23.claimable-balances.synth-strkey-b-invalid.md case 7/strkey_decode
-cap84.muxed-contract.synth-strkey-w-invalid 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap23.claimable-balances.synth-strkey-b-invalid.md case 7/strkey_decode
-classic.failed-tx.p12-allow-trust-self-not-allowed * diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-classic.failed-tx.p12-allow-trust-trust-not-required * diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-classic.failed-tx.p12-change-trust-self-not-allowed * diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-classic.failed-tx.p12-manage-buy-offer-buy-no-issuer * diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-classic.failed-tx.p12-manage-buy-offer-sell-no-issuer * diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-classic.failed-tx.p12-manage-sell-offer-buy-no-issuer * diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-classic.failed-tx.p12-manage-sell-offer-sell-no-issuer * diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-classic.failed-tx.p12-path-payment-strict-receive-no-issuer * diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-classic.failed-tx.p12-path-payment-strict-send-no-issuer * diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-classic.failed-tx.p12-payment-no-issuer * diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-classic.failed-tx.p9-change-trust-native-internal-error-envelope * diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash, testnet/tx_hash
-soroban.auth-trees.p30-declared-depth-245 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-soroban.auth-trees.p30-declared-depth-245.md mainnet/decode_encode, mainnet/encode_json, mainnet/tx_hash 0, testnet/decode_encode, testnet/encode_json, testnet/tx_hash 0
-soroban.auth-trees.p30-declared-depth-246 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-soroban.auth-trees.p30-declared-depth-245.md mainnet/decode_encode, mainnet/encode_json, mainnet/tx_hash 0, testnet/decode_encode, testnet/encode_json, testnet/tx_hash 0
-soroban.auth-trees.p30-declared-depth-492 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-soroban.auth-trees.p30-declared-depth-245.md mainnet/decode_encode, mainnet/encode_json, mainnet/tx_hash 0, testnet/decode_encode, testnet/encode_json, testnet/tx_hash 0
-soroban.auth-trees.synth-auth-depth-493-deepest-accepted * diverges-from-network candidate/findings/issues/stellar-cli-soroban.auth-trees.synth-auth-depth-493-deepest-accepted.md any/decode_encode, any/encode_json
-soroban.invoke-basics.synth-strkey-c-invalid * diverges-from-network candidate/findings/issues/stellar-cli-cap23.claimable-balances.synth-strkey-b-invalid.md case 7/strkey_decode
-soroban.scval-shapes.p30-map-depth-max-envelope 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-soroban.auth-trees.p30-declared-depth-245.md mainnet/decode_encode, mainnet/encode_json, mainnet/tx_hash, testnet/decode_encode, testnet/encode_json, testnet/tx_hash
-soroban.scval-shapes.p30-map-depth-max-meta 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-soroban.auth-trees.synth-auth-depth-493-deepest-accepted.md mainnet/decode_encode, mainnet/encode_json, testnet/decode_encode, testnet/encode_json
-soroban.scval-shapes.p30-map-depth-over 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-soroban.auth-trees.p30-declared-depth-245.md mainnet/decode_encode, mainnet/encode_json, mainnet/tx_hash 0, testnet/decode_encode, testnet/encode_json, testnet/tx_hash 0
-soroban.scval-shapes.p30-map-mixed-keys-sorted-meta 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-soroban.auth-trees.synth-auth-depth-493-deepest-accepted.md mainnet/decode_encode, mainnet/encode_json, testnet/decode_encode, testnet/encode_json
-soroban.scval-shapes.p30-vec-depth-max-envelope 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-soroban.auth-trees.synth-auth-depth-493-deepest-accepted.md mainnet/decode_encode, mainnet/encode_json, testnet/decode_encode, testnet/encode_json
-soroban.scval-shapes.p30-vec-depth-max-meta 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-soroban.auth-trees.synth-auth-depth-493-deepest-accepted.md mainnet/decode_encode, mainnet/encode_json, testnet/decode_encode, testnet/encode_json
-soroban.scval-shapes.p30-vec-depth-over 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-soroban.auth-trees.synth-auth-depth-493-deepest-accepted.md mainnet/decode_encode, mainnet/encode_json, testnet/decode_encode, testnet/encode_json
+cap03.offer-liabilities.mainnet-25000000 * diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, mainnet/tx_hash 1, mainnet/tx_hash 2, mainnet/tx_hash 3, mainnet/tx_hash 4, mainnet/tx_hash 5, mainnet/tx_hash 6, mainnet/tx_hash 7, mainnet/tx_hash 8, mainnet/tx_hash 9, mainnet/tx_hash 10, mainnet/tx_hash 11, mainnet/tx_hash 12, mainnet/tx_hash 13
+cap15.fee-bump.golden-f5fa0a4b15bfd9d9-12 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 any/tx_hash 0, any/tx_hash 1
+cap15.fee-bump.p30-fee-source-is-inner-source-envelope 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash, testnet/tx_hash
+cap15.fee-bump.p30-fee-source-is-inner-source-pre-auth-signer-envelope 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash, testnet/tx_hash
+cap15.fee-bump.p30-inner-bad-auth 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 1, testnet/tx_hash 1
+cap15.fee-bump.p30-inner-bad-auth-extra 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+cap15.fee-bump.p30-inner-bad-min-seq-gap 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 1, testnet/tx_hash 0
+cap15.fee-bump.p30-inner-bad-seq 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 1
+cap15.fee-bump.p30-inner-bad-sponsorship 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+cap15.fee-bump.p30-inner-failed-envelope 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash, testnet/tx_hash
+cap15.fee-bump.p30-inner-success-envelope 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash, testnet/tx_hash
+cap15.fee-bump.p30-muxed-fee-source-inner-failed-envelope 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash, testnet/tx_hash
+cap15.fee-bump.p30-muxed-fee-source-inner-success-envelope 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash, testnet/tx_hash
+cap23.claimable-balances.synth-strkey-b-invalid * diverges-from-network candidate/findings/triage.toml case 7/strkey_decode
+cap26.inflation.p11-inflation-not-time * diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+cap26.inflation.p11-inflation-payout * diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+cap27.muxed-accounts.synth-strkey-g-invalid * diverges-from-network candidate/findings/triage.toml case 7/strkey_decode
+cap27.muxed-accounts.synth-strkey-g-noncanonical-chars * diverges-from-network candidate/findings/triage.toml case 0/strkey_decode, case 1/strkey_decode
+cap27.muxed-accounts.synth-strkey-m-invalid * diverges-from-network candidate/findings/triage.toml case 7/strkey_decode
+cap27.muxed-accounts.synth-strkey-m-noncanonical-chars * diverges-from-network candidate/findings/triage.toml case 0/strkey_decode, case 1/strkey_decode
+cap27.muxed-accounts.synth-strkey-s-invalid * diverges-from-network candidate/findings/triage.toml case 7/strkey_decode
+cap38.liquidity-pools.synth-strkey-l-invalid * diverges-from-network candidate/findings/triage.toml case 7/strkey_decode
+cap40.signed-payload-signer.p28-extra-signer-empty-payload * diverges-from-network candidate/findings/triage.toml mainnet/decode_encode, testnet/decode_encode
+cap40.signed-payload-signer.p28-set-options-empty-payload * diverges-from-network candidate/findings/triage.toml mainnet/decode_encode, testnet/decode_encode
+cap40.signed-payload-signer.p30-extra-signer-empty-payload 30.0.1 diverges-from-network candidate/findings/triage.toml mainnet/decode_encode, testnet/decode_encode
+cap40.signed-payload-signer.p30-set-options-empty-payload 30.0.1 diverges-from-network candidate/findings/triage.toml mainnet/decode_encode, testnet/decode_encode
+cap40.signed-payload-signer.synth-empty-payload-signer * diverges-from-network candidate/findings/triage.toml any/decode_encode
+cap40.signed-payload-signer.synth-strkey-p-invalid * diverges-from-network candidate/findings/triage.toml case 7/strkey_decode
+cap40.signed-payload-signer.synth-strkey-p-noncanonical-chars * diverges-from-network candidate/findings/triage.toml case 0/strkey_decode, case 1/strkey_decode
+cap40.signed-payload-signer.synth-strkey-t-invalid * diverges-from-network candidate/findings/triage.toml case 7/strkey_decode
+cap40.signed-payload-signer.synth-strkey-x-invalid * diverges-from-network candidate/findings/triage.toml case 7/strkey_decode
+cap84.muxed-contract.synth-strkey-w-invalid 30.0.1 diverges-from-network candidate/findings/triage.toml case 7/strkey_decode
+classic.failed-tx.p12-allow-trust-self-not-allowed * diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+classic.failed-tx.p12-allow-trust-trust-not-required * diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+classic.failed-tx.p12-change-trust-self-not-allowed * diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+classic.failed-tx.p12-manage-buy-offer-buy-no-issuer * diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+classic.failed-tx.p12-manage-buy-offer-sell-no-issuer * diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+classic.failed-tx.p12-manage-sell-offer-buy-no-issuer * diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+classic.failed-tx.p12-manage-sell-offer-sell-no-issuer * diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+classic.failed-tx.p12-path-payment-strict-receive-no-issuer * diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+classic.failed-tx.p12-path-payment-strict-send-no-issuer * diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+classic.failed-tx.p12-payment-no-issuer * diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+classic.failed-tx.p9-change-trust-native-internal-error-envelope * diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash, testnet/tx_hash
+soroban.auth-trees.p30-declared-depth-245 30.0.1 diverges-from-network https://github.com/stellar/rs-stellar-xdr/issues/628 mainnet/decode_encode, mainnet/encode_json, testnet/decode_encode, testnet/encode_json
+soroban.auth-trees.p30-declared-depth-245 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-soroban.auth-trees.p30-declared-depth-245.md mainnet/tx_hash 0, testnet/tx_hash 0
+soroban.auth-trees.p30-declared-depth-246 30.0.1 diverges-from-network https://github.com/stellar/rs-stellar-xdr/issues/628 mainnet/decode_encode, mainnet/encode_json, testnet/decode_encode, testnet/encode_json
+soroban.auth-trees.p30-declared-depth-246 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-soroban.auth-trees.p30-declared-depth-245.md mainnet/tx_hash 0, testnet/tx_hash 0
+soroban.auth-trees.p30-declared-depth-492 30.0.1 diverges-from-network https://github.com/stellar/rs-stellar-xdr/issues/628 mainnet/decode_encode, mainnet/encode_json, testnet/decode_encode, testnet/encode_json
+soroban.auth-trees.p30-declared-depth-492 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-soroban.auth-trees.p30-declared-depth-245.md mainnet/tx_hash 0, testnet/tx_hash 0
+soroban.auth-trees.synth-auth-depth-493-deepest-accepted * diverges-from-network https://github.com/stellar/rs-stellar-xdr/issues/628 any/decode_encode, any/encode_json
+soroban.invoke-basics.synth-strkey-c-invalid * diverges-from-network candidate/findings/triage.toml case 7/strkey_decode
+soroban.scval-shapes.p30-map-depth-max-envelope 30.0.1 diverges-from-network https://github.com/stellar/rs-stellar-xdr/issues/628 mainnet/decode_encode, mainnet/encode_json, mainnet/tx_hash, testnet/decode_encode, testnet/encode_json, testnet/tx_hash
+soroban.scval-shapes.p30-map-depth-max-meta 30.0.1 diverges-from-network https://github.com/stellar/rs-stellar-xdr/issues/628 mainnet/decode_encode, mainnet/encode_json, testnet/decode_encode, testnet/encode_json
+soroban.scval-shapes.p30-map-depth-over 30.0.1 diverges-from-network https://github.com/stellar/rs-stellar-xdr/issues/628 mainnet/decode_encode, mainnet/encode_json, testnet/decode_encode, testnet/encode_json
+soroban.scval-shapes.p30-map-depth-over 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-soroban.auth-trees.p30-declared-depth-245.md mainnet/tx_hash 0, testnet/tx_hash 0
+soroban.scval-shapes.p30-map-mixed-keys-sorted-meta 30.0.1 diverges-from-network https://github.com/stellar/rs-stellar-xdr/issues/628 mainnet/decode_encode, mainnet/encode_json, testnet/decode_encode, testnet/encode_json
+soroban.scval-shapes.p30-vec-depth-max-envelope 30.0.1 diverges-from-network https://github.com/stellar/rs-stellar-xdr/issues/628 mainnet/decode_encode, mainnet/encode_json, testnet/decode_encode, testnet/encode_json
+soroban.scval-shapes.p30-vec-depth-max-meta 30.0.1 diverges-from-network https://github.com/stellar/rs-stellar-xdr/issues/628 mainnet/decode_encode, mainnet/encode_json, testnet/decode_encode, testnet/encode_json
+soroban.scval-shapes.p30-vec-depth-over 30.0.1 diverges-from-network https://github.com/stellar/rs-stellar-xdr/issues/628 mainnet/decode_encode, mainnet/encode_json, testnet/decode_encode, testnet/encode_json
 soroban.scval-shapes.synth-bytes-length-overrun * diverges-from-network:panic candidate/findings/issues/stellar-cli-soroban.scval-shapes.synth-bytes-length-overrun.md any/decode_encode
-soroban.scval-shapes.synth-event-vec-depth-101 * diverges-from-network candidate/findings/issues/stellar-cli-soroban.auth-trees.synth-auth-depth-493-deepest-accepted.md any/decode_encode, any/encode_json
-soroban.scval-shapes.synth-scmap-depth-197-deepest-accepted * diverges-from-network candidate/findings/issues/stellar-cli-soroban.auth-trees.synth-auth-depth-493-deepest-accepted.md any/decode_encode, any/encode_json
-soroban.scval-shapes.synth-scvec-depth-246-deepest-accepted * diverges-from-network candidate/findings/issues/stellar-cli-soroban.auth-trees.synth-auth-depth-493-deepest-accepted.md any/decode_encode, any/encode_json
+soroban.scval-shapes.synth-event-vec-depth-101 * diverges-from-network https://github.com/stellar/rs-stellar-xdr/issues/628 any/decode_encode, any/encode_json
+soroban.scval-shapes.synth-scmap-depth-197-deepest-accepted * diverges-from-network https://github.com/stellar/rs-stellar-xdr/issues/628 any/decode_encode, any/encode_json
+soroban.scval-shapes.synth-scvec-depth-246-deepest-accepted * diverges-from-network https://github.com/stellar/rs-stellar-xdr/issues/628 any/decode_encode, any/encode_json
 # as CLI-TXHASH-V1: stellar tx hash refuses v0 and fee bump envelopes ("only transaction v1 is supported")
-explore.witnesses.f62c-r0000-l89 28.1.0 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.f62c-r0000-l89 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.f62c-r0000-l90 28.1.0 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.f62c-r0000-l90 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.f62c-r0000-l92 28.1.0 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.f62c-r0000-l92 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.f62c-r0005-l112 28.1.0 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.f62c-r0005-l112 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.f62c-r0005-l97 28.1.0 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.f62c-r0005-l97 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.f62c-r0016-l94 28.1.0 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.f62c-r0016-l94 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.f62d-r0000-l100 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.f62d-r0001-l67 28.1.0 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.f62d-r0001-l67 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.f62d-r0001-l69 28.1.0 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.f62d-r0001-l69 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.f62d-r0001-l72 28.1.0 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.f62d-r0001-l72 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.f62d-r0001-l73 28.1.0 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.f62d-r0001-l73 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.f62d-r0002-l66 28.1.0 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.f62d-r0002-l66 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.f62d-r0002-l68 28.1.0 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.f62d-r0002-l68 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.f62d-r0002-l77 28.1.0 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.f62d-r0002-l77 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.f62d-r0002-l79 28.1.0 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.f62d-r0002-l79 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.f62d-r0002-l84 28.1.0 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.f62d-r0002-l84 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.f62d-r0003-l73 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.f62d-r0004-l66 28.1.0 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.f62d-r0004-l66 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.f62d-r0004-l69 28.1.0 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.f62d-r0004-l69 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.f62d-r0004-l74 28.1.0 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.f62d-r0004-l74 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.f62d-r0004-l75 28.1.0 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.f62d-r0004-l75 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.f62d-r0007-l72 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.f62d-r0007-l74 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.f62d-r0007-l77 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.f62d-r0008-l84 28.1.0 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.f62d-r0008-l84 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.f62d-r0008-l87 28.1.0 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.f62d-r0008-l87 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.f62d-r0022-l76 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.f62d-r0024-l97 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.f63-p28-r0000-l79 28.1.0 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.f63-p28-r0000-l79 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.g1-r0004-l102 28.1.0 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.g1-r0004-l102 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.g1-r0004-l103 28.1.0 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.g1-r0004-l103 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.g1-r0004-l104 28.1.0 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.g1-r0004-l104 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.g1-r0004-l122 28.1.0 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.g1-r0004-l122 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.g1-r0004-l123 28.1.0 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.g1-r0004-l123 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.g1-r0004-l126 28.1.0 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.g1-r0004-l126 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.g1-r0004-l141 28.1.0 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.g1-r0004-l141 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.g1-r0004-l142 28.1.0 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.g1-r0004-l142 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.g2-r0001-l113 28.1.0 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.g2-r0001-l113 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.g2-r0001-l114 28.1.0 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.g2-r0001-l114 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.g2-r0003-l77 28.1.0 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.g2-r0003-l77 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.g2-r0005-l102 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 1
-explore.witnesses.g2-r0005-l68 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.g2-r0006-l121 28.1.0 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.g2-r0006-l121 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.g2-r0007-l71 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.g2-r0007-l74 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 1
-explore.witnesses.g2-r0007-l81 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.g2-r0008-l71 28.1.0 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.g2-r0008-l71 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.g2-r0008-l73 28.1.0 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.g2-r0008-l73 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.g2-r0008-l76 28.1.0 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.g2-r0008-l76 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.g2-r0008-l77 28.1.0 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.g2-r0008-l77 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.g2-r0008-l78 28.1.0 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.g2-r0008-l78 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.g2-r0008-l80 28.1.0 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.g2-r0008-l80 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.g2-r0009-l78 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 1
-explore.witnesses.g2-r0009-l83 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.g2-r0010-l74 28.1.0 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.g2-r0010-l74 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.g2-r0010-l92 28.1.0 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.g2-r0010-l92 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.g2-r0010-l93 28.1.0 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.g2-r0010-l93 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.g2-r0015-l67 28.1.0 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.g2-r0015-l67 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.g2-r0015-l71 28.1.0 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.g2-r0015-l71 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.g2-r0015-l72 28.1.0 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.g2-r0015-l72 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.g2-r0017-l129 28.1.0 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.g2-r0017-l129 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.g2-r0018-l122 28.1.0 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.g2-r0018-l122 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.g2-r0021-l101 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.g2-r0022-l171 28.1.0 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.g2-r0022-l171 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.g2-r0028-l66 28.1.0 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.g2-r0028-l66 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.g2-r0029-l98 28.1.0 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.g2-r0029-l98 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.g2-r0033-l66 28.1.0 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.g2-r0033-l66 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.g2-r0038-l67 28.1.0 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.g2-r0038-l67 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.g2-r0038-l68 28.1.0 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.g2-r0038-l68 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.g2-r0041-l89 28.1.0 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
-explore.witnesses.g2-r0041-l89 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.f62c-r0000-l89 28.1.0 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.f62c-r0000-l89 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.f62c-r0000-l90 28.1.0 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.f62c-r0000-l90 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.f62c-r0000-l92 28.1.0 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.f62c-r0000-l92 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.f62c-r0005-l112 28.1.0 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.f62c-r0005-l112 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.f62c-r0005-l97 28.1.0 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.f62c-r0005-l97 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.f62c-r0016-l94 28.1.0 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.f62c-r0016-l94 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.f62d-r0000-l100 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.f62d-r0001-l67 28.1.0 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.f62d-r0001-l67 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.f62d-r0001-l69 28.1.0 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.f62d-r0001-l69 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.f62d-r0001-l72 28.1.0 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.f62d-r0001-l72 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.f62d-r0001-l73 28.1.0 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.f62d-r0001-l73 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.f62d-r0002-l66 28.1.0 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.f62d-r0002-l66 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.f62d-r0002-l68 28.1.0 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.f62d-r0002-l68 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.f62d-r0002-l77 28.1.0 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.f62d-r0002-l77 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.f62d-r0002-l79 28.1.0 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.f62d-r0002-l79 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.f62d-r0002-l84 28.1.0 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.f62d-r0002-l84 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.f62d-r0003-l73 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.f62d-r0004-l66 28.1.0 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.f62d-r0004-l66 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.f62d-r0004-l69 28.1.0 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.f62d-r0004-l69 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.f62d-r0004-l74 28.1.0 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.f62d-r0004-l74 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.f62d-r0004-l75 28.1.0 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.f62d-r0004-l75 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.f62d-r0007-l72 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.f62d-r0007-l74 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.f62d-r0007-l77 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.f62d-r0008-l84 28.1.0 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.f62d-r0008-l84 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.f62d-r0008-l87 28.1.0 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.f62d-r0008-l87 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.f62d-r0022-l76 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.f62d-r0024-l97 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.f63-p28-r0000-l79 28.1.0 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.f63-p28-r0000-l79 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.g1-r0004-l102 28.1.0 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.g1-r0004-l102 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.g1-r0004-l103 28.1.0 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.g1-r0004-l103 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.g1-r0004-l104 28.1.0 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.g1-r0004-l104 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.g1-r0004-l122 28.1.0 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.g1-r0004-l122 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.g1-r0004-l123 28.1.0 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.g1-r0004-l123 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.g1-r0004-l126 28.1.0 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.g1-r0004-l126 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.g1-r0004-l141 28.1.0 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.g1-r0004-l141 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.g1-r0004-l142 28.1.0 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.g1-r0004-l142 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.g2-r0001-l113 28.1.0 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.g2-r0001-l113 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.g2-r0001-l114 28.1.0 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.g2-r0001-l114 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.g2-r0003-l77 28.1.0 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.g2-r0003-l77 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.g2-r0005-l102 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 1
+explore.witnesses.g2-r0005-l68 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.g2-r0006-l121 28.1.0 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.g2-r0006-l121 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.g2-r0007-l71 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.g2-r0007-l74 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 1
+explore.witnesses.g2-r0007-l81 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.g2-r0008-l71 28.1.0 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.g2-r0008-l71 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.g2-r0008-l73 28.1.0 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.g2-r0008-l73 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.g2-r0008-l76 28.1.0 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.g2-r0008-l76 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.g2-r0008-l77 28.1.0 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.g2-r0008-l77 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.g2-r0008-l78 28.1.0 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.g2-r0008-l78 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.g2-r0008-l80 28.1.0 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.g2-r0008-l80 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.g2-r0009-l78 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 1
+explore.witnesses.g2-r0009-l83 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.g2-r0010-l74 28.1.0 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.g2-r0010-l74 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.g2-r0010-l92 28.1.0 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.g2-r0010-l92 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.g2-r0010-l93 28.1.0 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.g2-r0010-l93 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.g2-r0015-l67 28.1.0 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.g2-r0015-l67 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.g2-r0015-l71 28.1.0 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.g2-r0015-l71 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.g2-r0015-l72 28.1.0 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.g2-r0015-l72 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.g2-r0017-l129 28.1.0 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.g2-r0017-l129 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.g2-r0018-l122 28.1.0 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.g2-r0018-l122 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.g2-r0021-l101 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.g2-r0022-l171 28.1.0 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.g2-r0022-l171 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.g2-r0028-l66 28.1.0 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.g2-r0028-l66 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.g2-r0029-l98 28.1.0 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.g2-r0029-l98 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.g2-r0033-l66 28.1.0 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.g2-r0033-l66 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.g2-r0038-l67 28.1.0 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.g2-r0038-l67 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.g2-r0038-l68 28.1.0 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.g2-r0038-l68 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.g2-r0041-l89 28.1.0 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
+explore.witnesses.g2-r0041-l89 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 0, testnet/tx_hash 0
 # as CLI-TXHASH-V1: stellar tx hash refuses v0 and fee bump envelopes ("only transaction v1 is supported") and hashes only the outer transaction
-cap03.offer-liabilities.mainnet-37466023 28.1.0 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 236
-cap03.offer-liabilities.mainnet-37466023 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 236
-cap03.offer-liabilities.mainnet-44679511 28.1.0 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 364
-cap03.offer-liabilities.mainnet-44679511 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 364
-cap15.fee-bump.mainnet-57369500 28.1.0 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 106, mainnet/tx_hash 127, mainnet/tx_hash 128, mainnet/tx_hash 129, mainnet/tx_hash 130, mainnet/tx_hash 131, mainnet/tx_hash 132, mainnet/tx_hash 133, mainnet/tx_hash 134, mainnet/tx_hash 135, mainnet/tx_hash 136, mainnet/tx_hash 137, mainnet/tx_hash 138, mainnet/tx_hash 139, mainnet/tx_hash 140, mainnet/tx_hash 141, mainnet/tx_hash 142, mainnet/tx_hash 143, mainnet/tx_hash 144, mainnet/tx_hash 145, mainnet/tx_hash 146, mainnet/tx_hash 147, mainnet/tx_hash 148, mainnet/tx_hash 149, mainnet/tx_hash 150, mainnet/tx_hash 151, mainnet/tx_hash 152, mainnet/tx_hash 153, mainnet/tx_hash 154, mainnet/tx_hash 155, mainnet/tx_hash 156, mainnet/tx_hash 157, mainnet/tx_hash 158, mainnet/tx_hash 159, mainnet/tx_hash 160, mainnet/tx_hash 161, mainnet/tx_hash 162, mainnet/tx_hash 163, mainnet/tx_hash 164, mainnet/tx_hash 165, mainnet/tx_hash 166, mainnet/tx_hash 167, mainnet/tx_hash 168, mainnet/tx_hash 169, mainnet/tx_hash 170, mainnet/tx_hash 171, mainnet/tx_hash 172, mainnet/tx_hash 173, mainnet/tx_hash 174, mainnet/tx_hash 175, mainnet/tx_hash 176, mainnet/tx_hash 45, mainnet/tx_hash 46, mainnet/tx_hash 47, mainnet/tx_hash 49
-cap15.fee-bump.mainnet-57369500 30.0.1 diverges-from-network candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md mainnet/tx_hash 106, mainnet/tx_hash 127, mainnet/tx_hash 128, mainnet/tx_hash 129, mainnet/tx_hash 130, mainnet/tx_hash 131, mainnet/tx_hash 132, mainnet/tx_hash 133, mainnet/tx_hash 134, mainnet/tx_hash 135, mainnet/tx_hash 136, mainnet/tx_hash 137, mainnet/tx_hash 138, mainnet/tx_hash 139, mainnet/tx_hash 140, mainnet/tx_hash 141, mainnet/tx_hash 142, mainnet/tx_hash 143, mainnet/tx_hash 144, mainnet/tx_hash 145, mainnet/tx_hash 146, mainnet/tx_hash 147, mainnet/tx_hash 148, mainnet/tx_hash 149, mainnet/tx_hash 150, mainnet/tx_hash 151, mainnet/tx_hash 152, mainnet/tx_hash 153, mainnet/tx_hash 154, mainnet/tx_hash 155, mainnet/tx_hash 156, mainnet/tx_hash 157, mainnet/tx_hash 158, mainnet/tx_hash 159, mainnet/tx_hash 160, mainnet/tx_hash 161, mainnet/tx_hash 162, mainnet/tx_hash 163, mainnet/tx_hash 164, mainnet/tx_hash 165, mainnet/tx_hash 166, mainnet/tx_hash 167, mainnet/tx_hash 168, mainnet/tx_hash 169, mainnet/tx_hash 170, mainnet/tx_hash 171, mainnet/tx_hash 172, mainnet/tx_hash 173, mainnet/tx_hash 174, mainnet/tx_hash 175, mainnet/tx_hash 176, mainnet/tx_hash 45, mainnet/tx_hash 46, mainnet/tx_hash 47, mainnet/tx_hash 49
+cap03.offer-liabilities.mainnet-37466023 28.1.0 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 236
+cap03.offer-liabilities.mainnet-37466023 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 236
+cap03.offer-liabilities.mainnet-44679511 28.1.0 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 364
+cap03.offer-liabilities.mainnet-44679511 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 364
+cap15.fee-bump.mainnet-57369500 28.1.0 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 106, mainnet/tx_hash 127, mainnet/tx_hash 128, mainnet/tx_hash 129, mainnet/tx_hash 130, mainnet/tx_hash 131, mainnet/tx_hash 132, mainnet/tx_hash 133, mainnet/tx_hash 134, mainnet/tx_hash 135, mainnet/tx_hash 136, mainnet/tx_hash 137, mainnet/tx_hash 138, mainnet/tx_hash 139, mainnet/tx_hash 140, mainnet/tx_hash 141, mainnet/tx_hash 142, mainnet/tx_hash 143, mainnet/tx_hash 144, mainnet/tx_hash 145, mainnet/tx_hash 146, mainnet/tx_hash 147, mainnet/tx_hash 148, mainnet/tx_hash 149, mainnet/tx_hash 150, mainnet/tx_hash 151, mainnet/tx_hash 152, mainnet/tx_hash 153, mainnet/tx_hash 154, mainnet/tx_hash 155, mainnet/tx_hash 156, mainnet/tx_hash 157, mainnet/tx_hash 158, mainnet/tx_hash 159, mainnet/tx_hash 160, mainnet/tx_hash 161, mainnet/tx_hash 162, mainnet/tx_hash 163, mainnet/tx_hash 164, mainnet/tx_hash 165, mainnet/tx_hash 166, mainnet/tx_hash 167, mainnet/tx_hash 168, mainnet/tx_hash 169, mainnet/tx_hash 170, mainnet/tx_hash 171, mainnet/tx_hash 172, mainnet/tx_hash 173, mainnet/tx_hash 174, mainnet/tx_hash 175, mainnet/tx_hash 176, mainnet/tx_hash 45, mainnet/tx_hash 46, mainnet/tx_hash 47, mainnet/tx_hash 49
+cap15.fee-bump.mainnet-57369500 30.0.1 diverges-from-network https://github.com/stellar/stellar-cli/issues/2769 mainnet/tx_hash 106, mainnet/tx_hash 127, mainnet/tx_hash 128, mainnet/tx_hash 129, mainnet/tx_hash 130, mainnet/tx_hash 131, mainnet/tx_hash 132, mainnet/tx_hash 133, mainnet/tx_hash 134, mainnet/tx_hash 135, mainnet/tx_hash 136, mainnet/tx_hash 137, mainnet/tx_hash 138, mainnet/tx_hash 139, mainnet/tx_hash 140, mainnet/tx_hash 141, mainnet/tx_hash 142, mainnet/tx_hash 143, mainnet/tx_hash 144, mainnet/tx_hash 145, mainnet/tx_hash 146, mainnet/tx_hash 147, mainnet/tx_hash 148, mainnet/tx_hash 149, mainnet/tx_hash 150, mainnet/tx_hash 151, mainnet/tx_hash 152, mainnet/tx_hash 153, mainnet/tx_hash 154, mainnet/tx_hash 155, mainnet/tx_hash 156, mainnet/tx_hash 157, mainnet/tx_hash 158, mainnet/tx_hash 159, mainnet/tx_hash 160, mainnet/tx_hash 161, mainnet/tx_hash 162, mainnet/tx_hash 163, mainnet/tx_hash 164, mainnet/tx_hash 165, mainnet/tx_hash 166, mainnet/tx_hash 167, mainnet/tx_hash 168, mainnet/tx_hash 169, mainnet/tx_hash 170, mainnet/tx_hash 171, mainnet/tx_hash 172, mainnet/tx_hash 173, mainnet/tx_hash 174, mainnet/tx_hash 175, mainnet/tx_hash 176, mainnet/tx_hash 45, mainnet/tx_hash 46, mainnet/tx_hash 47, mainnet/tx_hash 49

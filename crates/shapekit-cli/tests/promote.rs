@@ -150,24 +150,25 @@ fn candidate_findings(d: &Path) {
 
 /// Puts findings into the layout's findings/triage.toml that take the entry's failures on python,
 /// dotnet and stellar-cli, with their drafts under findings/issues/, as moving those findings out
-/// of the candidate lane would. dotnet and stellar-cli bring their candidate drafts; python's
-/// defect is a candidate in candidate/finding-candidates.toml with no draft yet, so the test
-/// writes one.
+/// of the candidate lane would. dotnet brings its candidate draft; python's defect is a candidate
+/// in candidate/finding-candidates.toml with no draft yet, and the stellar-cli finding is
+/// recorded as intended with no draft, so the test writes those two.
 fn triage_the_other_failures(d: &Path) {
     let r = repo();
-    for (sdk, draft) in [
-        ("dotnet", format!("dotnet-{ENTRY}.md")),
-        ("stellar-cli", format!("stellar-cli-{ENTRY}.md")),
-    ] {
-        fs::copy(
-            r.join("candidate/findings/issues").join(&draft),
-            d.join("findings/issues").join(&draft),
-        )
-        .unwrap_or_else(|e| panic!("{sdk}: {e}"));
-    }
+    let draft = format!("dotnet-{ENTRY}.md");
+    fs::copy(
+        r.join("candidate/findings/issues").join(&draft),
+        d.join("findings/issues").join(&draft),
+    )
+    .unwrap_or_else(|e| panic!("dotnet: {e}"));
     fs::write(
         d.join(format!("findings/issues/python-{ENTRY}.md")),
         "a strkey with a trailing = decodes (stellar_sdk/strkey.py _decode_check)\n",
+    )
+    .unwrap();
+    fs::write(
+        d.join(format!("findings/issues/stellar-cli-{ENTRY}.md")),
+        "stellar strkey decode trims the text before decoding it (stellar-strkey src/cli/decode.rs)\n",
     )
     .unwrap();
     let mut triage = fs::read_to_string(d.join("findings/triage.toml")).unwrap();
