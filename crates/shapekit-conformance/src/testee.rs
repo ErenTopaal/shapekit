@@ -317,6 +317,8 @@ impl Testee {
     }
 
     fn stop(&mut self) -> Result<()> {
+        // a signal's cleanup kills the recorded group; the thread waits for it to exit
+        shapekit_process::cleanup::park_if_stopping();
         if let Some(mut r) = self.running.take() {
             kill_group(&r.child)
                 .with_context(|| format!("{}: stopping the testee", self.target.key()))?;
@@ -331,6 +333,7 @@ impl Testee {
 
 impl Drop for Testee {
     fn drop(&mut self) {
+        shapekit_process::cleanup::park_if_stopping();
         if let Some(mut r) = self.running.take() {
             // closing stdin lets a healthy testee exit 0 on its own; the group is killed after
             // the grace period whatever the testee did, so a process it started cannot outlive

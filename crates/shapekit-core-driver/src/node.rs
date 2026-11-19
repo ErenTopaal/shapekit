@@ -172,6 +172,9 @@ struct DockerResources {
 
 impl DockerResources {
     fn release(&mut self) -> Result<(), NodeError> {
+        // a signal's cleanup removes the recorded node and network; removing them here too
+        // would race it
+        shapekit_process::cleanup::park_if_stopping();
         let mut failures = Vec::new();
         if let Some(c) = self.container.take() {
             // a node dropped while paused for idling (see `http::IDLE_PAUSE`) must run again
