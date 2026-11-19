@@ -4,6 +4,9 @@ sdk version in versions/.
 
 the classes are read from the sdk source each version's venv holds (the build in
 conformance/versions.toml makes target/testees/python/<version>/venv), parsed, never imported.
+up to 17.x they are the generated classes of the stellar_sdk/xdr package. on the default branch
+stellar_sdk/xdr.py re-exports the stellar-xdr package instead, and the classes are those
+stellar_xdr exports.
 the table is keyed by the stellar-xdr crate's type names, which the testee protocol uses:
 heck's upper camel case of the .x name, as crates/shapekit-schema derives it, with the overlay
 Error renamed SError. types every version has go into COMMON, the others into ONLY under the
@@ -88,8 +91,26 @@ def manifest_types(path: Path) -> list[str]:
     return sorted(seen)
 
 
-def sdk_classes(xdr_dir: Path) -> set[str]:
-    """top-level classes of stellar_sdk/xdr that decode and encode xdr bytes."""
+def sdk_classes(venv: Path, version: str) -> set[str]:
+    """the names stellar_sdk.xdr has for classes that decode and encode xdr bytes."""
+    site = list(venv.glob("lib/python*/site-packages"))
+    if len(site) != 1:
+        sys.exit(f"gentypes: build the {version} testee first; {venv} holds {len(site)} site-packages")
+    sdk = site[0] / "stellar_sdk"
+    if (sdk / "xdr").is_dir():
+        out = generated_classes(sdk / "xdr")
+    elif (sdk / "xdr.py").is_file():
+        out = stellar_xdr_classes(sdk / "xdr.py", site[0] / "stellar_xdr")
+    else:
+        sys.exit(f"gentypes: build the {version} testee first; {venv} holds no stellar_sdk/xdr")
+    if not out:
+        sys.exit(f"gentypes: no xdr classes in {venv} for {version}")
+    return out
+
+
+def generated_classes(xdr_dir: Path) -> set[str]:
+    """top-level classes of the stellar_sdk/xdr package (up to 17.x) that decode and encode xdr
+    bytes and json text."""
     out = set()
     for f in sorted(xdr_dir.glob("*.py")):
         tree = ast.parse(f.read_text(), str(f))
@@ -98,9 +119,42 @@ def sdk_classes(xdr_dir: Path) -> set[str]:
                 methods = {n.name for n in node.body if isinstance(n, ast.FunctionDef)}
                 if {"from_xdr_bytes", "to_xdr_bytes", "from_json", "to_json"} <= methods:
                     out.add(node.name)
-    if not out:
-        sys.exit(f"gentypes: no xdr classes in {xdr_dir}")
     return out
+
+
+# the bases of stellar-xdr's generated classes, which give them from_xdr_bytes, to_xdr_bytes,
+# from_json_value and to_json_value. a union is a class with the metaclass UnionNamespace,
+# holding one class per arm
+STELLAR_XDR_BASES = {"XdrStruct", "XdrEnum", "XdrBytes", "XdrInt", "XdrArray"}
+
+
+def stellar_xdr_classes(reexport: Path, package: Path) -> set[str]:
+    """the classes stellar_xdr exports, when stellar_sdk/xdr.py re-exports all of it. a typedef
+    of a union (AccountID = PublicKey) is the union's class under a second name; a typedef of a
+    builtin (Uint32, or SponsorshipDescriptor, an optional) is a type alias that cannot decode."""
+    tree = ast.parse(reexport.read_text(), str(reexport))
+    if not any(isinstance(n, ast.ImportFrom) and n.module == "stellar_xdr" and [a.name for a in n.names] == ["*"] for n in tree.body):
+        sys.exit(f"gentypes: {reexport} does not re-export stellar_xdr with import *")
+    exported = None
+    init = ast.parse((package / "__init__.py").read_text(), str(package / "__init__.py"))
+    for node in init.body:
+        if isinstance(node, ast.Assign) and [getattr(t, "id", None) for t in node.targets] == ["__all__"]:
+            exported = set(ast.literal_eval(node.value))
+    if exported is None:
+        sys.exit(f"gentypes: {package}/__init__.py has no literal __all__")
+    classes = set()
+    aliases = {}
+    for f in sorted(package.glob("_*.py")):
+        for node in ast.parse(f.read_text(), str(f)).body:
+            if isinstance(node, ast.ClassDef):
+                bases = {b.value.id if isinstance(b, ast.Subscript) else getattr(b, "id", None) for b in node.bases}
+                union = any(k.arg == "metaclass" and getattr(k.value, "id", None) == "UnionNamespace" for k in node.keywords)
+                if union or bases & STELLAR_XDR_BASES:
+                    classes.add(node.name)
+            elif isinstance(node, ast.Assign) and len(node.targets) == 1 and isinstance(node.value, ast.Name):
+                aliases[getattr(node.targets[0], "id", None)] = node.value.id
+    classes |= {name for name, target in aliases.items() if target in classes}
+    return classes & exported
 
 
 def find(name: str, classes: set[str]) -> str | None:
@@ -142,12 +196,7 @@ def main() -> None:
         venvs = {v: Path(args.venvs, v, "venv") for v in versions}
     if not versions:
         sys.exit(f"gentypes: no versions in {args.versions}")
-    classes = {}
-    for v in versions:
-        dirs = list(venvs[v].glob("lib/python*/site-packages/stellar_sdk/xdr"))
-        if len(dirs) != 1:
-            sys.exit(f"gentypes: build the {v} testee first; {venvs[v]} holds {len(dirs)} stellar_sdk/xdr")
-        classes[v] = sdk_classes(dirs[0])
+    classes = {v: sdk_classes(venvs[v], v) for v in versions}
 
     common: dict[str, str] = {}
     only: dict[str, dict[str, str]] = {}
