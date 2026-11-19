@@ -21,7 +21,7 @@ import {
   fmt,
   useHashScroll,
 } from "@/components/common"
-import { betterText, coverageMetrics } from "@/lib/metrics"
+import { betterText, coverageMetrics, ledgerArms } from "@/lib/metrics"
 import { capPath, entriesPath } from "@/lib/paths"
 import { docs, sourceClasses, sources } from "@/lib/terms"
 
@@ -90,6 +90,7 @@ export function CorpusPage() {
 
   const s = coverage.summary
   const metrics = coverageMetrics(s, coverage.root_type)
+  const arms = ledgerArms(s)
   const families = coverage.families.toSorted((a, b) => a.priority - b.priority || a.id.localeCompare(b.id))
   return (
     <div className="flex flex-col gap-6">
@@ -268,8 +269,10 @@ export function CorpusPage() {
         description={
           <>
             A <GlossaryLink id="union-arm">union arm</GlossaryLink> is one variant that an XDR union can take.{" "}
-            {s.arms_covered} of the {s.arms_reachable} arms that <Id>{coverage.root_type}</Id> can reach under stellar-xdr{" "}
-            {coverage.stellar_xdr} have an entry from stellar-core. Each of the other {s.arms_uncovered} arms has a reason in{" "}
+<Id>{coverage.root_type}</Id> can reach {arms.all} arms under stellar-xdr {coverage.stellar_xdr}. {arms.covered}{" "}
+            of the {arms.total} <GlossaryLink id="union-arm">arms that a ledger can hold</GlossaryLink> have an entry from
+            stellar-core. {arms.refused + arms.never} arms cannot occur in any ledger: stellar-core refuses {arms.refused}{" "}
+            before a ledger and never emits {arms.never}. Each of the {s.arms_uncovered} arms without an entry has a reason in{" "}
             <RepoLink path={sources.uncovered} />, under one of these <GlossaryLink id="blocker">blockers</GlossaryLink>.
           </>
         }

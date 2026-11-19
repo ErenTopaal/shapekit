@@ -122,7 +122,44 @@ export interface CoverageMetric {
   section: string
 }
 
+export interface LedgerArms {
+  // every union arm that the root type can reach
+  all: number
+  // the arms that a ledger can hold: all arms minus the arms of the no-ledger blockers
+  total: number
+  // the arms with an entry from stellar-core
+  covered: number
+  // the arms that cannot occur in any ledger, by blocker
+  refused: number
+  never: number
+  // the other uncovered arms, each with a written reason
+  other: number
+  // covered of total, in percent with one decimal
+  percent: string
+}
+
+// the arm coverage that the landing page and the dashboard show: covered arms of the arms that
+// a ledger can hold. no ledger can hold the arms of two blockers: refused-before-ledger, where
+// stellar-core refuses the transaction before a ledger, and never-emitted, where the pinned
+// stellar-core has no code path that emits the arm
+export function ledgerArms(s: CoverageSummary): LedgerArms {
+  const by = s.arms_uncovered_by_blocker
+  const refused = by["refused-before-ledger"] ?? 0
+  const never = by["never-emitted"] ?? 0
+  const total = s.arms_reachable - refused - never
+  return {
+    all: s.arms_reachable,
+    total,
+    covered: s.arms_covered,
+    refused,
+    never,
+    other: s.arms_uncovered - refused - never,
+    percent: total > 0 ? ((s.arms_covered / total) * 100).toFixed(1) : "0.0",
+  }
+}
+
 export function coverageMetrics(s: CoverageSummary, rootType: string): CoverageMetric[] {
+  const arms = ledgerArms(s)
   return [
     { id: "core-emitted", label: "Entries emitted by stellar-core", value: s.core_emitted_entries, total: s.entries, better: "higher", section: "sources" },
     {
@@ -133,7 +170,14 @@ export function coverageMetrics(s: CoverageSummary, rootType: string): CoverageM
       better: "higher",
       section: "caps",
     },
-    { id: "arms", label: `Union arms of ${rootType} with an entry from stellar-core`, value: s.arms_covered, total: s.arms_reachable, better: "higher", section: "arms" },
+    {
+      id: "arms",
+      label: `Union arms of ${rootType} that a ledger can hold with an entry from stellar-core`,
+      value: arms.covered,
+      total: arms.total,
+      better: "higher",
+      section: "arms",
+    },
     { id: "fragments", label: "Family fragments with an entry from stellar-core", value: s.fragments_covered, total: s.fragments, better: "higher", section: "families" },
     {
       id: "fields",
