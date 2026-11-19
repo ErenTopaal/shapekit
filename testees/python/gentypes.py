@@ -14,6 +14,10 @@ against the crate's own list.
 
 run from the repository root:
     python3 -I testees/python/gentypes.py
+
+a development build of the sdk (docs/sdk-ci.md) reports a version this table may not know, so
+its build writes a table of its own, for that one version and venv:
+    python3 -I testees/python/gentypes.py --version <version> --venv <venv> --out <file>
 """
 
 import argparse
@@ -120,20 +124,29 @@ def main() -> None:
     p.add_argument("--venvs", default="target/testees/python")
     p.add_argument("--extra", default="TransactionMeta", help="comma separated types to add to the manifest's")
     p.add_argument("--out", default="testees/python/shapekit_testee/types_gen.py")
+    p.add_argument("--version", help="write the table of this one version, read from --venv, instead of versions/")
+    p.add_argument("--venv", help="the venv holding the --version build")
     args = p.parse_args()
+    if (args.version is None) != (args.venv is None):
+        sys.exit("gentypes: --version and --venv go together")
 
     required = manifest_types(Path(args.manifest))
     required += [n for n in args.extra.split(",") if n and n not in required]
     names = sorted(set(required) | set(schema_types(Path(args.schema))))
 
-    versions = sorted((d.name for d in Path(args.versions).iterdir() if d.is_dir()), key=version_key)
+    if args.version is not None:
+        versions = [args.version]
+        venvs = {args.version: Path(args.venv)}
+    else:
+        versions = sorted((d.name for d in Path(args.versions).iterdir() if d.is_dir()), key=version_key)
+        venvs = {v: Path(args.venvs, v, "venv") for v in versions}
     if not versions:
         sys.exit(f"gentypes: no versions in {args.versions}")
     classes = {}
     for v in versions:
-        dirs = list(Path(args.venvs, v, "venv").glob("lib/python*/site-packages/stellar_sdk/xdr"))
+        dirs = list(venvs[v].glob("lib/python*/site-packages/stellar_sdk/xdr"))
         if len(dirs) != 1:
-            sys.exit(f"gentypes: build the {v} testee first; {args.venvs}/{v}/venv holds {len(dirs)} stellar_sdk/xdr")
+            sys.exit(f"gentypes: build the {v} testee first; {venvs[v]} holds {len(dirs)} stellar_sdk/xdr")
         classes[v] = sdk_classes(dirs[0])
 
     common: dict[str, str] = {}
