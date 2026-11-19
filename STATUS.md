@@ -2,6 +2,23 @@
 
 A dated public log of what has landed in shapekit. Newest entry first.
 
+## 2026-11-19: findings link shapekit's own issues
+
+- RS-3 is `filed` with its own issue,
+  [rs-stellar-xdr#629](https://github.com/stellar/rs-stellar-xdr/issues/629), which upstream
+  closed on 2026-11-16 as a duplicate. The crate's main branch refuses a bool word other than
+  0 or 1 since 2026-11-19; no release holds the fix yet. Main record: 16 filed, 7 duplicates
+  of another issue, 2 recorded as won't fix (`shapekit findings check`).
+- CLI-JSON-DEPTH is `filed` with
+  [rs-stellar-xdr#628](https://github.com/stellar/rs-stellar-xdr/issues/628), shapekit's own
+  issue for RS-2, where a comment adds the `stellar xdr encode` case. CLI-ALLOC's cause names
+  only the CLI's own reader, which decodes every input under `Limits::none()`. The candidate
+  drafts that name them are regenerated. Candidate lane: 27 filed, 7 duplicates of another
+  issue, 11 recorded as won't fix and 1 draft.
+- The landing page counts upstream issues, each once however many findings link it: 42 issues
+  filed upstream by shapekit and 13 reported before by others, for 57 findings in 11
+  components. A finding whose link is an issue shapekit filed counts as shapekit's.
+
 ## 2026-11-19: 0.2.0 released, candidate findings filed upstream
 
 - shapekit 0.2.0 is released from a signed tag:
