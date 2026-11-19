@@ -6,7 +6,8 @@
 #                                        live sources, every version of every sdk through the
 #                                        corpus (quick mode runs rust, go and js at their
 #                                        current version and only builds and unit tests the
-#                                        other testees), the upstream
+#                                        other testees, the rust testee's own checks
+#                                        included), the upstream
 #                                        sightings, the wallet-backend reproductions and linter
 #                                        baseline, the stellar-rpc harness runs, findings with
 #                                        drafts allowed, every chain
@@ -108,7 +109,12 @@ cargo_testee() {
   local sdk=$1 version
   version=$(sed -n "/^\[sdk\.$sdk\]/,/^current/s/^current = \"\(.*\)\"/\1/p" conformance/versions.toml)
   local manifest="testees/$sdk/versions/$version/Cargo.toml" target="target/testees/$sdk/$version"
-  rustfmt --edition 2024 --check "testees/$sdk"/src/*.rs "testees/$sdk"/*.rs
+  # the sources, and a build script beside them where the testee has one (soroban)
+  local sources=("testees/$sdk"/src/*.rs)
+  if [ -f "testees/$sdk/build.rs" ]; then
+    sources+=("testees/$sdk/build.rs")
+  fi
+  rustfmt --edition 2024 --check "${sources[@]}"
   cargo clippy --locked --all-targets --manifest-path "$manifest" --target-dir "$target" -- -D warnings
   cargo test --locked --manifest-path "$manifest" --target-dir "$target"
 }
@@ -133,11 +139,18 @@ python_testee() {
   "target/testees/python/$v/venv/bin/python" -B -E -s -m unittest discover -s testees/python/tests -t testees/python
 }
 
-# the java testee's unit tests (maven surefire) at the current version
-java_testee() {
+# the unit tests (maven surefire) of the java or kmp testee at the sdk's current version
+maven_testee() {
   local v
-  v=$(python3 -I -c 'import sys, tomllib; print(tomllib.load(open(sys.argv[1], "rb"))["sdk"]["java"]["current"])' conformance/versions.toml)
-  mvn -B -q -f "testees/java/versions/$v/pom.xml" test
+  v=$(python3 -I -c 'import sys, tomllib; print(tomllib.load(open(sys.argv[1], "rb"))["sdk"][sys.argv[2]]["current"])' conformance/versions.toml "$1")
+  mvn -B -q -f "testees/$1/versions/$v/pom.xml" test
+}
+
+# the dotnet testee's unit checks, run against the build testee_build dotnet made
+dotnet_testee() {
+  local v
+  v=$(python3 -I -c 'import sys, tomllib; print(tomllib.load(open(sys.argv[1], "rb"))["sdk"]["dotnet"]["current"])' conformance/versions.toml)
+  python3 -I testees/dotnet/tests/check.py "target/testees/dotnet/$v"
 }
 
 # the dart testee as its conformance build lays it out under target/testees/dart/<version>/
@@ -180,6 +193,7 @@ current="indexerlint over adapters/"
 echo "== $current"
 (cd adapters && "$root/$out/bin/indexerlint" ./...)
 step js_testee
+step cargo_testee rust
 step cargo_testee soroban
 step "$shapekit" registry check
 step "$shapekit" manifest validate --file corpus/manifest.json --registry registry
@@ -214,15 +228,17 @@ current="java toolchain"
 echo "== $current"
 java_path=$(scripts/java-toolchain.sh)
 PATH="$java_path:$PATH" step testee_build java
-PATH="$java_path:$PATH" step java_testee
+PATH="$java_path:$PATH" step maven_testee java
 step testee_build dart
 step dart_testee
 step testee_build php
 step php_testee
-# the dotnet build treats warnings as errors; the testee has no unit tests of its own
+# the dotnet build treats warnings as errors
 step testee_build dotnet
+step dotnet_testee
 # the kmp build treats warnings as errors and checks the resolved jars against lib.sha256
 PATH="$java_path:$PATH" step testee_build kmp
+PATH="$java_path:$PATH" step maven_testee kmp
 step stellar_cli_testee
 step testee_build stellar-cli
 step "$shapekit" findings check

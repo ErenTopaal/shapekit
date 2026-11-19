@@ -227,10 +227,12 @@ against its sha256 in `pins.toml`. The workflows fetch Flutter the same way with
   registry, the corpus and candidate manifests, the synthetic entries, manifest and oracle
   files as the tools write them, the contract schemas, coverage, the guide, golden agreement,
   the committed chains, the repro selection, the adapter protocol schema and the release
-  archive; the current version of rust, go and js over the corpus; the build and unit tests of
-  the other testees at their current version (Python, Java, soroban-sdk, Dart, PHP, .NET, KMP
-  and stellar-cli; the .NET and KMP builds treat warnings as errors, and neither testee has
-  unit tests of its own), whose corpus runs are in full mode and in their own `pr.yml` jobs;
+  archive; the current version of rust, go and js over the corpus, and the rust testee's own
+  rustfmt, clippy and unit tests; the build and unit tests of the other testees at their
+  current version (Python, Java, soroban-sdk, Dart, PHP, .NET, KMP and stellar-cli; the .NET
+  and KMP builds treat warnings as errors, the .NET checks are `testees/dotnet/tests/check.py`
+  run against its build, and the KMP tests are its `mvn test`), whose corpus runs are in full
+  mode and in their own `pr.yml` jobs;
   the findings record; the `STATUS.md` release candidate section of the version in
   `Cargo.toml`, which the release notes are made from; the em dash check; and
   `scripts/check-public-text.sh`, which fails when a tracked file holds an absolute home
