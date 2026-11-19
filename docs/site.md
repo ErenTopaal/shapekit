@@ -1,9 +1,10 @@
 # The website
 
 The shapekit.org website is built from `site/`: the documentation under `/docs` and a
-dashboard over the committed results under `/dashboard`. The dashboard shows which shape
-families and CAPs the corpus covers, which SDK version diverges on which entry, what the
-wallet-backend reference run found, the findings list, and a page for every corpus entry. The site root is a landing
+dashboard over the committed results under `/dashboard`. The dashboard has one page for each
+question a reader asks: how an SDK does, how an indexer does, which defects shapekit found and
+where they are reported, and what the corpus covers. It also has a page for every CAP and every
+corpus entry, and one glossary. The site root is a landing
 page (`site/src/routes/home.tsx`) that reads every number it shows from the same data files at build time
 (`site/src/landing/stats.ts`).
 
@@ -35,10 +36,12 @@ support TypeScript 7; oxlint covers the React, hooks and accessibility rules ins
 | `/api/search.json` | the docs search index, downloaded by the search dialog | `api/search.json` |
 | `/llms.txt`, `/llms-full.txt` | the docs for llms: an index of every page, and every page's markdown in one file | `llms.txt`, `llms-full.txt` |
 | `/llms.mdx/docs/<group>/<page>/content.md` | one docs page as markdown; `/docs/<group>/<page>.md` serves the same file | `llms.mdx/docs/.../content.md` |
-| `/dashboard` | overview | `dashboard/index.html` |
-| `/dashboard/coverage`, `/dashboard/coverage/<CAP>` | coverage per CAP, one page per CAP in `coverage.json` | `dashboard/coverage/.../index.html` |
-| `/dashboard/sdk`, `/dashboard/indexer`, `/dashboard/findings` | SDK matrix, indexer run, findings | `dashboard/<page>/index.html` |
-| `/dashboard/corpus`, `/dashboard/corpus/<entry>` | the corpus explorer, one page per entry in `entries.json` | `dashboard/corpus/.../index.html` |
+| `/dashboard` | the start page: one question for each reader, with a short answer and a link | `dashboard/index.html` |
+| `/dashboard/sdk`, `/dashboard/indexer`, `/dashboard/findings` | SDK results, indexer results, findings | `dashboard/<page>/index.html` |
+| `/dashboard/corpus`, `/dashboard/corpus/cap/<CAP>` | corpus coverage, and one page per CAP in `coverage.json` | `dashboard/corpus/.../index.html` |
+| `/dashboard/corpus/entries`, `/dashboard/corpus/<entry>` | the list of corpus entries, and one page per entry in `entries.json` | `dashboard/corpus/.../index.html` |
+| `/dashboard/glossary`, `/dashboard/sources` | the terms of the dashboard, and the source files and pinned versions of its data | `dashboard/<page>/index.html` |
+| `/dashboard/coverage`, `/dashboard/coverage/<CAP>` | old addresses, which forward to `/dashboard/corpus` and `/dashboard/corpus/cap/<CAP>` | `dashboard/coverage/.../index.html` |
 | `/corpus/...` | a copy of every corpus file the manifest names, for download and for the explorer's XDR-JSON | the files themselves |
 | any other address | not-found page | `__spa-fallback.html`, served with status 404 |
 
@@ -49,18 +52,21 @@ link to its source file. Dashboard pages are prerendered as their navigation wit
 state; the browser then fetches `/data/*.json` and renders the
 page. Filters live in the query string (`/dashboard/sdk?entry=...`), so a filtered view can be
 linked; a finding can be linked as `/dashboard/findings#WB-W3` (it opens) and a corpus entry as
-`/dashboard/coverage/<CAP>#<entry-id>` or `/dashboard/corpus/<entry-id>`. Each dashboard page has a "Terms used on this page" block
-that explains its vocabulary (verdicts, severities, statuses, check results, source classes,
-blockers) and links the docs page or repository file that defines it; the words are kept in
-`site/src/lib/terms.ts`, next to the source each one follows. Old dashboard links of the form
+`/dashboard/corpus/<entry-id>`. Each dashboard page links its terms to one glossary,
+`/dashboard/glossary` (verdicts, severities, statuses, check results, source classes, blockers);
+the words are kept in `site/src/lib/terms.ts`, next to the source each one follows. The numbers
+that more than one page shows, the landing page included, come from one function each in
+`site/src/lib/metrics.ts`. The findings total is `reported.findings` in `findings.json`: the
+findings of both records with the status filed, duplicate-of or private-report. Old dashboard links of the form
 `/#/sdk` are redirected to `/dashboard/sdk`. Next to each route's HTML file the build writes a `.data` file that the client router fetches on in-site
 navigation.
 
-## The corpus explorer
+## The corpus entries
 
-`/dashboard/corpus` lists every corpus entry. Its filters (CAP, shape, an SDK that fails on
+`/dashboard/corpus/entries` lists every corpus entry. Its filters (CAP, shape, an SDK that fails on
 the entry and the failing version, and the entry id) are kept in the query string, for example
-`/dashboard/corpus?sdk=go&version=v0.7.1`. Each entry has its own page at
+`/dashboard/corpus/entries?sdk=go&version=v0.7.1`. An old link to `/dashboard/corpus` with these
+filters forwards to this list. Each entry has its own page at
 `/dashboard/corpus/<entry-id>` with:
 
 - the manifest record: shape, kind, XDR type, CAPs (linked to their coverage pages), protocol
@@ -97,7 +103,7 @@ takes about 20 seconds on a 10-core machine.
 | Getting started | `/docs` (Introduction) | `README.md`: introduction, "What is in it", "Infrastructure and privacy", "Maintenance", "License" |
 | | `/docs/install` | `README.md`: "Install" and "Building and checking" |
 | | `/docs/quick-start` | `README.md`: "Quick start" |
-| Corpus | `/docs/corpus/adding-a-shape` | `docs/adding-a-shape.md` (the sidebar also links the dashboard's coverage page and the corpus explorer) |
+| Corpus | `/docs/corpus/adding-a-shape` | `docs/adding-a-shape.md` (the sidebar also links the corpus coverage page and the list of corpus entries) |
 | Harness | `/docs/harness/adapter-interface`, `/docs/harness/mapping-adapter`, `/docs/harness/replay-server`, `/docs/harness/indexer-ci` | `docs/adapter-interface.md`, `docs/mapping-adapter.md`, `docs/replay-server.md`, `docs/indexer-ci.md` |
 | SDK conformance | `/docs/sdk/testee-protocol`, `/docs/sdk/sdk-ci`, `/docs/sdk/seeded-faults` | `docs/testee-protocol.md`, `docs/sdk-ci.md`, `docs/seeded-faults.md` |
 | Results | `/docs/results/report` | `docs/report.md` |
@@ -168,7 +174,7 @@ Every number the dashboard shows is read from JSON that `shapekit site data` wri
 | `conformance/versions.toml` | the SDK version matrix and the current version of each SDK |
 | `conformance/known-failures/*.txt` | known-failure lines per SDK and version |
 | `conformance/reproductions.toml` | the upstream sightings the runner must reproduce |
-| `pins.toml` | pinned upstream versions shown on the overview |
+| `pins.toml` | pinned upstream versions shown on the data sources page |
 
 The commit is passed with `--commit`; the command does not read git. It writes six files:
 `meta.json` (commit, repository, corpus header, pins, and the path, size and sha256 of every
