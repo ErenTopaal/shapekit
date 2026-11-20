@@ -126,6 +126,10 @@ On the way the script:
   file to `https://github.com/ErenTopaal/shapekit/blob/main/...` (`tree/` for a directory); a
   link to a file that does not exist is reported on the console. A link whose text is a doc's
   file name (`docs/linter.md`) reads as the page's title;
+- copies each image that a doc shows, such as the system overview of the architecture page, to
+  `site/public/docs-media/` and points the image at `/docs-media/<file>`, from where the build
+  bundles it under `/assets/`. So the site serves it from its own origin, as its content
+  security policy requires. GitHub shows the same image from the repository;
 - adapts the guide, which is written for stellar-docs: `{#id}` heading ids become Fumadocs'
   `[#id]`, `<Warning>` becomes a warn callout, its site-absolute links point at
   developers.stellar.org, and a callout at the top says that the page is the draft for review

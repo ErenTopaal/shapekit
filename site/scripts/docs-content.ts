@@ -2,16 +2,21 @@
 // ../README.md stay the only copies. run before every dev server start and build.
 //
 // what it changes on the way: a title and description in frontmatter (from the first heading
-// and paragraph), relative links between docs rewritten to site routes, links to any other
-// repository file pointed at github, and the few stellar-docs constructs in the guide that
-// fumadocs spells differently.
+// and paragraph), relative links between docs rewritten to site routes, images copied to
+// public/docs-media, links to any other repository file pointed at github, and the few
+// stellar-docs constructs in the guide that fumadocs spells differently.
 
-import { existsSync, mkdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs"
+import { copyFileSync, existsSync, mkdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs"
 import path from "node:path"
 
 const site = path.resolve(import.meta.dirname, "..")
 const repo = path.resolve(site, "..")
 const out = path.join(site, "content", "docs")
+// images the docs show, copied from the repository so the site serves them itself: its content
+// security policy loads images from its own origin only
+const media = path.join(site, "public", "docs-media")
+const mediaRoute = "/docs-media"
+rmSync(media, { recursive: true, force: true })
 const blobBase = "https://github.com/ErenTopaal/shapekit"
 const stellarDocs = "https://developers.stellar.org"
 
@@ -210,10 +215,12 @@ for (const g of groups) {
 }
 
 let missing = 0
+// file name under docs-media to the repository path it was copied from
+const copied = new Map<string, string>()
 function rewriteLinks(md: string, source: string): string {
   const dir = path.posix.dirname(source)
   const fix = (target: string): string => {
-    if (/^[a-z]+:/i.test(target)) return target
+    if (/^[a-z]+:/i.test(target) || target.startsWith(`${mediaRoute}/`)) return target
     // the readme is split over several pages, so its own anchors may now live on another page
     if (target.startsWith("#")) return source === "README.md" ? (readmeAnchor.get(target.slice(1)) ?? target) : target
     // site-absolute paths in the guide are developers.stellar.org pages
@@ -231,8 +238,22 @@ function rewriteLinks(md: string, source: string): string {
     const kind = existsSync(abs) && statSync(abs).isDirectory() ? "tree" : "blob"
     return `${blobBase}/${kind}/main/${resolved}${anchor ? `#${anchor}` : ""}`
   }
+  // an image of a repository file is served from the site, under its file name
+  const image = (target: string): string => {
+    if (/^[a-z]+:/i.test(target) || target.startsWith("/")) return target
+    const resolved = path.posix.normalize(path.posix.join(dir, target))
+    const name = path.posix.basename(resolved)
+    if (!existsSync(path.join(repo, resolved))) throw new Error(`${source}: image ${target} is not in the repository`)
+    const from = copied.get(name)
+    if (from !== undefined && from !== resolved) throw new Error(`${source}: ${resolved} and ${from} are both named ${name}`)
+    copied.set(name, resolved)
+    mkdirSync(media, { recursive: true })
+    copyFileSync(path.join(repo, resolved), path.join(media, name))
+    return `${mediaRoute}/${name}`
+  }
   return mapProse(md, (prose) =>
     prose
+      .replace(/(!\[[^\]]*\]\()([^)\s]+)(\))/g, (_, a: string, t: string, b: string) => `${a}${image(t)}${b}`)
       .replace(/(\]\()([^)\s]+)((?:\s+"[^"]*")?\))/g, (_, a: string, t: string, b: string) => `${a}${fix(t)}${b}`)
       .replace(/^(\[[^\]]+\]:\s+)(\S+)/gm, (_, a: string, t: string) => `${a}${fix(t)}`)
       // on github a link reading "docs/linter.md" names the file it opens; on the site it opens
