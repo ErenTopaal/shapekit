@@ -1,8 +1,8 @@
 // every number the landing page shows, read at build time from the json files `shapekit site data`
 // writes. the page computes only counts, sums and filters over these files.
 import { readFile } from "node:fs/promises"
-import type { Conformance, Coverage, Entries, Finding, Findings, Harness, Meta } from "@/lib/data"
-import { capCoverage, componentFindings, entryComposition, findingRows, foundText, ledgerArms, reportedFindings, runSummary, type CapCoverage, type LedgerArms, type SourcePart } from "@/lib/metrics"
+import type { Conformance, Coverage, Entries, Findings, Harness, Meta } from "@/lib/data"
+import { capCoverage, componentFindings, entryComposition, filedByShapekit, foundText, issueSplit, ledgerArms, reportedFindings, runSummary, type CapCoverage, type IssueSplit, type LedgerArms, type SourcePart } from "@/lib/metrics"
 import { proofText } from "./content"
 
 async function json<T>(name: string): Promise<T> {
@@ -83,10 +83,8 @@ export interface LandingStats {
   findings: LandingFinding[]
   /** findings of both records whose behavior is intended, so shapekit did not file them */
   findingsIntended: number
-  /** upstream issues shapekit filed that the findings link, each counted once */
-  issuesFiled: number
-  /** upstream issues the findings link that shapekit did not file, each counted once */
-  issuesReported: number
+  /** the reported findings as upstream issues, the same split as the dashboard's (src/lib/metrics.ts) */
+  issues: IssueSplit
   sdks: Sdk[]
   runs: IndexerRun[]
   bugs: Bug[]
@@ -134,12 +132,8 @@ export async function loadLandingStats(): Promise<LandingStats> {
   // the reported findings of both records, the same findings and the same count as the
   // dashboard's (src/lib/metrics.ts); drafts and intended behavior stay off the page
   const bugs = reportedFindings(findings)
-  // shapekit's own issues are the links of the filed findings of both records; a finding that
-  // links one of them is shapekit's whatever its status, so it is never counted as reported before
-  const ownLinks = new Set(findingRows(findings).flatMap((f) => (f.status === "filed" && f.link ? [f.link] : [])))
-  const own = (f: Finding) => f.link !== null && ownLinks.has(f.link)
-  // findings that share one upstream link count once
-  const issues = (keep: (f: Finding) => boolean) => new Set(bugs.filter(keep).map((f) => f.link ?? f.id)).size
+  // a finding is shapekit's when shapekit filed the issue it links (src/lib/metrics.ts)
+  const own = filedByShapekit(findings)
   const landingFindings: LandingFinding[] = bugs.map((f) => ({
     id: f.id,
     title: f.short ?? f.title,
@@ -251,8 +245,7 @@ export async function loadLandingStats(): Promise<LandingStats> {
     fields: { notValidated: sum.fields_not_fully_validated, exercised: sum.fields_not_fully_validated_exercised },
     findings: landingFindings,
     findingsIntended: findings.reported.not_reported["wont-fix"] ?? 0,
-    issuesFiled: issues(own),
-    issuesReported: issues((f) => !own(f)),
+    issues: issueSplit(findings),
     sdks,
     runs,
     bugs: bugsOut,

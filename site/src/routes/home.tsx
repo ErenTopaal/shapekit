@@ -9,6 +9,7 @@ import { setupLanding } from "@/landing/setup"
 import { breakSegments, statement } from "@/landing/statement"
 import { sdkName } from "@/lib/sdks"
 import { findingsPath } from "@/lib/paths"
+import { issueCount, issueSplitText } from "@/lib/metrics"
 
 // the landing page. every number on it is read at build time from the json files `shapekit site
 // data` writes (src/landing/stats.ts); the motion and the interactive parts are in
@@ -98,7 +99,7 @@ function Kit({ s }: { s: LandingStats }) {
           {finds.map((x, i) => <a key={x.id} className={`fi tip sev-${sevKey[x.severity] ?? "dv"}${x.filed ? "" : " o"}`} href="#findings" data-tip={tipOf(x)} aria-label={x.id} style={css({ "--i": i })}></a>)}
         </span>
         <span className="kit-sev">{sevOrder.map((k) => <span key={k}><i className={`sev-${sevKey[k]}`}></i>{bySev(k)} {sevLabel[k]}</span>)}</span>
-        <span className="kit-key"><span><i style={css({ "--sw": "var(--c-ink)" })}></i>{plural(s.issuesFiled, "issue", "issues")} filed</span><span><i style={css({ "--sw": "transparent", border: "var(--bw-strong) solid var(--c-ink)" })}></i>{s.issuesReported} reproduced</span></span>
+        <span className="kit-key"><span><i style={css({ "--sw": "var(--c-ink)" })}></i>{issueCount(s.issues.filed)} filed</span><span><i style={css({ "--sw": "transparent", border: "var(--bw-strong) solid var(--c-ink)" })}></i>{f(s.issues.reportedBefore)} reproduced</span></span>
         <a className="arrow-link kit-go" href="#findings">Every finding</a>
       </div>
     </figure>
@@ -108,11 +109,13 @@ function Kit({ s }: { s: LandingStats }) {
 function FindingsHead({ s }: { s: LandingStats }) {
   const components = new Set(s.findings.map((x) => x.component)).size
   const n = s.findingsIntended
+  const p = s.issues.privateReports
+  const priv = p === 0 ? "" : ` ${p === 1 ? "One finding is" : `${f(p)} findings are`} ${issueSplitText.privateReports}.`
   const intended = n === 0 ? "" : n === 1 ? " One more record is intended behavior and is not filed." : ` ${n} more records are intended behavior and are not filed.`
   return (
     <div className="fd-big" data-r="">
       <span className="fd-num tnum" data-count="">{f(s.findings.length)}</span>
-      <span className="fd-num-cap"><strong>findings in {components} components.</strong><span>{plural(s.issuesFiled, "issue", "issues")} filed upstream by shapekit. {plural(s.issuesReported, "issue", "issues")} reported before by others, now reproduced.{intended}</span></span>
+      <span className="fd-num-cap"><strong>findings in {components} components.</strong><span>{issueCount(s.issues.filed)} {issueSplitText.filed}. {issueCount(s.issues.reportedBefore)} {issueSplitText.reportedBefore}, now reproduced.{priv}{intended}</span></span>
     </div>
   )
 }
