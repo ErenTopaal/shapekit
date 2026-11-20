@@ -46,6 +46,52 @@ export function reportedFindings(f: Findings): FindingRow[] {
   return rows
 }
 
+// whether shapekit filed the upstream issue that a finding links. shapekit's issues are the links
+// of the filed findings of both records, so a finding that links one of them is shapekit's,
+// whatever its status, and it is never counted as reported before
+export function filedByShapekit(f: Findings): (x: Finding) => boolean {
+  const own = new Set(findingRows(f).flatMap((x) => (x.status === "filed" && x.link ? [x.link] : [])))
+  return (x) => x.link !== null && own.has(x.link)
+}
+
+export interface IssueSplit {
+  // the reported findings: the findings total
+  findings: number
+  // distinct upstream issues that shapekit filed
+  filed: number
+  // distinct upstream issues that others reported before shapekit, now reproduced
+  reportedBefore: number
+  // findings that shapekit reported through a private channel; each is one report
+  privateReports: number
+}
+
+// the split of the reported findings into upstream issues, the split that the landing page and
+// every dashboard page show. findings that link the same upstream issue count as one issue, so
+// the issues can be fewer than the findings
+export function issueSplit(f: Findings): IssueSplit {
+  const rows = reportedFindings(f)
+  const own = filedByShapekit(f)
+  const issues = (keep: (x: FindingRow) => boolean) => new Set(rows.filter(keep).map((x) => x.link ?? x.id)).size
+  const isPrivate = (x: FindingRow) => !own(x) && x.status === "private-report"
+  return {
+    findings: rows.length,
+    filed: issues(own),
+    reportedBefore: issues((x) => !own(x) && !isPrivate(x)),
+    privateReports: rows.filter(isPrivate).length,
+  }
+}
+
+// the split as the pages write it: "42 issues filed upstream by shapekit"
+export function issueCount(n: number): string {
+  return `${n.toLocaleString("en-US")} ${n === 1 ? "issue" : "issues"}`
+}
+
+export const issueSplitText = {
+  filed: "filed upstream by shapekit",
+  reportedBefore: "reported before by others",
+  privateReports: "reported privately",
+} as const
+
 // ---- sdks
 
 export function currentVersion(s: Sdk): SdkVersion | undefined {
