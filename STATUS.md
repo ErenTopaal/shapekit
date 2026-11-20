@@ -2,6 +2,39 @@
 
 A dated public log of what has landed in shapekit. Newest entry first.
 
+## 2026-11-20: technical architecture on the docs site
+
+- [docs/architecture.md](docs/architecture.md) describes every part of shapekit, its
+  interfaces and pins, and how it connects to the Stellar network software. The site shows it
+  at <https://shapekit.org/docs/architecture>, in the "Getting started" group of the docs.
+  The README, the docs index and the dashboard's Sources page link it.
+- Probe values changed after the 2026-11-17 entry, when the probe ran again on 2026-11-17 and
+  2026-11-18. `registry/generated/validation.json` records 1,312 attempts over the 203 envelope
+  fields: 174 fields are validated and 29 are not (that entry gives 1,310, 178 and 25).
+  `registry/generated/limits.json` records 21 bounded quantities (that entry gives 20).
+  `shapekit guide check` still reports 88 rows against core: 86 agree, 2 settled by core's
+  source.
+- The workspace links renamed `soroban-env-host` and `soroban-simulation` releases for
+  protocols 21 to 29 next to 30.0.0 (`SIMULATED_PROTOCOLS` in
+  `crates/shapekit-core-driver/src/sim_legacy.rs`). [docs/adding-a-shape.md](docs/adding-a-shape.md),
+  [docs/infrastructure.md](docs/infrastructure.md) and
+  [docs/protocol-upgrade-runbook.md](docs/protocol-upgrade-runbook.md) named only the hosts for
+  protocols 22, 24 and 28, and are corrected. The infrastructure page also lists the protocol 21
+  contract build (soroban-sdk 21.7.7).
+- Upstream response to the 42 issues that shapekit filed, on 2026-11-20: 6 are fixed and closed,
+  each by a merged pull request:
+  [stellar-php-sdk#239](https://github.com/Soneso/stellar-php-sdk/issues/239),
+  [#242](https://github.com/Soneso/stellar-php-sdk/issues/242) and
+  [#244](https://github.com/Soneso/stellar-php-sdk/issues/244),
+  [stellar_flutter_sdk#292](https://github.com/Soneso/stellar_flutter_sdk/issues/292) and
+  [#296](https://github.com/Soneso/stellar_flutter_sdk/issues/296), and
+  [kmp-stellar-sdk#168](https://github.com/Soneso/kmp-stellar-sdk/issues/168). The maintainers
+  confirmed 12 more and state that they will fix them. The fixes are merged after the newest
+  release of each SDK, so the corpus runs them at the next release.
+- Adoption proposals: 11 of the 14 are open. The maintainers of stellar_flutter_sdk,
+  stellar-php-sdk and kmp-stellar-sdk closed theirs on 2026-11-19, because they keep their CI on
+  workflows they maintain themselves. shapekit runs these SDKs from its own repository.
+
 ## 2026-11-19: findings link shapekit's own issues
 
 - RS-3 is `filed` with its own issue,
