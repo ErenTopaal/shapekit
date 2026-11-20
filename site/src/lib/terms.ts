@@ -187,6 +187,12 @@ export const glossary: { id: string; title: string; note?: string; terms: Glossa
           "A finding with an upstream decision: filed by shapekit, reported before, or reported privately. The findings total on every page counts reported findings. Drafts and intended behavior are not in the total.",
       },
       {
+        id: "upstream-issue",
+        name: "upstream issue",
+        meaning:
+          "The issue or pull request in the upstream project that a reported finding links. Two or more findings can link the same issue, so the pages count each issue one time: issues filed upstream by shapekit, and issues reported before by others. An issue is filed by shapekit when a finding with the status filed by shapekit links it.",
+      },
+      {
         id: "failure",
         name: "failure",
         meaning:
