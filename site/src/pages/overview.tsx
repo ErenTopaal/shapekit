@@ -3,8 +3,8 @@ import { Link } from "react-router"
 import { ArrowRightIcon } from "lucide-react"
 import { load } from "@/lib/data"
 import { bySdkOrder, sdkName } from "@/lib/sdks"
-import { capCoverage, entryComposition, foundText, reportedFindings, runSummary, sdkSummary } from "@/lib/metrics"
-import { docs, statuses } from "@/lib/terms"
+import { capCoverage, entryComposition, foundText, issueCount, issueSplit, issueSplitText, reportedFindings, runSummary, sdkSummary } from "@/lib/metrics"
+import { docs } from "@/lib/terms"
 import { GlossaryLink, TextLink, fmt } from "@/components/common"
 
 // one card for each question a reader of the dashboard asks: who asks it, a short answer from
@@ -54,6 +54,7 @@ export function Overview() {
   const findings = use(load("findings"))
   const r = findings.reported
   const reported = reportedFindings(findings)
+  const issues = issueSplit(findings)
   const sdks = bySdkOrder(conformance.sdks, (x) => x.sdk).map(sdkSummary)
   const diverging = sdks.filter((x) => x.diverging > 0)
   const runs = harness.runs.map((run, i) => runSummary(run, i))
@@ -138,12 +139,11 @@ export function Overview() {
         >
           <p>
             <span className="num font-semibold text-foreground">{fmt.format(reported.length)}</span>{" "}
-            <GlossaryLink id="reported-finding">reported findings</GlossaryLink> in {r.components} components:{" "}
-            {statuses
-              .filter((st) => (r.by_status[st.id] ?? 0) > 0)
-              .map((st) => `${fmt.format(r.by_status[st.id] ?? 0)} ${st.label}`)
-              .join(", ")}
-            .
+            <GlossaryLink id="reported-finding">reported findings</GlossaryLink> in {r.components} components.{" "}
+            <span className="num font-semibold text-foreground">{issueCount(issues.filed)}</span> {issueSplitText.filed}.{" "}
+            <span className="num font-semibold text-foreground">{issueCount(issues.reportedBefore)}</span> {issueSplitText.reportedBefore}.
+            {issues.privateReports > 0 ? ` ${fmt.format(issues.privateReports)} ${issues.privateReports === 1 ? "finding is" : "findings are"} ${issueSplitText.privateReports}.` : null}{" "}
+            Findings that link the same <GlossaryLink id="upstream-issue">upstream issue</GlossaryLink> count as one issue.
           </p>
         </Question>
 

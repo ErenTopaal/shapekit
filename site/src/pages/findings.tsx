@@ -2,7 +2,7 @@ import { Fragment, use, useEffect, useMemo, useState } from "react"
 import { useLocation, useSearchParams } from "react-router"
 import { ChevronDownIcon } from "lucide-react"
 import { load, sum } from "@/lib/data"
-import { findingRows, reportedFindings, type FindingRow } from "@/lib/metrics"
+import { findingRows, issueSplit, issueSplitText, reportedFindings, type FindingRow } from "@/lib/metrics"
 import { docs, label, severities, severityRank, sources, statuses } from "@/lib/terms"
 import { entryPath, findingPath, findingsPath, capPath } from "@/lib/paths"
 import { Input } from "@/components/ui/input"
@@ -285,6 +285,7 @@ export function FindingsPage() {
 
   const all = useMemo(() => findingRows(findings), [findings])
   const reported = useMemo(() => reportedFindings(findings), [findings])
+  const issues = useMemo(() => issueSplit(findings), [findings])
   const r = findings.reported
   const notReported = all.length - reported.length
   const options = {
@@ -370,14 +371,15 @@ export function FindingsPage() {
           <Metric value={fmt.format(r.findings)} label={<GlossaryLink id="reported-finding">Reported findings</GlossaryLink>}>
             in {r.components} components
           </Metric>
-          {statuses
-            .filter((s) => (r.by_status[s.id] ?? 0) > 0)
-            .map((s) => (
-              <Metric key={s.id} value={fmt.format(r.by_status[s.id] ?? 0)} label={<GlossaryLink id={`status-${s.id}`}>{s.label}</GlossaryLink>} />
-            ))}
+          <Metric value={fmt.format(issues.filed)} label={<><GlossaryLink id="upstream-issue">Issues</GlossaryLink> {issueSplitText.filed}</>} />
+          <Metric value={fmt.format(issues.reportedBefore)} label={<><GlossaryLink id="upstream-issue">Issues</GlossaryLink> {issueSplitText.reportedBefore}</>} />
+          {issues.privateReports > 0 ? (
+            <Metric value={fmt.format(issues.privateReports)} label={<>Findings {issueSplitText.privateReports}</>} />
+          ) : null}
         </div>
         <p className="text-sm text-muted-foreground">
-          Each finding is a defect, so fewer findings is better for a component.
+          Each finding is a defect, so fewer findings is better for a component. Findings that link the same upstream issue
+          count as one issue, so the issues can be fewer than the findings.
           {notReported > 0 ? (
             <>
               {" "}
@@ -396,7 +398,7 @@ export function FindingsPage() {
         <ByComponent byComponent={r.by_component} />
       </Section>
 
-      <PageTerms ids={["finding", "reported-finding", "severity-terms", "status-terms", "record"]} />
+      <PageTerms ids={["finding", "reported-finding", "upstream-issue", "severity-terms", "status-terms", "record"]} />
 
       {problems.length > 0 ? (
         <ul className="text-sm text-diverge">
