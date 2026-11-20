@@ -170,7 +170,7 @@ family apart.
   older-protocol Soroban recipe uses the legacy contract builds and hosts of the next item.
 - **Soroban below protocol 30.** Return `soroban_limits() -> true` and `soroban_settings() -> false`:
   the node starts with `TESTING_SOROBAN_HIGH_LIMIT_OVERRIDE` and no settings upgrade. The driver
-  simulates with the host of the chain's protocol (`sim_legacy`, protocols 22, 24 and 28), and
+  simulates with the host of the chain's protocol (`sim_legacy`, protocols 21 to 29), and
   `shapekit_core_driver::contracts::echo_wasm_for(protocol)` gives an echo build that runs there.
 - **Archived entries.** `min_persistent_ttl() -> Some(10)` sets
   `TESTING_MINIMUM_PERSISTENT_ENTRY_LIFETIME` (parsed by release builds, floor 10), so persistent

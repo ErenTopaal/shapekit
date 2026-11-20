@@ -112,8 +112,8 @@ cargo update -p stellar-xdr@30.0.0 -p soroban-env-host@30.0.0 -p soroban-simulat
 ```
 
 The `--locked` build below fails until the lock file matches. Keep the previous
-`soroban-env-host` and `soroban-simulation` as renamed dependencies (as `-p22`, `-p24` and
-`-p28` are) with a module for them in `sim_legacy.rs`. Add the new protocol to
+`soroban-env-host` and `soroban-simulation` as renamed dependencies (as `-p21` to
+`-p29` are) with a module for them in `sim_legacy.rs`. Add the new protocol to
 `SIMULATED_PROTOCOLS` and keep the old one, which the renamed host now serves, so chains at
 the old protocol can still be priced. Raise `MAX_PROTOCOL`, `smoke::PROTOCOL` and
 `COVERED_THROUGH_PROTOCOL`, and update the tests that assert the old protocol.

@@ -36,8 +36,8 @@ Docker.
 | XDR definitions | stellar-xdr tag `v30.0` (commit `4f524bba`) | the protocol 30 XDR definitions; `upstream-drift.yml` watches for a newer tag |
 | `stellar-xdr` crate | 30.0.0 (28.0.0 and 28.0.1 in the Rust testee matrix) | decoding, round trips, the Rust testee |
 | `stellar-strkey` | 1.0.0 | strkey encoding in the Rust testee |
-| `soroban-env-host` / `soroban-simulation` | 30.0.0, plus renamed 22.1.4, 24.0.0 and 28.0.2 for older protocols | transaction simulation in the generator |
-| `soroban-sdk` | 29.0.1 (22.0.11, 23.5.3 and 28.0.0 for the legacy contracts) | test contracts in `contracts/`; 28.0.0 and 29.0.1 (current) in the soroban-sdk testee matrix |
+| `soroban-env-host` / `soroban-simulation` | 30.0.0, plus renamed 21.2.2, 22.1.4, 23.0.2, 24.0.0, 25.2.2, 26.1.4, 27.0.1, 28.0.2 and 29.0.2 for protocols 21 to 29 | transaction simulation in the generator |
+| `soroban-sdk` | 29.0.1 (21.7.7, 22.0.11, 23.5.3 and 28.0.0 for the legacy contracts) | test contracts in `contracts/`; 28.0.0 and 29.0.1 (current) in the soroban-sdk testee matrix |
 | `@stellar/stellar-sdk` | 16.3.0, 16.3.1, 16.4.1, 17.2.0, 17.2.1, 17.3.0, 17.4.0 (current) | JavaScript testee matrix |
 | `stellar-sdk` (PyPI, py-stellar-base) | 16.1.1, 17.0.1 (current) | Python testee matrix, under CPython 3.15.2 and uv 0.13.9 |
 | `network.lightsail:stellar-sdk` (Maven Central, java-stellar-sdk) | 5.0.0, 6.0.0 (current) | Java testee matrix, on Temurin JDK 27.0.1 and Maven 3.10.1 |
