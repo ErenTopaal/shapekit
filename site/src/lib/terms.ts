@@ -111,6 +111,7 @@ export const expectations: { id: string; meaning: string }[] = [
 ]
 
 export const docs = {
+  architecture: "/docs/architecture",
   verdicts: "/docs/harness/adapter-interface#verdicts",
   claims: "/docs/harness/adapter-interface#claims",
   adapter: "/docs/harness/adapter-interface",

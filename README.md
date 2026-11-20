@@ -18,7 +18,9 @@ the shared set of those shapes plus the tools to run them. It is built in respon
 RFP "XDR/CAP-Coverage Audit Tool and Indexer-Hardening Guide", and covers protocol 30
 (stellar-core 30.0.0, stellar-xdr v30.0).
 
-The dated log of what has landed is [STATUS.md](STATUS.md).
+The dated log of what has landed is [STATUS.md](STATUS.md). The technical architecture of every
+part, its interfaces and pins, and how it connects to the Stellar network software are in
+[docs/architecture.md](docs/architecture.md).
 
 ## What is in it
 

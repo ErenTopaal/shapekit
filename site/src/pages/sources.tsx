@@ -6,6 +6,7 @@ import { Id, More, PageHeader, RepoLink, Section, TextLink, fmt, short } from "@
 // pages of this site's docs first, then committed files that only exist in the repository
 const docs: { to?: string; path?: string; label: string }[] = [
   { to: "/docs", label: "What shapekit is" },
+  { to: docPages.architecture, label: "Technical architecture" },
   { to: "/docs/quick-start", label: "Quick start" },
   { to: docPages.addingShape, label: "Add a shape to the corpus" },
   { to: docPages.testee, label: "Testee protocol for SDKs" },
