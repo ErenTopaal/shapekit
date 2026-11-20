@@ -342,6 +342,72 @@ fn site_data_matches_the_committed_files() {
         );
     }
 
+    // the split of the reported findings into upstream issues: findings that link the same
+    // issue count as one issue. the landing page and every dashboard page take it from
+    // issueSplit in site/src/lib/metrics.ts; the grant proposal cites 42 and 13
+    let reported_rows: Vec<&Value> = all
+        .iter()
+        .copied()
+        .filter(|f| statuses.contains(&f["status"].as_str().unwrap()))
+        .collect();
+    let is_own = |f: &Value| f["link"].as_str().is_some_and(|l| own.contains(l));
+    let issues = |keep: &dyn Fn(&Value) -> bool| -> usize {
+        reported_rows
+            .iter()
+            .filter(|f| keep(f))
+            .map(|f| f["link"].as_str().unwrap_or(f["id"].as_str().unwrap()))
+            .collect::<std::collections::BTreeSet<&str>>()
+            .len()
+    };
+    let issues_filed = issues(&is_own);
+    let issues_before = issues(&|f| !is_own(f) && f["status"] != "private-report");
+    assert_eq!((total, issues_filed, issues_before), (57, 42, 13));
+    let metrics = read("lib/metrics.ts");
+    for text in [
+        "export function issueSplit(",
+        "x.link ?? x.id",
+        "filedByShapekit(f)",
+        "\"filed upstream by shapekit\"",
+        "\"reported before by others\"",
+    ] {
+        assert!(metrics.contains(text), "metrics.ts lacks {text}");
+    }
+    for page in [
+        "landing/stats.ts",
+        "pages/overview.tsx",
+        "pages/findings.tsx",
+    ] {
+        let text = read(page);
+        assert!(text.contains("issueSplit("), "{page} does not call issueSplit");
+        // the finding counts per status are no headline: no page shows them
+        assert!(!text.contains("by_status"), "{page} shows the findings by status");
+    }
+    let home = read("routes/home.tsx");
+    for text in ["s.issues.filed", "s.issues.reportedBefore", "issueSplitText.filed", "issueSplitText.reportedBefore"] {
+        assert!(home.contains(text), "routes/home.tsx lacks {text}");
+    }
+    for page in ["pages/overview.tsx", "pages/findings.tsx"] {
+        let text = read(page);
+        for t in ["issueSplitText.filed", "issueSplitText.reportedBefore"] {
+            assert!(text.contains(t), "{page} lacks {t}");
+        }
+    }
+    // no page writes the figures itself
+    for page in [
+        "routes/home.tsx",
+        "landing/stats.ts",
+        "pages/overview.tsx",
+        "pages/findings.tsx",
+        "pages/cap.tsx",
+    ] {
+        let text = read(page);
+        for n in [issues_filed, issues_before, total] {
+            for word in ["issues", "findings"] {
+                assert!(!text.contains(&format!("{n} {word}")), "{page} writes {n} {word}");
+            }
+        }
+    }
+
     // the landing page and the dashboard show the same arm coverage: both call ledgerArms in
     // site/src/lib/metrics.ts, which takes out the arms of the two blockers that no ledger can
     // hold, and the dashboard's arms metric is its total
