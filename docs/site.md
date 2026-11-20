@@ -103,6 +103,7 @@ takes about 20 seconds on a 10-core machine.
 | Getting started | `/docs` (Introduction) | `README.md`: introduction, "What is in it", "Infrastructure and privacy", "Maintenance", "License" |
 | | `/docs/install` | `README.md`: "Install" and "Building and checking" |
 | | `/docs/quick-start` | `README.md`: "Quick start" |
+| | `/docs/architecture` | `docs/architecture.md` |
 | Corpus | `/docs/corpus/adding-a-shape` | `docs/adding-a-shape.md` (the sidebar also links the corpus coverage page and the list of corpus entries) |
 | Harness | `/docs/harness/adapter-interface`, `/docs/harness/mapping-adapter`, `/docs/harness/replay-server`, `/docs/harness/indexer-ci` | `docs/adapter-interface.md`, `docs/mapping-adapter.md`, `docs/replay-server.md`, `docs/indexer-ci.md` |
 | SDK conformance | `/docs/sdk/testee-protocol`, `/docs/sdk/sdk-ci`, `/docs/sdk/seeded-faults` | `docs/testee-protocol.md`, `docs/sdk-ci.md`, `docs/seeded-faults.md` |
@@ -118,8 +119,8 @@ On the way the script:
   descriptions, and the guide keeps the title and description of its own frontmatter. The page
   header shows the description only where the page does not already open with it (the
   readme-derived pages and the guide);
-- gives each sidebar group a lucide icon, and puts cards on the index page: the install and
-  quick start pages after the introduction, every other page at the end;
+- gives each sidebar group a lucide icon, and puts cards on the index page: the install, quick
+  start and architecture pages after the introduction, every other page at the end;
 - rewrites relative links between these files to site routes, including anchors (the readme's
   own anchors point at the page their section landed on), and links to any other repository
   file to `https://github.com/ErenTopaal/shapekit/blob/main/...` (`tree/` for a directory); a

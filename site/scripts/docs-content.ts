@@ -35,14 +35,16 @@ interface Group {
   icon: string
   // folder under content/docs, "" for the root
   dir: string
-  docs: { source: string; slug: string }[]
+  // docs of the root group sit at /docs/<slug>, after the readme-derived pages
+  // icon: the page's own card icon, when it is not the group's
+  docs: { source: string; slug: string; icon?: string }[]
   // extra sidebar links placed after the group's pages
   links?: { text: string; url: string }[]
 }
 
 // sidebar order. readme-derived pages are made separately and lead "getting started".
 const groups: Group[] = [
-  { title: "Getting started", icon: "BookOpen", dir: "", docs: [] },
+  { title: "Getting started", icon: "BookOpen", dir: "", docs: [{ source: "docs/architecture.md", slug: "architecture", icon: "Layers" }] },
   {
     title: "Corpus",
     icon: "Boxes",
@@ -109,6 +111,11 @@ const readmePages = [
     sections: ["Quick start"],
   },
 ]
+
+// a doc's route under /docs: the root group's docs sit directly under it
+function docRoute(g: Group, slug: string): string {
+  return g.dir === "" ? slug : `${g.dir}/${slug}`
+}
 
 function slugify(heading: string): string {
   // github's anchor rule, which fumadocs' heading ids follow too
@@ -190,7 +197,7 @@ for (const [name, body] of readmeSecs) {
 
 // repository path of every doc that becomes a page, to its route
 const routes = new Map<string, string>([["README.md", "/docs"]])
-for (const g of groups) for (const d of g.docs) routes.set(d.source, `/docs/${g.dir}/${d.slug}`)
+for (const g of groups) for (const d of g.docs) routes.set(d.source, `/docs/${docRoute(g, d.slug)}`)
 
 // every page's title by route, for link text that names a doc file
 const titles = new Map<string, string>([["/docs", "Introduction"]])
@@ -198,7 +205,7 @@ for (const p of readmePages) titles.set(`/docs/${p.route}`, p.title)
 for (const g of groups) {
   for (const d of g.docs) {
     const raw = readFileSync(path.join(repo, d.source), "utf8")
-    titles.set(`/docs/${g.dir}/${d.slug}`, d.source.endsWith(".mdx") ? frontmatterField(raw, "title", d.source) : splitTitle(raw).title)
+    titles.set(`/docs/${docRoute(g, d.slug)}`, d.source.endsWith(".mdx") ? frontmatterField(raw, "title", d.source) : splitTitle(raw).title)
   }
 }
 
@@ -292,12 +299,12 @@ for (const g of groups) {
     const raw = readFileSync(path.join(repo, d.source), "utf8")
     const file = path.posix.join(g.dir, `${d.slug}${path.extname(d.source)}`)
     if (d.source.endsWith(".mdx")) {
-      pages.push({ route: `${g.dir}/${d.slug}`, source: d.source, file, ...guide(raw, d.source) })
+      pages.push({ route: docRoute(g, d.slug), source: d.source, file, ...guide(raw, d.source) })
       continue
     }
     const { title, rest } = splitTitle(raw)
     pages.push({
-      route: `${g.dir}/${d.slug}`,
+      route: docRoute(g, d.slug),
       source: d.source,
       file,
       title,
@@ -382,10 +389,10 @@ function recordTables(md: string, blocks: string[]): string {
 function cards(start: boolean): string {
   const items: string[] = []
   for (const g of groups.filter((x) => (x.dir === "") === start)) {
-    const list =
-      g.dir === ""
-        ? readmePages.map((p) => ({ route: p.route, icon: p.icon }))
-        : g.docs.map((d) => ({ route: `${g.dir}/${d.slug}`, icon: g.icon }))
+    const list = [
+      ...(g.dir === "" ? readmePages.map((p) => ({ route: p.route, icon: p.icon })) : []),
+      ...g.docs.map((d) => ({ route: docRoute(g, d.slug), icon: d.icon ?? g.icon })),
+    ]
     for (const it of list) {
       const p = pages.find((x) => x.route === it.route)
       if (!p) throw new Error(`no page for ${it.route}`)
@@ -412,7 +419,7 @@ const rootPages: string[] = []
 for (const g of groups) {
   rootPages.push(`---[${g.icon}]${g.title}---`)
   if (g.dir === "") {
-    rootPages.push("index", ...readmePages.map((p) => p.route))
+    rootPages.push("index", ...readmePages.map((p) => p.route), ...g.docs.map((d) => d.slug))
   } else {
     rootPages.push(`...${g.dir}`)
     writeFileSync(path.join(out, g.dir, "meta.json"), `${JSON.stringify({ pages: g.docs.map((d) => d.slug) }, null, 2)}\n`)
