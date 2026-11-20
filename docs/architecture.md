@@ -4,9 +4,9 @@ This document describes the technical architecture of shapekit and how it connec
 Stellar network software. It covers release v0.2.0 and the `main` branch of the repository,
 and the planned work that the repository records.
 
-- Repository: <https://github.com/ErenTopaal/shapekit> (Apache-2.0)
-- Release: <https://github.com/ErenTopaal/shapekit/releases/tag/v0.2.0>
-- Documentation and dashboard: <https://shapekit.org>
+- Repository: [github.com/ErenTopaal/shapekit](https://github.com/ErenTopaal/shapekit) (Apache-2.0)
+- Release: [v0.2.0](https://github.com/ErenTopaal/shapekit/releases/tag/v0.2.0)
+- Documentation and dashboard: [shapekit.org](https://shapekit.org)
 - Dated status log: [STATUS.md](../STATUS.md)
 - Maintainer: [Eren Topal](https://github.com/ErenTopaal)
 
@@ -51,45 +51,7 @@ The Rust workspace has 25 crates (`crates/*`, workspace version 0.2.0, Rust 1.99
 workspace (`go.work`, Go 1.27.4) has three modules: `adapters`, `lint` and `testees/go`. The
 testees of the other SDKs live under `testees/` in their own languages.
 
-```text
- STELLAR INPUTS                      GENERATION
- stellar-core 30.0.0 image  ------>  shapekit gen, import, capture,
- (pinned by digest)                  synth: core driver on an
-                                     internal Docker network,
-                                     recipes and recipe IR,
-                                     key-stable normalization
-                                                |
- core test-lcm-current goldens -------------+   |
- (tag v30.0.0)                              |   |
- public SEP-54 ledger lake -----------------+   |
- (pubnet and testnet history)               |   |
- stellar-xdr v30.0 definitions, ------------+   |
- stellar-xdr crate 30.0.0                   v   v
- +------------------------------------------------------------+
- | CORPUS (corpus/)                                           |
- | chains: SEP-54 lake, history archive, chain.json           |
- | entries: .xdr, .expected.json, .oracle.json                |
- | manifest.json (schema/manifest.schema.json)                |
- +------------------------------------------------------------+
-            |                                  |
-            v                                  v
- SDK CONFORMANCE                    INDEXER REPLAY HARNESS
- conformance runner                 shapekit serve (stellar-rpc
- -> 11 testees                      shaped JSON-RPC, SEP-54 lake,
-    (testee protocol v2)            history archive)
- -> divergence matrix               -> adapters: wallet-backend,
-            |                          stellar-etl, stellar-rpc,
-            |                          mapped
-            |                       meta oracle -> harness report
-            |                                  |
-            |          indexerlint             |
-            |               |                  |
-            +-------------> FINDINGS <---------+
-                            RECORD
-                              |
-                              v
-                     shapekit.org dashboard
-```
+![System overview: the stellar-core image, the core test goldens, the public SEP-54 ledger lake and the stellar-xdr definitions feed generation and the corpus. The corpus feeds SDK conformance and the indexer replay harness. Their results and indexerlint go to the findings record, which the shapekit.org dashboard shows.](architecture.svg)
 
 The data flow from stellar-core to each consumer:
 
@@ -1112,14 +1074,14 @@ Security reports about shapekit go through GitHub security advisories (`SECURITY
 
 ## 16. Site and dashboard
 
-<https://shapekit.org> is built from `site/`: React Router 8.5.1 in framework mode on Vite
+[shapekit.org](https://shapekit.org) is built from `site/`: React Router 8.5.1 in framework mode on Vite
 8.3.8, Fumadocs 16.19.0 for the docs, Tailwind CSS 4 and shadcn/ui
 ([docs/site.md](site.md)). Every page is prerendered to a
 static file. The site has no analytics, no cookies and no third-party requests.
 
 - `/docs`: one page per document in `docs/`, including this one at
-  <https://shapekit.org/docs/architecture>, and pages made from `README.md`, with `llms.txt`,
-  `llms-full.txt` and a markdown copy of each page.
+  [shapekit.org/docs/architecture](https://shapekit.org/docs/architecture), and pages made from
+  `README.md`, with `llms.txt`, `llms-full.txt` and a markdown copy of each page.
 - `/dashboard`: one page for each question a reader asks, in this order:
   - Start: the summary of every other page;
   - SDKs: the diverging entries of each SDK at each version, from its known-failures file;

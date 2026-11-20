@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 676" width="600" height="676" role="img" aria-labelledby="t d">
+<title id="t">shapekit system overview</title>
+<desc id="d">Stellar inputs feed the generator and the corpus. The corpus feeds SDK conformance and the indexer replay harness. Their results and indexerlint go to the findings record, which the shapekit.org dashboard shows.</desc>
+<defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#475569"/></marker></defs>
+<rect width="600" height="676" rx="12" fill="#ffffff"/>
+<g font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif" fill="#0f172a">
+<text x="16" y="26" font-size="11" font-weight="700" fill="#64748b" letter-spacing="0.06em">STELLAR INPUTS</text>
+<text x="256" y="26" font-size="11" font-weight="700" fill="#64748b" letter-spacing="0.06em">SHAPEKIT</text>
+<rect x="16" y="36" width="208" height="56" rx="8" fill="#fff7ed" stroke="#c2410c" stroke-width="1.2"/>
+<text x="28" y="56" font-size="13" font-weight="600">stellar-core 30.0.0 image</text>
+<text x="28" y="74" font-size="12" fill="#334155">pinned by digest</text>
+<rect x="16" y="172" width="208" height="52" rx="8" fill="#fff7ed" stroke="#c2410c" stroke-width="1.2"/>
+<text x="28" y="192" font-size="13" font-weight="600">stellar-core test goldens</text>
+<text x="28" y="210" font-size="12" fill="#334155">test-lcm-current, tag v30.0.0</text>
+<rect x="16" y="230" width="208" height="52" rx="8" fill="#fff7ed" stroke="#c2410c" stroke-width="1.2"/>
+<text x="28" y="250" font-size="13" font-weight="600">Public SEP-54 ledger lake</text>
+<text x="28" y="268" font-size="12" fill="#334155">pubnet and testnet history</text>
+<rect x="16" y="288" width="208" height="52" rx="8" fill="#fff7ed" stroke="#c2410c" stroke-width="1.2"/>
+<text x="28" y="308" font-size="13" font-weight="600">stellar-xdr v30.0</text>
+<text x="28" y="326" font-size="12" fill="#334155">definitions and crate 30.0.0</text>
+<rect x="256" y="36" width="328" height="94" rx="8" fill="#f1f5f9" stroke="#64748b" stroke-width="1.2"/>
+<text x="268" y="56" font-size="13" font-weight="600">Generation</text>
+<text x="268" y="74" font-size="12" fill="#334155">shapekit gen, import, capture, synth</text>
+<text x="268" y="92" font-size="12" fill="#334155">core driver on an internal Docker network</text>
+<text x="268" y="110" font-size="12" fill="#334155">recipes, recipe IR, key-stable normalization</text>
+<path d="M224 64 L254 64" fill="none" stroke="#475569" stroke-width="1.4" marker-end="url(#a)"/>
+<rect x="256" y="160" width="328" height="180" rx="8" fill="#ecfdf5" stroke="#047857" stroke-width="1.2"/>
+<text x="268" y="180" font-size="13" font-weight="600">Corpus (corpus/)</text>
+<text x="268" y="198" font-size="12" fill="#334155">chains: SEP-54 lake, history archive,</text>
+<text x="282" y="216" font-size="12" fill="#334155">chain.json</text>
+<text x="268" y="234" font-size="12" fill="#334155">entries: .xdr, .expected.json,</text>
+<text x="282" y="252" font-size="12" fill="#334155">.oracle.json</text>
+<text x="268" y="270" font-size="12" fill="#334155">manifest.json</text>
+<text x="282" y="288" font-size="12" fill="#334155">(schema/manifest.schema.json)</text>
+<path d="M420 130 L420 158" fill="none" stroke="#475569" stroke-width="1.4" marker-end="url(#a)"/>
+<path d="M224 198 L254 198" fill="none" stroke="#475569" stroke-width="1.4" marker-end="url(#a)"/>
+<path d="M224 256 L254 256" fill="none" stroke="#475569" stroke-width="1.4" marker-end="url(#a)"/>
+<path d="M224 314 L254 314" fill="none" stroke="#475569" stroke-width="1.4" marker-end="url(#a)"/>
+<rect x="16" y="396" width="276" height="112" rx="8" fill="#eff6ff" stroke="#1d4ed8" stroke-width="1.2"/>
+<text x="28" y="416" font-size="13" font-weight="600">SDK conformance</text>
+<text x="28" y="434" font-size="12" fill="#334155">conformance runner</text>
+<text x="28" y="452" font-size="12" fill="#334155">→ 11 testees (testee protocol v2)</text>
+<text x="28" y="470" font-size="12" fill="#334155">→ divergence matrix</text>
+<rect x="308" y="396" width="276" height="130" rx="8" fill="#eff6ff" stroke="#1d4ed8" stroke-width="1.2"/>
+<text x="320" y="416" font-size="13" font-weight="600">Indexer replay harness</text>
+<text x="320" y="434" font-size="12" fill="#334155">shapekit serve: stellar-rpc shaped</text>
+<text x="334" y="452" font-size="12" fill="#334155">JSON-RPC, SEP-54 lake, archive</text>
+<text x="320" y="470" font-size="12" fill="#334155">→ adapters: wallet-backend, stellar-etl,</text>
+<text x="334" y="488" font-size="12" fill="#334155">stellar-rpc, mapped</text>
+<text x="320" y="506" font-size="12" fill="#334155">meta oracle → harness report</text>
+<path d="M300 340 L300 364 L154 364 L154 394" fill="none" stroke="#475569" stroke-width="1.4" marker-end="url(#a)"/>
+<path d="M446 340 L446 394" fill="none" stroke="#475569" stroke-width="1.4" marker-end="url(#a)"/>
+<rect x="16" y="554" width="170" height="50" rx="8" fill="#eff6ff" stroke="#1d4ed8" stroke-width="1.2"/>
+<text x="28" y="574" font-size="13" font-weight="600">indexerlint</text>
+<text x="28" y="592" font-size="12" fill="#334155">Go indexer code</text>
+<rect x="210" y="554" width="180" height="50" rx="8" fill="#fef2f2" stroke="#b91c1c" stroke-width="1.2"/>
+<text x="222" y="574" font-size="13" font-weight="600">Findings record</text>
+<text x="222" y="592" font-size="12" fill="#334155">findings/, candidate/</text>
+<path d="M154 508 L154 534 L270 534 L270 552" fill="none" stroke="#475569" stroke-width="1.4" marker-end="url(#a)"/>
+<path d="M446 526 L446 539 L330 539 L330 552" fill="none" stroke="#475569" stroke-width="1.4" marker-end="url(#a)"/>
+<path d="M186 579 L208 579" fill="none" stroke="#475569" stroke-width="1.4" marker-end="url(#a)"/>
+<rect x="195" y="624" width="210" height="36" rx="8" fill="#f1f5f9" stroke="#64748b" stroke-width="1.2"/>
+<text x="207" y="644" font-size="13" font-weight="600">shapekit.org dashboard</text>
+<path d="M300 604 L300 622" fill="none" stroke="#475569" stroke-width="1.4" marker-end="url(#a)"/>
+</g></svg>
